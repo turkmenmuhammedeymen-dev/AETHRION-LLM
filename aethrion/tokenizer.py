@@ -1,11 +1,9 @@
 """A compact byte-level BPE tokenizer; all merges are learned from the supplied corpus."""
 from __future__ import annotations
-
 import argparse
 import json
 from collections import Counter
 from pathlib import Path
-
 
 class ByteBPETokenizer:
     def __init__(self, merges: list[tuple[int, int]] | None = None):
@@ -20,6 +18,8 @@ class ByteBPETokenizer:
     def train(self, text: str, vocab_size: int = 2048, min_frequency: int = 2) -> None:
         if vocab_size < 256:
             raise ValueError("vocab_size must be at least 256 for byte-level tokenization")
+        if min_frequency < 1:
+            raise ValueError("min_frequency must be >= 1")
         sequences = [self._bytes(line) for line in text.splitlines() if line.strip()]
         merges: list[tuple[int, int]] = []
         while 256 + len(merges) < vocab_size:
@@ -75,16 +75,14 @@ class ByteBPETokenizer:
         return seq
 
     def decode(self, ids: list[int]) -> str:
-        # Build the complete token table: base bytes followed by every learned merge.
         vocab: list[bytes] = [bytes([i]) for i in range(256)]
         for left, right in self.merges:
-            if left >= len(vocab) or right >= len(vocab):
+            if left < 0 or right < 0 or left >= len(vocab) or right >= len(vocab):
                 raise ValueError("Tokenizer merge references an unknown token")
             vocab.append(vocab[left] + vocab[right])
-        try:
-            raw = b"".join(vocab[i] for i in ids)
-        except IndexError as exc:
-            raise ValueError("Token id is outside this tokenizer vocabulary") from exc
+        if any(not isinstance(token_id, int) or token_id < 0 or token_id >= len(vocab) for token_id in ids):
+            raise ValueError("Token id is outside this tokenizer vocabulary")
+        raw = b"".join(vocab[token_id] for token_id in ids)
         return raw.decode("utf-8", errors="replace")
 
     def save(self, path: str | Path) -> None:
@@ -96,10 +94,20 @@ class ByteBPETokenizer:
     @classmethod
     def load(cls, path: str | Path) -> "ByteBPETokenizer":
         payload = json.loads(Path(path).read_text(encoding="utf-8"))
-        if payload.get("format") != "aethrion-byte-bpe-v1":
+        if not isinstance(payload, dict) or payload.get("format") != "aethrion-byte-bpe-v1":
             raise ValueError("Unsupported tokenizer format")
-        return cls([tuple(pair) for pair in payload["merges"]])
-
+        merges = payload.get("merges")
+        if not isinstance(merges, list):
+            raise ValueError("Tokenizer merges must be a list")
+        normalized = []
+        for pair in merges:
+            if not isinstance(pair, list) or len(pair) != 2 or any(type(v) is not int for v in pair):
+                raise ValueError("Each tokenizer merge must contain exactly two integer token IDs")
+            normalized.append(tuple(pair))
+        tokenizer = cls(normalized)
+        # Validate the complete merge graph at load time.
+        tokenizer.decode([])
+        return tokenizer
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train the AETHRION byte-level BPE tokenizer")
@@ -113,7 +121,6 @@ def main() -> None:
     tokenizer.train(text, args.vocab_size, args.min_frequency)
     tokenizer.save(args.output)
     print(f"Tokenizer saved: {args.output} | vocab_size={tokenizer.vocab_size}")
-
 
 if __name__ == "__main__":
     main()
