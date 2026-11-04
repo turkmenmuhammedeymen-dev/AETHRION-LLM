@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aethrion-llm"
+version = "0.1.0"
+description = "From-scratch decoder-only Transformer language model research project"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["torch>=2.2", "numpy>=1.24"]
+
+[project.optional-dependencies]
+dev = ["ruff>=0.4"]
+api = ["fastapi>=0.110", "uvicorn[standard]>=0.27"]
+
+[tool.setuptools.packages.find]
+include = ["aethrion*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
