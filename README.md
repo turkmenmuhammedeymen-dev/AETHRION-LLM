@@ -35,13 +35,15 @@ pip install -e ".[dev]"
 
 Only use text you own, public-domain text, or data whose license explicitly permits machine-learning training. Do not scrape private accounts, personal messages, copyrighted books, or restricted datasets. Keep raw corpora outside Git.
 
-Put UTF-8 `.txt` files or JSONL files with a `text` field in `data/raw/`. Then:
+Put approved UTF-8 `.txt` or JSONL files (with a string `text` field) in `data/raw/`. Copy `data/sources.example.json` to `data/sources.json` and document every source's origin, license, permitted use, and training approval. Then:
 
 ```bash
-python -m aethrion.prepare_data --input data/raw --output data/processed/corpus.txt
-python -m aethrion.tokenizer --train data/processed/corpus.txt --output artifacts/tokenizer.json --vocab-size 2048
+python -m aethrion.prepare_data --input data/raw --manifest data/sources.json --output data/processed/corpus.txt --report data/processed/corpus-report.json
+python -m aethrion.tokenizer --train data/processed/corpus.txt --output artifacts/tokenizer.json --vocab-size 8192
 python -m aethrion.train --config configs/small.json
 ```
+
+See [the Turkish dataset protocol](docs/TURKISH_DATASET.md). The pipeline deduplicates records, applies basic hygiene filters, shuffles deterministically, and writes an audit report. It does not verify licenses or prove that text is Turkish; human review is required.
 
 The included small config is for smoke tests and experimentation, not ChatGPT-scale quality. Increase model dimensions only after confirming GPU memory and dataset size. Keep `data/` and `artifacts/*.pt` out of Git.
 
