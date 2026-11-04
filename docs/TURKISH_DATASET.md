@@ -7,6 +7,29 @@ pipeline and manifest template; the project owner supplies approved source mater
 Every source needs a documented origin, license, permitted use, and explicit training
 approval. Exclude personal, confidential, private, or unlawfully obtained material.
 
+## Bounded public-corpus pilot
+
+The Hugging Face dataset card for `ytu-ce-cosmos/Cosmos-Turkish-Corpus-v1.0`
+currently declares CC BY 4.0, 9,075,453 rows, and about 22.8 GB of download data.
+It is a candidate source, not a blanket guarantee about every upstream webpage.
+Review the card, attribution requirements, privacy, and component rights before use.
+
+For a small streaming sample:
+
+```bash
+pip install -e ".[data]"
+python -m aethrion.import_hf_dataset --max-records 5000
+python -m aethrion.prepare_data --input data/raw/cosmos --manifest data/raw/cosmos/sources.json \\
+  --output data/processed/corpus.txt --report data/processed/corpus-report.json
+python -m aethrion.tokenizer --train data/processed/corpus.txt \\
+  --output artifacts/tokenizer.json --vocab-size 512
+```
+
+The importer streams at most 5,000 rows by default and writes attribution metadata.
+It does not fetch the entire upstream corpus. The existing BPE trainer is a simple
+research implementation and is not yet optimized for a multi-billion-token run.
+Use this pilot to validate the pipeline, not to claim high-quality model capability.
+
 ## Preparation
 
 ```bash
