@@ -1,0 +1,119 @@
+"""A compact byte-level BPE tokenizer; all merges are learned from the supplied corpus."""
+from __future__ import annotations
+
+import argparse
+import json
+from collections import Counter
+from pathlib import Path
+
+
+class ByteBPETokenizer:
+    def __init__(self, merges: list[tuple[int, int]] | None = None):
+        self.merges = merges or []
+        self._rank = {pair: rank for rank, pair in enumerate(self.merges)}
+        self.vocab_size = 256 + len(self.merges)
+
+    @staticmethod
+    def _bytes(text: str) -> list[int]:
+        return list(text.encode("utf-8", errors="replace"))
+
+    def train(self, text: str, vocab_size: int = 2048, min_frequency: int = 2) -> None:
+        if vocab_size < 256:
+            raise ValueError("vocab_size must be at least 256 for byte-level tokenization")
+        sequences = [self._bytes(line) for line in text.splitlines() if line.strip()]
+        merges: list[tuple[int, int]] = []
+        while 256 + len(merges) < vocab_size:
+            counts: Counter[tuple[int, int]] = Counter()
+            for seq in sequences:
+                counts.update(zip(seq, seq[1:]))
+            if not counts:
+                break
+            pair, freq = counts.most_common(1)[0]
+            if freq < min_frequency:
+                break
+            new_id = 256 + len(merges)
+            merges.append(pair)
+            updated = []
+            for seq in sequences:
+                out: list[int] = []
+                i = 0
+                while i < len(seq):
+                    if i + 1 < len(seq) and (seq[i], seq[i + 1]) == pair:
+                        out.append(new_id)
+                        i += 2
+                    else:
+                        out.append(seq[i])
+                        i += 1
+                updated.append(out)
+            sequences = updated
+        self.merges = merges
+        self._rank = {pair: rank for rank, pair in enumerate(merges)}
+        self.vocab_size = 256 + len(merges)
+
+    def encode(self, text: str) -> list[int]:
+        seq = self._bytes(text)
+        while len(seq) > 1:
+            best_pair = None
+            best_rank = len(self.merges) + 1
+            for pair in zip(seq, seq[1:]):
+                rank = self._rank.get(pair)
+                if rank is not None and rank < best_rank:
+                    best_pair, best_rank = pair, rank
+            if best_pair is None:
+                break
+            new_id = 256 + best_rank
+            out: list[int] = []
+            i = 0
+            while i < len(seq):
+                if i + 1 < len(seq) and (seq[i], seq[i + 1]) == best_pair:
+                    out.append(new_id)
+                    i += 2
+                else:
+                    out.append(seq[i])
+                    i += 1
+            seq = out
+        return seq
+
+    def decode(self, ids: list[int]) -> str:
+        # Build the complete token table: base bytes followed by every learned merge.
+        vocab: list[bytes] = [bytes([i]) for i in range(256)]
+        for left, right in self.merges:
+            if left >= len(vocab) or right >= len(vocab):
+                raise ValueError("Tokenizer merge references an unknown token")
+            vocab.append(vocab[left] + vocab[right])
+        try:
+            raw = b"".join(vocab[i] for i in ids)
+        except IndexError as exc:
+            raise ValueError("Token id is outside this tokenizer vocabulary") from exc
+        return raw.decode("utf-8", errors="replace")
+
+    def save(self, path: str | Path) -> None:
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({"format": "aethrion-byte-bpe-v1", "merges": self.merges},
+                                   ensure_ascii=False), encoding="utf-8")
+
+    @classmethod
+    def load(cls, path: str | Path) -> "ByteBPETokenizer":
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+        if payload.get("format") != "aethrion-byte-bpe-v1":
+            raise ValueError("Unsupported tokenizer format")
+        return cls([tuple(pair) for pair in payload["merges"]])
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Train the AETHRION byte-level BPE tokenizer")
+    parser.add_argument("--train", required=True, help="UTF-8 corpus text file")
+    parser.add_argument("--output", required=True)
+    parser.add_argument("--vocab-size", type=int, default=2048)
+    parser.add_argument("--min-frequency", type=int, default=2)
+    args = parser.parse_args()
+    text = Path(args.train).read_text(encoding="utf-8")
+    tokenizer = ByteBPETokenizer()
+    tokenizer.train(text, args.vocab_size, args.min_frequency)
+    tokenizer.save(args.output)
+    print(f"Tokenizer saved: {args.output} | vocab_size={tokenizer.vocab_size}")
+
+
+if __name__ == "__main__":
+    main()

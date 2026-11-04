@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+artifacts/*.pt
+artifacts/*.bin
+artifacts/*.safetensors
+artifacts/tokenizer.json
+.DS_Store
+.pytest_cache/
+.coverage
