@@ -34,7 +34,7 @@ def load_tokens(path: str, tokenizer: ByteBPETokenizer) -> torch.Tensor:
 def get_batch(data: torch.Tensor, batch_size: int, block_size: int, device: torch.device):
     if batch_size < 1 or block_size < 1: raise ValueError("batch_size and block_size must be positive")
     if len(data) <= block_size + 1: raise ValueError("Tokenized corpus must contain more tokens than block_size + 1")
-    starts = torch.randint(len(data) - block_size - 1, (batch_size,))
+    starts = torch.randint(len(data) - block_size, (batch_size,))
     x = torch.stack([data[i:i + block_size] for i in starts])
     y = torch.stack([data[i + 1:i + block_size + 1] for i in starts])
     return x.to(device), y.to(device)
