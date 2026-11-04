@@ -17,8 +17,13 @@ def capture_rng_state() -> dict:
     return state
 
 def restore_rng_state(state: dict) -> None:
-    random.setstate(state["python"]); np.random.set_state(state["numpy"]); torch.set_rng_state(state["torch"])
-    if torch.cuda.is_available() and "cuda" in state: torch.cuda.set_rng_state_all(state["cuda"])
+    random.setstate(state["python"])
+    np.random.set_state(state["numpy"])
+    # torch.load(map_location=device) may move this CPU RNG tensor onto CUDA.
+    # torch.set_rng_state requires a CPU ByteTensor.
+    torch.set_rng_state(state["torch"].detach().cpu())
+    if torch.cuda.is_available() and "cuda" in state:
+        torch.cuda.set_rng_state_all([item.detach().cpu() for item in state["cuda"]])
 
 def sha256_file(path: str | Path) -> str:
     digest = hashlib.sha256()
