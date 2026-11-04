@@ -33,7 +33,8 @@ def main() -> None:
             text = row.get("text") if isinstance(row, dict) else None
             if not isinstance(text, str) or not text.strip():
                 continue
-            handle.write(json.dumps({"text": text}, ensure_ascii=False) + "\n")
+            source_url = row.get("url") if isinstance(row.get("url"), str) else None
+            handle.write(json.dumps({"url": source_url, "text": text}, ensure_ascii=False) + "\n")
             written += 1
     if written == 0:
         output_file.unlink(missing_ok=True)
