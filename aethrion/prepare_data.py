@@ -45,8 +45,8 @@ def iter_records(path: Path):
             if isinstance(value, str): yield number, value
 
 def build_corpus(input_dir: Path, manifest_path: Path, output_path: Path, report_path: Path,
-                 seed: int = 1337, min_chars: int = 20, max_chars: int = 12000) -> dict:
-    if min_chars < 1 or max_chars < min_chars: raise ValueError("Require 1 <= min_chars <= max_chars.")
+                 seed: int = 1337, min_chars: int = 20, max_chars: int = 12000, min_records: int = 100) -> dict:
+    if min_chars < 1 or max_chars < min_chars or min_records < 1: raise ValueError("Invalid corpus size limits.")
     sources = load_sources_manifest(manifest_path, input_dir); unique = {}; stats = []; totals = Counter()
     for source in sources:
         path = source["_resolved_path"]; counts = Counter()
@@ -73,7 +73,7 @@ def build_corpus(input_dir: Path, manifest_path: Path, output_path: Path, report
       "sources":stats,"warning":"Automated filters do not replace human license, privacy, or quality review."}
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    if len(records) < 100: raise ValueError(f"Only {len(records)} unique records remain; add more approved source text.")
+    if len(records) < min_records: raise ValueError(f"Only {len(records)} unique records remain; minimum required is {min_records}.")
     return report
 
 def main():
@@ -82,8 +82,8 @@ def main():
     parser.add_argument("--output",default="data/processed/corpus.txt")
     parser.add_argument("--report",default="data/processed/corpus-report.json")
     parser.add_argument("--seed",type=int,default=1337); parser.add_argument("--min-chars",type=int,default=20)
-    parser.add_argument("--max-chars",type=int,default=12000); args=parser.parse_args()
-    report=build_corpus(Path(args.input),Path(args.manifest),Path(args.output),Path(args.report),args.seed,args.min_chars,args.max_chars)
+    parser.add_argument("--max-chars",type=int,default=12000); parser.add_argument("--min-records",type=int,default=100); args=parser.parse_args()
+    report=build_corpus(Path(args.input),Path(args.manifest),Path(args.output),Path(args.report),args.seed,args.min_chars,args.max_chars,args.min_records)
     print(json.dumps(report["totals"],ensure_ascii=False,sort_keys=True))
     print(f"Corpus: {args.output} | SHA-256: {report['output']['sha256']}"); print(f"Audit report: {args.report}")
 
