@@ -1,0 +1,11 @@
+{
+  "sources": [{
+    "source_id": "owner-authored-turkish-text",
+    "path": "owner_text.txt",
+    "license": "Owner-authored; verify ownership",
+    "permitted_uses": "machine-learning training for AETHRION-LLM",
+    "allow_training": true,
+    "url": null,
+    "retrieved_at": null
+  }]
+}
