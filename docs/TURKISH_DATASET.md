@@ -10,9 +10,9 @@ approval. Exclude personal, confidential, private, or unlawfully obtained materi
 ## Preparation
 
 ```bash
-python -m aethrion.prepare_data --input data/raw --manifest data/sources.json \\
+python -m aethrion.prepare_data --input data/raw --manifest data/sources.json \
   --output data/processed/corpus.txt --report data/processed/corpus-report.json
-python -m aethrion.tokenizer --train data/processed/corpus.txt \\
+python -m aethrion.tokenizer --train data/processed/corpus.txt \
   --output artifacts/tokenizer.json --vocab-size 8192
 ```
 
@@ -24,7 +24,7 @@ The email-pattern filter is only a basic precaution, not a PII detector.
 
 ```bash
 python -m aethrion.train --config configs/small.json
-python -m aethrion.evaluate --checkpoint artifacts/checkpoint_last.pt \\
+python -m aethrion.evaluate --checkpoint artifacts/checkpoint_last.pt \
   --tokenizer artifacts/tokenizer.json --data data/heldout/approved-eval.txt
 ```
 
