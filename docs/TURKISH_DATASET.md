@@ -46,7 +46,7 @@ The email-pattern filter is only a basic precaution, not a PII detector.
 ## Train and evaluate
 
 ```bash
-python -m aethrion.train --config configs/small.json
+python -m aethrion.train --config configs/turkish_pilot.json
 python -m aethrion.evaluate --checkpoint artifacts/checkpoint_last.pt \
   --tokenizer artifacts/tokenizer.json --data data/heldout/approved-eval.txt
 ```
