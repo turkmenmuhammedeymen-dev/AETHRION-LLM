@@ -8,10 +8,22 @@ from aethrion.prepare_data import (
     build_corpus,
     load_sources_manifest,
     normalize_text,
+    require_training_enabled,
 )
 
 
 class CorpusPreparationTests(unittest.TestCase):
+    def _write_dataset_manifest(self, root: Path, allowed: bool = True) -> Path:
+        path = root / "corpus_manifest.json"
+        path.write_text(
+            json.dumps({
+                "project": "AETHRION-LLM-tests",
+                "training_allowed": allowed,
+            }),
+            encoding="utf-8",
+        )
+        return path
+
     def test_unicode_and_whitespace(self):
         self.assertEqual(normalize_text("  Türkçe\n  metin  "), "Türkçe metin")
 
@@ -35,7 +47,8 @@ class CorpusPreparationTests(unittest.TestCase):
             output = root / "out/corpus.txt"
             report_path = root / "out/report.json"
             report = build_corpus(
-                root, manifest, output, report_path, seed=7, min_chars=10, min_records=1
+                root, manifest, output, report_path, seed=7, min_chars=10,
+                min_records=1, dataset_manifest_path=self._write_dataset_manifest(root),
             )
             self.assertEqual(report["totals"]["records_kept"], 2)
             self.assertEqual(report["totals"]["duplicates"], 1)
@@ -82,6 +95,7 @@ class CorpusPreparationTests(unittest.TestCase):
                 build_corpus(
                     root, root / "sources.json", root / "out/corpus.txt",
                     root / "out/report.json", min_chars=10, min_records=1,
+                    dataset_manifest_path=self._write_dataset_manifest(root),
                 )
 
     def test_pending_domain_review_blocks_training(self):
@@ -109,6 +123,7 @@ class CorpusPreparationTests(unittest.TestCase):
                     root, root / "sources.json", root / "out/corpus.txt",
                     root / "out/report.json", min_chars=10, min_records=1,
                     source_review_path=review,
+                    dataset_manifest_path=self._write_dataset_manifest(root),
                 )
 
     def test_evidence_backed_domain_approval_allows_reviewed_record(self):
@@ -135,9 +150,46 @@ class CorpusPreparationTests(unittest.TestCase):
                 root, root / "sources.json", root / "out/corpus.txt",
                 root / "out/report.json", min_chars=10, min_records=1,
                 source_review_path=review,
+                dataset_manifest_path=self._write_dataset_manifest(root),
             )
             self.assertEqual(report["domain_review"][0]["domain"], "example.org")
             self.assertEqual(report["domain_review"][0]["records"], 1)
+
+
+    def test_dataset_manifest_requires_exact_boolean_true(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            missing = root / "missing.json"
+
+            with self.assertRaises(ValueError):
+                require_training_enabled(missing)
+
+            invalid_values = [
+                {},
+                {"training_allowed": False},
+                {"training_allowed": "true"},
+                {"training_allowed": 1},
+                {"training_allowed": None},
+            ]
+
+            for index, payload in enumerate(invalid_values):
+                path = root / f"invalid_{index}.json"
+                path.write_text(json.dumps(payload), encoding="utf-8")
+                with self.subTest(payload=payload):
+                    with self.assertRaises(ValueError):
+                        require_training_enabled(path)
+
+    def test_dataset_manifest_accepts_exact_boolean_true(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "approved.json"
+            payload = {
+                "project": "AETHRION-LLM-tests",
+                "training_allowed": True,
+            }
+            path.write_text(json.dumps(payload), encoding="utf-8")
+
+            result = require_training_enabled(path)
+            self.assertIs(result["training_allowed"], True)
 
 
 if __name__ == "__main__":
