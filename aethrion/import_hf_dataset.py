@@ -12,8 +12,8 @@ LICENSE = "CC-BY-4.0"
 def main() -> None:
     parser = argparse.ArgumentParser(description="Import a bounded sample of the Cosmos Turkish corpus.")
     parser.add_argument("--output-dir", default="data/raw/cosmos")
-    parser.add_argument("--max-records", type=int, default=100_000,
-                        help="Maximum records to stream; default is 100,000, not the full 22.8 GB corpus.")
+    parser.add_argument("--max-records", type=int, default=5_000,
+                        help="Maximum records to stream; default is 5,000, not the full 22.8 GB corpus.")
     parser.add_argument("--split", default="train")
     args = parser.parse_args()
     if args.max_records < 1:
