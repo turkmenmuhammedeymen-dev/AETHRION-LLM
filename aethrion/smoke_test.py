@@ -8,8 +8,12 @@ from aethrion.tokenizer import ByteBPETokenizer
 def main():
     sample = ("AETHRION bağımsız dil modeli deneme metni. " * 80) + "\n"
     tokenizer = ByteBPETokenizer()
-    tokenizer.train(sample, vocab_size=300, min_frequency=2)
+    # Keep byte tokens unmerged so this test always has enough sequence positions.
+    # Learned-merge behavior is covered independently by tokenizer unit tests.
+    tokenizer.train(sample, vocab_size=256, min_frequency=2)
     ids = tokenizer.encode(sample)
+    if len(ids) < 64:
+        raise RuntimeError("Synthetic smoke corpus unexpectedly short.")
     config = ModelConfig(vocab_size=tokenizer.vocab_size, block_size=32, n_layer=1,
                          n_head=2, n_embd=32, dropout=0.0)
     model = AETHRIONLM(config)
