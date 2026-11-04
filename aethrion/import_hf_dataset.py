@@ -44,7 +44,7 @@ def main() -> None:
             "path": output_file.name,
             "license": LICENSE,
             "permitted_uses": "Attribution required; verify upstream dataset card and all component rights before training or redistribution.",
-            "allow_training": True,
+            "allow_training": False,
             "url": DATASET_URL,
             "dataset_id": DATASET_ID,
             "attribution": "Cosmos Research Group / Yıldız Technical University; cite the dataset card",
@@ -59,7 +59,8 @@ def main() -> None:
     )
     print(f"Imported {written:,} records to {output_file}")
     print(f"Manifest: {output_dir / 'sources.json'}")
-    print("Review upstream license, attribution, privacy, and content before training.")
+    print("Training is NOT approved by default. Review all rights, attribution, privacy, and content.")
+    print('Only after approval, change "allow_training" to true in sources.json.')
 
 if __name__ == "__main__":
     main()
