@@ -75,14 +75,16 @@ class ByteBPETokenizer:
         return seq
 
     def decode(self, ids: list[int]) -> str:
-        pieces: list[bytes] = [bytes([i]) if 0 <= i < 256 else b"" for i in ids]
-        for rank, (left, right) in enumerate(self.merges):
-            token_id = 256 + rank
-            # Reconstruct merged token bytes from the already reconstructed token table.
-            if token_id < len(pieces):
-                continue
-            pieces.append(pieces[left] + pieces[right])
-        raw = b"".join(pieces[i] if 0 <= i < len(pieces) else b"" for i in ids)
+        # Build the complete token table: base bytes followed by every learned merge.
+        vocab: list[bytes] = [bytes([i]) for i in range(256)]
+        for left, right in self.merges:
+            if left >= len(vocab) or right >= len(vocab):
+                raise ValueError("Tokenizer merge references an unknown token")
+            vocab.append(vocab[left] + vocab[right])
+        try:
+            raw = b"".join(vocab[i] for i in ids)
+        except IndexError as exc:
+            raise ValueError("Token id is outside this tokenizer vocabulary") from exc
         return raw.decode("utf-8", errors="replace")
 
     def save(self, path: str | Path) -> None:
