@@ -9,50 +9,62 @@ approval. Exclude personal, confidential, private, or unlawfully obtained materi
 
 ## Bounded public-corpus pilot
 
-The Hugging Face dataset card for `ytu-ce-cosmos/Cosmos-Turkish-Corpus-v1.0`
-currently declares CC BY 4.0, 9,075,453 rows, and about 22.8 GB of download data.
-It is a candidate source, not a blanket guarantee about every upstream webpage.
-Review the card, attribution requirements, privacy, and component rights before use.
+The Hugging Face dataset card for ytu-ce-cosmos/Cosmos-Turkish-Corpus-v1.0
+declares CC BY 4.0 for the dataset. This is a candidate source, not a blanket guarantee
+about every upstream webpage or component. Review the card, attribution requirements,
+privacy, and the rights for each original source before use.
 
-For a small streaming sample:
+The importer preserves the original URL on each JSONL record. Because the corpus is
+mixed-source, a single dataset-level license flag is not enough. Before preparing
+URL-attributed JSONL, create and complete a domain review CSV with one row for every
+exact hostname. The review must contain a license name, HTTPS evidence URL, rights
+holder, explicit AI-training permission (YES), attribution requirement (YES or NO),
+and review_status=APPROVED. Unknown, missing, or pending entries block corpus
+preparation. Exact hostnames are matched; approval for one host does not
+automatically approve its subdomains.
 
-```bash
+Example:
+
+~~~bash
 pip install -e ".[data]"
 python -m aethrion.import_hf_dataset --max-records 5000
-python -m aethrion.prepare_data --input data/raw/cosmos --manifest data/raw/cosmos/sources.json \\
-  --output data/processed/corpus.txt --report data/processed/corpus-report.json
-python -m aethrion.tokenizer --train data/processed/corpus.txt \\
-  --output artifacts/tokenizer.json --vocab-size 512
-```
+# Review data/raw/cosmos/sources.json and every original source URL.
+# Complete data/processed/privacy_review/source_review_template.csv.
+# The dataset-level manifest gate and every exact-host review must be approved.
+python -m aethrion.prepare_data --input data/raw/cosmos \
+  --manifest data/raw/cosmos/sources.json \
+  --source-review data/processed/privacy_review/source_review_template.csv \
+  --output data/processed/corpus.txt \
+  --report data/processed/corpus-report.json
+~~~
 
-The importer streams at most 5,000 rows by default and writes attribution metadata with `allow_training: false`.
-It does not fetch the entire upstream corpus. Review the complete dataset card, component-source rights,
-privacy, and attribution first. Only after confirming that the intended training use is permitted,
-change `allow_training` to `true` in `data/raw/cosmos/sources.json`; the preparation pipeline rejects it otherwise.
-The existing BPE trainer is a simple
-research implementation and is not yet optimized for a multi-billion-token run.
-Use this pilot to validate the pipeline, not to claim high-quality model capability.
+The importer streams at most 5,000 rows by default; it does not fetch the full upstream
+corpus. Keep allow_training=false until the dataset-level rights review is complete.
+The preparation pipeline also requires an evidence-backed approval for every exact
+hostname found in URL-attributed JSONL. These checks enforce recorded review decisions;
+they do not provide legal advice or independently determine whether a license applies.
 
 ## Preparation
 
-```bash
-python -m aethrion.prepare_data --input data/raw --manifest data/sources.json \
-  --output data/processed/corpus.txt --report data/processed/corpus-report.json
-python -m aethrion.tokenizer --train data/processed/corpus.txt \
-  --output artifacts/tokenizer.json --vocab-size 8192
-```
+For plain text or JSONL without per-record URLs, use a manifest that documents each
+source and explicitly approves it. URL-attributed JSONL additionally requires
+--source-review as described above.
 
-Review the audit report and sample records manually. Check Turkish coverage, source
-balance, duplication, spelling, encoding, privacy, and license compatibility.
-The email-pattern filter is only a basic precaution, not a PII detector.
+The pipeline normalizes Unicode to NFC, collapses whitespace, removes duplicates,
+excludes basic email-pattern matches, and enforces length limits. The email-pattern
+filter is only a basic precaution, not a PII detector. Review audit reports and sample
+records manually; check Turkish coverage, source balance, duplication, spelling,
+encoding, privacy, and license compatibility.
 
 ## Train and evaluate
 
-```bash
+~~~bash
+python -m aethrion.tokenizer --train data/processed/corpus.txt \
+  --output artifacts/tokenizer.json --vocab-size 512
 python -m aethrion.train --config configs/turkish_pilot.json
-python -m aethrion.evaluate --checkpoint artifacts/checkpoint_last.pt \
+python -m aethrion.evaluate --checkpoint artifacts/turkish_pilot/checkpoint_last.pt \
   --tokenizer artifacts/tokenizer.json --data data/heldout/approved-eval.txt
-```
+~~~
 
 Keep evaluation text disjoint from training data. Build a human-reviewed benchmark
 for grammar, reading comprehension, summarization, reasoning, instruction following,
@@ -62,6 +74,7 @@ tokenizer versions, hardware, training steps, and evaluation results.
 ## Scale and limitations
 
 GitHub Actions CPU tests cannot train a high-capability language model. Large-scale
-training requires a carefully sized corpus, capable GPU hardware, experiment
-tracking, and repeated independent evaluation. Never claim superiority without
-controlled, reproducible benchmark results.
+training requires a carefully sized corpus, capable GPU hardware, experiment tracking,
+and repeated independent evaluation. Never claim superiority without controlled,
+reproducible benchmark results. The current BPE trainer is a research implementation,
+not optimized for multi-billion-token corpora.
