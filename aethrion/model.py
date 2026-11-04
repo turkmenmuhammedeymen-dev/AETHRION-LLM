@@ -90,7 +90,7 @@ class AETHRIONLM(nn.Module):
             nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     def forward(self, idx: torch.Tensor, targets: torch.Tensor | None = None):
-        if idx.ndim != 2 or idx.size(1) < 1:
+        if idx.ndim != 2 or idx.size(0) < 1 or idx.size(1) < 1:
             raise ValueError("idx must have shape [batch, sequence] with a non-empty sequence")
         if idx.dtype != torch.long:
             raise TypeError("idx must use torch.long token IDs")
