@@ -25,8 +25,11 @@ python -m aethrion.tokenizer --train data/processed/corpus.txt \\
   --output artifacts/tokenizer.json --vocab-size 512
 ```
 
-The importer streams at most 5,000 rows by default and writes attribution metadata.
-It does not fetch the entire upstream corpus. The existing BPE trainer is a simple
+The importer streams at most 5,000 rows by default and writes attribution metadata with `allow_training: false`.
+It does not fetch the entire upstream corpus. Review the complete dataset card, component-source rights,
+privacy, and attribution first. Only after confirming that the intended training use is permitted,
+change `allow_training` to `true` in `data/raw/cosmos/sources.json`; the preparation pipeline rejects it otherwise.
+The existing BPE trainer is a simple
 research implementation and is not yet optimized for a multi-billion-token run.
 Use this pilot to validate the pipeline, not to claim high-quality model capability.
 
