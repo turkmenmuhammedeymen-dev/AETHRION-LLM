@@ -1,0 +1,12 @@
+{
+  "project": "AETHRION-LLM",
+  "dataset_status": "awaiting_licensed_sources",
+  "training_allowed": false,
+  "requirements": [
+    "UTF-8 text",
+    "documented source",
+    "verified training license",
+    "deduplication",
+    "train-validation separation"
+  ]
+}
