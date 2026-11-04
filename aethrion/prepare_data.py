@@ -4,10 +4,10 @@ import argparse, hashlib, json, random, re, unicodedata
 from collections import Counter
 from pathlib import Path
 
-EMAIL_RE = re.compile(r"(?i)\\b[\\w.+-]+@[\\w.-]+\\.[a-z]{2,}\\b")
+EMAIL_RE = re.compile(r"(?i)\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b")
 
 def normalize_text(value: str) -> str:
-    return " ".join(unicodedata.normalize("NFC", value).replace("\\x00", " ").split()).strip()
+    return " ".join(unicodedata.normalize("NFC", value).replace("\x00", " ").split()).strip()
 
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
@@ -63,8 +63,8 @@ def build_corpus(input_dir: Path, manifest_path: Path, output_path: Path, report
           "sha256":sha256_file(path),**dict(counts)})
     records = list(unique.values()); random.Random(seed).shuffle(records)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8", newline="\\n") as handle:
-        for value in records: handle.write(value + "\\n")
+    with output_path.open("w", encoding="utf-8", newline="\n") as handle:
+        for value in records: handle.write(value + "\n")
     report = {"format":"aethrion-corpus-report-v1","seed":seed,
       "normalization":"Unicode NFC + whitespace collapse",
       "deduplication":"SHA-256 of casefolded normalized record",
@@ -72,7 +72,7 @@ def build_corpus(input_dir: Path, manifest_path: Path, output_path: Path, report
       "totals":dict(totals),"output":{"path":str(output_path),"sha256":sha256_file(output_path),"bytes":output_path.stat().st_size},
       "sources":stats,"warning":"Automated filters do not replace human license, privacy, or quality review."}
     report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+    report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     if len(records) < 100: raise ValueError(f"Only {len(records)} unique records remain; add more approved source text.")
     return report
 
