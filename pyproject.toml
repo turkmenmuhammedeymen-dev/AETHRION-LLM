@@ -13,6 +13,7 @@ dependencies = ["torch>=2.2", "numpy>=1.24"]
 [project.optional-dependencies]
 dev = ["ruff>=0.4"]
 api = ["fastapi>=0.110", "uvicorn[standard]>=0.27"]
+data = ["datasets>=3.0"]
 
 [tool.setuptools.packages.find]
 include = ["aethrion*"]

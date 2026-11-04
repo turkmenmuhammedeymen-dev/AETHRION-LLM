@@ -35,13 +35,22 @@ pip install -e ".[dev]"
 
 Only use text you own, public-domain text, or data whose license explicitly permits machine-learning training. Do not scrape private accounts, personal messages, copyrighted books, or restricted datasets. Keep raw corpora outside Git.
 
-Put UTF-8 `.txt` files or JSONL files with a `text` field in `data/raw/`. Then:
+For a bounded pilot import from the public Cosmos Turkish corpus (dataset card lists CC BY 4.0; verify the card and source rights before use):
 
 ```bash
-python -m aethrion.prepare_data --input data/raw --output data/processed/corpus.txt
-python -m aethrion.tokenizer --train data/processed/corpus.txt --output artifacts/tokenizer.json --vocab-size 2048
-python -m aethrion.train --config configs/small.json
+pip install -e ".[data]"
+python -m aethrion.import_hf_dataset --max-records 5000
+# Review data/raw/cosmos/sources.json and the upstream dataset card.
+# Only if every source's training rights are verified, change allow_training to true.
+python -m aethrion.prepare_data --input data/raw/cosmos --manifest data/raw/cosmos/sources.json --output data/processed/corpus.txt --report data/processed/corpus-report.json
+python -m aethrion.tokenizer --train data/processed/corpus.txt --output artifacts/tokenizer.json --vocab-size 512
 ```
+
+This imports at most 5,000 records as a pilot, not the full upstream corpus. Review source attribution, privacy, license compatibility, and sample quality before training. The current tokenizer is a research implementation; large-scale BPE training needs further optimization before processing the full 15B-token corpus.
+
+For your own approved files, put UTF-8 `.txt` or JSONL files (with a string `text` field) in `data/raw/`, create a source manifest from `data/sources.example.json`, and run the preparation command with that manifest.
+
+See [the Turkish dataset protocol](docs/TURKISH_DATASET.md). The pipeline deduplicates records, applies basic hygiene filters, shuffles deterministically, and writes an audit report. It does not verify licenses or prove that text is Turkish; human review is required.
 
 The included small config is for smoke tests and experimentation, not ChatGPT-scale quality. Increase model dimensions only after confirming GPU memory and dataset size. Keep `data/` and `artifacts/*.pt` out of Git.
 
