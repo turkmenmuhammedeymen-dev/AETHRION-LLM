@@ -36,6 +36,24 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def require_training_enabled(path: Path) -> dict:
+    """Fail closed unless the dataset-level manifest explicitly enables training."""
+    if not path.is_file():
+        raise ValueError(f"Dataset manifest does not exist: {path}")
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("Dataset manifest must be a JSON object.")
+
+    if payload.get("training_allowed") is not True:
+        raise ValueError(
+            "Training blocked: dataset manifest must explicitly set "
+            "training_allowed to true."
+        )
+
+    return payload
+
+
 def load_sources_manifest(path: Path, root: Path) -> list[dict]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     entries = payload.get("sources") if isinstance(payload, dict) else None
@@ -143,9 +161,14 @@ def build_corpus(
     max_chars: int = 12000,
     min_records: int = 100,
     source_review_path: Path | None = None,
+    dataset_manifest_path: Path | None = None,
 ) -> dict:
     if min_chars < 1 or max_chars < min_chars or min_records < 1:
         raise ValueError("Invalid corpus size limits.")
+
+    if dataset_manifest_path is None:
+        raise ValueError("Training blocked: dataset_manifest_path is required.")
+    require_training_enabled(dataset_manifest_path)
 
     sources = load_sources_manifest(manifest_path, input_dir)
     domain_reviews = (
@@ -290,6 +313,11 @@ def main():
     parser.add_argument("--input", required=True)
     parser.add_argument("--manifest", required=True)
     parser.add_argument(
+        "--dataset-manifest",
+        required=True,
+        help="Dataset-level JSON manifest; training_allowed must be true.",
+    )
+    parser.add_argument(
         "--source-review",
         default=None,
         help="CSV with evidence-backed approval for every URL hostname.",
@@ -311,6 +339,7 @@ def main():
         args.max_chars,
         args.min_records,
         Path(args.source_review) if args.source_review else None,
+        Path(args.dataset_manifest),
     )
     print(json.dumps(report["totals"], ensure_ascii=False, sort_keys=True))
     print(f"Corpus: {args.output} | SHA-256: {report['output']['sha256']}")
