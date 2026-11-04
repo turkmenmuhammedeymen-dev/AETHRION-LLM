@@ -40,6 +40,8 @@ For a bounded pilot import from the public Cosmos Turkish corpus (dataset card l
 ```bash
 pip install -e ".[data]"
 python -m aethrion.import_hf_dataset --max-records 5000
+# Review data/raw/cosmos/sources.json and the upstream dataset card.
+# Only if every source's training rights are verified, change allow_training to true.
 python -m aethrion.prepare_data --input data/raw/cosmos --manifest data/raw/cosmos/sources.json --output data/processed/corpus.txt --report data/processed/corpus-report.json
 python -m aethrion.tokenizer --train data/processed/corpus.txt --output artifacts/tokenizer.json --vocab-size 512
 ```
