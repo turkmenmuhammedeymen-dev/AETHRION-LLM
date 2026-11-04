@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aethrion-llm"
-version = "0.1.0"
-description = "From-scratch decoder-only Transformer language model research project"
+version = "0.2.0"
+description = "Reliability-hardened from-scratch decoder-only Transformer language model"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["torch>=2.2", "numpy>=1.24"]

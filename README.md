@@ -1,6 +1,6 @@
 # AETHRION-LLM
 
-**AETHRION-0.1 — from-scratch language-model research project**
+**AETHRION-0.2 — from-scratch language-model research project**
 
 This repository builds a decoder-only Transformer from random initialization. It does not download or load pretrained model weights, call Ollama, or depend on third-party inference APIs.
 
@@ -70,7 +70,7 @@ python -m unittest discover -s tests -v
 
 ## Project status
 
-Version 0.1 is the training/inference foundation. It is not instruction-tuned, safety-aligned, or production-hardened. A raw next-token model can produce unreliable, biased, or unsafe text. Do not treat its output as factual or professional advice. Before real users: build evaluation sets, measure hallucination and harmful-output rates, add policy training and robust serving controls, and get independent review.
+Version 0.2 is the training/inference foundation. It is not instruction-tuned, safety-aligned, or production-hardened. A raw next-token model can produce unreliable, biased, or unsafe text. Do not treat its output as factual or professional advice. Before real users: build evaluation sets, measure hallucination and harmful-output rates, add policy training and robust serving controls, and get independent review.
 
 ## Roadmap
 
