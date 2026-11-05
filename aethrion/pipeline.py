@@ -89,9 +89,13 @@ def create_pending_domain_template() -> None:
                 if not line.strip():
                     continue
                 item = json.loads(line)
-                url = item.get("url") if isinstance(item, dict) else None
+                if not isinstance(item, dict):
+                    raise RuntimeError(f"Invalid source record at {source_path.name}:{line_number}")
+                if "url" not in item:
+                    continue
+                url = item.get("url")
                 if not isinstance(url, str) or not url.strip():
-                    raise RuntimeError(f"Missing source URL at {source_path.name}:{line_number}")
+                    raise RuntimeError(f"Invalid source URL at {source_path.name}:{line_number}")
                 parsed = urlparse(url)
                 if parsed.scheme not in {"http", "https"} or not parsed.hostname:
                     raise RuntimeError(f"Invalid source URL at {source_path.name}:{line_number}")
