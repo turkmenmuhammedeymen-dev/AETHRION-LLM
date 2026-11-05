@@ -51,8 +51,6 @@ class PipelineApprovalTests(unittest.TestCase):
             "permitted_uses": "AI training",
             "allow_training": allowed,
         }
-        if with_url:
-            source["url"] = "https://dataset.example.org"
         self.sources.write_text(
             json.dumps({"sources": [source]}), encoding="utf-8"
         )
