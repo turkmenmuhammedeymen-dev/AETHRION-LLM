@@ -34,7 +34,10 @@ def main() -> None:
             if not isinstance(text, str) or not text.strip():
                 continue
             source_url = row.get("url") if isinstance(row.get("url"), str) else None
-            handle.write(json.dumps({"url": source_url, "text": text}, ensure_ascii=False) + "\n")
+            record = {"text": text}
+            if source_url and source_url.strip():
+                record["url"] = source_url
+            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
             written += 1
     if written == 0:
         output_file.unlink(missing_ok=True)
