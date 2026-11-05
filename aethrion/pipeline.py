@@ -118,6 +118,31 @@ def create_pending_domain_template() -> None:
     print(f"Created {len(domains)} PENDING domain rows: {SOURCE_REVIEW}")
 
 
+def source_records_have_urls() -> bool:
+    """Detect row-level source URLs; source-manifest dataset-card URLs do not count."""
+    if not SOURCE_MANIFEST.is_file():
+        return False
+    payload = json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8"))
+    for source in payload.get("sources", []):
+        source_path = (RAW_DIR / source.get("path", "")).resolve()
+        if RAW_DIR.resolve() not in source_path.parents or not source_path.is_file():
+            raise RuntimeError("Source manifest contains a missing or unsafe path.")
+        with source_path.open(encoding="utf-8-sig") as stream:
+            for line_number, line in enumerate(stream, 1):
+                if not line.strip():
+                    continue
+                item = json.loads(line)
+                if not isinstance(item, dict):
+                    raise RuntimeError(f"Invalid source record at {source_path.name}:{line_number}")
+                if "url" in item:
+                    url = item.get("url")
+                    parsed = urlparse(url) if isinstance(url, str) else None
+                    if parsed is None or parsed.scheme not in {"http", "https"} or not parsed.hostname:
+                        raise RuntimeError(f"Invalid source URL at {source_path.name}:{line_number}")
+                    return True
+    return False
+
+
 def approval_status() -> tuple[bool, str]:
     if not DATASET_MANIFEST.is_file():
         return False, f"Missing dataset manifest: {DATASET_MANIFEST}"
@@ -134,7 +159,7 @@ def approval_status() -> tuple[bool, str]:
             return False, f"Source not approved: {source.get('source_id', 'unknown')}"
         if not source.get("license") or not source.get("permitted_uses"):
             return False, f"Source license/use metadata incomplete: {source.get('source_id', 'unknown')}"
-    has_urls = any(source.get("url") for source in sources)
+    has_urls = source_records_have_urls()
     if has_urls:
         if not SOURCE_REVIEW.is_file():
             return False, "URL-attributed data requires the per-domain review CSV."
@@ -193,9 +218,7 @@ def main() -> int:
 
     if not SOURCE_MANIFEST.is_file():
         raise RuntimeError("Approved source manifest disappeared.")
-    review_arg = ["--source-review", str(SOURCE_REVIEW)] if any(
-        source.get("url") for source in json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8")).get("sources", [])
-    ) else []
+    review_arg = ["--source-review", str(SOURCE_REVIEW)] if source_records_have_urls() else []
 
     run([
         sys.executable, "-m", "aethrion.prepare_data",
