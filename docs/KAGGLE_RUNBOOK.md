@@ -13,82 +13,53 @@ BRANCH = "feature/turkish-corpus-pipeline-sync"
 ROOT = Path("/kaggle/working/AETHRION-LLM")
 
 if not (ROOT / ".git").exists():
-    subprocess.run(
-        ["git", "clone", "--branch", BRANCH, "--single-branch", REPO, str(ROOT)],
-        check=True,
-    )
+    subprocess.run(["git", "clone", "--branch", BRANCH, "--single-branch", REPO, str(ROOT)], check=True)
 else:
     subprocess.run(["git", "fetch", "origin", BRANCH], cwd=ROOT, check=True)
     subprocess.run(["git", "switch", BRANCH], cwd=ROOT, check=True)
     subprocess.run(["git", "pull", "--ff-only", "origin", BRANCH], cwd=ROOT, check=True)
 
-subprocess.run(
-    [sys.executable, "-m", "pip", "install", "-e", ".[data]"],
-    cwd=ROOT,
-    check=True,
-)
-subprocess.run(
-    [sys.executable, "-m", "aethrion.pipeline", "--import-if-missing"],
-    cwd=ROOT,
-    check=True,
-)
+subprocess.run([sys.executable, "-m", "pip", "install", "-e", ".[data,api]"], cwd=ROOT, check=True)
+subprocess.run([sys.executable, "-m", "aethrion.pipeline", "--import-if-missing"], cwd=ROOT, check=True)
 ```
 
-The importer streams no more than 5,000 records by default. It does not download
-the full upstream corpus. The first run is expected to stop safely at the approval
-gate because the committed dataset manifest is intentionally set to
-`training_allowed: false`.
+The importer streams at most 5,000 records by default. It does not download the
+full upstream corpus. The first run is expected to stop at the approval gate
+because `training_allowed` is intentionally false.
 
-## What the pipeline does
+## Pipeline behavior
 
-1. Reports Python, PyTorch, CUDA/GPU, and free disk space.
-2. Runs the complete unit-test suite.
-3. Optionally streams a bounded source sample when no source manifest exists.
-4. Creates a per-domain review CSV with every row initially `PENDING`.
-5. Checks the dataset-level manifest, each source manifest entry, and domain review.
-6. Only after all gates pass: prepares the corpus, trains the tokenizer, and runs
+1. Reports Python, PyTorch, CUDA/GPU, and disk.
+2. Runs unit tests.
+3. Optionally streams a bounded review sample if source files are missing.
+4. Creates a per-domain CSV with every row initially PENDING.
+5. Checks dataset, source, and per-domain approvals.
+6. Only after every approval passes: prepares data, trains tokenizer and runs
    the configured pilot training.
-7. Runs independent evaluation only if a separately reviewed
-   `data/heldout/approved-eval.txt` file exists.
+7. Evaluates only on a separate reviewed held-out file, reporting loss,
+   perplexity, tokens/second, parameter count and peak GPU memory.
 
-## Required human review before training
+## Human review before training
 
-Never change the approval flags merely to make the pipeline continue.
+Never change approval flags just to make the pipeline continue. Verify rights
+for every upstream component, privacy, source terms and attribution. Review each
+hostname and source entry. Keep `data/processed/corpus_manifest.json` false
+until a documented human review has approved training. Keep a separate
+`data/heldout/approved-eval.txt`; it must not be copied from training data.
 
-- Verify the upstream dataset card and the rights for every original component.
-- Review privacy, sensitive information, source terms, attribution, and lawful basis.
-- For every exact hostname, record a verifiable HTTPS license/evidence URL, rights
-  holder, explicit AI-training permission, attribution requirement, and
-  `review_status=APPROVED` in
-  `data/processed/privacy_review/source_review_template.csv`.
-- Review every source in `data/raw/cosmos/sources.json`; set
-  `allow_training=true` only when that particular source is actually approved.
-- Have the dataset-level review completed before changing
-  `data/processed/corpus_manifest.json` to Boolean `true`.
-- Keep a separately collected, reviewed held-out evaluation file. It must not be
-  copied from the training corpus.
+Automated checks validate recorded decisions; they do not establish copyright,
+license compatibility, privacy compliance or lawful permission.
 
-The pipeline's checks validate recorded decisions; they do not determine copyright,
-license compatibility, privacy compliance, or legal permission.
+## Provider adapters
 
-## Pilot configuration and outputs
+See [PROVIDER_SETUP.md](PROVIDER_SETUP.md) for environment variables and the
+API startup instructions. Provider credentials are not stored in Git. Provider
+adapters are opt-in; live tests may consume paid credits and are not run by CI.
 
-The default `configs/turkish_pilot.json` is a small engineering pilot (2 layers,
-128 embedding width, 500 steps), not a high-capability model recipe. Outputs are
-written under `data/processed/` and `artifacts/turkish_pilot/`. Keep generated
-corpora, checkpoints, tokenizer artifacts, and private data out of Git.
+## Pilot limitations
 
-To run only preflight/tests without importing data:
-
-```bash
-python -m aethrion.pipeline
-```
-
-To choose another reviewed configuration:
-
-```bash
-python -m aethrion.pipeline --config configs/small.json
-```
-
-The larger config may require substantially more GPU memory and time. Do not select
-it without checking the available hardware and corpus size.
+The default `configs/turkish_pilot.json` is a small engineering pilot
+(2 layers, 128 embedding width, 500 steps), not a high-capability model recipe.
+Generated corpora, checkpoints, tokenizer artifacts and private data stay out
+of Git. The API has no built-in authentication or rate limiting: keep it local
+or behind authenticated HTTPS.
