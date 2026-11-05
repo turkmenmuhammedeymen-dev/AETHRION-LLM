@@ -102,3 +102,5 @@ No license is granted to third-party training data by this repository. Add an ex
 ## One-command Kaggle workflow
 
 See [docs/KAGGLE_RUNBOOK.md](docs/KAGGLE_RUNBOOK.md) for the single-cell Kaggle setup and fail-closed pipeline. The first run performs environment checks, tests, and optional bounded data import, then stops at the approval gate while training permission remains false.
+
+See [docs/MULTIMODAL_ARCHITECTURE.md](docs/MULTIMODAL_ARCHITECTURE.md) for the capability-routing design. The routing layer is infrastructure only; specialist providers must be configured and integration-tested before their UI modes are advertised as available.
