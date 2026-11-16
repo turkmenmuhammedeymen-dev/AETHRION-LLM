@@ -23,50 +23,64 @@ Python 3.10+ and PyTorch 2.2+. A CUDA GPU is strongly recommended for meaningful
 
 Install:
 
-```bash
+~~~bash
 python -m venv .venv
-# Windows: .venv\\Scripts\\activate
+# Windows: .venv\Scripts\activate
 # Linux/macOS: source .venv/bin/activate
 python -m pip install --upgrade pip
 pip install -e ".[dev]"
-```
+~~~
 
 ## Prepare data
 
 Only use text you own, public-domain text, or data whose license explicitly permits machine-learning training. Do not scrape private accounts, personal messages, copyrighted books, or restricted datasets. Keep raw corpora outside Git.
 
-Put UTF-8 `.txt` files or JSONL files with a `text` field in `data/raw/`. Then:
+For a bounded pilot import from the public Cosmos Turkish corpus, the dataset card declares CC BY 4.0 at dataset level. That label does not automatically establish rights for every original webpage. The importer preserves each record's URL, and the preparation pipeline requires a separate evidence-backed approval for every exact hostname:
 
-```bash
-python -m aethrion.prepare_data --input data/raw --output data/processed/corpus.txt
-python -m aethrion.tokenizer --train data/processed/corpus.txt --output artifacts/tokenizer.json --vocab-size 2048
-python -m aethrion.train --config configs/small.json
-```
+~~~bash
+pip install -e ".[data]"
+python -m aethrion.import_hf_dataset --max-records 5000
+# Review the dataset card, source rights, privacy, and attribution.
+# Keep allow_training=false until dataset-level review is complete.
+# Complete a per-host review CSV with license evidence and explicit AI-training permission.
+python -m aethrion.prepare_data --input data/raw/cosmos \
+  --manifest data/raw/cosmos/sources.json \
+  --source-review data/processed/privacy_review/source_review_template.csv \
+  --output data/processed/corpus.txt \
+  --report data/processed/corpus-report.json
+python -m aethrion.tokenizer --train data/processed/corpus.txt --output artifacts/tokenizer.json --vocab-size 512
+~~~
 
-The included small config is for smoke tests and experimentation, not ChatGPT-scale quality. Increase model dimensions only after confirming GPU memory and dataset size. Keep `data/` and `artifacts/*.pt` out of Git.
+This imports at most 5,000 records as a pilot, not the full upstream corpus. The dataset-level manifest gate and every exact-host review must be approved before URL-attributed data can enter the corpus. Review source attribution, privacy, license compatibility, and sample quality. The current tokenizer is a research implementation; large-scale BPE training needs further optimization before processing multi-billion-token corpora.
+
+For your own approved files, put UTF-8 .txt or JSONL files (with a string text field) in data/raw/, create a source manifest from data/sources.example.json, and run the preparation command with that manifest. The email-pattern filter is not a comprehensive PII detector; human review is required.
+
+The included small config is for smoke tests and experimentation, not ChatGPT-scale quality. Increase model dimensions only after confirming GPU memory and dataset size. Keep data/ and artifacts/*.pt out of Git.
+
+See the Turkish dataset protocol in docs/TURKISH_DATASET.md.
 
 ## Chat
 
 After training has produced a checkpoint:
 
-```bash
+~~~bash
 python -m aethrion.chat --checkpoint artifacts/checkpoint_last.pt --tokenizer artifacts/tokenizer.json
-```
+~~~
 
 Optional local API:
 
-```bash
+~~~bash
 pip install -e ".[api]"
 AETHRION_CHECKPOINT=artifacts/checkpoint_last.pt AETHRION_TOKENIZER=artifacts/tokenizer.json uvicorn aethrion.api:app --host 127.0.0.1 --port 8000
-```
+~~~
 
 The API binds to localhost by default in the example. Do not expose it publicly without authentication, rate limits, request-size limits, monitoring, and a safety review.
 
 ## Tests
 
-```bash
+~~~bash
 python -m unittest discover -s tests -v
-```
+~~~
 
 ## Project status
 
@@ -84,3 +98,9 @@ Version 0.2 is the training/inference foundation. It is not instruction-tuned, s
 ## License
 
 No license is granted to third-party training data by this repository. Add an explicit project license before redistributing code or model weights.
+
+## One-command Kaggle workflow
+
+See [docs/KAGGLE_RUNBOOK.md](docs/KAGGLE_RUNBOOK.md) for the single-cell Kaggle setup and fail-closed pipeline. The first run performs environment checks, tests, and optional bounded data import, then stops at the approval gate while training permission remains false.
+
+See [docs/MULTIMODAL_ARCHITECTURE.md](docs/MULTIMODAL_ARCHITECTURE.md) for capability routing and [docs/PROVIDER_SETUP.md](docs/PROVIDER_SETUP.md) for real provider configuration. Code, image, 3D, research, and file-analysis adapters register only when their credentials are configured. Held-out evaluation reports loss, perplexity, throughput, parameter count, and GPU memory.

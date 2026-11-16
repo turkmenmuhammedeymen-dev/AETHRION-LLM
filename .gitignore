@@ -14,3 +14,4 @@ artifacts/tokenizer.json
 .DS_Store
 .pytest_cache/
 .coverage
+!data/processed/corpus_manifest.json
