@@ -166,6 +166,67 @@ class CorpusPreparationTests(unittest.TestCase):
                 dataset_manifest, manifest, root, corpus, report_path
             )
 
+    def test_explicit_group_overrides_url_host_group_across_domains(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source = root / "mixed.jsonl"
+            rows = [
+                {"url": "https://a.example.org/one", "group_id": "shared-author",
+                 "text": "Shared author first source record has enough text."},
+                {"url": "https://b.example.org/two", "group_id": "shared-author",
+                 "text": "Shared author second domain record has enough words."},
+                {"url": "https://c.example.org/three", "group_id": "independent-c",
+                 "text": "Independent third author source record is separate."},
+                {"url": "https://a.example.org/four", "group_id": "independent-d",
+                 "text": "Another independent author contributes this record."},
+            ]
+            source.write_text(
+                "".join(json.dumps(row, ensure_ascii=False) + "\\n" for row in rows),
+                encoding="utf-8",
+            )
+            manifest = root / "sources.json"
+            manifest.write_text(json.dumps({"sources": [{
+                "source_id": "mixed-reviewed",
+                "path": source.name,
+                "license": "CC0",
+                "permitted_uses": "training permitted for unit-test fixture only",
+                "allow_training": True,
+            }]}), encoding="utf-8")
+            review = root / "review.csv"
+            columns = [
+                "domain", "license_name", "license_evidence_url", "rights_holder",
+                "ai_training_permission", "attribution_required", "review_status",
+            ]
+            with review.open("w", encoding="utf-8", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=columns)
+                writer.writeheader()
+                for domain in ("a.example.org", "b.example.org", "c.example.org"):
+                    writer.writerow({
+                        "domain": domain,
+                        "license_name": "CC0",
+                        "license_evidence_url": f"https://{domain}/license",
+                        "rights_holder": "Example rights holder",
+                        "ai_training_permission": "YES",
+                        "attribution_required": "NO",
+                        "review_status": "APPROVED",
+                    })
+            dataset_manifest = self._write_dataset_manifest(root)
+            corpus = root / "out" / "corpus.txt"
+            report_path = root / "out" / "report.json"
+            report = build_corpus(
+                root, manifest, corpus, report_path, min_chars=10, min_records=1,
+                source_review_path=review, dataset_manifest_path=dataset_manifest,
+            )
+            shared_hash = hashlib.sha256(b"group:shared-author").hexdigest()
+            split_memberships = [
+                name for name, item in report["splits"].items()
+                if shared_hash in item["groups"]
+            ]
+            self.assertEqual(len(split_memberships), 1)
+            validate_training_approval(
+                dataset_manifest, manifest, root, corpus, report_path, review
+            )
+
     def test_rejects_unapproved_source(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
