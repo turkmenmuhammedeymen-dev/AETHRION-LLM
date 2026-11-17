@@ -91,8 +91,17 @@ class NativeModelRegistry:
             raise NativeModelError(f"Missing local architecture identifier for {capability}.")
         for key in ("checkpoint", "tokenizer", "processor"):
             value = entry.get(key)
-            if value is not None and (not isinstance(value, str) or not value.strip()):
-                raise NativeModelError(f"Invalid {key} path for {capability}.")
+            if value is not None:
+                if not isinstance(value, str) or not value.strip():
+                    raise NativeModelError(f"Invalid {key} path for {capability}.")
+                normalized = value.replace("\\\\", "/")
+                if (
+                    normalized.startswith("/")
+                    or "://" in normalized
+                    or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", normalized)
+                    or any(part == ".." for part in normalized.split("/"))
+                ):
+                    raise NativeModelError(f"{key} must be a safe relative local path for {capability}.")
         for key in ("checkpoint_sha256", "tokenizer_sha256", "processor_sha256"):
             value = entry.get(key)
             if value is not None and (not isinstance(value, str) or not _SHA256.fullmatch(value.lower())):
