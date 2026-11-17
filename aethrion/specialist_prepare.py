@@ -55,6 +55,13 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _group_id(row: dict[str, Any], *, fallback: str = "id") -> str:
+    value = row.get("group_id", row.get(fallback, row.get("id", "")))
+    if not isinstance(value, str) or not value.strip():
+        raise PreparationError("Every record requires a non-empty group_id (or fallback identifier).")
+    return value.strip()
+
+
 def _split(sample_id: str, seed: int) -> str:
     value = int(hashlib.sha256(f"{seed}:{sample_id}".encode()).hexdigest()[:8], 16) % 100
     return "train" if value < 80 else "validation" if value < 90 else "test"
@@ -78,9 +85,11 @@ def _build_arrays(model_id: str, rows: list[dict[str, Any]], tokenizer: ByteBPET
                   max_length: int, reason_classes: int, seed: int,
                   layout_vocab_size: int, tag_classes: int) -> dict[str, np.ndarray]:
     ids = [str(row["id"]) for row in rows]
-    splits = [_split(str(row.get("group_id", item)), seed) for item, row in zip(ids, rows)]
+    group_ids = [_group_id(row) for row in rows]
+    splits = [_split(group_id, seed) for group_id in group_ids]
     arrays: dict[str, np.ndarray] = {
         "sample_id": np.asarray(ids, dtype=np.str_),
+        "group_id": np.asarray(group_ids, dtype=np.str_),
         "split": np.asarray(splits, dtype=np.str_),
     }
     if model_id == "code":
@@ -174,13 +183,17 @@ def prepare_text_dataset(
         raise PreparationError("Invalid tokenizer or sequence dimensions.")
     source = Path(input_path).resolve()
     rows = _read_jsonl(source)
+    group_ids = [_group_id(row) for row in rows]
+    split_names = [_split(group_id, seed) for group_id in group_ids]
     corpus_fields = []
-    for row in rows:
+    for row, split_name in zip(rows, split_names):
+        if split_name != "train":
+            continue
         for key in ("text", "query", "passage"):
             if isinstance(row.get(key), str):
                 corpus_fields.append(row[key])
     if not corpus_fields:
-        raise PreparationError("No text fields found to train the tokenizer.")
+        raise PreparationError("No training-split text fields found to train the tokenizer.")
     tokenizer = ByteBPETokenizer()
     tokenizer.train("\n".join(corpus_fields), vocab_size=vocab_size)
     arrays = _build_arrays(model_id, rows, tokenizer, max_length, reason_classes, seed,
