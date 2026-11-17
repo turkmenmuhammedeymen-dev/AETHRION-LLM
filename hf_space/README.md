@@ -12,7 +12,7 @@ pinned: false
 # AETHRION-LLM
 Intelligence Without Limits.
 
-The Space interface groups Chat, Code, Image, 3D, Research, Files and Audio.
+The Space interface groups Chat, Code, Vision, Image, 3D, Research, Files and Audio.
 The production runtime is native-only: no third-party inference, image,
 speech, 3D, code or hosted-search APIs are called.
 

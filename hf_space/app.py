@@ -94,7 +94,7 @@ def vision_compare(image_path, text):
         )
         score = float(result.get("similarity"))
         return (
-            f"**Image/text embedding similarity:** {score:.4f}\\n\\n"
+            f"**Image/text embedding similarity:** {score:.4f}\n\n"
             "This score compares representations; it is not a natural-language "
             "image description or visual question-answering result."
         )
