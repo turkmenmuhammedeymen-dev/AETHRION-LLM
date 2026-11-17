@@ -1,5 +1,6 @@
 import os, base64, tempfile
 import httpx
+import spaces
 from pathlib import Path
 import gradio as gr
 from aethrion.api import build_router
@@ -34,6 +35,20 @@ def _remote_disabled_message():
 def dispatch(capability, prompt, options=None):
     return router.dispatch(capability, CapabilityRequest(prompt, options or {})).output
 
+
+@spaces.GPU(duration=1)
+def _zerogpu_registration_noop():
+    # Registered as a hidden, non-API event so ZeroGPU recognizes this Space.
+    # It is never invoked by normal UI usage and consumes no GPU quota.
+    return None
+
+
+@spaces.GPU(duration=60)
+def _gpu_local_chat(prompt):
+    result = dispatch(Capability.CHAT, prompt, {"max_new_tokens": 256})
+    return result.get("text", str(result)) if isinstance(result, dict) else str(result)
+
+
 def status():
     available = router.available()
     rows = [f"- **{c.value}**: {available.get(c.value, 'NOT CONFIGURED')}" for c in Capability]
@@ -42,16 +57,19 @@ def status():
     return "### Capability status\n" + "\n".join(rows)
 
 def chat(message, history):
-    context=[]
+    if not REMOTE_PROVIDERS_ENABLED:
+        return _remote_disabled_message()
+    if Capability.CHAT.value not in router.available():
+        return "AETHRION's own trained checkpoint/tokenizer is not loaded. No third-party model is silently substituted."
+    context = []
     for item in (history or [])[-8:]:
-        if isinstance(item,dict) and isinstance(item.get("content"),str):
-            context.append(str(item.get("role","user"))+": "+item["content"][:1500])
+        if isinstance(item, dict) and isinstance(item.get("content"), str):
+            context.append(str(item.get("role", "user")) + ": " + item["content"][:1500])
+    prompt = "\\n".join(context + ["user: " + message[:4000], "assistant:"])
     try:
-        result=dispatch(Capability.CHAT,"\n".join(context+["user: "+message[:4000],"assistant:"]),{"max_new_tokens":256})
-        return result.get("text",str(result)) if isinstance(result,dict) else str(result)
+        return _gpu_local_chat(prompt)
     except CapabilityUnavailable:
-        return _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "AETHRION's own trained checkpoint/tokenizer is not loaded. No third-party model is silently substituted."
-
+        return "AETHRION's own trained checkpoint/tokenizer is not available. No third-party model is silently substituted."
 def code(prompt):
     try:
         r=dispatch(Capability.CODE,prompt[:10000],{"max_tokens":4096,"temperature":0.1})
@@ -166,6 +184,13 @@ def edit_project(path,task):
 
 with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.themes.Soft()) as demo:
     gr.Markdown("# AETHRION-LLM\n### Intelligence Without Limits")
+    _zero_gpu_registration = gr.Button(visible=False, interactive=False)
+    _zero_gpu_registration.click(
+        fn=_zerogpu_registration_noop,
+        inputs=[],
+        outputs=[],
+        api_name=False,
+    )
     s=gr.Markdown(status());gr.Button("Refresh status").click(status,outputs=s)
     with gr.Tabs():
         with gr.Tab("AI Chat"):
