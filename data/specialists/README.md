@@ -84,6 +84,41 @@ BASE continues to use the separate audited corpus/tokenizer pipeline in `aethrio
 clouds, or OCR itself. Those modalities require their own source-specific
 decoders and provenance checks; do not relabel text records as multimodal data.
 
+## Raw WAV preparation (ASR, TTS, Vocoder)
+
+The audio adapter `aethrion.specialist_prepare_audio` reads local uncompressed
+PCM WAV files, resamples to 16 kHz, extracts native log-mel features, creates
+the required padded arrays, and copies each source WAV into the provenance
+folder with SHA-256. The JSONL file contains one record per clip:
+
+- ASR: `{"id":"clip-001","wav_path":"audio/clip-001.wav","transcript":"..."}`
+- TTS: the same fields plus `"durations":[...]`, one positive frame count per
+  byte-BPE token. Durations must come from a documented, reviewed alignment
+  process and must sum exactly to that clip's mel-frame count.
+- Vocoder: `{"id":"clip-001","wav_path":"audio/clip-001.wav"}`
+
+Example:
+
+```bash
+python -m aethrion.specialist_prepare_audio \
+  --input data/incoming/speech-reviewed.jsonl \
+  --model asr \
+  --output-root data/specialists \
+  --license "record the exact source license" \
+  --permitted-use "record the exact permitted training use" \
+  --evidence-uri "https://source.example/license-or-terms" \
+  --source-uri "https://source.example/dataset-release"
+```
+
+For TTS, include the per-token `durations` arrays. For Vocoder, the default
+hop length matches the current model config (256 samples); ASR/TTS default to
+160. The tool never infers speaker consent: all audio source records keep
+`speaker_consent_verified=false`, and the dataset manifest keeps
+`speaker_consent_reviewed=false`, `privacy_reviewed=false`,
+`training_allowed=false` and `owner_approval=false`. A responsible adult
+must review the actual license and speaker-consent scope before any approval
+is changed. The tool does not download datasets or accept terms.
+
 ## Training
 
 Create a per-model manifest by copying `manifest.template.json`, filling the
