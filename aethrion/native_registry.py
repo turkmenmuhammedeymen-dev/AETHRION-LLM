@@ -125,9 +125,12 @@ class NativeModelRegistry:
         if config is not None and (not isinstance(config, dict) or not config):
             raise NativeModelError(f"{capability}.model_config must be a non-empty object.")
         if entry["status"] == "trained":
-            required_paths = ("checkpoint", "tokenizer", "training_report", "evaluation_report", "model_card")
-            required_hashes = ("checkpoint_sha256", "tokenizer_sha256", "training_report_sha256",
+            required_paths = ("checkpoint", "training_report", "evaluation_report", "model_card")
+            required_hashes = ("checkpoint_sha256", "training_report_sha256",
                                "evaluation_report_sha256", "model_card_sha256", "dataset_sha256")
+            if capability != "vocoder":
+                required_paths += ("tokenizer",)
+                required_hashes += ("tokenizer_sha256",)
             for key in required_paths:
                 if not entry.get(key):
                     raise NativeModelError(f"Trained {capability} model requires {key}.")
@@ -200,7 +203,9 @@ class NativeModelRegistry:
         if entry["status"] != "trained":
             raise NativeModelUnavailable(f"AETHRION {capability} model is not trained and released.")
         checkpoint = self._verified_file(capability, entry, "checkpoint", "checkpoint_sha256")
-        tokenizer = self._verified_file(capability, entry, "tokenizer", "tokenizer_sha256")
+        tokenizer = None
+        if entry.get("tokenizer"):
+            tokenizer = self._verified_file(capability, entry, "tokenizer", "tokenizer_sha256")
         processor = None
         if entry.get("processor"):
             processor = self._verified_file(capability, entry, "processor", "processor_sha256")
@@ -222,6 +227,8 @@ class NativeModelRegistry:
             raise NativeModelIntegrityError(f"{capability} evaluation report does not match its dataset.")
         if evaluation.get("status") != "approved_for_release":
             raise NativeModelUnavailable(f"{capability} evaluation report is not approved for release.")
+        if capability == "tts" and self.status("vocoder") != "ready":
+            raise NativeModelUnavailable("AETHRION-TTS requires a separately trained and released AETHRION-VOCODER.")
         return NativeModelArtifacts(
             capability=capability,
             architecture=entry["architecture"],
