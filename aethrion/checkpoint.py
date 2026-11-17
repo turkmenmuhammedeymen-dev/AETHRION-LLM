@@ -6,6 +6,7 @@ PyTorch optimizer/RNG checkpoints use pickle-backed serialization.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import os
 import shutil
@@ -38,7 +39,7 @@ def verify_checkpoint(path: str | Path) -> str:
         raise ValueError(f"Checkpoint integrity file is missing: {sidecar}")
     expected = sidecar.read_text(encoding="ascii").strip().split()[0]
     actual = sha256_file(target)
-    if len(expected) != 64 or not hashlib.compare_digest(expected.lower(), actual):
+    if len(expected) != 64 or not hmac.compare_digest(expected.lower(), actual):
         raise ValueError(f"Checkpoint SHA-256 verification failed: {target}")
     return actual
 
