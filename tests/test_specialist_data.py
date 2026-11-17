@@ -133,7 +133,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
         for split in ("train", "validation", "test"):
             for label in range(3):
                 for index in range(per_class):
-                            sample_ids.append(f"{split}-{label}-{index}")
+                    sample_ids.append(f"{split}-{label}-{index}")
                     splits.append(split)
                     decisions.append(label)
         count = len(sample_ids)
