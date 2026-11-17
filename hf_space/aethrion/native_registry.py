@@ -17,18 +17,22 @@ CAPABILITIES = frozenset({
     "research", "document", "safety",
 })
 PROCESSOR_REQUIRED = frozenset({"vision", "image", "asr", "tts", "3d", "research", "document", "safety"})
+REQUIRED_BENCHMARK_DIRECTIONS = {
+    "chat": {"held_out_lm_loss": "min", "instruction_following": "max"},
+    "code": {"unit_test_pass_rate": "max", "security_regression": "max"},
+    "vision": {"recall_at_1": "max", "image_text_alignment": "max"},
+    "image": {"fid_or_equivalent": "min", "prompt_alignment": "max", "image_safety": "max"},
+    "asr": {"wer": "min", "cer": "min"},
+    "tts": {"mos": "max", "intelligibility": "max"},
+    "vocoder": {"mos": "max", "spectral_distortion": "min"},
+    "3d": {"chamfer_distance": "min", "point_cloud_validity": "max"},
+    "research": {"recall_at_5": "max", "citation_precision": "max"},
+    "document": {"field_f1": "max", "extractive_qa_em": "max"},
+    "safety": {"false_negative_rate": "min", "calibration_ece": "min"},
+}
 REQUIRED_BENCHMARKS = {
-    "chat": {"held_out_lm_loss", "instruction_following"},
-    "code": {"unit_test_pass_rate", "security_regression"},
-    "vision": {"recall_at_1", "image_text_alignment"},
-    "image": {"fid_or_equivalent", "prompt_alignment", "image_safety"},
-    "asr": {"wer", "cer"},
-    "tts": {"mos", "intelligibility"},
-    "vocoder": {"mos", "spectral_distortion"},
-    "3d": {"chamfer_distance", "point_cloud_validity"},
-    "research": {"recall_at_5", "citation_precision"},
-    "document": {"field_f1", "extractive_qa_em"},
-    "safety": {"false_negative_rate", "calibration_ece"},
+    capability: set(metrics)
+    for capability, metrics in REQUIRED_BENCHMARK_DIRECTIONS.items()
 }
 _ALLOWED_ENTRY_KEYS = frozenset({
     "architecture", "model_config",
@@ -267,26 +271,45 @@ class NativeModelRegistry:
             raise NativeModelUnavailable(
                 f"{capability} evaluation report is missing required benchmarks: {', '.join(missing)}."
             )
+        unexpected_benchmarks = set(benchmark_results) - required_benchmarks
+        if unexpected_benchmarks:
+            raise NativeModelIntegrityError(
+                f"{capability} evaluation contains unsupported benchmarks: "
+                + ", ".join(sorted(str(name) for name in unexpected_benchmarks))
+            )
         for benchmark_name, result in benchmark_results.items():
             if not isinstance(benchmark_name, str) or not benchmark_name.strip():
                 raise NativeModelIntegrityError("Benchmark names must be non-empty strings.")
             if not isinstance(result, dict) or not result:
                 raise NativeModelIntegrityError(f"Invalid benchmark record: {benchmark_name}.")
             value = result.get("value")
+            direction = REQUIRED_BENCHMARK_DIRECTIONS[capability][benchmark_name]
+            threshold = result.get("threshold")
+            metric_value = result.get("value")
+            numeric = (
+                isinstance(metric_value, (int, float)) and not isinstance(metric_value, bool)
+                and math.isfinite(float(metric_value))
+                and isinstance(threshold, (int, float)) and not isinstance(threshold, bool)
+                and math.isfinite(float(threshold))
+            )
+            meets_threshold = (
+                numeric and (
+                    float(metric_value) <= float(threshold)
+                    if direction == "min"
+                    else float(metric_value) >= float(threshold)
+                )
+            )
             if (
                 result.get("passed") is not True
+                or result.get("direction") != direction
                 or not isinstance(result.get("metric"), str)
-                or not isinstance(value, (int, float))
-                or isinstance(value, bool)
-                or not math.isfinite(float(value))
-                or not isinstance(result.get("threshold"), (int, float))
-                or isinstance(result.get("threshold"), bool)
-                or not math.isfinite(float(result["threshold"]))
+                or not result.get("metric").strip()
+                or not meets_threshold
                 or not isinstance(result.get("evidence"), str)
                 or not result["evidence"].strip()
             ):
                 raise NativeModelUnavailable(
-                    f"Benchmark {benchmark_name} has not passed with a finite numeric measurement."
+                    f"Benchmark {benchmark_name} does not satisfy its documented direction and threshold."
                 )
         evidence_path = self._safe_path(evaluation["approval_evidence_path"])
         if not evidence_path.is_file() or self._digest(evidence_path) != evaluation["approval_evidence_sha256"].lower():

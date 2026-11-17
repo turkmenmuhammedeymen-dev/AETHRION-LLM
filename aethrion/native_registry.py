@@ -271,6 +271,12 @@ class NativeModelRegistry:
             raise NativeModelUnavailable(
                 f"{capability} evaluation report is missing required benchmarks: {', '.join(missing)}."
             )
+        unexpected_benchmarks = set(benchmark_results) - required_benchmarks
+        if unexpected_benchmarks:
+            raise NativeModelIntegrityError(
+                f"{capability} evaluation contains unsupported benchmarks: "
+                + ", ".join(sorted(str(name) for name in unexpected_benchmarks))
+            )
         for benchmark_name, result in benchmark_results.items():
             if not isinstance(benchmark_name, str) or not benchmark_name.strip():
                 raise NativeModelIntegrityError("Benchmark names must be non-empty strings.")
