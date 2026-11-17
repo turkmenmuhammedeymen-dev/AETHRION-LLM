@@ -49,7 +49,8 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
     # local index and document preprocessing pipelines have passed release tests.
     supported = (
         Capability.CHAT, Capability.CODE, Capability.VISION, Capability.IMAGE,
-        Capability.ASR, Capability.TTS, Capability.THREE_D, Capability.SAFETY,
+        Capability.ASR, Capability.TTS, Capability.THREE_D, Capability.RESEARCH,
+        Capability.DOCUMENT, Capability.SAFETY,
     )
     for capability in supported:
         if runtime.registry.status(capability.value) != "ready":
