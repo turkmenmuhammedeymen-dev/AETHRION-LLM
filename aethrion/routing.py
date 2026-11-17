@@ -13,9 +13,15 @@ from typing import Any, Callable, Mapping
 class Capability(str, Enum):
     CHAT = "chat"
     CODE = "code"
+    VISION = "vision"
     IMAGE = "image"
     THREE_D = "3d"
+    ASR = "asr"
+    TTS = "tts"
     RESEARCH = "research"
+    DOCUMENT = "document"
+    SAFETY = "safety"
+    # Legacy interface names remain unavailable aliases until migrated.
     FILE_ANALYSIS = "file_analysis"
     AUDIO = "audio"
 
