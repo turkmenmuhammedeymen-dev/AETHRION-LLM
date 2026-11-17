@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import base64
 import tempfile
+import math
 from pathlib import Path
 from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
@@ -40,9 +41,17 @@ def _require_safety_allow(runtime: Any, text: str) -> dict[str, Any]:
     except Exception as exc:
         raise CapabilityUnavailable("AETHRION-SAFE inference failed; request stopped.") from exc
     decision = verdict.get("decision") if isinstance(verdict, dict) else None
-    if decision != "ALLOW":
+    confidence = verdict.get("confidence") if isinstance(verdict, dict) else None
+    if (
+        decision != "ALLOW"
+        or not isinstance(confidence, (int, float))
+        or not math.isfinite(float(confidence))
+        or not 0.65 <= float(confidence) <= 1.0
+    ):
         label = decision if decision in {"REVIEW", "BLOCK"} else "UNKNOWN"
-        raise CapabilityUnavailable(f"AETHRION-SAFE returned {label}; request stopped.")
+        raise CapabilityUnavailable(
+            f"AETHRION-SAFE returned {label} or an untrusted confidence score; request stopped."
+        )
     return verdict
 
 
