@@ -120,6 +120,52 @@ class CorpusPreparationTests(unittest.TestCase):
                     dataset_manifest, manifest, root, corpus, report_path
                 )
 
+    def test_explicit_group_ids_remain_together_across_source_files(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            entries = []
+            for index in range(3):
+                path = root / f"source-{index}.jsonl"
+                rows = [
+                    {
+                        "group_id": "same-speaker",
+                        "text": f"Shared speaker utterance number {index} belongs to one group.",
+                    },
+                    {
+                        "group_id": f"independent-author-{index}",
+                        "text": f"Independent author {index} writes a different long sentence.",
+                    },
+                ]
+                path.write_text(
+                    "".join(json.dumps(row, ensure_ascii=False) + "\\n" for row in rows),
+                    encoding="utf-8",
+                )
+                entries.append({
+                    "source_id": f"jsonl-source-{index}",
+                    "path": path.name,
+                    "license": "Synthetic unit-test fixture",
+                    "permitted_uses": "training permitted for unit-test fixture only",
+                    "allow_training": True,
+                })
+            manifest = root / "sources.json"
+            manifest.write_text(json.dumps({"sources": entries}), encoding="utf-8")
+            dataset_manifest = self._write_dataset_manifest(root)
+            corpus = root / "out" / "corpus.txt"
+            report_path = root / "out" / "report.json"
+            report = build_corpus(
+                root, manifest, corpus, report_path, min_chars=10, min_records=1,
+                dataset_manifest_path=dataset_manifest,
+            )
+            shared_hash = hashlib.sha256(b"group:same-speaker").hexdigest()
+            containing = [
+                split_name for split_name, item in report["splits"].items()
+                if shared_hash in item["groups"]
+            ]
+            self.assertEqual(len(containing), 1)
+            validate_training_approval(
+                dataset_manifest, manifest, root, corpus, report_path
+            )
+
     def test_rejects_unapproved_source(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
