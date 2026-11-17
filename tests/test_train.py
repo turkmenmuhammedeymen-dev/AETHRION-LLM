@@ -61,24 +61,28 @@ class TrainingUtilityTests(unittest.TestCase):
             output = work / "artifacts"
             raw_dir = work / "raw"
             raw_dir.mkdir()
-            source_text = "\n".join(
-                f"Synthetic AETHRION unit-test record number {index} with Turkish sample text."
-                for index in range(120)
-            )
-            (raw_dir / "approved_fixture.txt").write_text(source_text, encoding="utf-8")
+            source_texts = []
+            for source_index in range(3):
+                source_text = "\n".join(
+                    f"Synthetic AETHRION unit-test source {source_index} record number {index} with Turkish sample text."
+                    for index in range(40)
+                )
+                filename = f"approved_fixture_{source_index}.txt"
+                (raw_dir / filename).write_text(source_text, encoding="utf-8")
+                source_texts.append({
+                    "source_id": f"synthetic-test-fixture-{source_index}",
+                    "path": filename,
+                    "license": "Synthetic test fixture",
+                    "permitted_uses": "machine-learning training for unit-test fixture only",
+                    "allow_training": True,
+                })
             dataset_manifest = work / "dataset_manifest.json"
             dataset_manifest.write_text(json.dumps({
                 "project": "AETHRION-LLM-test",
                 "training_allowed": True
             }), encoding="utf-8")
             source_manifest = work / "sources.json"
-            source_manifest.write_text(json.dumps({"sources": [{
-                "source_id": "synthetic-test-fixture",
-                "path": "approved_fixture.txt",
-                "license": "Synthetic test fixture",
-                "permitted_uses": "machine-learning training for unit-test fixture only",
-                "allow_training": True
-            }]}), encoding="utf-8")
+            source_manifest.write_text(json.dumps({"sources": source_texts}), encoding="utf-8")
             corpus_report = work / "corpus-report.json"
             build_corpus(
                 input_dir=raw_dir,
@@ -88,7 +92,8 @@ class TrainingUtilityTests(unittest.TestCase):
                 dataset_manifest_path=dataset_manifest,
             )
             tokenizer = ByteBPETokenizer()
-            tokenizer.train(data_path.read_text(encoding="utf-8"), vocab_size=256)
+            train_path = data_path.with_name("corpus-train.txt")
+            tokenizer.train(train_path.read_text(encoding="utf-8"), vocab_size=256)
             tokenizer.save(tokenizer_path)
             config = {
                 "seed": 42, "data_path": str(data_path), "tokenizer_path": str(tokenizer_path),
