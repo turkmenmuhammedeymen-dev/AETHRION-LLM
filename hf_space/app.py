@@ -110,7 +110,7 @@ def gpu_model_preflight():
         "**Safety:** synthetic tensors only; no dataset read, no optimizer step, no checkpoint written, no production training started.",
         f"**Overall:** {report['status']} — all models remain NOT_RELEASED.",
     ])
-    return "\\n".join(lines)
+    return "\n".join(lines)
 
 
 def status():
