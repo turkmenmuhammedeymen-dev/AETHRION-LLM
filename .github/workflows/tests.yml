@@ -113,13 +113,13 @@ jobs:
           trap cleanup EXIT
           for endpoint in / /config /info; do
             ready=0
-            for attempt in $(seq 1 30); do
+            for attempt in $(seq 1 10); do
               if ! kill -0 "$app_pid" 2>/dev/null; then
                 cat /tmp/aethrion-space.log
                 echo "Space app process exited while waiting for $endpoint."
                 exit 1
               fi
-              code=$(curl --silent --show-error -o /tmp/aethrion-response.json -w "%{http_code}" "http://127.0.0.1:7860$endpoint" || true)
+              code=$(curl --connect-timeout 2 --max-time 4 --silent --show-error -o /tmp/aethrion-response.json -w "%{http_code}" "http://127.0.0.1:7860$endpoint" || true)
               if [ "$code" = "200" ]; then
                 ready=1
                 case "$endpoint" in
