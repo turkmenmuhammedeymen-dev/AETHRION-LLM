@@ -190,7 +190,7 @@ def tune_instructions(
             }
             checkpoint_hash = save_checkpoint(payload, checkpoint_path)
             write_json_atomic({
-                "status": "instruction_tuning_complete_not_released",
+                "status": "instruction_tuning_in_progress_not_released",
                 "model_id": "chat",
                 "release_status": "NOT_RELEASED",
                 "checkpoint_sha256": checkpoint_hash,
