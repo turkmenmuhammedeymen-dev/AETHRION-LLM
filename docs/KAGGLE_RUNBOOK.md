@@ -1,15 +1,16 @@
-# Kaggle workflow retired
+# Kaggle optional free-GPU workflow
 
-AETHRION-LLM no longer uses Kaggle as its documented development or training
-workflow. The active remote development environment is GitHub Codespaces.
+Kaggle is optional. It is not required for editing the repository or running
+GitHub Actions tests. Use it only when an approved training dataset exists and
+a free GPU is actually offered.
 
-See [CODESPACES_RUNBOOK.md](CODESPACES_RUNBOOK.md).
+See [FREE_GPU_TRAINING_RUNBOOK.md](FREE_GPU_TRAINING_RUNBOOK.md) for the
+current safe workflow, checkpoint handling and fail-closed data gates.
 
-Important: Codespaces is configured for development, CPU tests and bounded
-data preparation; it is not a GPU training service. The existing Hugging Face
-Space ZeroGPU runtime is not a persistent training worker either. Do not use
-this historical document to start training or change any dataset approval.
+Kaggle's free GPU availability, queueing, hardware, session limits and weekly
+quota can change. Do not purchase compute or use billing-linked services.
+GitHub Actions remains the CI environment; Hugging Face ZeroGPU is not a
+persistent training worker.
 
-The fail-closed data governance and training contracts remain documented in
-[data/specialists/README.md](../data/specialists/README.md) and
-[the native-only model-family specification](NATIVE_ONLY_MODEL_FAMILY.md).
+Do not train until the exact source license, privacy and (for audio) speaker
+consent have been reviewed and the model-specific manifest passes validation.
