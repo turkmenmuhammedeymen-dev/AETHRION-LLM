@@ -30,8 +30,8 @@ REQUIRED_ARRAYS = {
     "vision": {"sample_id", "split", "images", "token_ids"},
     "image": {"sample_id", "split", "images", "token_ids"},
     "asr": {"sample_id", "split", "features", "input_lengths", "targets", "target_lengths"},
-    "tts": {"sample_id", "split", "token_ids", "frame_to_token", "target_mels", "durations"},
-    "vocoder": {"sample_id", "split", "target_mels", "target_waveforms"},
+    "tts": {"sample_id", "split", "token_ids", "token_mask", "token_lengths", "frame_to_token", "frame_mask", "frame_lengths", "target_mels", "durations"},
+    "vocoder": {"sample_id", "split", "target_mels", "target_waveforms", "frame_lengths", "waveform_mask"},
     "3d": {"sample_id", "split", "points", "token_ids"},
     "research": {"sample_id", "split", "query_ids", "passage_ids"},
     "document": {"sample_id", "split", "token_ids", "boxes", "layout_ids", "tag_labels"},
@@ -103,20 +103,45 @@ def _validate_modality_shapes(model_id: str, arrays: Any, sample_count: int) -> 
     elif model_id == "tts":
         ids, alignment = arrays["token_ids"], arrays["frame_to_token"]
         mels, durations = arrays["target_mels"], arrays["durations"]
+        token_mask, token_lengths = arrays["token_mask"], arrays["token_lengths"]
+        frame_mask, frame_lengths = arrays["frame_mask"], arrays["frame_lengths"]
         if ids.ndim != 2 or alignment.ndim != 2 or mels.ndim != 3 or durations.shape != ids.shape:
-            raise SpecialistDataError("TTS requires token_ids [N,L], frame_to_token [N,F], target_mels [N,F,M] and durations [N,L].")
-        if not np.issubdtype(alignment.dtype, np.integer) or not np.issubdtype(durations.dtype, np.integer):
-            raise SpecialistDataError("TTS alignments and durations must be integer arrays.")
-        if alignment.shape[:2] != mels.shape[:2] or np.any(durations < 1):
-            raise SpecialistDataError("TTS frame alignment or positive duration targets are invalid.")
-        if np.any(durations.sum(axis=1) != alignment.shape[1]):
-            raise SpecialistDataError("TTS token durations must sum to the target mel frame count.")
-        if np.any(alignment < 0) or np.any(alignment >= ids.shape[1]):
-            raise SpecialistDataError("TTS alignment references token positions outside the transcript.")
+            raise SpecialistDataError("TTS token, alignment, mel and duration arrays have invalid shapes.")
+        if alignment.shape != mels.shape[:2] or token_mask.shape != ids.shape or frame_mask.shape != alignment.shape:
+            raise SpecialistDataError("TTS masks and alignment must match their padded arrays.")
+        if token_lengths.shape != (sample_count,) or frame_lengths.shape != (sample_count,):
+            raise SpecialistDataError("TTS token_lengths and frame_lengths must contain one value per sample.")
+        if not all(np.issubdtype(value.dtype, np.integer) for value in (alignment, durations, token_lengths, frame_lengths)):
+            raise SpecialistDataError("TTS alignment, duration and length arrays must be integers.")
+        if np.any(token_lengths < 1) or np.any(token_lengths > ids.shape[1]) or np.any(frame_lengths < 1) or np.any(frame_lengths > alignment.shape[1]):
+            raise SpecialistDataError("TTS sequence lengths are outside their padded arrays.")
+        expected_token_mask = np.arange(ids.shape[1])[None, :] < token_lengths[:, None]
+        expected_frame_mask = np.arange(alignment.shape[1])[None, :] < frame_lengths[:, None]
+        if not np.array_equal(token_mask.astype(bool), expected_token_mask) or not np.array_equal(frame_mask.astype(bool), expected_frame_mask):
+            raise SpecialistDataError("TTS masks do not match the declared sequence lengths.")
+        if np.any(durations[token_mask.astype(bool)] < 1) or np.any(durations[~token_mask.astype(bool)] != 0):
+            raise SpecialistDataError("TTS durations must be positive for real tokens and zero for padding.")
+        for index in range(sample_count):
+            token_count, frame_count = int(token_lengths[index]), int(frame_lengths[index])
+            aligned = alignment[index, :frame_count]
+            if np.any(aligned < 0) or np.any(aligned >= token_count):
+                raise SpecialistDataError("TTS alignment references a padded or missing token.")
+            if int(durations[index, :token_count].sum()) != frame_count:
+                raise SpecialistDataError("TTS valid-token durations must sum to frame_lengths.")
+            observed = np.bincount(aligned.astype(np.int64), minlength=token_count)
+            if not np.array_equal(observed, durations[index, :token_count]):
+                raise SpecialistDataError("TTS frame-to-token alignment and durations disagree.")
     elif model_id == "vocoder":
         mels, audio = arrays["target_mels"], arrays["target_waveforms"]
-        if mels.ndim != 3 or audio.ndim != 2:
-            raise SpecialistDataError("Vocoder requires target_mels [N,frames,mel_bins] and target_waveforms [N,samples].")
+        frame_lengths, waveform_mask = arrays["frame_lengths"], arrays["waveform_mask"]
+        if mels.ndim != 3 or audio.ndim != 2 or frame_lengths.shape != (sample_count,) or waveform_mask.shape != audio.shape:
+            raise SpecialistDataError("Vocoder requires aligned mel, waveform, frame-length and waveform-mask arrays.")
+        if not np.issubdtype(frame_lengths.dtype, np.integer):
+            raise SpecialistDataError("Vocoder frame_lengths must be integers.")
+        if np.any(frame_lengths < 1) or np.any(frame_lengths > mels.shape[1]):
+            raise SpecialistDataError("Vocoder frame_lengths are outside the mel array.")
+        if np.any((waveform_mask != 0) & (waveform_mask != 1)):
+            raise SpecialistDataError("Vocoder waveform_mask must be binary.")
     elif model_id == "3d":
         points, ids = arrays["points"], arrays["token_ids"]
         if points.ndim != 3 or points.shape[2] != 3 or ids.ndim != 2:
