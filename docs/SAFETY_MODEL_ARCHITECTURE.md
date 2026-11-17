@@ -81,7 +81,7 @@ when AETHRION-SAFE is not yet trained or enabled.
 
 ## Current status
 
-<badge>PLANNED — NOT TRAINED</badge>
+**Status: PLANNED — NOT TRAINED**
 
 No AETHRION-SAFE weights or approved safety-training corpus are currently
 included in this repository. This document is an architecture plan, not a
