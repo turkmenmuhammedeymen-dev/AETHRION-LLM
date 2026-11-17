@@ -80,10 +80,28 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         response=self.client.get("/health")
         self.assertEqual(response.status_code,200)
 
+    def test_every_non_health_api_route_requires_bearer_token(self):
+        from fastapi.routing import APIRoute
+        from aethrion.security import require_api_token
+
+        api_routes = [route for route in api.app.routes if isinstance(route, APIRoute)]
+        self.assertGreater(len(api_routes), 1)
+        unprotected = sorted(
+            route.path
+            for route in api_routes
+            if route.path != "/health"
+            and not any(
+                dependency.call is require_api_token
+                for dependency in route.dependant.dependencies
+            )
+        )
+        self.assertEqual(unprotected, [])
+
     def test_protected_routes_fail_closed_when_server_token_is_unset(self):
-        with patch.dict("os.environ", {"AETHRION_API_TOKEN": ""}):
-            response=self.client.get("/capabilities")
-        self.assertEqual(response.status_code,503)
+        for configured_token in ("", "   "):
+            with patch.dict("os.environ", {"AETHRION_API_TOKEN": configured_token}):
+                response=self.client.get("/capabilities")
+            self.assertEqual(response.status_code,503)
 
     def test_protected_routes_reject_missing_or_invalid_bearer_token(self):
         missing=self.client.get("/capabilities")
