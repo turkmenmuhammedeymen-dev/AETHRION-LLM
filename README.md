@@ -23,7 +23,10 @@ human release approval are present.
 
 See [the native-only model-family specification](docs/NATIVE_ONLY_MODEL_FAMILY.md)
 and [the roadmap](docs/ROADMAP.md) for verified implementation status and
-remaining work.
+remaining work. The cross-product mapping for Vizyon2026/AETHRION, SENTRIX and
+TdevKuantum is documented in [the product AI integration matrix](docs/PRODUCT_AI_INTEGRATION_MATRIX.md).
+Dataset candidates and their rights-review findings are tracked in
+[the dataset source review](docs/DATASET_SOURCE_REVIEW.md).
 
 ## Development environment: GitHub Codespaces
 
