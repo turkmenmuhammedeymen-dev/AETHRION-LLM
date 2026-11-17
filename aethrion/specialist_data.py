@@ -11,10 +11,19 @@ import numpy as np
 
 FORMAT = "aethrion-specialist-dataset-v1"
 MODEL_MODALITIES = {
-    "chat": "text", "code": "code", "vision": "vision", "image": "image", "asr": "audio",
-    "tts": "audio", "vocoder": "audio", "3d": "3d", "research": "text",
-    "document": "document", "safety": "text",
+    "chat": "text",
+    "code": "code",
+    "vision": "vision",
+    "image": "image",
+    "asr": "audio",
+    "tts": "audio",
+    "vocoder": "audio",
+    "3d": "3d",
+    "research": "text",
+    "document": "document",
+    "safety": "text",
 }
+AUDIO_MODELS = frozenset({"asr", "tts", "vocoder"})
 REQUIRED_ARRAYS = {
     "chat": {"sample_id", "split", "input_ids", "labels"},
     "code": {"sample_id", "split", "token_ids"},
@@ -45,7 +54,7 @@ def sha256_file(path: str | Path) -> str:
 
 def _safe_local_path(root: Path, relative: str) -> Path:
     candidate = Path(relative)
-    if candidate.is_absolute() or "\\" in relative or "://" in relative:
+    if candidate.is_absolute() or chr(92) in relative or "://" in relative:
         raise SpecialistDataError("Dataset paths must be relative local paths.")
     if any(part in {"", ".", ".."} for part in relative.split("/")):
         raise SpecialistDataError("Dataset path contains an unsafe component.")
@@ -57,77 +66,8 @@ def _safe_local_path(root: Path, relative: str) -> Path:
     return resolved
 
 
-def validate_specialist_dataset(
-    manifest_path: str | Path,
-    *,
-    require_training_approval: bool = True,
-) -> dict[str, Any]:
-    """Validate license evidence, exact approval booleans, NPZ schema, splits and hashes."""
-    manifest_file = Path(manifest_path).resolve()
-    try:
-        payload = json.loads(manifest_file.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        raise SpecialistDataError("Specialist dataset manifest is missing or invalid JSON.") from exc
-    if not isinstance(payload, dict) or payload.get("format") != FORMAT:
-        raise SpecialistDataError("Unsupported specialist dataset manifest format.")
-    model_id = payload.get("model_id")
-    if model_id not in MODEL_MODALITIES:
-        raise SpecialistDataError("Unknown specialist model_id.")
-    if payload.get("modality") != MODEL_MODALITIES[model_id]:
-        raise SpecialistDataError("Dataset modality does not match the target specialist.")
-    if type(payload.get("training_allowed")) is not bool:
-        raise SpecialistDataError("training_allowed must be an exact JSON boolean.")
-    if type(payload.get("owner_approval")) is not bool:
-        raise SpecialistDataError("owner_approval must be an exact JSON boolean.")
-    if require_training_approval and (
-        payload["training_allowed"] is not True or payload["owner_approval"] is not True
-    ):
-        raise SpecialistDataError("Training blocked: specialist dataset and owner approvals are not true.")
-    if payload.get("privacy_reviewed") is not True:
-        raise SpecialistDataError("Training blocked: privacy review is not approved.")
-    if model_id in {"asr", "tts", "vocoder"} and payload.get("speaker_consent_reviewed") is not True:
-        raise SpecialistDataError("Training blocked: speaker consent review is not approved.")
-
-    sources = payload.get("sources")
-    if not isinstance(sources, list) or not sources:
-        raise SpecialistDataError("At least one documented training source is required.")
-    for source in sources:
-        if not isinstance(source, dict):
-            raise SpecialistDataError("Each source review must be an object.")
-        required_text = ("source_id", "source_uri", "source_path", "license", "permitted_use", "evidence_uri")
-        if any(not isinstance(source.get(key), str) or not source[key].strip() for key in required_text):
-            raise SpecialistDataError("Each source requires an ID, URI, license, permitted use and evidence.")
-        digest = source.get("sha256")
-        if not isinstance(digest, str) or not SHA256.fullmatch(digest.lower()):
-            raise SpecialistDataError("Each source requires a valid SHA-256.")
-        source_file = _safe_local_path(manifest_file.parent.resolve(), source["source_path"])
-        if not source_file.is_file() or source_file.stat().st_size == 0:
-            raise SpecialistDataError("A reviewed source file is missing or empty.")
-        if sha256_file(source_file) != digest.lower():
-            raise SpecialistDataError("A reviewed source file SHA-256 mismatch.")
-        if type(source.get("allow_training")) is not bool or source["allow_training"] is not True:
-            raise SpecialistDataError("Training blocked: one or more source licenses are not approved.")
-        if source.get("privacy_reviewed") is not True:
-            raise SpecialistDataError("Training blocked: one or more sources lack privacy approval.")
-        if model_id in {"asr", "tts"} and source.get("speaker_consent_verified") is not True:
-            raise SpecialistDataError("Training blocked: audio source lacks verified speaker consent.")
-
-    dataset_path = payload.get("dataset_path")
-    dataset_hash = payload.get("dataset_sha256")
-    if not isinstance(dataset_path, str) or not dataset_path:
-        raise SpecialistDataError("dataset_path is required.")
-    if not isinstance(dataset_hash, str) or not SHA256.fullmatch(dataset_hash.lower()):
-        raise SpecialistDataError("dataset_sha256 must be a SHA-256 digest.")
-    root = manifest_file.parent.resolve()
-    file_path = _safe_local_path(root, dataset_path)
-    if not file_path.is_file() or file_path.stat().st_size == 0:
-        raise SpecialistDataError("Prepared specialist dataset is missing or empty.")
-    actual_hash = sha256_file(file_path)
-    if actual_hash != dataset_hash.lower():
-        raise SpecialistDataError("Prepared specialist dataset SHA-256 mismatch.")
-
 def _validate_modality_shapes(model_id: str, arrays: Any, sample_count: int) -> None:
-    """Validate fixed-shape tensors before any model or optimizer is constructed."""
+    """Validate tensor shapes, integer labels and alignment before model creation."""
     if model_id in {"chat", "code"}:
         key = "input_ids" if model_id == "chat" else "token_ids"
         ids = arrays[key]
@@ -154,6 +94,8 @@ def _validate_modality_shapes(model_id: str, arrays: Any, sample_count: int) -> 
             raise SpecialistDataError("ASR features must be [N,frames,mels] with one input length per sample.")
         if targets.ndim != 2 or target_lengths.shape != (sample_count,):
             raise SpecialistDataError("ASR targets must be padded [N,target_length] with one target length per sample.")
+        if not np.issubdtype(input_lengths.dtype, np.integer) or not np.issubdtype(target_lengths.dtype, np.integer):
+            raise SpecialistDataError("ASR input and target lengths must be integer arrays.")
         if np.any(input_lengths < 1) or np.any(input_lengths > features.shape[1]):
             raise SpecialistDataError("ASR input lengths are outside the feature sequence.")
         if np.any(target_lengths < 1) or np.any(target_lengths > targets.shape[1]):
@@ -163,6 +105,8 @@ def _validate_modality_shapes(model_id: str, arrays: Any, sample_count: int) -> 
         mels, durations = arrays["target_mels"], arrays["durations"]
         if ids.ndim != 2 or alignment.ndim != 2 or mels.ndim != 3 or durations.shape != ids.shape:
             raise SpecialistDataError("TTS requires token_ids [N,L], frame_to_token [N,F], target_mels [N,F,M] and durations [N,L].")
+        if not np.issubdtype(alignment.dtype, np.integer) or not np.issubdtype(durations.dtype, np.integer):
+            raise SpecialistDataError("TTS alignments and durations must be integer arrays.")
         if alignment.shape[:2] != mels.shape[:2] or np.any(durations < 1):
             raise SpecialistDataError("TTS frame alignment or positive duration targets are invalid.")
         if np.any(durations.sum(axis=1) != alignment.shape[1]):
@@ -180,23 +124,95 @@ def _validate_modality_shapes(model_id: str, arrays: Any, sample_count: int) -> 
         if points.shape[1] < 16 or not np.issubdtype(ids.dtype, np.integer):
             raise SpecialistDataError("3D point clouds or conditioning token IDs are invalid.")
     elif model_id == "research":
-        if arrays["query_ids"].ndim != 2 or arrays["passage_ids"].ndim != 2:
-            raise SpecialistDataError("Research query_ids and passage_ids must be padded 2D integer arrays.")
-        if not np.issubdtype(arrays["query_ids"].dtype, np.integer) or not np.issubdtype(arrays["passage_ids"].dtype, np.integer):
+        query_ids, passage_ids = arrays["query_ids"], arrays["passage_ids"]
+        if query_ids.ndim != 2 or passage_ids.ndim != 2:
+            raise SpecialistDataError("Research query_ids and passage_ids must be padded 2D arrays.")
+        if not np.issubdtype(query_ids.dtype, np.integer) or not np.issubdtype(passage_ids.dtype, np.integer):
             raise SpecialistDataError("Research token arrays must use integer dtypes.")
     elif model_id == "document":
         ids, boxes, layouts, tags = arrays["token_ids"], arrays["boxes"], arrays["layout_ids"], arrays["tag_labels"]
         if ids.ndim != 2 or boxes.shape != (*ids.shape, 4) or layouts.shape != ids.shape or tags.shape != ids.shape:
             raise SpecialistDataError("Document token, layout, boxes and tag arrays have inconsistent shapes.")
+        if not np.issubdtype(layouts.dtype, np.integer) or not np.issubdtype(tags.dtype, np.integer):
+            raise SpecialistDataError("Document layout and tag labels must be integer arrays.")
         if np.any(boxes < 0) or np.any(boxes > 1):
             raise SpecialistDataError("Document boxes must be normalized to [0,1].")
     elif model_id == "safety":
         ids, decisions, reasons = arrays["token_ids"], arrays["decision_labels"], arrays["reason_labels"]
         if ids.ndim != 2 or decisions.shape != (sample_count,) or reasons.ndim != 2 or reasons.shape[0] != sample_count:
             raise SpecialistDataError("Safety token, decision and reason arrays have inconsistent shapes.")
+        if not np.issubdtype(decisions.dtype, np.integer):
+            raise SpecialistDataError("Safety decision labels must be integer values.")
         if np.any(decisions < 0) or np.any(decisions > 2):
             raise SpecialistDataError("Safety decision labels must be ALLOW=0, REVIEW=1 or BLOCK=2.")
 
+
+def validate_specialist_dataset(
+    manifest_path: str | Path,
+    *,
+    require_training_approval: bool = True,
+) -> dict[str, Any]:
+    """Validate source licenses, local hashes, NPZ safety, modality shapes and split integrity."""
+    manifest_file = Path(manifest_path).resolve()
+    try:
+        payload = json.loads(manifest_file.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise SpecialistDataError("Specialist dataset manifest is missing or invalid JSON.") from exc
+    if not isinstance(payload, dict) or payload.get("format") != FORMAT:
+        raise SpecialistDataError("Unsupported specialist dataset manifest format.")
+    model_id = payload.get("model_id")
+    if model_id not in MODEL_MODALITIES:
+        raise SpecialistDataError("Unknown specialist model_id.")
+    if payload.get("modality") != MODEL_MODALITIES[model_id]:
+        raise SpecialistDataError("Dataset modality does not match the target specialist.")
+    if type(payload.get("training_allowed")) is not bool or type(payload.get("owner_approval")) is not bool:
+        raise SpecialistDataError("training_allowed and owner_approval must be exact JSON booleans.")
+    if require_training_approval and (
+        payload["training_allowed"] is not True or payload["owner_approval"] is not True
+    ):
+        raise SpecialistDataError("Training blocked: specialist dataset and owner approvals are not true.")
+    if payload.get("privacy_reviewed") is not True:
+        raise SpecialistDataError("Training blocked: privacy review is not approved.")
+    if model_id in AUDIO_MODELS and payload.get("speaker_consent_reviewed") is not True:
+        raise SpecialistDataError("Training blocked: speaker consent review is not approved.")
+
+    sources = payload.get("sources")
+    if not isinstance(sources, list) or not sources:
+        raise SpecialistDataError("At least one documented training source is required.")
+    for source in sources:
+        if not isinstance(source, dict):
+            raise SpecialistDataError("Each source review must be an object.")
+        required_text = ("source_id", "source_uri", "source_path", "license", "permitted_use", "evidence_uri")
+        if any(not isinstance(source.get(key), str) or not source[key].strip() for key in required_text):
+            raise SpecialistDataError("Each source requires an ID, URI, path, license, permitted use and evidence.")
+        digest = source.get("sha256")
+        if not isinstance(digest, str) or not SHA256.fullmatch(digest.lower()):
+            raise SpecialistDataError("Each source requires a valid SHA-256.")
+        source_file = _safe_local_path(manifest_file.parent.resolve(), source["source_path"])
+        if not source_file.is_file() or source_file.stat().st_size == 0:
+            raise SpecialistDataError("A reviewed source file is missing or empty.")
+        if sha256_file(source_file) != digest.lower():
+            raise SpecialistDataError("A reviewed source file SHA-256 mismatch.")
+        if source.get("allow_training") is not True:
+            raise SpecialistDataError("Training blocked: one or more source licenses are not approved.")
+        if source.get("privacy_reviewed") is not True:
+            raise SpecialistDataError("Training blocked: one or more sources lack privacy approval.")
+        if model_id in AUDIO_MODELS and source.get("speaker_consent_verified") is not True:
+            raise SpecialistDataError("Training blocked: audio source lacks verified speaker consent.")
+
+    dataset_path = payload.get("dataset_path")
+    dataset_hash = payload.get("dataset_sha256")
+    if not isinstance(dataset_path, str) or not dataset_path:
+        raise SpecialistDataError("dataset_path is required.")
+    if not isinstance(dataset_hash, str) or not SHA256.fullmatch(dataset_hash.lower()):
+        raise SpecialistDataError("dataset_sha256 must be a SHA-256 digest.")
+    root = manifest_file.parent.resolve()
+    file_path = _safe_local_path(root, dataset_path)
+    if not file_path.is_file() or file_path.stat().st_size == 0:
+        raise SpecialistDataError("Prepared specialist dataset is missing or empty.")
+    actual_hash = sha256_file(file_path)
+    if actual_hash != dataset_hash.lower():
+        raise SpecialistDataError("Prepared specialist dataset SHA-256 mismatch.")
 
     try:
         with np.load(file_path, allow_pickle=False) as arrays:
