@@ -471,6 +471,68 @@ def validate_training_approval(
     if observed != expected:
         raise ValueError("Training blocked: corpus audit sources differ from the current approved source manifest.")
 
+    # Reconstruct every normalized record and its provenance group from the
+    # currently approved raw sources. This prevents a hand-edited audit report
+    # from relabeling validation/test records as training data.
+    filters = report.get("filters")
+    seed = report.get("seed")
+    if (
+        not isinstance(filters, dict)
+        or type(filters.get("min_chars")) is not int
+        or type(filters.get("max_chars")) is not int
+        or filters["min_chars"] < 1
+        or filters["max_chars"] < filters["min_chars"]
+        or filters.get("email_like_records_excluded") is not True
+        or type(seed) is not int
+    ):
+        raise ValueError("Training blocked: corpus report filters or split seed are invalid.")
+    reconstructed: dict[str, dict[str, str]] = {}
+    for source in sources:
+        source_path = source["_resolved_path"]
+        for line_number, raw, metadata in iter_records(source_path):
+            group_id = f"source:{source['source_id']}"
+            if "url" in metadata:
+                url = metadata.get("url")
+                parsed = urlparse(url) if isinstance(url, str) else None
+                domain = (parsed.hostname or "").lower().rstrip(".") if parsed else ""
+                if parsed is None or parsed.scheme not in {"http", "https"} or not domain:
+                    raise ValueError(
+                        f"Training blocked: invalid source URL in {source_path.name}:{line_number}"
+                    )
+                review = domain_reviews.get(domain) if domain_reviews is not None else None
+                if review is None or not review["approved"]:
+                    raise ValueError(f"Training blocked: hostname is not approved: {domain}")
+                group_id = f"host:{domain}"
+            elif "group_id" in metadata:
+                explicit_group = metadata.get("group_id")
+                if not isinstance(explicit_group, str) or not explicit_group.strip():
+                    raise ValueError(
+                        f"Training blocked: invalid group_id in {source_path.name}:{line_number}"
+                    )
+                group_id = f"source:{source['source_id']}:group:{explicit_group.strip()}"
+            value = normalize_text(raw)
+            if (
+                len(value) < filters["min_chars"]
+                or len(value) > filters["max_chars"]
+                or EMAIL_RE.search(value)
+            ):
+                continue
+            record_hash = hashlib.sha256(value.casefold().encode("utf-8")).hexdigest()
+            reconstructed.setdefault(record_hash, {"text": value, "group_id": group_id})
+
+    rebuilt_records = list(reconstructed.values())
+    if len(rebuilt_records) != report.get("totals", {}).get("records_kept"):
+        raise ValueError("Training blocked: raw source records do not reproduce the audited corpus count.")
+    rebuilt_assignments = _assign_group_splits(rebuilt_records, seed)
+    random.Random(seed).shuffle(rebuilt_records)
+    expected_partitions = {
+        split_name: [
+            row for row in rebuilt_records
+            if rebuilt_assignments[row["group_id"]] == split_name
+        ]
+        for split_name in ("train", "validation", "test")
+    }
+
     split_report = report.get("splits")
     required_splits = {"train", "validation", "test"}
     if not isinstance(split_report, dict) or set(split_report) != required_splits:
@@ -496,10 +558,22 @@ def validate_training_approval(
         with split_path.open("rb") as split_handle:
             for chunk in iter(lambda: split_handle.read(1024 * 1024), b""):
                 combined_digest.update(chunk)
+        expected_rows = expected_partitions[split_name]
+        expected_bytes = "".join(row["text"] + "\\n" for row in expected_rows).encode("utf-8")
+        if split_path.read_bytes() != expected_bytes:
+            raise ValueError(
+                f"Training blocked: {split_name} split content does not reproduce from reviewed source records."
+            )
+        expected_group_hashes = sorted({
+            hashlib.sha256(row["group_id"].encode("utf-8")).hexdigest()
+            for row in expected_rows
+        })
         record_count = item.get("records")
         groups = item.get("groups")
-        if type(record_count) is not int or record_count < 1:
-            raise ValueError(f"Training blocked: {split_name} split is empty or has invalid record count.")
+        if type(record_count) is not int or record_count != len(expected_rows) or record_count < 1:
+            raise ValueError(f"Training blocked: {split_name} split has an invalid record count.")
+        if groups != expected_group_hashes:
+            raise ValueError(f"Training blocked: {split_name} provenance group list does not match raw sources.")
         if not isinstance(groups, list) or not groups:
             raise ValueError(f"Training blocked: {split_name} split has no provenance groups.")
         if len(set(groups)) != len(groups) or any(
