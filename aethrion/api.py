@@ -4,7 +4,8 @@ import os
 from pathlib import Path
 from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
-from aethrion.native_registry import NativeModelRegistry,NativeModelUnavailable
+from aethrion.native_registry import NativeModelRegistry,NativeModelUnavailable,NativeModelError
+from aethrion.native_runtime import NativeModelRuntime
 from aethrion.document_tools import create_document,extract_document_text,DocumentError
 from aethrion.security import require_api_token
 from fastapi import UploadFile,File,Form,Response,Depends
@@ -30,36 +31,32 @@ def get_native_model_statuses(manifest: str | Path | None = None) -> dict[str, s
 
 
 def build_router(*, allow_remote_providers: bool = False, allow_local_model: bool = True)->tuple[CapabilityRouter,dict[str,Any]]:
-    """Build a native-only router from hash-verified local first-party artifacts."""
+    """Build a native-only router from independently trained and verified local model releases."""
     if allow_remote_providers:
         raise ValueError("AETHRION native-only policy forbids external model and search APIs.")
     router=CapabilityRouter()
     providers={}
-    if allow_local_model:
-        manifest=Path(os.environ.get("AETHRION_MODEL_MANIFEST","models/manifest.json"))
-        registry=NativeModelRegistry(Path.cwd(),manifest)
-        try:
-            artifacts=registry.resolve("chat")
-        except NativeModelUnavailable:
-            artifacts=None
-        if artifacts is not None:
-            def local_chat(request:CapabilityRequest)->dict[str,str]:
-                import torch
-                from aethrion.chat import load_model
-                from aethrion.tokenizer import ByteBPETokenizer
-                device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
-                model=load_model(str(artifacts.checkpoint),device)
-                if artifacts.tokenizer is None:
-                    raise RuntimeError("AETHRION-BASE tokenizer is not registered.")
-                tokenizer=ByteBPETokenizer.load(artifacts.tokenizer)
-                ids=tokenizer.encode(request.prompt)
-                if not ids:
-                    raise ValueError("Prompt produced no tokens.")
-                context=torch.tensor([ids],dtype=torch.long,device=device)
-                with torch.no_grad():
-                    result=model.generate(context,min(int(request.options.get("max_new_tokens",128)),512))
-                return {"text":tokenizer.decode(result[0,len(ids):].tolist()),"model":"AETHRION-BASE"}
-            router.register(Capability.CHAT,"local-aethrion-base",local_chat)
+    if not allow_local_model:
+        return router,providers
+    manifest=Path(os.environ.get("AETHRION_MODEL_MANIFEST","models/manifest.json"))
+    try:
+        runtime=NativeModelRuntime(Path.cwd(),manifest)
+    except NativeModelError as exc:
+        providers["runtime_error"]=type(exc).__name__
+        return router,providers
+    providers["runtime"]=runtime
+    # The retrieval and layout/OCR adapters are not registered until their own
+    # local index and document preprocessing pipelines have passed release tests.
+    supported = (
+        Capability.CHAT, Capability.CODE, Capability.VISION, Capability.IMAGE,
+        Capability.ASR, Capability.TTS, Capability.THREE_D, Capability.SAFETY,
+    )
+    for capability in supported:
+        if runtime.registry.status(capability.value) != "ready":
+            continue
+        def handler(request: CapabilityRequest, selected=capability.value):
+            return runtime.handle(selected,request)
+        router.register(capability,runtime.registry.resolve(capability.value).architecture,handler)
     return router,providers
 
 app=FastAPI(title="AETHRION-LLM API",version="0.4.0")
