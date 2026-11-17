@@ -12,22 +12,24 @@ pinned: false
 # AETHRION-LLM
 Intelligence Without Limits.
 
-Seven capabilities: Chat, Code, Image, 3D, Research, File Analysis and Audio.
+The Space interface groups Chat, Code, Image, 3D, Research, Files and Audio.
+The production runtime is native-only: no third-party inference, image,
+speech, 3D, code or hosted-search APIs are called.
 
-Set these under Space Settings → Variables and secrets:
-- AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD to enable authenticated access to paid remote providers
-- AETHRION_CODE_API_KEY, AETHRION_CODE_MODEL
-- AETHRION_IMAGE_API_KEY or OPENAI_API_KEY
-- MESHY_API_KEY
-- TAVILY_API_KEY
-- AETHRION_AUDIO_API_KEY or OPENAI_API_KEY
-- AETHRION_CHECKPOINT and AETHRION_TOKENIZER for the trained AETHRION model
+Set AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD under Space Secrets
+to enable authenticated access to local model inference. No model API keys
+are accepted or required.
 
-Local model inference and remote provider adapters stay disabled unless both
-Space authentication variables are configured. This prevents unauthenticated
-visitors from consuming model resources or spending provider credits through
-the UI. The app still boots with model/provider features disabled.
+The chat model remains unavailable until its own trained checkpoint and
+matching tokenizer are installed and integrity-verified. Code, vision,
+image-generation, ASR, TTS, 3D, research, document-intelligence and safety
+specialists are separate first-party model programs and remain unavailable
+until each one is independently trained and passes its release gates.
 
-Chat remains unavailable until its matching checkpoint/tokenizer are supplied; no third-party model silently replaces it. A trained checkpoint must be accompanied by its matching `checkpoint_last.pt.sha256` integrity file; only trusted project checkpoints should be uploaded. 3D jobs are asynchronous. File-analysis inputs are bounded. Project changes are returned as review ZIPs and uploaded code is never executed. Audio is turn-based, not continuous realtime.
+Deterministic document creation and text extraction are available as software
+utilities; they are not a trained document-understanding model. Uploaded
+project code is not executed. Training is not started from the Space UI.
 
-Training is not started in this Space. The repository manifest must remain training_allowed=false until the data-license and privacy approvals are complete.
+See docs/NATIVE_ONLY_MODEL_FAMILY.md for the model-family specification and
+completion criteria. The dataset approval manifest remains fail-closed until
+source rights, privacy, and quality checks are completed.
