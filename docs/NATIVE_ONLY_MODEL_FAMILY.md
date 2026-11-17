@@ -70,19 +70,38 @@ frontier-level quality across all modalities. Do not inflate model size beyond
 available memory or start expensive/long training without an approved data
 manifest and an explicit compute plan.
 
-## Current known baseline (must be re-verified per commit)
+## Implementation status (verified in the native-specialist branch)
 
-- The repository contains a small from-scratch decoder-only text Transformer,
-  byte-level BPE tokenizer, corpus pipeline, training/checkpoint code, routing,
-  basic document utilities, and a Gradio Space.
-- The main branch's Space/API code still contains external provider adapters
-  for code, image, 3D, research, file analysis and audio.
-- The base text model is not an image, speech, or 3D specialist.
-- The tracked corpus manifest is fail-closed with training not approved.
-- No trained production checkpoint or complete specialist model family is
-  present in the repository.
-- Document creation/extraction utilities are deterministic software tools;
-  they are not evidence of a trained document-understanding model.
+Implemented as randomly initialized PyTorch architectures:
+
+- AETHRION-BASE: causal Transformer + byte-level BPE, pretraining gate and
+  resumable checkpoint system already exist.
+- AETHRION-CODE: separate model class and independent tokenizer/checkpoint path.
+- AETHRION-VISION: image/text contrastive dual encoder.
+- AETHRION-IMAGE: text-conditioned pixel diffusion research U-Net.
+- AETHRION-ASR: acoustic encoder with CTC objective.
+- AETHRION-TTS: mel predictor and duration head; AETHRION-VOCODER is a separate
+  learned mel-to-waveform upsampler with its own model ID and training profile.
+- AETHRION-3D: text-conditioned point-cloud diffusion; the present output is a
+  vertex-only OBJ point cloud, not a watertight textured mesh.
+- AETHRION-RESEARCH: dual query/passage encoder for local retrieval training.
+- AETHRION-DOC: text/layout encoder with token tagging and extractive-QA heads.
+- AETHRION-SAFE: separate ALLOW/REVIEW/BLOCK classifier with reason scores.
+
+The repository now includes a fail-closed multimodal NPZ dataset validator,
+separate specialist training runner, response-only AETHRION-BASE instruction
+tuning command, example configurations, and forward/loss tests. The audio
+preprocessor supports bounded uncompressed PCM WAV and native log-mel features.
+
+Still not complete: high-capacity production architectures, robust document
+OCR/layout extraction, a full mesh topology/texture generator, full local
+research indexing and evidence citation, an end-to-end trained TTS vocoder
+release, inference adapters for every modality, large-scale quality/safety
+benchmarks, and all trained checkpoints.
+
+The tracked corpus and every specialist data manifest remain fail-closed.
+No production checkpoint or trained specialist release is claimed. Document
+creation/extraction remain deterministic utilities, not a trained DOC model.
 
 ## Completion definition
 
