@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import random
+import signal
 import time
 from typing import Any
 
@@ -17,12 +18,24 @@ from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.specialist_data import validate_specialist_dataset
 
 
+_STOP_REQUESTED = False
+
+
+def _request_stop(signum, frame):
+    global _STOP_REQUESTED
+    _STOP_REQUESTED = True
+    print(f"Stop requested (signal {signum}); instruction tuning will checkpoint after this step.", flush=True)
+
+
 def _rng_state():
-    return {
+    state = {
         "python": random.getstate(),
         "numpy": np.random.get_state(),
         "torch": torch.get_rng_state(),
     }
+    if torch.cuda.is_available():
+        state["cuda"] = torch.cuda.get_rng_state_all()
+    return state
 
 
 def _batch(arrays, indices, device):
@@ -34,6 +47,7 @@ def _batch(arrays, indices, device):
 
 @torch.no_grad()
 def _evaluate(model, arrays, indices, device, batch_size):
+    was_training = model.training
     model.eval()
     losses = []
     for start in range(0, len(indices), batch_size):
@@ -43,7 +57,7 @@ def _evaluate(model, arrays, indices, device, batch_size):
         if loss is None or not torch.isfinite(loss):
             raise FloatingPointError("Non-finite instruction-tuning evaluation loss.")
         losses.append(float(loss.item()))
-    model.train()
+    model.train(was_training)
     if not losses:
         raise ValueError("Instruction-tuning evaluation split is empty.")
     return sum(losses) / len(losses)
@@ -117,6 +131,7 @@ def tune_instructions(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = AETHRIONLM(model_config).to(device)
     model.load_state_dict(base["model"])
+    base_checkpoint_hash = sha256_file(base_checkpoint)
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=float(config["learning_rate"]),
         weight_decay=float(config["weight_decay"])
@@ -133,13 +148,22 @@ def tune_instructions(
             raise ValueError("Instruction dataset changed; refusing unsafe resume.")
         if state.get("tokenizer_sha256") != tokenizer_hash:
             raise ValueError("Instruction tokenizer changed; refusing unsafe resume.")
+        if state.get("base_checkpoint_sha256") != base_checkpoint_hash:
+            raise ValueError("Base checkpoint changed; refusing unsafe instruction-tuning resume.")
         model.load_state_dict(state["model"])
         optimizer.load_state_dict(state["optimizer"])
         if state.get("rng_state"):
             random.setstate(state["rng_state"]["python"])
             np.random.set_state(state["rng_state"]["numpy"])
             torch.set_rng_state(state["rng_state"]["torch"].cpu())
-        start_step = int(state["step"]) + 1
+            if torch.cuda.is_available() and "cuda" in state["rng_state"]:
+                torch.cuda.set_rng_state_all([item.cpu() for item in state["rng_state"]["cuda"]])
+        checkpoint_step = state.get("step")
+        if type(checkpoint_step) is not int or checkpoint_step < 0:
+            raise ValueError("Instruction-tuning resume checkpoint step is invalid.")
+        start_step = checkpoint_step + 1
+        if start_step >= config["max_steps"]:
+            raise ValueError("max_steps must exceed the instruction-tuning resume checkpoint step.")
 
     started = time.perf_counter()
     metrics_path = output / "metrics.jsonl"
@@ -156,7 +180,7 @@ def tune_instructions(
         torch.nn.utils.clip_grad_norm_(model.parameters(), float(config["grad_clip"]))
         optimizer.step()
 
-        if step % config["eval_interval"] == 0 or step == config["max_steps"] - 1:
+        if step % config["eval_interval"] == 0 or step == config["max_steps"] - 1 or _STOP_REQUESTED:
             validation_loss = _evaluate(
                 model, arrays, val_indices, device, config["batch_size"]
             )
@@ -186,7 +210,7 @@ def tune_instructions(
                 "data_sha256": approval["dataset_sha256"],
                 "rng_state": _rng_state(),
                 "training_stage": "instruction_tuning",
-                "base_checkpoint_sha256": sha256_file(base_checkpoint),
+                "base_checkpoint_sha256": base_checkpoint_hash,
             }
             checkpoint_hash = save_checkpoint(payload, checkpoint_path)
             write_json_atomic({
@@ -199,6 +223,22 @@ def tune_instructions(
                 "validation_loss": validation_loss,
                 "note": "Independent benchmark, safety review and explicit release approval remain required."
             }, output / "instruction_tuning_report.json")
+
+        if _STOP_REQUESTED and step < config["max_steps"] - 1:
+            interrupted_report = {
+                "status": "instruction_tuning_interrupted_not_released",
+                "model_id": "chat",
+                "release_status": "NOT_RELEASED",
+                "steps": step + 1,
+                "dataset_sha256": approval["dataset_sha256"],
+                "tokenizer_sha256": tokenizer_hash,
+                "checkpoint_sha256": checkpoint_hash,
+                "validation_loss": validation_loss,
+                "device": str(device),
+                "note": "Instruction tuning was safely paused after a verified checkpoint; resume with the same base checkpoint, dataset and tokenizer."
+            }
+            write_json_atomic(interrupted_report, output / "instruction_tuning_report.json")
+            return interrupted_report
 
     test_loss = _evaluate(model, arrays, test_indices, device, config["batch_size"])
     report = {
@@ -227,7 +267,16 @@ def main():
     parser.add_argument("--resume", default=None)
     args = parser.parse_args()
     config = json.loads(Path(args.config).read_text(encoding="utf-8"))
-    report = tune_instructions(config, args.manifest, args.base_checkpoint, resume=args.resume)
+    global _STOP_REQUESTED
+    _STOP_REQUESTED = False
+    previous_handlers = {}
+    for stop_signal in (signal.SIGINT, signal.SIGTERM):
+        previous_handlers[stop_signal] = signal.signal(stop_signal, _request_stop)
+    try:
+        report = tune_instructions(config, args.manifest, args.base_checkpoint, resume=args.resume)
+    finally:
+        for stop_signal, previous_handler in previous_handlers.items():
+            signal.signal(stop_signal, previous_handler)
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
 
