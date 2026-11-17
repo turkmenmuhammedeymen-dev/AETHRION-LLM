@@ -1,9 +1,12 @@
 # AETHRION specialist dataset format
 
 All specialist datasets are prepared locally as a NumPy NPZ archive loaded with
-`allow_pickle=False`. The archive must contain `sample_id` and `split`
-arrays. Every record must be assigned exactly one of `train`, `validation`
-or `test`; all three splits must be non-empty and sample IDs must be unique.
+`allow_pickle=False`. The archive must contain `sample_id`, `group_id` and
+`split` arrays. Every record must be assigned exactly one of `train`,
+`validation` or `test`; all three splits must be non-empty, sample IDs must be
+unique, and each provenance group must occur in only one split. Text-conditioned
+specialist tokenizers are learned from the training partition only and their exact
+SHA-256 values are recorded in their dataset manifests.
 
 | Model | Required NPZ arrays |
 |---|---|
@@ -54,10 +57,10 @@ copies the original source file for provenance, and writes SHA-256 hashes.
 
 Supported record shapes:
 
-- `code`: `{"id":"...","text":"..."}`
-- `research`: `{"id":"...","query":"...","passage":"..."}`
-- `document`: `{"id":"...","text":"...","boxes":[[x0,y0,x1,y1],...],"layout_ids":[...],"tag_labels":[...]}`; layout arrays must align with byte-BPE token positions.
-- `safety`: `{"id":"...","text":"...","decision":"ALLOW|REVIEW|BLOCK","reasons":[integer,...]}`; decisions are human-supplied, never inferred by the tool.
+- `code`: `{"id":"...","group_id":"...","text":"..."}`
+- `research`: `{"id":"...","group_id":"...","query":"...","passage":"..."}`
+- `document`: `{"id":"...","group_id":"...","text":"...","boxes":[[x0,y0,x1,y1],...],"layout_ids":[...],"tag_labels":[...]}`; layout arrays must align with byte-BPE token positions.
+- `safety`: `{"id":"...","group_id":"...","text":"...","decision":"ALLOW|REVIEW|BLOCK","reasons":[integer,...]}`; decisions are human-supplied, never inferred by the tool.
 
 Example (CODE):
 
@@ -91,11 +94,11 @@ PCM WAV files, resamples to 16 kHz, extracts native log-mel features, creates
 the required padded arrays, and copies each source WAV into the provenance
 folder with SHA-256. The JSONL file contains one record per clip:
 
-- ASR: `{"id":"clip-001","wav_path":"audio/clip-001.wav","transcript":"..."}`
+- ASR: `{"id":"clip-001","speaker_id":"speaker-001","wav_path":"audio/clip-001.wav","transcript":"..."}`
 - TTS: the same fields plus `"durations":[...]`, one positive frame count per
   byte-BPE token. Durations must come from a documented, reviewed alignment
   process and must sum exactly to that clip's mel-frame count.
-- Vocoder: `{"id":"clip-001","wav_path":"audio/clip-001.wav"}`
+- Vocoder: `{"id":"clip-001","speaker_id":"speaker-001","wav_path":"audio/clip-001.wav"}`
 
 Example:
 
@@ -112,7 +115,9 @@ python -m aethrion.specialist_prepare_audio \
 
 For TTS, include the per-token `durations` arrays. For Vocoder, the default
 hop length matches the current model config (256 samples); ASR/TTS default to
-160. The tool never infers speaker consent: all audio source records keep
+160. The audio adapter requires either a stable `speaker_id` or explicit `group_id`
+on every clip so recordings from the same speaker cannot cross evaluation splits.
+The tool never infers speaker consent: all audio source records keep
 `speaker_consent_verified=false`, and the dataset manifest keeps
 `speaker_consent_reviewed=false`, `privacy_reviewed=false`,
 `training_allowed=false` and `owner_approval=false`. A responsible adult
