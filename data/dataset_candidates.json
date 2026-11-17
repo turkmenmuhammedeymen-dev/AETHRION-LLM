@@ -375,10 +375,7 @@
       "public_metadata_review": {
         "checked_at": "2026-11-17",
         "finding": "No external public dataset has been approved for AETHRION-SAFE. The safer first-party path is a new, documented, human-reviewed classification corpus authored for the policy taxonomy; this record does not contain training samples.",
-        "evidence_urls": [
-          "configs/safety/policy_v1.json",
-          "data/safety/README.md"
-        ],
+        "evidence_urls": [],
         "next_gate": "Author and independently review the dataset before setting any approval flag."
       }
     }
