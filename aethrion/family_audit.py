@@ -15,6 +15,9 @@ EXPECTED_MODELS = (
     "research", "document", "safety", "vocoder",
 )
 SPECIALISTS = frozenset(EXPECTED_MODELS) - {"chat"}
+PROCESSOR_REQUIRED = frozenset({
+    "vision", "image", "asr", "tts", "3d", "research", "document", "safety"
+})
 REQUIRED_FILES = {
     "chat": {
         "config": "configs/small.json",
@@ -116,12 +119,16 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
             )
         artifact_keys = ("checkpoint", "tokenizer", "processor", "training_report",
                          "evaluation_report", "model_card")
+        required_artifacts = {"checkpoint", "training_report", "evaluation_report", "model_card"}
+        if model_id != "vocoder":
+            required_artifacts.add("tokenizer")
+        if model_id in PROCESSOR_REQUIRED:
+            required_artifacts.add("processor")
         artifact_presence = {}
         for key in artifact_keys:
             relative = entry.get(key)
             if not relative:
-                artifact_presence[key] = key not in {"checkpoint", "training_report",
-                                                     "evaluation_report", "model_card"}
+                artifact_presence[key] = key not in required_artifacts
                 continue
             artifact_presence[key] = _local_file(repo, relative).is_file()
 
@@ -137,10 +144,11 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
             "training_report_present": artifact_presence["training_report"],
             "evaluation_report_present": artifact_presence["evaluation_report"],
             "model_card_present": artifact_presence["model_card"],
+            "required_artifacts": sorted(required_artifacts),
             "training_ready": bool(config_ok and dataset_exists and data_ready),
             "release_ready": bool(
                 entry.get("status") == "trained"
-                and all(artifact_presence.values())
+                and all(artifact_presence[key] for key in required_artifacts)
             ),
         })
 
