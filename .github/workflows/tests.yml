@@ -30,7 +30,7 @@ jobs:
           python -m pip install "torch>=2.2" --index-url https://download.pytorch.org/whl/cpu
           python -m pip install -e ".[api]"
       - name: Space application syntax checks
-        run: python -m compileall -q hf_space/app.py hf_space/aethrion
+        run: python -m compileall -q aethrion hf_space/app.py hf_space/aethrion
       - name: Unit tests
         run: python -m unittest discover -s tests -v
       - name: Synthetic end-to-end smoke test
