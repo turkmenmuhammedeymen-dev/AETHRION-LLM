@@ -50,11 +50,28 @@ class NativeModelRegistryTests(unittest.TestCase):
                     "model_id": "chat", "dataset_sha256": "a" * 64,
                     "release_status": "NOT_RELEASED"
                 }).encode(),
+                "review.txt": b"Human release review evidence for a synthetic unit test fixture.",
                 "evaluation.json": json.dumps({
                     "model_id": "chat", "dataset_sha256": "a" * 64,
-                    "status": "approved_for_release"
+                    "status": "approved_for_release",
+                    "quality_gate_passed": True,
+                    "safety_gate_passed": True,
+                    "human_reviewed": True,
+                    "reviewer": "unit-test-reviewer",
+                    "reviewed_at": "2026-11-17T15:00:00Z",
+                    "approval_evidence_path": "models/review.txt",
+                    "approval_evidence_sha256": hashlib.sha256(
+                        b"Human release review evidence for a synthetic unit test fixture."
+                    ).hexdigest(),
+                    "benchmarks": {
+                        "held_out_lm_loss": {"metric": "loss", "value": 1.0, "passed": True}
+                    }
                 }).encode(),
-                "MODEL_CARD.md": b"# Test-only model card",
+                "MODEL_CARD.md": (
+                    b"# Test-only model card\\n\\n## Intended use\\nTest only\\n"
+                    b"## Training data\\nSynthetic only\\n## Evaluation\\nUnit tests\\n"
+                    b"## Limitations\\nNot a real model\\n"
+                ),
             }
             digests = {}
             for name, raw in artifacts.items():
