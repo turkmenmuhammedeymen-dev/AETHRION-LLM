@@ -141,7 +141,7 @@ class SafeRuntimeGateTests(unittest.TestCase):
     def test_safe_chunk_gate_stops_on_first_non_allow_segment(self):
         runtime = _FakeSafetyRuntime(
             {"safety": "ready"},
-            decisions={"BLOCK": "BLOCK"},
+            decisions={"BLOCK" + "B" * 395: "BLOCK"},
         )
         with self.assertRaises(api.HTTPException) as caught:
             api._require_safety_allow_chunks(runtime, "A" * 400 + "BLOCK" + "B" * 400, chunk_chars=400)
