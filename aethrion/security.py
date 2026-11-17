@@ -8,7 +8,7 @@ from fastapi import Header, HTTPException
 def require_api_token(authorization: str | None = Header(default=None)) -> None:
     """Require a configured API token for every non-health API route."""
     expected = os.environ.get("AETHRION_API_TOKEN", "")
-    if not expected:
+    if not expected or not expected.strip():
         raise HTTPException(
             status_code=503,
             detail="API authentication is not configured.",
