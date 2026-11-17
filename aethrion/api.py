@@ -234,6 +234,8 @@ async def audio_transcriptions(file:UploadFile=File(...)):
         try:
             transcript=runtime.transcribe_wav(handle.name)
             _require_safety_allow_http(runtime, transcript)
+        except HTTPException:
+            raise
         except CapabilityUnavailable:
             raise HTTPException(status_code=503,detail="AETHRION-SAFE did not allow this transcript.")
         except Exception as exc: raise HTTPException(status_code=422,detail=f"Native ASR failed: {type(exc).__name__}") from exc
