@@ -120,6 +120,26 @@ class NativeModelRegistryTests(unittest.TestCase):
             with self.assertRaises(NativeModelIntegrityError):
                 NativeModelRegistry(root).resolve("chat")
 
+    def test_trained_multimodal_model_requires_processor_digest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            entry = {
+                "architecture": "aethrion.vision_model:AETHRIONVision",
+                "model_config": {"width": 16},
+                "checkpoint": "models/checkpoint.pt", "checkpoint_sha256": "0" * 64,
+                "tokenizer": "models/tokenizer.json", "tokenizer_sha256": "0" * 64,
+                "processor": "models/processor.json",
+                "training_report": "models/training.json", "training_report_sha256": "0" * 64,
+                "evaluation_report": "models/evaluation.json", "evaluation_report_sha256": "0" * 64,
+                "model_card": "models/card.md", "model_card_sha256": "0" * 64,
+                "dataset_sha256": "0" * 64,
+                "release_approval": True, "quality_gate_passed": True,
+                "safety_gate_passed": True, "status": "trained",
+            }
+            write_manifest(root, entry, capability="vision")
+            with self.assertRaisesRegex(NativeModelError, "processor_sha256"):
+                NativeModelRegistry(root)
+
     def test_trained_model_without_release_approval_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
