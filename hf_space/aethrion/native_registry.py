@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 from typing import Any
@@ -15,7 +16,20 @@ CAPABILITIES = frozenset({
     "chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d",
     "research", "document", "safety",
 })
-PROCESSOR_REQUIRED = frozenset({"vision", "image", "asr", "tts", "3d", "document"})
+PROCESSOR_REQUIRED = frozenset({"vision", "image", "asr", "tts", "3d", "research", "document", "safety"})
+REQUIRED_BENCHMARKS = {
+    "chat": {"held_out_lm_loss", "instruction_following"},
+    "code": {"unit_test_pass_rate", "security_regression"},
+    "vision": {"recall_at_1", "image_text_alignment"},
+    "image": {"fid_or_equivalent", "prompt_alignment", "image_safety"},
+    "asr": {"wer", "cer"},
+    "tts": {"mos", "intelligibility"},
+    "vocoder": {"mos", "spectral_distortion"},
+    "3d": {"chamfer_distance", "point_cloud_validity"},
+    "research": {"recall_at_5", "citation_precision"},
+    "document": {"field_f1", "extractive_qa_em"},
+    "safety": {"false_negative_rate", "calibration_ece"},
+}
 _ALLOWED_ENTRY_KEYS = frozenset({
     "architecture", "model_config",
     "checkpoint", "tokenizer", "processor",
@@ -223,10 +237,64 @@ class NativeModelRegistry:
             raise NativeModelIntegrityError(f"{capability} release reports are invalid JSON.") from exc
         if training.get("model_id") != capability or training.get("dataset_sha256") != entry["dataset_sha256"]:
             raise NativeModelIntegrityError(f"{capability} training report does not match its dataset.")
+        if training.get("status") not in {
+            "training_complete_not_released", "instruction_tuning_complete_not_released"
+        }:
+            raise NativeModelUnavailable(f"{capability} training report is not a completed native training run.")
+        if training.get("checkpoint_sha256") and training["checkpoint_sha256"] != self._digest(checkpoint):
+            raise NativeModelIntegrityError(f"{capability} checkpoint hash does not match the training report.")
         if evaluation.get("model_id") != capability or evaluation.get("dataset_sha256") != entry["dataset_sha256"]:
             raise NativeModelIntegrityError(f"{capability} evaluation report does not match its dataset.")
+        if evaluation.get("checkpoint_sha256") != entry["checkpoint_sha256"]:
+            raise NativeModelIntegrityError(f"{capability} evaluation report does not match its checkpoint.")
         if evaluation.get("status") != "approved_for_release":
             raise NativeModelUnavailable(f"{capability} evaluation report is not approved for release.")
+        for flag in ("quality_gate_passed", "safety_gate_passed", "human_reviewed"):
+            if type(evaluation.get(flag)) is not bool or evaluation[flag] is not True:
+                raise NativeModelUnavailable(
+                    f"{capability} evaluation report requires {flag}=true."
+                )
+        for key in ("reviewer", "reviewed_at", "approval_evidence_path",
+                    "approval_evidence_sha256"):
+            if not isinstance(evaluation.get(key), str) or not evaluation[key].strip():
+                raise NativeModelUnavailable(
+                    f"{capability} evaluation report is missing human review evidence: {key}."
+                )
+        benchmark_results = evaluation.get("benchmarks")
+        required_benchmarks = REQUIRED_BENCHMARKS.get(capability, set())
+        if not isinstance(benchmark_results, dict) or not required_benchmarks.issubset(benchmark_results):
+            missing = sorted(required_benchmarks - set(benchmark_results or {}))
+            raise NativeModelUnavailable(
+                f"{capability} evaluation report is missing required benchmarks: {', '.join(missing)}."
+            )
+        for benchmark_name, result in benchmark_results.items():
+            if not isinstance(benchmark_name, str) or not benchmark_name.strip():
+                raise NativeModelIntegrityError("Benchmark names must be non-empty strings.")
+            if not isinstance(result, dict) or not result:
+                raise NativeModelIntegrityError(f"Invalid benchmark record: {benchmark_name}.")
+            value = result.get("value")
+            if (
+                result.get("passed") is not True
+                or not isinstance(result.get("metric"), str)
+                or not isinstance(value, (int, float))
+                or isinstance(value, bool)
+                or not math.isfinite(float(value))
+                or not isinstance(result.get("threshold"), (int, float))
+                or isinstance(result.get("threshold"), bool)
+                or not math.isfinite(float(result["threshold"]))
+                or not isinstance(result.get("evidence"), str)
+                or not result["evidence"].strip()
+            ):
+                raise NativeModelUnavailable(
+                    f"Benchmark {benchmark_name} has not passed with a finite numeric measurement."
+                )
+        evidence_path = self._safe_path(evaluation["approval_evidence_path"])
+        if not evidence_path.is_file() or self._digest(evidence_path) != evaluation["approval_evidence_sha256"].lower():
+            raise NativeModelIntegrityError(f"{capability} human release evidence is missing or hash-mismatched.")
+        card_text = model_card.read_text(encoding="utf-8")
+        for heading in ("## Intended use", "## Training data", "## Evaluation", "## Limitations"):
+            if heading not in card_text:
+                raise NativeModelUnavailable(f"{capability} model card must include '{heading}'.")
         if capability == "tts" and self.status("vocoder") != "ready":
             raise NativeModelUnavailable("AETHRION-TTS requires a separately trained and released AETHRION-VOCODER.")
         return NativeModelArtifacts(
