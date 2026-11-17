@@ -46,7 +46,7 @@ trained Vocoder learns mel-to-waveform conversion; both datasets require
 documented speaker consent. TTS cannot be released unless its companion
 AETHRION-VOCODER also passes its own evaluation and release gates.
 
-## Raw JSONL preparation (chat, code, research, document, SAFE)
+## Raw JSONL preparation (CODE, RESEARCH, DOCUMENT, SAFE)
 
 The first-party preparation CLI converts owner-supplied, reviewed JSONL records
 into the NPZ contract above, learns a byte-BPE tokenizer from only those records,
@@ -54,7 +54,6 @@ copies the original source file for provenance, and writes SHA-256 hashes.
 
 Supported record shapes:
 
-- `chat`: `{"id":"...","prompt":"...","response":"..."}`
 - `code`: `{"id":"...","text":"..."}`
 - `research`: `{"id":"...","query":"...","passage":"..."}`
 - `document`: `{"id":"...","text":"...","boxes":[[x0,y0,x1,y1],...],"layout_ids":[...],"tag_labels":[...]}`; layout arrays must align with byte-BPE token positions.
@@ -81,7 +80,7 @@ Use `group_id` for records that must remain in the same split; the split is
 deterministic and group-aware. SAFE requires at least 25 manually reviewed
 examples of each decision in every split.
 
-This first JSONL adapter does not yet preprocess raw images, WAV audio, point
+BASE continues to use the separate audited corpus/tokenizer pipeline in `aethrion.prepare_data` and `aethrion.train`. This first JSONL adapter does not yet preprocess raw images, WAV audio, point
 clouds, or OCR itself. Those modalities require their own source-specific
 decoders and provenance checks; do not relabel text records as multimodal data.
 
