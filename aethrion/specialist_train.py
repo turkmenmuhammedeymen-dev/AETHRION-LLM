@@ -39,6 +39,9 @@ def _build_model(model_id: str, config: dict[str, Any]) -> nn.Module:
     if model_id == "tts":
         from aethrion.tts_model import AETHRIONTTS, TTSConfig
         return AETHRIONTTS(TTSConfig(**config))
+    if model_id == "vocoder":
+        from aethrion.tts_model import AETHRIONVocoder
+        return AETHRIONVocoder(**config)
     if model_id == "3d":
         from aethrion.model_3d import AETHRION3D, Model3DConfig
         return AETHRION3D(Model3DConfig(**config))
@@ -98,6 +101,9 @@ def _loss(model: nn.Module, model_id: str, batch: dict[str, torch.Tensor]) -> to
         )
         duration = model.duration_loss(batch["token_ids"], batch["durations"])
         return acoustic + 0.1 * duration
+    if model_id == "vocoder":
+        predicted = model(batch["target_mels"].transpose(1, 2))
+        return model.waveform_loss(predicted, batch["target_waveforms"])
     if model_id == "3d":
         return model.diffusion_loss(batch["points"], batch["token_ids"])
     if model_id == "research":
