@@ -24,27 +24,28 @@ class FileRequest(BaseModel):
     content_base64:str=Field(min_length=1,max_length=12_000_000)
     question:str=Field(default="Summarize and analyze this file.",max_length=2000)
 
-def build_router()->tuple[CapabilityRouter,dict[str,Any]]:
+def build_router(*, allow_remote_providers: bool = True)->tuple[CapabilityRouter,dict[str,Any]]:
     router=CapabilityRouter(); providers={}
-    code_key=os.environ.get("AETHRION_CODE_API_KEY") or os.environ.get("OPENAI_API_KEY")
-    code_model=os.environ.get("AETHRION_CODE_MODEL")
-    code_base=os.environ.get("AETHRION_CODE_BASE_URL","https://api.openai.com/v1")
-    if code_key and code_model:
-        code=OpenAICompatibleChatProvider(code_key,code_model,code_base)
-        router.register(Capability.CODE,"openai-compatible-code",code)
-        router.register(Capability.FILE_ANALYSIS,"openai-compatible-file-agent",code)
-        providers["file_analysis"]=code
-    image_key=os.environ.get("AETHRION_IMAGE_API_KEY") or os.environ.get("OPENAI_API_KEY")
-    if image_key:
-        router.register(Capability.IMAGE,"openai-images",OpenAIImageProvider(
-            image_key,os.environ.get("AETHRION_IMAGE_MODEL","gpt-image-2"),
-            os.environ.get("AETHRION_IMAGE_BASE_URL","https://api.openai.com/v1")))
-    meshy_key=os.environ.get("MESHY_API_KEY")
-    if meshy_key:
-        meshy=MeshyTextTo3DProvider(meshy_key,os.environ.get("AETHRION_MESHY_BASE_URL","https://api.meshy.ai/openapi/v2"))
-        router.register(Capability.THREE_D,"meshy-text-to-3d",meshy); providers["3d"]=meshy
-    tavily_key=os.environ.get("TAVILY_API_KEY")
-    if tavily_key: router.register(Capability.RESEARCH,"tavily-search",TavilyResearchProvider(tavily_key))
+    if allow_remote_providers:
+        code_key=os.environ.get("AETHRION_CODE_API_KEY") or os.environ.get("OPENAI_API_KEY")
+        code_model=os.environ.get("AETHRION_CODE_MODEL")
+        code_base=os.environ.get("AETHRION_CODE_BASE_URL","https://api.openai.com/v1")
+        if code_key and code_model:
+            code=OpenAICompatibleChatProvider(code_key,code_model,code_base)
+            router.register(Capability.CODE,"openai-compatible-code",code)
+            router.register(Capability.FILE_ANALYSIS,"openai-compatible-file-agent",code)
+            providers["file_analysis"]=code
+        image_key=os.environ.get("AETHRION_IMAGE_API_KEY") or os.environ.get("OPENAI_API_KEY")
+        if image_key:
+            router.register(Capability.IMAGE,"openai-images",OpenAIImageProvider(
+                image_key,os.environ.get("AETHRION_IMAGE_MODEL","gpt-image-2"),
+                os.environ.get("AETHRION_IMAGE_BASE_URL","https://api.openai.com/v1")))
+        meshy_key=os.environ.get("MESHY_API_KEY")
+        if meshy_key:
+            meshy=MeshyTextTo3DProvider(meshy_key,os.environ.get("AETHRION_MESHY_BASE_URL","https://api.meshy.ai/openapi/v2"))
+            router.register(Capability.THREE_D,"meshy-text-to-3d",meshy); providers["3d"]=meshy
+        tavily_key=os.environ.get("TAVILY_API_KEY")
+        if tavily_key: router.register(Capability.RESEARCH,"tavily-search",TavilyResearchProvider(tavily_key))
     checkpoint=Path(os.environ.get("AETHRION_CHECKPOINT","artifacts/checkpoint_last.pt"))
     tokenizer_path=Path(os.environ.get("AETHRION_TOKENIZER","artifacts/tokenizer.json"))
     if checkpoint.is_file() and tokenizer_path.is_file():
@@ -60,15 +61,16 @@ def build_router()->tuple[CapabilityRouter,dict[str,Any]]:
             with torch.no_grad(): result=model.generate(context,min(int(request.options.get("max_new_tokens",128)),512))
             return {"text":tokenizer.decode(result[0,len(ids):].tolist()),"model":"AETHRIONLM"}
         router.register(Capability.CHAT,"local-aethrionlm",local_chat)
-    audio_key=os.environ.get("AETHRION_AUDIO_API_KEY") or os.environ.get("OPENAI_API_KEY")
-    if audio_key:
-        from aethrion.audio import OpenAISpeechProvider
-        import base64
-        speech=OpenAISpeechProvider(api_key=audio_key)
-        def audio_handler(request:CapabilityRequest)->dict[str,Any]:
-            raw=speech.synthesize(request.prompt,voice=str(request.options.get("voice","marin")))
-            return {"format":"mp3","audio_base64":base64.b64encode(raw).decode("ascii")}
-        router.register(Capability.AUDIO,"openai-turn-based-speech",audio_handler)
+    if allow_remote_providers:
+        audio_key=os.environ.get("AETHRION_AUDIO_API_KEY") or os.environ.get("OPENAI_API_KEY")
+        if audio_key:
+            from aethrion.audio import OpenAISpeechProvider
+            import base64
+            speech=OpenAISpeechProvider(api_key=audio_key)
+            def audio_handler(request:CapabilityRequest)->dict[str,Any]:
+                raw=speech.synthesize(request.prompt,voice=str(request.options.get("voice","marin")))
+                return {"format":"mp3","audio_base64":base64.b64encode(raw).decode("ascii")}
+            router.register(Capability.AUDIO,"openai-turn-based-speech",audio_handler)
     return router,providers
 
 app=FastAPI(title="AETHRION-LLM API",version="0.4.0")
