@@ -25,7 +25,7 @@ class FileRequest(BaseModel):
     content_base64:str=Field(min_length=1,max_length=12_000_000)
     question:str=Field(default="Summarize and analyze this file.",max_length=2000)
 
-def build_router(*, allow_remote_providers: bool = True, allow_local_model: bool = True)->tuple[CapabilityRouter,dict[str,Any]]:
+def build_router(*, allow_remote_providers: bool = False, allow_local_model: bool = True)->tuple[CapabilityRouter,dict[str,Any]]:
     router=CapabilityRouter(); providers={}
     if allow_remote_providers:
         code_key=os.environ.get("AETHRION_CODE_API_KEY") or os.environ.get("OPENAI_API_KEY")
@@ -77,7 +77,7 @@ def build_router(*, allow_remote_providers: bool = True, allow_local_model: bool
 app=FastAPI(title="AETHRION-LLM API",version="0.4.0")
 router,providers=build_router()
 audio_key=os.environ.get("AETHRION_AUDIO_API_KEY") or os.environ.get("OPENAI_API_KEY")
-audio_provider=OpenAISpeechProvider(api_key=audio_key) if audio_key else None
+audio_provider=None  # Native-only policy: AETHRION-ASR/TTS must be trained locally.
 code_provider=providers.get("file_analysis")
 
 @app.get("/health")
