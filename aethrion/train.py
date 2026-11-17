@@ -68,6 +68,8 @@ def main() -> None:
                         help="Manifest listing every approved training source.")
     parser.add_argument("--source-root", required=True,
                         help="Directory containing the files listed in the source manifest.")
+    parser.add_argument("--corpus-report", required=True,
+                        help="Audit report produced by prepare_data for the exact training corpus.")
     parser.add_argument("--source-review", default=None,
                         help="Evidence-backed per-domain approval CSV for URL-attributed records.")
     args = parser.parse_args()
@@ -87,6 +89,8 @@ def main() -> None:
         Path(args.dataset_manifest),
         Path(args.source_manifest),
         Path(args.source_root),
+        Path(cfg["data_path"]),
+        Path(args.corpus_report),
         Path(args.source_review) if args.source_review else None,
     )
     print("Training approval gate passed: dataset, source manifest, and URL reviews verified.")
