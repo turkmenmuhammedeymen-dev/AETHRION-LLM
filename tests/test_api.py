@@ -14,7 +14,9 @@ class ApiRegistrationTests(unittest.TestCase):
              "AETHRION_CHECKPOINT":"/missing/checkpoint.pt","AETHRION_TOKENIZER":"/missing/tokenizer.json"}
         with patch.dict("os.environ",env,clear=False):
             router,providers=build_router()
-        self.assertEqual(router.available(),{}); self.assertEqual(providers,{})
+        self.assertEqual(router.available(), {})
+        self.assertIn("runtime", providers)
+        self.assertEqual(providers["runtime"].status()["chat"], "not_trained")
     def test_remote_providers_can_be_disabled_even_when_secrets_exist(self):
         env={"AETHRION_CODE_API_KEY":"dummy","AETHRION_CODE_MODEL":"dummy-model",
              "AETHRION_IMAGE_API_KEY":"dummy","OPENAI_API_KEY":"dummy",
@@ -24,8 +26,9 @@ class ApiRegistrationTests(unittest.TestCase):
              "AETHRION_TOKENIZER":"/missing/tokenizer.json"}
         with patch.dict("os.environ",env,clear=False):
             router,providers=build_router(allow_remote_providers=False)
-        self.assertEqual(router.available(),{})
-        self.assertEqual(providers,{})
+        self.assertEqual(router.available(), {})
+        self.assertIn("runtime", providers)
+        self.assertEqual(providers["runtime"].status()["image"], "not_trained")
 
     def test_local_model_can_be_disabled_without_authentication(self):
         with tempfile.TemporaryDirectory() as folder:
