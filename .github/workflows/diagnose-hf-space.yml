@@ -5,20 +5,25 @@ on:
     paths:
       - ".github/workflows/diagnose-hf-space.yml"
       - "hf_space/**"
+  workflow_run:
+    workflows: ["Deploy AETHRION-LLM to Hugging Face Space"]
+    types: [completed]
+    branches: ["main"]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   diagnose:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install Hugging Face client
         run: python -m pip install --upgrade huggingface_hub requests
-      - name: Wait for runtime and collect logs
+      - name: Restart failed Space, wait for runtime, and verify live UI
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
@@ -32,56 +37,59 @@ jobs:
           token = os.environ.get("HF_TOKEN", "")
           if not token:
               raise SystemExit("HF_TOKEN repository secret is missing.")
+
           api = HfApi(token=token)
           repo_id = "vizyon2027/AETHRION-LLM"
-          runtime = None
-          stage = "UNKNOWN"
+          runtime = api.get_space_runtime(repo_id=repo_id)
+          stage = str(runtime.stage)
+          print(f"SPACE_INITIAL_STAGE={stage}", flush=True)
+          print(f"SPACE_HARDWARE={runtime.hardware}", flush=True)
 
-          for attempt in range(12):
+          if stage in {"RUNTIME_ERROR", "PAUSED"}:
+              print("SPACE_RESTART=REQUESTED", flush=True)
+              runtime = api.restart_space(repo_id=repo_id, token=token)
+              stage = str(runtime.stage)
+              print(f"SPACE_RESTART_STAGE={stage}", flush=True)
+
+          for attempt in range(24):
               runtime = api.get_space_runtime(repo_id=repo_id)
               stage = str(runtime.stage)
-              print(f"SPACE_STAGE={stage}", flush=True)
-              print(f"SPACE_HARDWARE={runtime.hardware}", flush=True)
-              if stage not in {"BUILDING", "STARTING", "APP_STARTING"}:
+              print(f"SPACE_STAGE_ATTEMPT_{attempt + 1}={stage}", flush=True)
+              if stage == "RUNNING":
                   break
               time.sleep(15)
 
           for label, build in (("BUILD_LOGS", True), ("RUNTIME_LOGS", False)):
-              print(f"\n===== {label} =====", flush=True)
+              print(f"\\n===== {label} =====", flush=True)
               try:
                   lines = list(api.fetch_space_logs(repo_id=repo_id, build=build))
                   if not lines:
                       print("(No log lines returned.)", flush=True)
                   for line in lines[-300:]:
-                      safe = str(line).replace(token, "[REDACTED_HF_TOKEN]")
-                      print(safe, end="" if safe.endswith("\n") else "\n", flush=True)
+                      print(str(line).replace(token, "[REDACTED_HF_TOKEN]"), end="", flush=True)
               except Exception as exc:
                   print(f"{label}_ERROR={type(exc).__name__}: {exc}", flush=True)
 
           url = "https://vizyon2027-aethrion-llm.hf.space"
           headers = {"Authorization": f"Bearer {token}"}
-          print("\n===== HTTP HEALTH CHECK =====", flush=True)
-          try:
-              for endpoint in ("/", "/config", "/gradio_api/info"):
-                  response = requests.get(url + endpoint, headers=headers, timeout=30)
-                  print(f"SPACE_HTTP_{endpoint.replace('/', 'ROOT') or 'ROOT'}={response.status_code}", flush=True)
-                  if response.status_code != 200:
-                      print(response.text[:3000], flush=True)
-                      sys.exit(4)
-                  if endpoint == "/config":
-                      config = response.json()
-                      components = config.get("components", [])
-                      print(f"GRADIO_COMPONENT_COUNT={len(components)}", flush=True)
-                      if len(components) < 20:
-                          raise RuntimeError("Live Gradio config is missing expected UI components.")
-                  if endpoint == "/gradio_api/info":
-                      api_info = response.json()
-                      if not isinstance(api_info, dict):
-                          raise RuntimeError("Live Gradio API info response is not a JSON object.")
-                      print("GRADIO_API_INFO=PASS", flush=True)
-          except Exception as exc:
-              print(f"SPACE_HTTP_ERROR={type(exc).__name__}: {exc}", flush=True)
-              sys.exit(4)
+          print("\\n===== HTTP HEALTH CHECK =====", flush=True)
+          for endpoint in ("/", "/config", "/gradio_api/info"):
+              response = requests.get(url + endpoint, headers=headers, timeout=30)
+              print(f"SPACE_HTTP_{endpoint}={response.status_code}", flush=True)
+              if response.status_code != 200:
+                  print(response.text[:3000], flush=True)
+                  sys.exit(4)
+              if endpoint == "/config":
+                  config = response.json()
+                  component_count = len(config.get("components", []))
+                  print(f"GRADIO_COMPONENT_COUNT={component_count}", flush=True)
+                  if component_count < 20:
+                      raise SystemExit("Live Gradio config is missing expected UI components.")
+              if endpoint == "/gradio_api/info":
+                  api_info = response.json()
+                  if not isinstance(api_info, dict):
+                      raise SystemExit("Live Gradio API info response is not a JSON object.")
+                  print("GRADIO_API_INFO=PASS", flush=True)
 
           print(f"SPACE_RUNTIME_STAGE_AT_CHECK={stage}", flush=True)
           print("SPACE_RUNTIME_DIAGNOSTICS_OK", flush=True)
