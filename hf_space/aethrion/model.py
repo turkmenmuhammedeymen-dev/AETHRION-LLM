@@ -101,14 +101,18 @@ class AETHRIONLM(nn.Module):
         if targets is not None:
             if targets.shape != idx.shape or targets.dtype != torch.long:
                 raise ValueError("targets must be torch.long and have the same shape as idx")
-            if targets.min().item() < 0 or targets.max().item() >= self.config.vocab_size:
-                raise ValueError("targets contain token IDs outside the configured vocabulary")
+            supervised = targets != -100
+            if not supervised.any():
+                raise ValueError("targets must contain at least one supervised token")
+            selected = targets[supervised]
+            if selected.min().item() < 0 or selected.max().item() >= self.config.vocab_size:
+                raise ValueError("targets contain token IDs outside the configured vocabulary; only -100 is a valid ignore index")
         batch, length = idx.shape
         positions = torch.arange(length, device=idx.device)
         x = self.drop(self.token_embedding(idx) + self.position_embedding(positions))
         x = self.final_norm(self.blocks(x))
         logits = self.lm_head(x)
-        loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), targets.reshape(-1)) if targets is not None else None
+        loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), targets.reshape(-1), ignore_index=-100) if targets is not None else None
         return logits, loss
 
     @torch.no_grad()
