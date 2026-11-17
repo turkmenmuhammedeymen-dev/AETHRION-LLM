@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import random
 import shutil
+import signal
 import time
 from typing import Any
 
@@ -22,6 +23,15 @@ import torch.nn as nn
 
 from aethrion.specialist_data import validate_specialist_dataset
 from aethrion.checkpoint import write_json_atomic
+
+
+_STOP_REQUESTED = False
+
+
+def _request_stop(signum, frame):
+    global _STOP_REQUESTED
+    _STOP_REQUESTED = True
+    print(f"Stop requested (signal {signum}); checkpointing after the current step.", flush=True)
 
 
 def _build_model(model_id: str, config: dict[str, Any]) -> nn.Module:
@@ -70,7 +80,7 @@ def _to_batch(arrays: dict[str, np.ndarray], keys: list[str], indices: torch.Ten
         tensor = torch.from_numpy(value.copy())
         if key in {
             "token_ids", "query_ids", "passage_ids", "layout_ids", "tag_labels",
-            "decision_labels", "input_lengths", "target_lengths", "targets",
+            "decision_labels", "reason_labels", "input_lengths", "target_lengths", "targets",
             "frame_to_token", "start_positions", "end_positions",
         }:
             tensor = tensor.long()
@@ -222,6 +232,7 @@ def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
 
 
 def _evaluate(model, model_id, arrays, keys, indices, device, batch_size):
+    was_training = model.training
     model.eval()
     losses = []
     with torch.no_grad():
@@ -232,7 +243,7 @@ def _evaluate(model, model_id, arrays, keys, indices, device, batch_size):
             if not torch.isfinite(loss):
                 raise FloatingPointError(f"Non-finite {model_id} evaluation loss.")
             losses.append(float(loss.item()))
-    model.train()
+    model.train(was_training)
     if not losses:
         raise ValueError("Evaluation split is empty.")
     return float(sum(losses) / len(losses))
@@ -298,7 +309,12 @@ def train_specialist(
         model.load_state_dict(state["model_state"])
         optimizer.load_state_dict(state["optimizer_state"])
         _restore_rng_state(state["rng_state"])
-        start_step = int(state["step"]) + 1
+        checkpoint_step = state.get("step")
+        if type(checkpoint_step) is not int or checkpoint_step < 0:
+            raise ValueError("Resume checkpoint step is invalid.")
+        start_step = checkpoint_step + 1
+        if start_step >= config["max_steps"]:
+            raise ValueError("max_steps must be greater than the verified resume checkpoint step.")
 
     metrics_path = output / "metrics.jsonl"
     started = time.perf_counter()
@@ -316,7 +332,7 @@ def train_specialist(
         torch.nn.utils.clip_grad_norm_(model.parameters(), float(config["grad_clip"]))
         optimizer.step()
 
-        if step % config["eval_interval"] == 0 or step == config["max_steps"] - 1:
+        if step % config["eval_interval"] == 0 or step == config["max_steps"] - 1 or _STOP_REQUESTED:
             last_validation = _evaluate(
                 model, model_id, arrays, keys, val_idx, device, config["batch_size"]
             )
@@ -331,7 +347,7 @@ def train_specialist(
                 os.fsync(handle.fileno())
             print(json.dumps(record, ensure_ascii=False), flush=True)
 
-        if step % config["save_interval"] == 0 or step == config["max_steps"] - 1:
+        if step % config["save_interval"] == 0 or step == config["max_steps"] - 1 or _STOP_REQUESTED:
             checkpoint_hash = _save_checkpoint(checkpoint_path, {
                 "format": "aethrion-specialist-checkpoint-v1",
                 "model_id": model_id, "step": step,
@@ -350,6 +366,22 @@ def train_specialist(
                 "validation_loss": last_validation,
                 "note": "Training alone does not authorize registry status=trained; run independent quality and safety evaluation."
             }, output / "training_report.json")
+
+        if _STOP_REQUESTED and step < config["max_steps"] - 1:
+            interrupted_report = {
+                "status": "training_interrupted_not_released",
+                "release_status": "NOT_RELEASED",
+                "model_id": model_id,
+                "steps": step + 1,
+                "dataset_sha256": approval["dataset_sha256"],
+                "checkpoint_sha256": checkpoint_hash,
+                "validation_loss": last_validation,
+                "sample_counts": approval["split_counts"],
+                "device": str(device),
+                "note": "Training was safely paused after a verified checkpoint; resume with the same dataset and model configuration."
+            }
+            write_json_atomic(interrupted_report, output / "training_report.json")
+            return interrupted_report
 
     test_loss = _evaluate(model, model_id, arrays, keys, test_idx, device, config["batch_size"])
     report = {
@@ -376,7 +408,16 @@ def main():
     parser.add_argument("--resume", default=None, help="Optional SHA-256 verified checkpoint.")
     args = parser.parse_args()
     config = json.loads(Path(args.config).read_text(encoding="utf-8"))
-    report = train_specialist(config, args.manifest, resume=args.resume)
+    global _STOP_REQUESTED
+    _STOP_REQUESTED = False
+    previous_handlers = {}
+    for stop_signal in (signal.SIGINT, signal.SIGTERM):
+        previous_handlers[stop_signal] = signal.signal(stop_signal, _request_stop)
+    try:
+        report = train_specialist(config, args.manifest, resume=args.resume)
+    finally:
+        for stop_signal, previous_handler in previous_handlers.items():
+            signal.signal(stop_signal, previous_handler)
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
 
