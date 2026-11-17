@@ -86,7 +86,7 @@ jobs:
           for capability in ("chat", "code", "image", "3d", "research", "file_analysis", "audio"):
               assert capability in status, f"Missing capability status: {capability}"
 
-          assert "aethrion_space_username" in app.chat("hello", [] ).lower()
+          assert "authentication" in app.chat("hello", [] ).lower()
           assert "not trained" in app.code("write a function").lower()
           assert "not trained" in app.research("latest AI research").lower()
           assert "not trained" in app.three_d_text("a small tree")[0].lower()
