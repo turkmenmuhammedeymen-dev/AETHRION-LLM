@@ -83,8 +83,8 @@ jobs:
           assert isinstance(api_info, dict), "Gradio API schema generation failed"
 
           status = app.status()
-          for capability in ("chat", "code", "image", "3d", "research", "file_analysis", "audio"):
-              assert capability in status, f"Missing capability status: {capability}"
+          for capability in ("chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d", "research", "document", "safety"):
+              assert capability in status, f"Missing native model status: {capability}"
 
           assert "authentication" in app.chat("hello", [] ).lower()
           assert "authentication" in app.code("write a function").lower()
