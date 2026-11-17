@@ -5,7 +5,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from aethrion.prepare_data import validate_training_approval
+from aethrion.prepare_data import sha256_file, validate_training_approval
 
 class ByteBPETokenizer:
     def __init__(self, merges: list[tuple[int, int]] | None = None):
@@ -140,8 +140,32 @@ def main() -> None:
     text = train_path.read_text(encoding="utf-8")
     tokenizer = ByteBPETokenizer()
     tokenizer.train(text, args.vocab_size, args.min_frequency)
-    tokenizer.save(args.output)
-    print(f"Tokenizer saved: {args.output} | vocab_size={tokenizer.vocab_size}")
+    tokenizer_path = Path(args.output)
+    tokenizer.save(tokenizer_path)
+    source_review_path = Path(args.source_review) if args.source_review else None
+    provenance = {
+        "format": "aethrion-tokenizer-provenance-v1",
+        "tokenizer_sha256": sha256_file(tokenizer_path),
+        "corpus_sha256": sha256_file(Path(args.corpus)),
+        "corpus_report_sha256": sha256_file(Path(args.corpus_report)),
+        "dataset_manifest_sha256": sha256_file(Path(args.dataset_manifest)),
+        "source_manifest_sha256": sha256_file(Path(args.source_manifest)),
+        "source_review_sha256": (
+            sha256_file(source_review_path) if source_review_path is not None else None
+        ),
+        "train_split_sha256": verified_splits["train"]["sha256"],
+        "validation_split_sha256": verified_splits["validation"]["sha256"],
+        "test_split_sha256": verified_splits["test"]["sha256"],
+    }
+    provenance_path = Path(str(tokenizer_path) + ".provenance.json")
+    temporary_path = Path(str(provenance_path) + ".tmp")
+    temporary_path.write_text(
+        json.dumps(provenance, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    temporary_path.replace(provenance_path)
+    print(f"Tokenizer saved: {tokenizer_path} | vocab_size={tokenizer.vocab_size}")
+    print(f"Tokenizer provenance: {provenance_path}")
 
 if __name__ == "__main__":
     main()
