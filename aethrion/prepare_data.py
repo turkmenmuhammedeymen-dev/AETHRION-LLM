@@ -72,6 +72,12 @@ def load_sources_manifest(path: Path, root: Path) -> list[dict]:
             raise ValueError(f"Source entry missing: {', '.join(missing)}")
         if entry["allow_training"] is not True:
             raise ValueError(f"Source is not approved for training: {entry['source_id']}")
+        if not isinstance(entry["license"], str) or entry["license"].strip().upper() in {
+            "UNKNOWN", "PENDING", "PENDING_HUMAN_REVIEW", "UNVERIFIED", "TBD"
+        }:
+            raise ValueError(f"Source license is not verified: {entry['source_id']}")
+        if not isinstance(entry["permitted_uses"], str) or "train" not in entry["permitted_uses"].lower():
+            raise ValueError(f"Source permitted_uses must explicitly include training: {entry['source_id']}")
 
         source = (root / entry["path"]).resolve()
         if root not in source.parents:
