@@ -131,6 +131,23 @@ class SafeRuntimeGateTests(unittest.TestCase):
             router.dispatch("chat", CapabilityRequest("benign prompt", {}))
         self.assertEqual(runtime.reviewed, ["benign prompt", "generated unsafe output"])
 
+
+    def test_safe_chunk_gate_checks_every_segment(self):
+        runtime = _FakeSafetyRuntime({"safety": "ready"})
+        api._require_safety_allow_chunks(runtime, "x" * 1001, chunk_chars=400)
+        self.assertEqual(len(runtime.reviewed), 3)
+        self.assertEqual([len(item) for item in runtime.reviewed], [400, 400, 201])
+
+    def test_safe_chunk_gate_stops_on_first_non_allow_segment(self):
+        runtime = _FakeSafetyRuntime(
+            {"safety": "ready"},
+            decisions={"BLOCK": "BLOCK"},
+        )
+        with self.assertRaises(api.HTTPException) as caught:
+            api._require_safety_allow_chunks(runtime, "A" * 400 + "BLOCK" + "B" * 400, chunk_chars=400)
+        self.assertEqual(caught.exception.status_code, 503)
+        self.assertEqual(len(runtime.reviewed), 2)
+
     def test_safe_classifier_route_does_not_gate_itself(self):
         router, _, runtime = self._build(
             {"safety": "ready"},
