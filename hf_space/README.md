@@ -30,6 +30,12 @@ Deterministic document creation and text extraction are available as software
 utilities; they are not a trained document-understanding model. Uploaded
 project code is not executed. Training is not started from the Space UI.
 
+Cross-product integration plans for Vizyon2026/AETHRION, SENTRIX and
+TdevKuantum are tracked in the repository's
+[native product AI integration matrix](https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/docs/PRODUCT_AI_INTEGRATION_MATRIX.md).
+Those legacy product endpoints are not yet connected to released native
+checkpoints; no external provider fallback is enabled.
+
 See the [native-only model-family specification](https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/docs/NATIVE_ONLY_MODEL_FAMILY.md)
 for model-family status and completion criteria. Dataset approval remains
 fail-closed until source rights, privacy, provenance and quality checks are
