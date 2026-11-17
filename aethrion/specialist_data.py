@@ -347,6 +347,7 @@ def validate_specialist_dataset(
         "sample_count": sample_count,
         "split_counts": counts,
         "source_count": len(sources),
+        "group_count": len(set(group_names)),
         "tokenizer_path": str(tokenizer_path) if tokenizer_path is not None else None,
         "tokenizer_sha256": tokenizer_hash,
         "tokenizer_vocab_size": tokenizer_vocab_size,
