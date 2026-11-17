@@ -249,8 +249,8 @@ def validate_specialist_dataset(
                 split_array = np.asarray(split_names)
                 for split_name in ("train", "validation", "test"):
                     split_decisions = decisions[split_array == split_name]
-                    counts = np.bincount(split_decisions.astype(np.int64), minlength=3)
-                    if np.any(counts < minimum):
+                    class_counts = np.bincount(split_decisions.astype(np.int64), minlength=3)
+                    if np.any(class_counts < minimum):
                         raise SpecialistDataError(
                             f"Safety {split_name} split must contain at least {minimum} samples for ALLOW, REVIEW and BLOCK."
                         )
