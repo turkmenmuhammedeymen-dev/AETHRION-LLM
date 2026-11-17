@@ -6,8 +6,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from aethrion.model import AETHRIONLM, ModelConfig
-from aethrion.tokenizer import ByteBPETokenizer
-from aethrion.prepare_data import validate_training_approval
+from aethrion.tokenizer import ByteBPETokenizer, validate_tokenizer_provenance
 from aethrion.checkpoint import load_checkpoint, save_checkpoint, sha256_file, write_json_atomic
 
 _STOP_REQUESTED = False
@@ -93,44 +92,21 @@ def main() -> None:
         if cfg[key] < 1: raise ValueError(f"{key} must be >= 1")
     if cfg["warmup_steps"] < 0 or cfg["learning_rate"] <= 0 or cfg["min_learning_rate"] < 0:
         raise ValueError("Invalid learning-rate or warmup configuration")
-    split_info = validate_training_approval(
+    tokenizer_path, data_path = Path(cfg["tokenizer_path"]), Path(cfg["data_path"])
+    split_info, tokenizer_provenance_hash = validate_tokenizer_provenance(
+        tokenizer_path,
+        data_path,
         Path(args.dataset_manifest),
         Path(args.source_manifest),
         Path(args.source_root),
-        Path(cfg["data_path"]),
         Path(args.corpus_report),
         Path(args.source_review) if args.source_review else None,
     )
-    print("Training approval gate passed: dataset, source manifest, source-group disjoint splits and URL reviews verified.")
+    print("Training approval gate passed: reviewed sources, reconstructed group-disjoint splits, tokenizer and provenance verified.")
     set_seed(cfg["seed"])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
-    tokenizer_path, data_path = Path(cfg["tokenizer_path"]), Path(cfg["data_path"])
     tokenizer = ByteBPETokenizer.load(tokenizer_path)
-    provenance_path = Path(str(tokenizer_path) + ".provenance.json")
-    if not provenance_path.is_file():
-        raise ValueError("Training blocked: tokenizer provenance sidecar is missing.")
-    try:
-        tokenizer_provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        raise ValueError("Training blocked: tokenizer provenance sidecar is invalid.") from exc
-    expected_provenance = {
-        "format": "aethrion-tokenizer-provenance-v1",
-        "tokenizer_sha256": sha256_file(tokenizer_path),
-        "corpus_sha256": sha256_file(data_path),
-        "corpus_report_sha256": sha256_file(Path(args.corpus_report)),
-        "dataset_manifest_sha256": sha256_file(Path(args.dataset_manifest)),
-        "source_manifest_sha256": sha256_file(Path(args.source_manifest)),
-        "source_review_sha256": (
-            sha256_file(Path(args.source_review)) if args.source_review else None
-        ),
-        "train_split_sha256": split_info["train"]["sha256"],
-        "validation_split_sha256": split_info["validation"]["sha256"],
-        "test_split_sha256": split_info["test"]["sha256"],
-    }
-    if tokenizer_provenance != expected_provenance:
-        raise ValueError("Training blocked: tokenizer provenance does not match the approved corpus, source manifests and split hashes.")
-    tokenizer_provenance_hash = sha256_file(provenance_path)
     if tokenizer.vocab_size != cfg["vocab_size"]:
         cfg["vocab_size"] = tokenizer.vocab_size
         print(f"Tokenizer vocabulary overrides config: {cfg['vocab_size']}")
