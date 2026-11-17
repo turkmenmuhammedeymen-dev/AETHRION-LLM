@@ -47,11 +47,11 @@ def gpu_diagnostics():
     try:
         import torch
     except Exception as exc:
-        return "### ZeroGPU diagnostics\\n- PyTorch import failed: " + type(exc).__name__
+        return "### ZeroGPU diagnostics\n- PyTorch import failed: " + type(exc).__name__
     if not torch.cuda.is_available():
         return (
-            "### ZeroGPU diagnostics\\n"
-            "- GPU request completed, but CUDA is not visible in this execution.\\n"
+            "### ZeroGPU diagnostics\n"
+            "- GPU request completed, but CUDA is not visible in this execution.\n"
             "- No model was loaded and no training was started."
         )
     try:
@@ -61,16 +61,16 @@ def gpu_diagnostics():
         free_gib, _ = torch.cuda.mem_get_info(0)
         free_gib /= 1024 ** 3
         return (
-            "### ZeroGPU diagnostics\\n"
-            f"- CUDA: **available**\\n"
-            f"- Device: **{device_name}**\\n"
-            f"- Device memory: **{total_gib:.2f} GiB total**\\n"
-            f"- Currently free: **{free_gib:.2f} GiB**\\n"
+            "### ZeroGPU diagnostics\n"
+            f"- CUDA: **available**\n"
+            f"- Device: **{device_name}**\n"
+            f"- Device memory: **{total_gib:.2f} GiB total**\n"
+            f"- Currently free: **{free_gib:.2f} GiB**\n"
             "- This was a short diagnostic request only; no training was started."
         )
     except Exception as exc:
         return (
-            "### ZeroGPU diagnostics\\n"
+            "### ZeroGPU diagnostics\n"
             "- CUDA is available, but device details could not be read: "
             + type(exc).__name__
         )
