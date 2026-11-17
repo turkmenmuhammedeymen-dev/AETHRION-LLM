@@ -50,6 +50,7 @@ def build_local_research_index(
     *,
     chunk_tokens: int = 256,
     overlap_tokens: int = 32,
+    project_root: str | Path | None = None,
 ) -> dict[str, Any]:
     """Index local UTF-8 JSONL text only after each source's index-use approval."""
     if not 16 <= chunk_tokens <= 2048 or not 0 <= overlap_tokens < chunk_tokens:
@@ -157,7 +158,7 @@ def build_local_research_index(
     processor_path = output / "processor.json"
     np.savez_compressed(index_path, passage_ids=token_array, passage_mask=mask_array)
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
-    repo_root = Path.cwd().resolve()
+    repo_root = Path(project_root or Path.cwd()).resolve()
     try:
         index_relative = index_path.resolve().relative_to(repo_root).as_posix()
         metadata_relative = metadata_path.resolve().relative_to(repo_root).as_posix()
@@ -188,10 +189,12 @@ def main():
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--chunk-tokens", type=int, default=256)
     parser.add_argument("--overlap-tokens", type=int, default=32)
+    parser.add_argument("--project-root", default=".")
     args = parser.parse_args()
     result = build_local_research_index(
         args.records, args.approval, args.tokenizer, args.output_dir,
-        chunk_tokens=args.chunk_tokens, overlap_tokens=args.overlap_tokens
+        chunk_tokens=args.chunk_tokens, overlap_tokens=args.overlap_tokens,
+        project_root=args.project_root
     )
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
