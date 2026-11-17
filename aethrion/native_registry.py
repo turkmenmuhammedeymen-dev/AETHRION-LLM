@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 from typing import Any
@@ -244,6 +245,8 @@ class NativeModelRegistry:
             raise NativeModelIntegrityError(f"{capability} checkpoint hash does not match the training report.")
         if evaluation.get("model_id") != capability or evaluation.get("dataset_sha256") != entry["dataset_sha256"]:
             raise NativeModelIntegrityError(f"{capability} evaluation report does not match its dataset.")
+        if evaluation.get("checkpoint_sha256") != entry["checkpoint_sha256"]:
+            raise NativeModelIntegrityError(f"{capability} evaluation report does not match its checkpoint.")
         if evaluation.get("status") != "approved_for_release":
             raise NativeModelUnavailable(f"{capability} evaluation report is not approved for release.")
         for flag in ("quality_gate_passed", "safety_gate_passed", "human_reviewed"):
@@ -275,7 +278,12 @@ class NativeModelRegistry:
                 or not isinstance(result.get("metric"), str)
                 or not isinstance(value, (int, float))
                 or isinstance(value, bool)
-                or not __import__("math").isfinite(float(value))
+                or not math.isfinite(float(value))
+                or not isinstance(result.get("threshold"), (int, float))
+                or isinstance(result.get("threshold"), bool)
+                or not math.isfinite(float(result["threshold"]))
+                or not isinstance(result.get("evidence"), str)
+                or not result["evidence"].strip()
             ):
                 raise NativeModelUnavailable(
                     f"Benchmark {benchmark_name} has not passed with a finite numeric measurement."
