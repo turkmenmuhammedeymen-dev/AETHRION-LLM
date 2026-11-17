@@ -253,6 +253,9 @@ def validate_specialist_dataset(
             missing = REQUIRED_ARRAYS[model_id] - keys
             if missing:
                 raise SpecialistDataError("Dataset is missing arrays: " + ", ".join(sorted(missing)))
+            # Materialize every NPZ array before the archive context closes.
+            # NpzFile lazily reads from its ZIP handle and cannot be used afterwards.
+            arrays = {key: np.array(arrays[key], copy=True) for key in keys}
             sample_ids = arrays["sample_id"]
             group_ids = arrays["group_id"]
             splits = arrays["split"]
@@ -298,7 +301,7 @@ def validate_specialist_dataset(
                         raise SpecialistDataError(
                             f"Safety {split_name} split must contain at least {minimum} samples for ALLOW, REVIEW and BLOCK."
                         )
-            for key in keys - {"sample_id", "split"}:
+            for key in keys - {"sample_id", "group_id", "split"}:
                 value = arrays[key]
                 if value.dtype.hasobject:
                     raise SpecialistDataError(f"Object/pickle arrays are forbidden: {key}.")
