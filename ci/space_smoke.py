@@ -45,13 +45,17 @@ class _SmokeSafetyRegistry:
 
 class _SmokeSafetyRuntime:
     registry = _SmokeSafetyRegistry()
+    def __init__(self):
+        self.reviewed = []
     def classify_safety(self, text):
-        return {"decision": "BLOCK" if "BLOCK_ME" in text else "ALLOW"}
+        self.reviewed.append(text)
+        return {"decision": "BLOCK" if "BLOCK_ME" in text else "ALLOW", "confidence": 0.99}
 
 old_auth, old_providers = space.SPACE_AUTH_ENABLED, space.providers
 try:
     space.SPACE_AUTH_ENABLED = True
-    space.providers = {"runtime": _SmokeSafetyRuntime()}
+    smoke_runtime = _SmokeSafetyRuntime()
+    space.providers = {"runtime": smoke_runtime}
     with tempfile.TemporaryDirectory() as folder:
         archive_path = Path(folder) / "project.zip"
         with zipfile.ZipFile(archive_path, "w") as archive:
@@ -59,6 +63,7 @@ try:
         rejected, output = space.edit_project(str(archive_path), "review this project")
         assert "rejected by AETHRION-SAFE" in rejected
         assert output is None
+        assert any("BLOCK_ME" in segment for segment in smoke_runtime.reviewed)
 finally:
     space.SPACE_AUTH_ENABLED, space.providers = old_auth, old_providers
 
