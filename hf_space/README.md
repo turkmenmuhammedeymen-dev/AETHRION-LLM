@@ -30,6 +30,5 @@ Deterministic document creation and text extraction are available as software
 utilities; they are not a trained document-understanding model. Uploaded
 project code is not executed. Training is not started from the Space UI.
 
-See docs/NATIVE_ONLY_MODEL_FAMILY.md for the model-family specification and
-completion criteria. The dataset approval manifest remains fail-closed until
+See the [native-only model-family specification](https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/feature/native-specialist-family/docs/NATIVE_ONLY_MODEL_FAMILY.md) for the model-family plan and completion criteria. The dataset approval manifest remains fail-closed until
 source rights, privacy, and quality checks are completed.
