@@ -1,6 +1,6 @@
 """Bounded document extraction, generation and text-first editing."""
 from __future__ import annotations
-import csv, io, json
+import csv, io, json, zipfile
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +9,52 @@ class DocumentError(ValueError):
 
 MAX_INPUT_BYTES = 8 * 1024 * 1024
 MAX_TEXT_CHARS = 200_000
+
+def _validate_docx_archive(raw: bytes) -> None:
+    """Bound DOCX ZIP expansion before handing the archive to python-docx."""
+    max_entries = 2048
+    max_entry_bytes = 16 * 1024 * 1024
+    max_total_bytes = 32 * 1024 * 1024
+    seen = set()
+    total = 0
+    document_xml_found = False
+    try:
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            entries = archive.infolist()
+            if not entries or len(entries) > max_entries:
+                raise DocumentError("DOCX archive has an invalid number of ZIP entries.")
+            for info in entries:
+                if info.is_dir():
+                    continue
+                name = info.filename
+                if not name or name in seen or name.startswith(("/", "\\\\")) or ".." in Path(name).parts:
+                    raise DocumentError("DOCX archive contains duplicate or unsafe paths.")
+                seen.add(name)
+                if info.flag_bits & 0x1:
+                    raise DocumentError("Encrypted DOCX entries are not accepted.")
+                if info.file_size > max_entry_bytes:
+                    raise DocumentError("DOCX archive contains an oversized entry.")
+                total += info.file_size
+                if total > max_total_bytes:
+                    raise DocumentError("DOCX uncompressed size exceeds 32 MiB.")
+                with archive.open(info, "r") as entry:
+                    actual = 0
+                    while True:
+                        chunk = entry.read(min(1024 * 1024, max_entry_bytes + 1 - actual))
+                        if not chunk:
+                            break
+                        actual += len(chunk)
+                        if actual > max_entry_bytes:
+                            raise DocumentError("DOCX entry exceeds its decompressed size limit.")
+                    if actual != info.file_size:
+                        raise DocumentError("DOCX ZIP size metadata is inconsistent.")
+                if name == "word/document.xml":
+                    document_xml_found = True
+    except (zipfile.BadZipFile, OSError, RuntimeError) as exc:
+        raise DocumentError("DOCX archive is invalid or cannot be read safely.") from exc
+    if not document_xml_found:
+        raise DocumentError("DOCX archive is missing word/document.xml.")
+
 
 def extract_document_text(path):
     source = Path(path)
@@ -25,6 +71,7 @@ def extract_document_text(path):
         return text[:MAX_TEXT_CHARS]
     if suffix == ".docx":
         try:
+            _validate_docx_archive(raw)
             from docx import Document
             document = Document(io.BytesIO(raw))
             parts = [p.text for p in document.paragraphs if p.text]
