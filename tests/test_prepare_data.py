@@ -40,8 +40,8 @@ class CorpusPreparationTests(unittest.TestCase):
             manifest.write_text(json.dumps({"sources": [{
                 "source_id": "unit-test",
                 "path": "source.txt",
-                "license": "test",
-                "permitted_uses": "unit test",
+                "license": "Synthetic unit-test fixture",
+                "permitted_uses": "training permitted for unit-test fixture only",
                 "allow_training": True,
             }]}), encoding="utf-8")
             output = root / "out/corpus.txt"
@@ -82,7 +82,7 @@ class CorpusPreparationTests(unittest.TestCase):
             "source_id": "mixed-test",
             "path": "mixed.jsonl",
             "license": "dataset-label",
-            "permitted_uses": "review required",
+            "permitted_uses": "training review required",
             "allow_training": True,
         }]}), encoding="utf-8")
         return source, manifest
