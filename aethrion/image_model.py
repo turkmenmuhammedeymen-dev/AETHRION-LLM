@@ -113,5 +113,39 @@ class AETHRIONImageGenerator(nn.Module):
         prediction = self(noisy, token_ids, timesteps)
         return F.mse_loss(prediction, noise)
 
+    @torch.no_grad()
+    def generate(self, token_ids: torch.Tensor, inference_steps: int = 50) -> torch.Tensor:
+        """DDIM-style deterministic sampling from noise; returns images in [-1,1]."""
+        if token_ids.ndim != 2 or token_ids.dtype != torch.long or token_ids.size(0) < 1:
+            raise ValueError("token_ids must be a non-empty [batch, sequence] long tensor")
+        if not 2 <= inference_steps <= self.config.diffusion_steps:
+            raise ValueError("inference_steps must be between 2 and diffusion_steps")
+        was_training = self.training
+        self.eval()
+        try:
+            device = token_ids.device
+            batch = token_ids.size(0)
+            image = torch.randn(
+                batch, 3, self.config.image_size, self.config.image_size,
+                device=device
+            )
+            schedule = torch.linspace(
+                self.config.diffusion_steps - 1, 0, inference_steps,
+                device=device
+            ).round().long().unique_consecutive()
+            for index, timestep in enumerate(schedule):
+                times = torch.full((batch,), int(timestep.item()), device=device, dtype=torch.long)
+                predicted_noise = self(image, token_ids, times)
+                alpha = self.alpha_bars[timestep]
+                if index + 1 < len(schedule):
+                    previous = self.alpha_bars[schedule[index + 1]]
+                else:
+                    previous = torch.ones((), device=device, dtype=alpha.dtype)
+                predicted_clean = (image - (1 - alpha).sqrt() * predicted_noise) / alpha.sqrt().clamp_min(1e-6)
+                image = previous.sqrt() * predicted_clean + (1 - previous).sqrt() * predicted_noise
+            return image.clamp(-1, 1)
+        finally:
+            self.train(was_training)
+
     def config_dict(self):
         return asdict(self.config)
