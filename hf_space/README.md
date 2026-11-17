@@ -2,7 +2,7 @@
 title: AETHRION-LLM
 emoji: ✨
 colorFrom: indigo
-colorTo: slate
+colorTo: gray
 sdk: gradio
 sdk_version: 5.0.0
 app_file: app.py
