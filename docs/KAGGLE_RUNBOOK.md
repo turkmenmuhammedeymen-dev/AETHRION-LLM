@@ -22,7 +22,7 @@ if not token:
 askpass = Path("/kaggle/working/.aethrion-git-askpass.sh")
 askpass.write_text(
     '#!/bin/sh\ncase "$1" in *Username*) printf "%s\\n" "x-access-token" ;; '
-    '* ) printf "%s\\n" "$AETHRION_GITHUB_TOKEN" ;; esac\n',
+    '*) printf "%s\\n" "$AETHRION_GITHUB_TOKEN" ;; esac\n',
     encoding="utf-8",
 )
 askpass.chmod(0o700)
