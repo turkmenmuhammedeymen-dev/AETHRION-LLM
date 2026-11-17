@@ -113,7 +113,8 @@ class ByteBPETokenizer:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train the AETHRION byte-level BPE tokenizer")
-    parser.add_argument("--train", required=True, help="UTF-8 corpus text file")
+    parser.add_argument("--train", required=True, help="UTF-8 approved train-only split file")
+    parser.add_argument("--corpus", required=True, help="Combined corpus path bound to the audit report")
     parser.add_argument("--output", required=True)
     parser.add_argument("--vocab-size", type=int, default=2048)
     parser.add_argument("--min-frequency", type=int, default=2)
@@ -128,12 +129,15 @@ def main() -> None:
     parser.add_argument("--source-review", default=None,
                         help="Evidence-backed per-domain approval CSV for URL-attributed records.")
     args = parser.parse_args()
-    validate_training_approval(
+    verified_splits = validate_training_approval(
         Path(args.dataset_manifest), Path(args.source_manifest), Path(args.source_root),
-        Path(args.train), Path(args.corpus_report),
+        Path(args.corpus), Path(args.corpus_report),
         Path(args.source_review) if args.source_review else None,
     )
-    text = Path(args.train).read_text(encoding="utf-8")
+    train_path = Path(args.train).resolve()
+    if train_path != verified_splits["train"]["path"]:
+        raise ValueError("Tokenizer training input must be the approved train-only split; validation/test text is forbidden.")
+    text = train_path.read_text(encoding="utf-8")
     tokenizer = ByteBPETokenizer()
     tokenizer.train(text, args.vocab_size, args.min_frequency)
     tokenizer.save(args.output)
