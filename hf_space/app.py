@@ -1,9 +1,10 @@
 import os, base64, tempfile
+import httpx
 from pathlib import Path
 import gradio as gr
 from aethrion.api import build_router
 from aethrion.audio import OpenAISpeechProvider
-from aethrion.document_tools import create_document, extract_document_text
+from aethrion.document_tools import create_document, extract_document_text, replace_document_text
 from aethrion.file_agent import FileAnalysisAgent
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
 from aethrion.workspace_agent import ProjectWorkspaceAgent
@@ -48,13 +49,48 @@ def image(prompt):
     except CapabilityUnavailable as e:
         raise gr.Error("Configure AETHRION_IMAGE_API_KEY or OPENAI_API_KEY.") from e
 
-def three_d(prompt):
+def three_d_text(prompt):
     provider=providers.get("3d")
-    if not provider:return "Configure MESHY_API_KEY."
+    if not provider:return "Configure MESHY_API_KEY.",""
     try:
         r=provider(CapabilityRequest(prompt[:2000]))
-        return f"Task {r['task_id']} created; status PENDING. It is not a completed model."
-    except Exception as e:return "3D task failed: "+type(e).__name__
+        task_ref="text:"+r["task_id"]
+        return "Text-to-3D task created; status PENDING.",task_ref
+    except Exception as e:return "3D task failed: "+type(e).__name__,""
+
+def three_d_image(path,texture_prompt):
+    provider=providers.get("3d")
+    if not provider:return "Configure MESHY_API_KEY.",""
+    if not path:return "Upload a JPG, PNG or WebP reference image.",""
+    try:
+        r=provider.image_to_3d(path,texture_prompt or "")
+        task_ref="image:"+r["task_id"]
+        return "Image-to-3D task created; status PENDING.",task_ref
+    except Exception as e:return "Image-to-3D failed: "+type(e).__name__,""
+
+def three_d_poll(task_ref):
+    provider=providers.get("3d")
+    if not provider:return "Configure MESHY_API_KEY.",None
+    if not task_ref or ":" not in task_ref:return "Enter a task reference.",None
+    kind,task_id=task_ref.split(":",1)
+    try:
+        result=provider.get_image_task(task_id) if kind=="image" else provider.get_task(task_id)
+        state=result.get("status","UNKNOWN")
+        detail="**Status:** "+str(state)
+        if result.get("progress") is not None:detail+=" · **Progress:** "+str(result["progress"])+"%"
+        if state=="SUCCEEDED":
+            url=(result.get("model_urls") or {}).get("glb")
+            if url:
+                response=httpx.get(url,timeout=90,follow_redirects=True)
+                response.raise_for_status()
+                if len(response.content)>100*1024*1024:return detail+"\nGLB exceeds 100 MiB.",None
+                path=Path(tempfile.gettempdir())/("aethrion-3d-"+os.urandom(5).hex()+".glb")
+                path.write_bytes(response.content)
+                return detail+"\nGLB model is ready.",str(path)
+        if state in {"FAILED","CANCELED"}:detail+="\n"+str(result.get("task_error") or "Provider task failed.")
+        else:detail+="\nTask is still processing; poll again later."
+        return detail,None
+    except Exception as e:return "Task check failed: "+type(e).__name__,None
 
 def research(query):
     try:return str(dispatch(Capability.RESEARCH,query[:2000],{"max_results":6}))
@@ -91,6 +127,13 @@ def make_doc(title,content,fmt):
 def extract_doc(path):
     return extract_document_text(path) if path else "Upload a document."
 
+def edit_doc(path,find_text,replacement,fmt):
+    if not path:return "Upload a document.",None
+    raw,name,mime=replace_document_text(path,find_text,replacement,fmt)
+    p=Path(tempfile.gettempdir())/("aethrion-edited-"+os.urandom(5).hex()+"-"+name)
+    p.write_bytes(raw)
+    return "Edited copy created. Original file was not modified.",str(p)
+
 def edit_project(path,task):
     provider=providers.get("file_analysis")
     if not provider:return "Configure code provider.",None
@@ -116,8 +159,14 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             p=gr.Textbox(lines=3,label="Image prompt");o=gr.Image(type="filepath")
             gr.Button("Generate image").click(image,inputs=p,outputs=o)
         with gr.Tab("3D Studio"):
-            p=gr.Textbox(lines=3,label="Text-to-3D prompt");o=gr.Textbox()
-            gr.Button("Create 3D task").click(three_d,inputs=p,outputs=o)
+            p=gr.Textbox(lines=3,label="Text-to-3D prompt");task_msg=gr.Markdown()
+            task_ref=gr.Textbox(label="3D task reference")
+            gr.Button("Create from text").click(three_d_text,inputs=p,outputs=[task_msg,task_ref])
+            image_ref=gr.Image(type="filepath",sources=["upload"],label="Image-to-3D reference")
+            texture=gr.Textbox(label="Optional texture prompt")
+            gr.Button("Create from image").click(three_d_image,inputs=[image_ref,texture],outputs=[task_msg,task_ref])
+            task_status=gr.Markdown();model_file=gr.File(label="Generated GLB")
+            gr.Button("Check task / download GLB").click(three_d_poll,inputs=task_ref,outputs=[task_status,model_file])
         with gr.Tab("Research"):
             q=gr.Textbox(lines=3,label="Research question");o=gr.Markdown()
             gr.Button("Search").click(research,inputs=q,outputs=o)
@@ -131,6 +180,13 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             out=gr.File();gr.Button("Create").click(make_doc,inputs=[title,content,fmt],outputs=out)
             src=gr.File(type="filepath",label="Extract document")
             extracted=gr.Textbox(lines=8);gr.Button("Extract").click(extract_doc,inputs=src,outputs=extracted)
+            gr.Markdown("#### Edit text in an existing document")
+            source_edit=gr.File(type="filepath",label="Source document")
+            find_text=gr.Textbox(label="Find exact text")
+            replacement=gr.Textbox(label="Replace with")
+            edit_fmt=gr.Dropdown(["docx","pdf","txt","md","json","csv"],value="docx",label="Edited copy format")
+            edit_status=gr.Markdown();edit_download=gr.File(label="Edited copy")
+            gr.Button("Create edited copy").click(edit_doc,inputs=[source_edit,find_text,replacement,edit_fmt],outputs=[edit_status,edit_download])
         with gr.Tab("Audio"):
             a=gr.Audio(sources=["microphone","upload"],type="filepath")
             text=gr.Markdown();spoken=gr.Audio(type="filepath")
