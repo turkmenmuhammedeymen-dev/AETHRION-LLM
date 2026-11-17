@@ -126,6 +126,10 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
         def handler(request: CapabilityRequest, selected=capability.value):
             if selected != Capability.SAFETY.value:
                 _require_safety_allow(runtime, request.prompt)
+            if selected == Capability.DOCUMENT.value:
+                document_path = request.options.get("document_path")
+                if isinstance(document_path, str) and document_path:
+                    _require_safety_allow_chunks(runtime, extract_document_text(document_path))
             result = runtime.handle(selected, request)
             if selected != Capability.SAFETY.value:
                 output_text = _text_for_safety(result)
@@ -175,8 +179,10 @@ def analyze_file(request:FileRequest):
     with tempfile.NamedTemporaryFile(suffix=Path(request.filename).suffix.lower()) as handle:
         handle.write(raw); handle.flush()
         try:
+            source_text = extract_document_text(handle.name)
+            _require_safety_allow_chunks(runtime, source_text)
             result=runtime.analyze_document(handle.name)
-            _require_safety_allow_http(runtime, str(result.get("text", "")))
+            _require_safety_allow_chunks(runtime, str(result.get("text", "")))
         except CapabilityUnavailable:
             raise HTTPException(status_code=503,detail="AETHRION-SAFE did not allow this document output.")
         except HTTPException:
