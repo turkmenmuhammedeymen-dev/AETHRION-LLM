@@ -20,7 +20,7 @@ REQUIRED_ARRAYS = {
     "vision": {"sample_id", "split", "images", "token_ids"},
     "image": {"sample_id", "split", "images", "token_ids"},
     "asr": {"sample_id", "split", "features", "input_lengths", "targets", "target_lengths"},
-    "tts": {"sample_id", "split", "token_ids", "frame_to_token", "target_mels"},
+    "tts": {"sample_id", "split", "token_ids", "frame_to_token", "target_mels", "durations"},
     "3d": {"sample_id", "split", "points", "token_ids"},
     "research": {"sample_id", "split", "query_ids", "passage_ids"},
     "document": {"sample_id", "split", "token_ids", "boxes", "layout_ids", "tag_labels"},
