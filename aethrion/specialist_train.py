@@ -133,7 +133,7 @@ def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
             handle.flush()
             os.fsync(handle.fileno())
         digest = _sha256(tmp)
-        checksum_tmp.write_text(digest + "\\n", encoding="ascii")
+        checksum_tmp.write_text(digest + "\n", encoding="ascii")
         os.replace(tmp, path)
         os.replace(checksum_tmp, Path(str(path) + ".sha256"))
         return digest
@@ -260,7 +260,7 @@ def train_specialist(
                 "dataset_sha256": approval["dataset_sha256"],
             }
             with metrics_path.open("a", encoding="utf-8") as handle:
-                handle.write(json.dumps(record, ensure_ascii=False) + "\\n")
+                handle.write(json.dumps(record, ensure_ascii=False) + "\n")
                 handle.flush()
                 os.fsync(handle.fileno())
             print(json.dumps(record, ensure_ascii=False), flush=True)
