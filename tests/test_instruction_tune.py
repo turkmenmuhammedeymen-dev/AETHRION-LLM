@@ -53,6 +53,7 @@ class InstructionTuningTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(["a", "b", "c", "d", "e", "f"]),
+            group_id=np.asarray(["ga", "gb", "gc", "gd", "ge", "gf"]),
             split=np.asarray(["train", "train", "validation", "validation", "test", "test"]),
             input_ids=inputs,
             labels=labels,
@@ -66,6 +67,7 @@ class InstructionTuningTests(unittest.TestCase):
             "training_allowed": approved,
             "owner_approval": approved,
             "privacy_reviewed": approved,
+            "tokenizer_path": str(tokenizer_path),
             "tokenizer_sha256": sha256_file(tokenizer_path),
             "dataset_path": "instructions.npz",
             "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
