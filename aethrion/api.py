@@ -86,7 +86,7 @@ def _text_for_safety(result: Any) -> str:
     if isinstance(rows, list):
         for row in rows:
             if isinstance(row, dict):
-                for key in ("text", "passage", "snippet", "content"):
+                for key in ("text", "passage", "snippet", "content", "excerpt", "title", "description"):
                     value = row.get(key)
                     if isinstance(value, str) and value.strip():
                         pieces.append(value)
