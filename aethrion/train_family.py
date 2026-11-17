@@ -67,13 +67,11 @@ def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
         tokenizer = (repo / str(config.get("tokenizer_path", ""))).resolve()
         report = repo / "data" / "processed" / "corpus-report.json"
         source_review = repo / "data" / "processed" / "privacy_review" / "source_review.csv"
-        from aethrion.prepare_data import validate_training_approval
-        validate_training_approval(
-            dataset_manifest, source_manifest, source_root, corpus, report,
+        from aethrion.tokenizer import validate_tokenizer_provenance
+        validate_tokenizer_provenance(
+            tokenizer, corpus, dataset_manifest, source_manifest, source_root, report,
             source_review if source_review.is_file() else None,
         )
-        if not tokenizer.is_file():
-            raise FamilyTrainingError(f"BASE tokenizer is missing: {tokenizer}")
         output_dir = _resolve_output_dir(repo, config.get("output_dir", "artifacts"))
         command = [
             sys.executable, "-m", "aethrion.train",
