@@ -30,30 +30,44 @@ class CorpusPreparationTests(unittest.TestCase):
     def test_manifest_pipeline_deduplicates_and_filters_email(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
-            (root / "source.txt").write_text(
-                ("Bu, AETHRION için yeterince uzun bir Türkçe eğitim cümlesidir.\n") * 2
-                + "İkinci ve farklı bir Türkçe eğitim örneği burada bulunuyor.\n"
+            first = "Bu, AETHRION için yeterince uzun bir Türkçe eğitim cümlesidir."
+            (root / "source-a.txt").write_text((first + "\n") * 2, encoding="utf-8")
+            (root / "source-b.txt").write_text(
+                "İkinci ve farklı bir Türkçe eğitim örneği burada bulunuyor.\n"
                 + "İletişim test@example.com olan kayıt dışarıda kalmalıdır.\n",
                 encoding="utf-8",
             )
+            (root / "source-c.txt").write_text(
+                "Üçüncü ve bağımsız bir Türkçe eğitim örneği de burada bulunuyor.\n",
+                encoding="utf-8",
+            )
             manifest = root / "sources.json"
-            manifest.write_text(json.dumps({"sources": [{
-                "source_id": "unit-test",
-                "path": "source.txt",
-                "license": "Synthetic unit-test fixture",
-                "permitted_uses": "training permitted for unit-test fixture only",
-                "allow_training": True,
-            }]}), encoding="utf-8")
+            manifest.write_text(json.dumps({"sources": [
+                {"source_id": "unit-a", "path": "source-a.txt",
+                 "license": "Synthetic unit-test fixture",
+                 "permitted_uses": "training permitted for unit-test fixture only",
+                 "allow_training": True},
+                {"source_id": "unit-b", "path": "source-b.txt",
+                 "license": "Synthetic unit-test fixture",
+                 "permitted_uses": "training permitted for unit-test fixture only",
+                 "allow_training": True},
+                {"source_id": "unit-c", "path": "source-c.txt",
+                 "license": "Synthetic unit-test fixture",
+                 "permitted_uses": "training permitted for unit-test fixture only",
+                 "allow_training": True},
+            ]}), encoding="utf-8")
             output = root / "out/corpus.txt"
             report_path = root / "out/report.json"
             report = build_corpus(
                 root, manifest, output, report_path, seed=7, min_chars=10,
                 min_records=1, dataset_manifest_path=self._write_dataset_manifest(root),
             )
-            self.assertEqual(report["totals"]["records_kept"], 2)
+            self.assertEqual(report["totals"]["records_kept"], 3)
             self.assertEqual(report["totals"]["duplicates"], 1)
             self.assertEqual(report["totals"]["email_like_records_excluded"], 1)
-            self.assertEqual(len(output.read_text(encoding="utf-8").splitlines()), 2)
+            self.assertEqual(len(output.read_text(encoding="utf-8").splitlines()), 3)
+            self.assertEqual(set(report["splits"]), {"train", "validation", "test"})
+            self.assertTrue(all(Path(item["path"]).is_file() for item in report["splits"].values()))
             self.assertTrue(report_path.exists())
 
     def test_rejects_unapproved_source(self):
@@ -73,10 +87,15 @@ class CorpusPreparationTests(unittest.TestCase):
 
     def _write_url_source(self, root: Path):
         source = root / "mixed.jsonl"
-        source.write_text(json.dumps({
-            "url": "https://example.org/article",
-            "text": "Bu kayıt kaynak alan adı onayı olmadan eğitime giremez.",
-        }, ensure_ascii=False) + "\n", encoding="utf-8")
+        rows = [
+            {"url": "https://a.example.org/article", "text": "Birinci kaynak alan adı için yeterince uzun eğitim metni."},
+            {"url": "https://b.example.org/article", "text": "İkinci bağımsız alan adı için yeterince uzun metin."},
+            {"url": "https://c.example.org/article", "text": "Üçüncü ayrı alan adı için yeterince uzun metin."},
+        ]
+        source.write_text(
+            "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
+            encoding="utf-8",
+        )
         manifest = root / "sources.json"
         manifest.write_text(json.dumps({"sources": [{
             "source_id": "mixed-test",
@@ -137,23 +156,27 @@ class CorpusPreparationTests(unittest.TestCase):
                     "ai_training_permission", "attribution_required", "review_status",
                 ])
                 writer.writeheader()
-                writer.writerow({
-                    "domain": "example.org",
-                    "license_name": "CC0",
-                    "license_evidence_url": "https://example.org/license",
-                    "rights_holder": "Example rights holder",
-                    "ai_training_permission": "YES",
-                    "attribution_required": "NO",
-                    "review_status": "APPROVED",
-                })
+                for domain in ("a.example.org", "b.example.org", "c.example.org"):
+                    writer.writerow({
+                        "domain": domain,
+                        "license_name": "CC0",
+                        "license_evidence_url": f"https://{domain}/license",
+                        "rights_holder": "Example rights holder",
+                        "ai_training_permission": "YES",
+                        "attribution_required": "NO",
+                        "review_status": "APPROVED",
+                    })
             report = build_corpus(
                 root, root / "sources.json", root / "out/corpus.txt",
                 root / "out/report.json", min_chars=10, min_records=1,
                 source_review_path=review,
                 dataset_manifest_path=self._write_dataset_manifest(root),
             )
-            self.assertEqual(report["domain_review"][0]["domain"], "example.org")
-            self.assertEqual(report["domain_review"][0]["records"], 1)
+            self.assertEqual(
+                {item["domain"] for item in report["domain_review"]},
+                {"a.example.org", "b.example.org", "c.example.org"},
+            )
+            self.assertTrue(all(item["records"] == 1 for item in report["domain_review"]))
 
 
     def test_dataset_manifest_requires_exact_boolean_true(self):
