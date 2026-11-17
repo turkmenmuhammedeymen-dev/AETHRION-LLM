@@ -60,7 +60,10 @@ def _build_model(model_id: str, config: dict[str, Any]) -> nn.Module:
 def _to_batch(arrays: dict[str, np.ndarray], keys: list[str], indices: torch.Tensor,
               device: torch.device) -> dict[str, torch.Tensor]:
     batch: dict[str, torch.Tensor] = {}
-    index_np = indices.detach().cpu().numpy()
+    if isinstance(indices, torch.Tensor):
+        index_np = indices.detach().cpu().numpy()
+    else:
+        index_np = np.asarray(indices, dtype=np.int64)
     for key in keys:
         value = np.asarray(arrays[key][index_np])
         tensor = torch.from_numpy(value.copy())
