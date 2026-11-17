@@ -86,7 +86,7 @@ class _FakeSafetyRuntime:
 
     def classify_safety(self, text):
         self.reviewed.append(text)
-        return {"decision": self.decisions.get(text, "ALLOW")}
+        return {"decision": self.decisions.get(text, "ALLOW"), "confidence": 0.99}
 
     def handle(self, capability, request):
         if capability == "safety":
@@ -131,6 +131,23 @@ class SafeRuntimeGateTests(unittest.TestCase):
             router.dispatch("chat", CapabilityRequest("benign prompt", {}))
         self.assertEqual(runtime.reviewed, ["benign prompt", "generated unsafe output"])
 
+
+
+    def test_safe_low_or_invalid_confidence_never_allows(self):
+        class _LowConfidenceRuntime(_FakeSafetyRuntime):
+            def classify_safety(self, text):
+                self.reviewed.append(text)
+                return {"decision": "ALLOW", "confidence": 0.4}
+        runtime = _LowConfidenceRuntime({"safety": "ready"})
+        with self.assertRaises(CapabilityUnavailable):
+            api._require_safety_allow(runtime, "uncertain")
+        class _InvalidConfidenceRuntime(_FakeSafetyRuntime):
+            def classify_safety(self, text):
+                self.reviewed.append(text)
+                return {"decision": "ALLOW", "confidence": float("nan")}
+        runtime = _InvalidConfidenceRuntime({"safety": "ready"})
+        with self.assertRaises(CapabilityUnavailable):
+            api._require_safety_allow(runtime, "invalid score")
 
     def test_safe_chunk_gate_checks_every_segment(self):
         runtime = _FakeSafetyRuntime({"safety": "ready"})
