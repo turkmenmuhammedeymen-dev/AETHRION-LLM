@@ -308,6 +308,60 @@ def build_corpus(
     return report
 
 
+
+def validate_training_approval(
+    dataset_manifest_path: Path,
+    source_manifest_path: Path,
+    input_dir: Path,
+    source_review_path: Path | None = None,
+) -> None:
+    """Re-check every training permission immediately before model training.
+
+    The training CLI calls this independently of the corpus-preparation pipeline,
+    so invoking aethrion.train directly cannot bypass the dataset/source gate.
+    """
+    require_training_enabled(dataset_manifest_path)
+    if not source_manifest_path.is_file():
+        raise ValueError(f"Training blocked: source manifest does not exist: {source_manifest_path}")
+
+    sources = load_sources_manifest(source_manifest_path, input_dir)
+    if not sources:
+        raise ValueError("Training blocked: source manifest contains no approved sources.")
+
+    domain_reviews = load_domain_review(source_review_path) if source_review_path else None
+    pending_domains = (
+        sorted(domain for domain, review in domain_reviews.items() if not review["approved"])
+        if domain_reviews is not None else []
+    )
+    if pending_domains:
+        raise ValueError(
+            "Training blocked: source review contains unapproved domains: "
+            + ", ".join(pending_domains[:20])
+        )
+
+    for source in sources:
+        source_path = source["_resolved_path"]
+        for line_number, _, metadata in iter_records(source_path):
+            if "url" not in metadata:
+                continue
+            url = metadata.get("url")
+            parsed = urlparse(url) if isinstance(url, str) else None
+            domain = (parsed.hostname or "").lower().rstrip(".") if parsed else ""
+            if parsed is None or parsed.scheme not in {"http", "https"} or not domain:
+                raise ValueError(
+                    f"Training blocked: invalid source URL in {source_path.name}:{line_number}"
+                )
+            if domain_reviews is None:
+                raise ValueError(
+                    "Training blocked: URL-attributed records require --source-review."
+                )
+            review = domain_reviews.get(domain)
+            if review is None or not review["approved"]:
+                raise ValueError(
+                    f"Training blocked: hostname has no evidence-backed approval: {domain}"
+                )
+
+
 def main():
     parser = argparse.ArgumentParser(description="Prepare an approved AETHRION text corpus.")
     parser.add_argument("--input", required=True)
