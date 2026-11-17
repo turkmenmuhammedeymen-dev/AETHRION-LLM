@@ -30,6 +30,8 @@ class NativeResearchIndexTests(unittest.TestCase):
             "index_allowed": approved,
             "owner_approval": approved,
             "privacy_reviewed": approved,
+            "records_path": "records.jsonl",
+            "records_sha256": hashlib.sha256(records.read_bytes()).hexdigest(),
             "sources": [{
                 "source_id": "source-1",
                 "source_path": "source.txt",
@@ -62,6 +64,17 @@ class NativeResearchIndexTests(unittest.TestCase):
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
             self.assertEqual(metadata[0]["source_uri"], "https://example.invalid/source")
             self.assertEqual(metadata[0]["license"], "Test fixture license")
+
+    def test_records_jsonl_must_match_approved_hash(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            records, approval, tokenizer = self._fixture(root)
+            records.write_text('{"doc_id":"tampered"}\\n', encoding="utf-8")
+            with self.assertRaisesRegex(ResearchIndexError, "records JSONL SHA-256"):
+                build_local_research_index(
+                    records, approval, tokenizer, root / "artifacts" / "research",
+                    chunk_tokens=64, project_root=root
+                )
 
     def test_unapproved_index_use_is_blocked(self):
         with tempfile.TemporaryDirectory() as directory:
