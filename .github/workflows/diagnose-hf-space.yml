@@ -4,6 +4,7 @@ on:
     branches: ["main"]
     paths:
       - ".github/workflows/diagnose-hf-space.yml"
+      - "hf_space/**"
   workflow_dispatch:
 permissions:
   contents: read
@@ -58,20 +59,25 @@ jobs:
                   print(f"{label}_ERROR={type(exc).__name__}: {exc}", flush=True)
 
           url = "https://vizyon2027-aethrion-llm.hf.space"
+          headers = {"Authorization": f"Bearer {token}"}
           print("\n===== HTTP HEALTH CHECK =====", flush=True)
           try:
-              response = requests.get(url + "/config", headers={"Authorization": f"Bearer {token}"}, timeout=30)
-              print(f"SPACE_HTTP_STATUS={response.status_code}", flush=True)
-              print(f"SPACE_CONFIG_CONTENT_TYPE={response.headers.get('content-type')}", flush=True)
-              if response.status_code != 200:
-                  print(response.text[:3000], flush=True)
-                  sys.exit(4)
+              for endpoint in ("/", "/config"):
+                  response = requests.get(url + endpoint, headers=headers, timeout=30)
+                  print(f"SPACE_HTTP_{endpoint.replace('/', 'ROOT') or 'ROOT'}={response.status_code}", flush=True)
+                  if response.status_code != 200:
+                      print(response.text[:3000], flush=True)
+                      sys.exit(4)
+                  if endpoint == "/config":
+                      config = response.json()
+                      components = config.get("components", [])
+                      print(f"GRADIO_COMPONENT_COUNT={len(components)}", flush=True)
+                      if len(components) < 20:
+                          raise RuntimeError("Live Gradio config is missing expected UI components.")
           except Exception as exc:
               print(f"SPACE_HTTP_ERROR={type(exc).__name__}: {exc}", flush=True)
               sys.exit(4)
 
-          if stage != "RUNNING":
-              print(f"SPACE_NOT_RUNNING_FINAL_STAGE={stage}", flush=True)
-              sys.exit(3)
+          print(f"SPACE_RUNTIME_STAGE_AT_CHECK={stage}", flush=True)
           print("SPACE_RUNTIME_DIAGNOSTICS_OK", flush=True)
           PY
