@@ -1,3 +1,6 @@
+import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -26,6 +29,30 @@ class TokenizerTests(unittest.TestCase):
             path.write_text('{"format":"aethrion-byte-bpe-v1","merges":[[999,1]]}', encoding="utf-8")
             with self.assertRaises(ValueError):
                 ByteBPETokenizer.load(path)
+
+    def test_tokenizer_cli_blocks_without_dataset_approval(self):
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            work = Path(directory)
+            corpus = work / "corpus.txt"
+            corpus.write_text(("Synthetic test fixture only. " * 20), encoding="utf-8")
+            raw = work / "raw"
+            raw.mkdir()
+            dataset = work / "dataset.json"
+            dataset.write_text(json.dumps({"training_allowed": False}), encoding="utf-8")
+            sources = work / "sources.json"
+            sources.write_text(json.dumps({"sources": []}), encoding="utf-8")
+            output = work / "tokenizer.json"
+            command = [
+                sys.executable, "-m", "aethrion.tokenizer",
+                "--train", str(corpus), "--output", str(output),
+                "--dataset-manifest", str(dataset), "--source-manifest", str(sources),
+                "--source-root", str(raw), "--corpus-report", str(work / "missing-report.json"),
+            ]
+            result = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=30)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Training blocked", result.stdout + result.stderr)
+            self.assertFalse(output.exists(), "Blocked tokenizer command must not write an artifact.")
 
 if __name__ == "__main__":
     unittest.main()
