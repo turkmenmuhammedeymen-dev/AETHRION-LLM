@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -6,6 +7,7 @@ import unittest
 import numpy as np
 
 from aethrion.specialist_prepare import PreparationError, _split, prepare_text_dataset
+from aethrion.tokenizer import ByteBPETokenizer
 from aethrion.specialist_data import validate_specialist_dataset, SpecialistDataError
 
 
@@ -48,11 +50,13 @@ class SpecialistPreparationTests(unittest.TestCase):
                 for index in range(90)
             ]
             self._write_jsonl(source, rows)
+            base_tokenizer = root / "base-tokenizer.json"
+            ByteBPETokenizer().save(base_tokenizer)
             result = prepare_text_dataset(
                 source, model_id="chat", output_root=root / "prepared",
                 license_name="Unit test only", permitted_use="CI fixture only",
                 evidence_uri="unit-test://source", source_uri="unit-test://dataset",
-                max_length=64,
+                max_length=64, tokenizer_source_path=base_tokenizer,
             )
             with np.load(result["dataset"], allow_pickle=False) as arrays:
                 self.assertEqual(set(arrays.files), {"sample_id", "group_id", "split", "input_ids", "labels"})
@@ -65,6 +69,8 @@ class SpecialistPreparationTests(unittest.TestCase):
                 self.assertEqual(manifest["modality"], "text")
                 self.assertFalse(manifest["training_allowed"])
                 self.assertFalse(manifest["owner_approval"])
+                self.assertEqual(manifest["tokenizer_sha256"], hashlib.sha256(base_tokenizer.read_bytes()).hexdigest())
+                self.assertEqual(Path(result["tokenizer"]).read_bytes(), base_tokenizer.read_bytes())
                 self.assertEqual(sum(result["split_counts"].values()), len(rows))
                 group_splits = {}
                 for group_id, split in zip(arrays["group_id"].tolist(), arrays["split"].tolist()):
