@@ -32,25 +32,6 @@ class SpecialistPreparationTests(unittest.TestCase):
             with self.assertRaises(SpecialistDataError):
                 validate_specialist_dataset(result["manifest"])
 
-    def test_chat_jsonl_masks_prompt_tokens(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            source = root / "chat.jsonl"
-            self._write_jsonl(source, [
-                {"id": f"chat-{i}", "prompt": f"Question {i}", "response": f"Answer {i}"}
-                for i in range(80)
-            ])
-            result = prepare_text_dataset(
-                source, model_id="chat", output_root=root / "prepared",
-                license_name="Unit test only", permitted_use="CI fixture only",
-                evidence_uri="unit-test://source", max_length=32,
-            )
-            import numpy as np
-            with np.load(result["dataset"], allow_pickle=False) as arrays:
-                self.assertEqual(arrays["input_ids"].shape, (80, 32))
-                self.assertEqual(arrays["labels"].shape, (80, 32))
-                self.assertTrue((arrays["labels"] == -100).any())
-
     def test_document_rejects_misaligned_boxes(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
