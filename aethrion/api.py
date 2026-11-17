@@ -26,6 +26,46 @@ class FileRequest(BaseModel):
     content_base64:str=Field(min_length=1,max_length=12_000_000)
     question:str=Field(default="Summarize and analyze this file.",max_length=2000)
 
+
+def _require_safety_allow(runtime: Any, text: str) -> dict[str, Any]:
+    """Fail closed unless the independently released SAFE model returns ALLOW."""
+    if not isinstance(text, str) or not text.strip():
+        raise CapabilityUnavailable("AETHRION-SAFE received no reviewable text; request stopped.")
+    try:
+        if runtime.registry.status(Capability.SAFETY.value) != "ready":
+            raise CapabilityUnavailable("AETHRION-SAFE is not trained and released; request stopped.")
+        verdict = runtime.classify_safety(text)
+    except CapabilityUnavailable:
+        raise
+    except Exception as exc:
+        raise CapabilityUnavailable("AETHRION-SAFE inference failed; request stopped.") from exc
+    decision = verdict.get("decision") if isinstance(verdict, dict) else None
+    if decision != "ALLOW":
+        label = decision if decision in {"REVIEW", "BLOCK"} else "UNKNOWN"
+        raise CapabilityUnavailable(f"AETHRION-SAFE returned {label}; request stopped.")
+    return verdict
+
+
+def _text_for_safety(result: Any) -> str:
+    """Extract user-visible textual output for a second safety pass."""
+    if not isinstance(result, dict):
+        return ""
+    pieces = []
+    for key in ("text", "extractive_span", "answer"):
+        value = result.get(key)
+        if isinstance(value, str) and value.strip():
+            pieces.append(value)
+    rows = result.get("results")
+    if isinstance(rows, list):
+        for row in rows:
+            if isinstance(row, dict):
+                for key in ("text", "passage", "snippet", "content"):
+                    value = row.get(key)
+                    if isinstance(value, str) and value.strip():
+                        pieces.append(value)
+    return "\\n".join(pieces)
+
+
 def get_native_model_statuses(manifest: str | Path | None = None) -> dict[str, str]:
     """Report verified per-model release status without loading model weights."""
     selected = Path(manifest or os.environ.get("AETHRION_MODEL_MANIFEST", "models/manifest.json"))
@@ -55,11 +95,23 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
         Capability.ASR, Capability.TTS, Capability.THREE_D, Capability.RESEARCH,
         Capability.DOCUMENT, Capability.SAFETY,
     )
+    safety_ready = runtime.registry.status(Capability.SAFETY.value) == "ready"
     for capability in supported:
         if runtime.registry.status(capability.value) != "ready":
             continue
+        # No capability except the SAFE classifier is exposed until SAFE itself
+        # has a verified local release.
+        if capability != Capability.SAFETY and not safety_ready:
+            continue
         def handler(request: CapabilityRequest, selected=capability.value):
-            return runtime.handle(selected,request)
+            if selected != Capability.SAFETY.value:
+                _require_safety_allow(runtime, request.prompt)
+            result = runtime.handle(selected, request)
+            if selected != Capability.SAFETY.value:
+                output_text = _text_for_safety(result)
+                if output_text:
+                    _require_safety_allow(runtime, output_text)
+            return result
         router.register(capability,runtime.registry.resolve(capability.value).architecture,handler)
     return router,providers
 
@@ -93,6 +145,7 @@ def analyze_file(request:FileRequest):
     runtime=providers.get("runtime")
     if runtime is None or Capability.DOCUMENT.value not in router.available():
         raise HTTPException(status_code=503,detail="AETHRION-DOC is not trained and released.")
+    _require_safety_allow(runtime, request.question)
     try:
         raw=base64.b64decode(request.content_base64,validate=True)
     except (ValueError,TypeError) as exc:
@@ -103,6 +156,9 @@ def analyze_file(request:FileRequest):
         handle.write(raw); handle.flush()
         try:
             result=runtime.analyze_document(handle.name)
+            _require_safety_allow(runtime, str(result.get("text", "")))
+        except CapabilityUnavailable:
+            raise HTTPException(status_code=503,detail="AETHRION-SAFE did not allow this document output.")
         except Exception as exc:
             raise HTTPException(status_code=422,detail=f"Native document analysis failed: {type(exc).__name__}") from exc
     result["question"]=request.question
@@ -120,6 +176,7 @@ def generate_3d(request:dict[str,Any]):
     prompt=request.get("prompt")
     if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>4000:
         raise HTTPException(status_code=400,detail="prompt must contain 1–4000 characters.")
+    _require_safety_allow(runtime, prompt)
     path=None
     try:
         path=runtime.generate_point_cloud(prompt,inference_steps=min(int(request.get("inference_steps",50)),100))
@@ -142,6 +199,7 @@ async def vision_compare(file:UploadFile=File(...),text:str=Form(...)):
     suffix=Path(file.filename or "image.png").suffix.lower()
     if suffix not in {".png",".jpg",".jpeg",".webp"}:
         raise HTTPException(status_code=400,detail="Supported image formats are PNG, JPG and WebP.")
+    _require_safety_allow(runtime, text)
     with tempfile.NamedTemporaryFile(suffix=suffix) as handle:
         handle.write(raw); handle.flush()
         try: score=runtime.image_text_similarity(handle.name,text)
@@ -162,7 +220,11 @@ async def audio_transcriptions(file:UploadFile=File(...)):
         raise HTTPException(status_code=400,detail="Native ASR currently accepts PCM WAV only.")
     with tempfile.NamedTemporaryFile(suffix=".wav") as handle:
         handle.write(raw); handle.flush()
-        try: transcript=runtime.transcribe_wav(handle.name)
+        try:
+            transcript=runtime.transcribe_wav(handle.name)
+            _require_safety_allow(runtime, transcript)
+        except CapabilityUnavailable:
+            raise HTTPException(status_code=503,detail="AETHRION-SAFE did not allow this transcript.")
         except Exception as exc: raise HTTPException(status_code=422,detail=f"Native ASR failed: {type(exc).__name__}") from exc
     return {"capability":"asr","text":transcript}
 
@@ -174,6 +236,7 @@ def audio_speech(request:dict[str,Any]):
     text=request.get("text")
     if not isinstance(text,str) or not text.strip() or len(text)>4096:
         raise HTTPException(status_code=400,detail="text must contain 1–4096 characters.")
+    _require_safety_allow(runtime, text)
     path=None
     try:
         path=runtime.synthesize_wav(text)
@@ -192,7 +255,11 @@ async def documents_extract(file: UploadFile = File(...)):
     if len(raw)>8*1024*1024: raise HTTPException(status_code=413,detail="Document exceeds 8 MiB.")
     with tempfile.NamedTemporaryFile(suffix=suffix) as handle:
         handle.write(raw); handle.flush()
-        try: content=extract_document_text(handle.name)
+        try:
+            content=extract_document_text(handle.name)
+            _require_safety_allow(runtime, content)
+        except CapabilityUnavailable:
+            raise HTTPException(status_code=503,detail="AETHRION-SAFE did not allow this extracted document.")
         except (DocumentError,UnicodeError,ValueError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
     return {"filename":file.filename,"text":content}
 
@@ -211,8 +278,12 @@ async def workspace_propose(file:UploadFile=File(...),task:str=Form(...)):
     raw=await file.read(8*1024*1024+1)
     if not raw or len(raw)>8*1024*1024:
         raise HTTPException(status_code=413,detail="Project ZIP must be between 1 byte and 8 MiB.")
+    _require_safety_allow(runtime, task)
     def local_code_provider(request):
-        return runtime.generate_text("code",request.prompt,max_new_tokens=1024,temperature=0.1)
+        _require_safety_allow(runtime, request.prompt)
+        generated = runtime.generate_text("code",request.prompt,max_new_tokens=1024,temperature=0.1)
+        _require_safety_allow(runtime, _text_for_safety(generated))
+        return generated
     try:
         output,summary=ProjectWorkspaceAgent(local_code_provider).propose(raw,task)
         return Response(content=output,media_type="application/zip",
