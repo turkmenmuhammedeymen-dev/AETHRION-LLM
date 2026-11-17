@@ -75,7 +75,8 @@ def _required_text(row: dict[str, Any], key: str, row_id: str) -> str:
 
 
 def _build_arrays(model_id: str, rows: list[dict[str, Any]], tokenizer: ByteBPETokenizer,
-                  max_length: int, reason_classes: int, seed: int) -> dict[str, np.ndarray]:
+                  max_length: int, reason_classes: int, seed: int,
+                  layout_vocab_size: int, tag_classes: int) -> dict[str, np.ndarray]:
     ids = [str(row["id"]) for row in rows]
     splits = [_split(str(row.get("group_id", item)), seed) for item, row in zip(ids, rows)]
     arrays: dict[str, np.ndarray] = {
@@ -134,6 +135,10 @@ def _build_arrays(model_id: str, rows: list[dict[str, Any]], tokenizer: ByteBPET
                 raise PreparationError(f"Record {row_id!r} boxes must be normalized to [0,1].")
             if any(type(x) is not int for x in raw_layouts + raw_tags):
                 raise PreparationError(f"Record {row_id!r} layout and tag IDs must be integers.")
+            if any(x < 0 or x >= layout_vocab_size for x in raw_layouts):
+                raise PreparationError(f"Record {row_id!r} layout ID exceeds layout_vocab_size.")
+            if any(x < 0 or x >= tag_classes for x in raw_tags):
+                raise PreparationError(f"Record {row_id!r} tag ID exceeds tag_classes.")
             tokens.append(_pad(token_ids, max_length))
             boxes.append(raw_boxes + [[0.0, 0.0, 0.0, 0.0]] * (max_length - count))
             layouts.append(_pad(raw_layouts, max_length))
@@ -153,16 +158,19 @@ def prepare_text_dataset(
     license_name: str,
     permitted_use: str,
     evidence_uri: str,
+    source_uri: str,
     seed: int = 1337,
     vocab_size: int = 2048,
     max_length: int = 512,
     reason_classes: int = 16,
+    layout_vocab_size: int = 32,
+    tag_classes: int = 32,
 ) -> dict[str, Any]:
     if model_id not in SUPPORTED:
         raise PreparationError(f"Unsupported text preparation model: {model_id}")
-    if not all(isinstance(v, str) and v.strip() for v in (license_name, permitted_use, evidence_uri)):
+    if not all(isinstance(v, str) and v.strip() for v in (license_name, permitted_use, evidence_uri, source_uri)):
         raise PreparationError("License, permitted_use and evidence_uri must be documented; approvals stay false.")
-    if max_length < 2 or vocab_size < 256 or reason_classes < 1:
+    if max_length < 2 or vocab_size < 256 or reason_classes < 1 or layout_vocab_size < 1 or tag_classes < 1:
         raise PreparationError("Invalid tokenizer or sequence dimensions.")
     source = Path(input_path).resolve()
     rows = _read_jsonl(source)
@@ -175,7 +183,8 @@ def prepare_text_dataset(
         raise PreparationError("No text fields found to train the tokenizer.")
     tokenizer = ByteBPETokenizer()
     tokenizer.train("\n".join(corpus_fields), vocab_size=vocab_size)
-    arrays = _build_arrays(model_id, rows, tokenizer, max_length, reason_classes, seed)
+    arrays = _build_arrays(model_id, rows, tokenizer, max_length, reason_classes, seed,
+                           layout_vocab_size, tag_classes)
     split_names = arrays["split"].tolist()
     if any(name not in split_names for name in SPLITS):
         raise PreparationError("Deterministic split produced an empty split; add records or change the seed.")
@@ -196,7 +205,7 @@ def prepare_text_dataset(
     manifest_path = destination.parent / f"{model_id}.json"
     source_record = {
         "source_id": f"{model_id}-input-jsonl",
-        "source_uri": source.as_uri(),
+        "source_uri": source_uri,
         "source_path": f"{model_id}/source.jsonl",
         "sha256": _sha256(source_copy),
         "license": license_name,
@@ -224,6 +233,8 @@ def prepare_text_dataset(
             "seed": seed,
             "max_length": max_length,
             "vocab_size": tokenizer.vocab_size,
+            "layout_vocab_size": layout_vocab_size,
+            "tag_classes": tag_classes,
             "record_count": len(rows),
             "split_counts": {name: split_names.count(name) for name in SPLITS},
             "automatic_approval": False,
@@ -251,16 +262,20 @@ def main() -> None:
     parser.add_argument("--license", required=True, dest="license_name")
     parser.add_argument("--permitted-use", required=True)
     parser.add_argument("--evidence-uri", required=True)
+    parser.add_argument("--source-uri", required=True, help="Canonical URL or dataset identifier for the reviewed source.")
     parser.add_argument("--seed", type=int, default=1337)
     parser.add_argument("--vocab-size", type=int, default=2048)
     parser.add_argument("--max-length", type=int, default=512)
     parser.add_argument("--reason-classes", type=int, default=16)
+    parser.add_argument("--layout-vocab-size", type=int, default=32)
+    parser.add_argument("--tag-classes", type=int, default=32)
     args = parser.parse_args()
     result = prepare_text_dataset(
         args.input, model_id=args.model, output_root=args.output_root,
         license_name=args.license_name, permitted_use=args.permitted_use,
-        evidence_uri=args.evidence_uri, seed=args.seed, vocab_size=args.vocab_size,
+        evidence_uri=args.evidence_uri, source_uri=args.source_uri, seed=args.seed, vocab_size=args.vocab_size,
         max_length=args.max_length, reason_classes=args.reason_classes,
+        layout_vocab_size=args.layout_vocab_size, tag_classes=args.tag_classes,
     )
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
