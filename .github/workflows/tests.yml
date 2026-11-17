@@ -35,3 +35,63 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Synthetic end-to-end smoke test
         run: python -m aethrion.smoke_test
+
+  space-runtime:
+    name: Hugging Face Space runtime smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU PyTorch
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "numpy>=1.24"
+          python -m pip install "torch>=2.2" --index-url https://download.pytorch.org/whl/cpu
+      - name: Install Space dependencies
+        run: |
+          grep -v -E '^torch([<=>]|$)' hf_space/requirements.txt > /tmp/space-requirements.txt
+          python -m pip install -r /tmp/space-requirements.txt
+      - name: Import and construct the actual Space UI
+        working-directory: hf_space
+        env:
+          PYTHONPATH: .
+        run: |
+          python - <<'PY'
+          import os
+          import tempfile
+          from pathlib import Path
+          import gradio as gr
+          import app
+
+          assert isinstance(app.demo, gr.Blocks), "Gradio Blocks UI was not constructed"
+          config = app.demo.get_config_file()
+          assert isinstance(config, dict) and config.get("components"), "Gradio UI config is empty"
+          assert len(config["components"]) >= 20, "Expected all Space tabs and controls in UI config"
+
+          status = app.status()
+          for capability in ("chat", "code", "image", "3d", "research", "file_analysis", "audio"):
+              assert capability in status, f"Missing capability status: {capability}"
+
+          assert "checkpoint/tokenizer" in app.chat("hello", [] ).lower()
+          assert "configure" in app.code("write a function").lower()
+          assert "configure" in app.research("latest AI research").lower()
+          assert "configure" in app.three_d_text("a small tree")[0].lower()
+          assert "configure" in app.analyse(None, "summarize").lower()
+          assert "configure" in app.voice(None)[0].lower()
+
+          with tempfile.TemporaryDirectory() as temp:
+              created = app.make_doc("AETHRION smoke test", "first paragraph\n\nsecond paragraph", "docx")
+              extracted = app.extract_doc(created)
+              assert "first paragraph" in extracted and "second paragraph" in extracted
+              message, edited = app.edit_doc(created, "first paragraph", "updated paragraph", "docx")
+              assert edited and "created" in message.lower()
+              edited_text = app.extract_doc(edited)
+              assert "updated paragraph" in edited_text
+              Path(created).unlink(missing_ok=True)
+              Path(edited).unlink(missing_ok=True)
+
+          print("SPACE_RUNTIME_SMOKE_TEST_OK")
+          PY
