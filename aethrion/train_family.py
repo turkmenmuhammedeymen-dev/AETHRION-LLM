@@ -101,6 +101,37 @@ def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
     }
 
 
+
+def _training_outcome(output_dir: Path, model_id: str, returncode: int) -> str:
+    """Derive status from the trainer's durable report, never from exit code alone."""
+    if returncode != 0:
+        return "training_failed_not_released"
+    report_path = output_dir / "training_report.json"
+    if report_path.is_file():
+        try:
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            return "training_report_invalid_not_released"
+        status = report.get("status")
+        if status == "training_complete_not_released":
+            return "training_completed_not_released"
+        if status == "training_interrupted_not_released":
+            return "training_interrupted_not_released"
+        if status == "instruction_tuning_complete_not_released":
+            return "instruction_tuning_completed_not_released"
+        return "trainer_report_unrecognized_not_released"
+    if model_id == "chat":
+        progress_path = output_dir / "progress.json"
+        if progress_path.is_file():
+            try:
+                progress = json.loads(progress_path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, json.JSONDecodeError):
+                return "training_progress_invalid_not_released"
+            if progress.get("status") == "interrupted":
+                return "training_interrupted_not_released"
+    return "trainer_exited_without_verified_report"
+
+
 def run_family(
     root: str | Path = ".",
     *,
@@ -131,8 +162,9 @@ def run_family(
             rows.append({
                 **plan,
                 "command": command,
-                "status": "training_completed_not_released" if completed.returncode == 0
-                          else "training_failed_not_released",
+                "status": _training_outcome(
+                    repo / plan["output_dir"], model_id, int(completed.returncode)
+                ),
                 "returncode": int(completed.returncode),
             })
         except Exception as exc:
@@ -144,7 +176,13 @@ def run_family(
             })
 
     started = execute and any(
-        row.get("status") in {"training_completed_not_released", "training_failed_not_released"}
+        row.get("status") in {
+            "training_completed_not_released", "training_failed_not_released",
+            "training_interrupted_not_released", "trainer_exited_without_verified_report",
+            "training_report_invalid_not_released", "training_progress_invalid_not_released",
+            "trainer_report_unrecognized_not_released",
+            "instruction_tuning_completed_not_released",
+        }
         for row in rows
     )
     return {
