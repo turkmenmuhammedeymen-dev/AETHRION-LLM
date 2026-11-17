@@ -1,71 +1,108 @@
 # AETHRION-LLM roadmap
 
-## 0.1 — research foundation
+This roadmap tracks implementation, not claims of model quality. A checkbox
+for architecture or code does not mean a trained model is available. No model
+may be released until its dataset, checkpoint, held-out evaluation, safety
+review and model card pass the registry gates.
 
-- [x] Randomly initialized decoder-only causal Transformer
-- [x] Byte-level BPE tokenizer
-- [x] Text/JSONL corpus preparation with deduplication and audit reports
-- [x] Single-GPU training loop, validation, and checkpoint/resume
-- [x] Sampling, terminal inference, and optional HTTP API
-- [x] Unit and synthetic smoke-test foundations
+## Foundation — AETHRION-BASE
 
-## 0.2 — data governance and training reliability
+- [x] From-scratch decoder-only Transformer architecture.
+- [x] Byte-level BPE tokenizer trained from supplied corpus.
+- [x] Corpus preparation, provenance manifest and fail-closed training gate.
+- [x] Resumable pretraining, atomic checkpoint and SHA-256 integrity checks.
+- [x] Evaluation metric reporting and synthetic training smoke test.
+- [x] Response-only instruction-tuning entrypoint and ignored-prompt loss.
+- [ ] Human-reviewed lawful multilingual corpus with adequate scale.
+- [ ] Full pretraining run on approved data and documented hardware budget.
+- [ ] Instruction dataset and tuning run with independent held-out evaluation.
+- [ ] Turkish/multilingual factuality, reasoning, hallucination, robustness and safety benchmarks.
+- [ ] Production model card and explicit release approval.
 
-- [x] Dataset-level and per-source approval manifests
-- [x] URL-hostname review for URL-attributed corpora
-- [x] Corpus checksums and held-out evaluation separation
-- [ ] Enforce all approval and corpus-integrity checks in direct training CLI
-- [ ] Verify checkpoint integrity, safe resume, interrupted-session recovery,
-      and durable progress reporting across supported runtimes
-- [ ] Run the complete Python matrix and training resume tests successfully
+The currently tracked general corpus manifest stays training_allowed=false.
+The test-only fixtures are not production training data.
 
-Training remains blocked while `data/processed/corpus_manifest.json` has
-`training_allowed: false`. Never change this flag just to make a run proceed.
+## Independent specialist family
 
-## 0.3 — Turkish baseline and model quality
+### AETHRION-CODE
+- [x] Separate randomly initialized causal LM architecture and config.
+- [x] Specialist training runner and dataset schema.
+- [x] Forward/loss test.
+- [ ] Permissively licensed code corpus with provenance and repository deduplication.
+- [ ] Code training, unit-test generation, repair benchmark and security review.
+- [ ] Instruction/fix evaluation on held-out repositories.
 
-- [ ] Approve a sufficiently large, licensed Turkish-first corpus
-- [ ] Review data quality, privacy, deduplication, attribution, and contamination
-- [ ] Improve tokenizer throughput and evaluate vocabulary/context choices
-- [ ] Train a small reproducible baseline and preserve resumable checkpoints
-- [ ] Add two-GPU training for the available two-T4 Kaggle environment
-- [ ] Evaluate on an independent held-out Turkish set and publish reproducible metrics
-- [ ] Add human-reviewed grammar, comprehension, summarization, reasoning, and factuality tests
+### AETHRION-VISION
+- [x] Image/text dual encoder and contrastive objective.
+- [x] Dataset schema and shape/loss smoke test.
+- [ ] Licensed image-caption and visual-QA dataset.
+- [ ] Larger visual encoder, data pipeline, training, retrieval and calibration benchmarks.
+- [ ] Visual chat/grounding integration if separately designed and evaluated.
 
-The current pilot configuration is an engineering smoke/pilot setup, not a
-high-capability production model. No trained model-quality claim is made.
+### AETHRION-IMAGE
+- [x] Text-conditioned pixel diffusion research architecture and noise-prediction loss.
+- [x] Dataset schema and smoke test.
+- [ ] Licensed high-quality image-caption and alignment data.
+- [ ] Scalable latent diffusion/flow architecture, text conditioning and sampling implementation.
+- [ ] Resolution, prompt adherence, composition, safety and memorization benchmarks.
 
-## 0.4 — instruction tuning and separate safety model
+### AETHRION-ASR
+- [x] Acoustic encoder and CTC objective.
+- [x] Native WAV decoding/resampling and log-mel feature extraction.
+- [ ] Consented, licensed multilingual speech corpus and transcript normalization.
+- [ ] Training, greedy/beam decoding, WER/CER, dialect/noise/accent evaluation.
 
-- [ ] Build a curated, licensed instruction dataset and supervised fine-tuning pipeline
-- [x] Document the independent AETHRION-SAFE classifier architecture
-- [ ] Create a separate safety dataset manifest and approval gate
-- [ ] Train and calibrate AETHRION-SAFE independently from AETHRIONLM
-- [ ] Evaluate false negatives, false positives, abstention, Turkish coverage,
-      robustness, and human-review agreement
-- [ ] Add policy-engine integration only after independent safety evaluation
+### AETHRION-TTS and AETHRION-VOCODER
+- [x] Transcript-to-mel predictor and duration objective.
+- [x] Separate vocoder architecture and training profile.
+- [x] Audio consent gate and WAV output utility.
+- [ ] Speaker-consented recordings, validated alignments and multilingual text normalization.
+- [ ] Train acoustic model and vocoder independently; verify both hashes and compatibility.
+- [ ] Naturalness, intelligibility, pronunciation, speaker-consistency and latency benchmarks.
 
-AETHRION-SAFE is planned and has no trained weights yet. It must not be described
-as an active safety barrier until its dataset, training, and evaluation are complete.
+### AETHRION-3D
+- [x] Text-conditioned point-cloud diffusion and vertex-only OBJ export.
+- [x] Separate dataset schema and training objective.
+- [ ] Licensed text/image/3D pairs with topology/texture metadata.
+- [ ] Mesh topology generation, texture/material model, geometry repair and export pipeline.
+- [ ] Geometric fidelity, topology, prompt adherence and CAD/game-engine validation.
 
-## 0.5 — multimodal capability adapters
+### AETHRION-RESEARCH
+- [x] Local query/passage dual encoder and contrastive objective.
+- [ ] Local source ingestion, provenance-preserving index, chunking and deduplication.
+- [ ] Reranking, citation grounding, freshness policy and evidence coverage benchmarks.
+- [ ] Offline-only search UI and end-to-end citation checks.
 
-- [x] Explicit capability router and provider registry
-- [x] Code, image, 3D, research, file-analysis, and turn-based audio adapters
-- [x] Gradio Space interface for the seven capability groups
-- [ ] Restore and verify the live Hugging Face Space runtime
-- [ ] Run mocked integration tests for every adapter and file operation
-- [ ] Run opt-in live provider tests and validate real output artifacts
-- [ ] Add provider-specific quotas, cost controls, retries, and observability
+### AETHRION-DOC
+- [x] Document text/layout encoder, tagging and extractive-QA heads.
+- [ ] Local OCR and layout extraction, including tables, reading order and page geometry.
+- [ ] Licensed document understanding dataset and separate training/held-out tests.
+- [ ] DOCX/PDF semantic and formatting-preserving edit pipeline.
+- [ ] Document question-answering, table, layout and OCR benchmarks.
 
-Provider adapters are not the same as locally trained AETHRION models. Live
-provider functionality remains unverified until real end-to-end tests pass.
+### AETHRION-SAFE
+- [x] Separate ALLOW/REVIEW/BLOCK classifier and reason scores.
+- [x] Separate manifest/data gate and evaluation requirements documented.
+- [ ] Qualified human-reviewed, lawful, privacy-preserving labelled safety dataset.
+- [ ] Train, calibrate and independently evaluate category-level false positives/negatives.
+- [ ] Adversarial, multilingual and abstention benchmarks; independent safety review.
+- [ ] Enable only after documented acceptance criteria and explicit release approval.
 
-## 0.6 — production serving and AETHRION integration
+## Integration and production
+- [x] Local-only model registry with strict artifact/release checks.
+- [x] Native-only API routing; no third-party model provider fallback.
+- [x] Space deployment path retains existing ZeroGPU hardware.
+- [ ] Register each specialist only after checkpoint, processor, reports and release gates are verified.
+- [ ] Complete local inference adapters and end-to-end tests for each released model.
+- [ ] Concurrency, cancellation, batching, memory, latency and failure recovery tests.
+- [ ] Auth, rate limits, quotas, upload isolation, logging and monitoring.
+- [ ] Independent security and privacy review.
+- [ ] Final release only after every advertised capability meets its own benchmark thresholds.
 
-- [ ] Add API authentication, rate limits, quotas, request logging, and monitoring
-- [ ] Harden public serving, upload validation, isolation, and secrets handling
-- [ ] Optimize inference and evaluate quantization
-- [ ] Build the separately reviewed AETHRION Gateway adapter
-- [ ] Integrate behind a feature flag and verify rollback behavior
-- [ ] Publish model card, dataset provenance, evaluation report, and release checklist
+## Compute reality
+
+Current model classes are research-scale scaffolds. The existing two-T4 Kaggle
+runtime and modest pilot configs are not sufficient evidence of parity with
+frontier chat, code, image, speech or 3D systems. Before increasing model size,
+measure actual GPU memory, storage, step time and projected cost. No paid
+hardware or training job should be started implicitly.
