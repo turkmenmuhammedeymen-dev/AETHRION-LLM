@@ -1,7 +1,7 @@
 """Bounded extraction for common document formats and LLM-assisted analysis."""
 from __future__ import annotations
 import base64,csv,io,json,zipfile
-from aethrion.document_tools import _validate_docx_archive
+from aethrion.document_tools import DocumentError, _validate_docx_archive
 from pathlib import PurePosixPath
 from xml.etree import ElementTree
 MAX_FILE_BYTES=8*1024*1024
@@ -39,7 +39,7 @@ def extract_text(filename:str,content_base64:str)->str:
                 value="".join(n.text or "" for n in p.iter() if n.tag.endswith("}t"))
                 if value: paragraphs.append(value)
         return "\n".join(paragraphs)[:200_000]
-    except (KeyError,zipfile.BadZipFile,ElementTree.ParseError) as exc: raise FileAnalysisError("Invalid DOCX document.") from exc
+    except (DocumentError,KeyError,zipfile.BadZipFile,ElementTree.ParseError) as exc: raise FileAnalysisError("Invalid DOCX document.") from exc
 
 class FileAnalysisAgent:
     def __init__(self,chat_provider): self.chat_provider=chat_provider
