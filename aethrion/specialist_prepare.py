@@ -1,8 +1,9 @@
 """Prepare auditable text-family datasets from owner-supplied JSONL records.
 
-Supported IDs: chat, code, research, document, safety.
-This tool never approves data. It always emits training_allowed=false and
-owner_approval=false; a human must review provenance, rights and privacy.
+Supported IDs: chat, code, research, document and safety. Non-CHAT text
+tokenizers are trained only on their training partition; CHAT must reuse the
+exact BASE tokenizer. This tool never approves data and always emits
+training_allowed=false and owner_approval=false.
 """
 from __future__ import annotations
 
