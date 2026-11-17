@@ -16,7 +16,8 @@ MODEL_MODALITIES = {
     "document": "document", "safety": "text",
 }
 REQUIRED_ARRAYS = {
-    "chat": {"sample_id", "split", "input_ids", "labels"},\n    "code": {"sample_id", "split", "token_ids"},
+    "chat": {"sample_id", "split", "input_ids", "labels"},
+    "code": {"sample_id", "split", "token_ids"},
     "vision": {"sample_id", "split", "images", "token_ids"},
     "image": {"sample_id", "split", "images", "token_ids"},
     "asr": {"sample_id", "split", "features", "input_lengths", "targets", "target_lengths"},
