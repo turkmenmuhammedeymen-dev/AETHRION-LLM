@@ -93,12 +93,12 @@ def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
             raise FamilyTrainingError("Training config model_id does not match the selected specialist.")
         if not isinstance(config.get("model_config"), dict) or not config["model_config"]:
             raise FamilyTrainingError("A non-empty model_config object is required.")
+        output_dir = _resolve_output_dir(repo, config.get("output_dir"))
         manifest_path = repo / "data" / "specialists" / "manifests" / f"{model_id}.json"
         from aethrion.specialist_data import validate_specialist_dataset
         approval = validate_specialist_dataset(manifest_path, require_training_approval=True)
         if approval.get("model_id") != model_id:
             raise FamilyTrainingError("Approved dataset manifest targets a different model.")
-        output_dir = _resolve_output_dir(repo, config.get("output_dir"))
         command = [
             sys.executable, "-m", "aethrion.specialist_train",
             "--config", str(config_path.relative_to(repo)),
