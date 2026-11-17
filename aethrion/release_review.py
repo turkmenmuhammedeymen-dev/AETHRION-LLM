@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from aethrion.native_registry import REQUIRED_BENCHMARKS
+from aethrion.native_registry import REQUIRED_BENCHMARKS, REQUIRED_BENCHMARK_DIRECTIONS
 
 
 class ReleaseReviewError(ValueError):
@@ -53,6 +53,7 @@ def create_release_evaluation_template(
         "benchmarks": {
             name: {
                 "metric": "",
+                "direction": REQUIRED_BENCHMARK_DIRECTIONS[model_id][name],
                 "value": None,
                 "threshold": None,
                 "passed": False,
