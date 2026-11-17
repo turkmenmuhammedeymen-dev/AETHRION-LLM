@@ -111,7 +111,7 @@ def _loss(model: nn.Module, model_id: str, batch: dict[str, torch.Tensor]) -> to
         return model.ctc_loss(batch["features"], flattened, batch["input_lengths"], lengths)
     if model_id == "tts":
         acoustic = model.acoustic_loss(
-            batch["token_ids"], batch["frame_to_token"], batch["target_mels"], batch.get("frame_mask")
+            batch["token_ids"], batch["frame_to_token"], batch["target_mels"], batch.get("frame_mask"), batch.get("token_mask")
         )
         duration = model.duration_loss(batch["token_ids"], batch["durations"], batch.get("token_mask"))
         return acoustic + 0.1 * duration
