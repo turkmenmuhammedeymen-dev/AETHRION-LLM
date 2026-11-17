@@ -154,6 +154,13 @@ class SafeRuntimeGateTests(unittest.TestCase):
             api._require_safety_allow_chunks_http(runtime, "BLOCK")
         self.assertEqual(caught.exception.status_code, 503)
 
+
+    def test_research_excerpts_are_included_in_output_safety_review(self):
+        self.assertEqual(
+            api._text_for_safety({"results": [{"title": "Title", "excerpt": "Passage"}]}),
+            "Title\\nPassage",
+        )
+
     def test_safe_classifier_route_does_not_gate_itself(self):
         router, _, runtime = self._build(
             {"safety": "ready"},
