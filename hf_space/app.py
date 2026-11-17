@@ -13,9 +13,9 @@ def _resolve_space_auth(environ=None):
     env = os.environ if environ is None else environ
     username = str(env.get("AETHRION_SPACE_USERNAME", "")).strip()
     password = str(env.get("AETHRION_SPACE_PASSWORD", ""))
-    if bool(username) != bool(password):
-        raise RuntimeError("Set both AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD.")
-    return (username, password) if username and password else None
+    if not username or not password:
+        return None
+    return (username, password)
 
 
 SPACE_AUTH = _resolve_space_auth()
@@ -82,7 +82,7 @@ def three_d_text(prompt):
 
 def three_d_image(path,texture_prompt):
     provider=providers.get("3d")
-    if not provider:return "Configure MESHY_API_KEY.",""
+    if not provider:return (_remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure MESHY_API_KEY."),""
     if not path:return "Upload a JPG, PNG or WebP reference image.",""
     try:
         r=provider.image_to_3d(path,texture_prompt or "")
