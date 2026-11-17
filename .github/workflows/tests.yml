@@ -70,6 +70,8 @@ jobs:
           config = app.demo.get_config_file()
           assert isinstance(config, dict) and config.get("components"), "Gradio UI config is empty"
           assert len(config["components"]) >= 20, "Expected all Space tabs and controls in UI config"
+          api_info = app.demo.get_api_info()
+          assert isinstance(api_info, dict), "Gradio API schema generation failed"
 
           status = app.status()
           for capability in ("chat", "code", "image", "3d", "research", "file_analysis", "audio"):
