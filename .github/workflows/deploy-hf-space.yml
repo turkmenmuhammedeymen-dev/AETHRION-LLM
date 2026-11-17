@@ -2,9 +2,11 @@ name: Deploy AETHRION-LLM to Hugging Face Space
 on:
   workflow_dispatch:
   push:
-    branches: ["main", "hardening/training-approval-gate", "feature/native-specialist-family"]
+    branches: ["main"]
     paths:
       - "hf_space/**"
+      - "aethrion/**"
+      - "models/manifest.json"
       - ".github/workflows/deploy-hf-space.yml"
 permissions:
   contents: read
@@ -17,9 +19,25 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install --upgrade huggingface_hub
+      - name: Assemble Space from canonical runtime sources
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          staging="$RUNNER_TEMP/aethrion-space"
+          rm -rf "$staging"
+          mkdir -p "$staging"
+          cp -a hf_space/. "$staging/"
+          rm -rf "$staging/aethrion"
+          mkdir -p "$staging/aethrion" "$staging/models"
+          cp -a aethrion/. "$staging/aethrion/"
+          cp models/manifest.json "$staging/models/manifest.json"
+          echo "Staged canonical first-party AETHRION runtime."
+          python -m compileall -q "$staging/aethrion" "$staging/app.py"
       - name: Upload Space files
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SPACE_STAGING_DIR: ${{ runner.temp }}/aethrion-space
         run: |
           python - <<'PY'
           import os
@@ -31,21 +49,17 @@ jobs:
           repo_id = "vizyon2027/AETHRION-LLM"
           api = HfApi(token=token)
 
-          # Keep the Space's existing ZeroGPU hardware. The production runtime
-          # is native-only; no hosted model or search API is enabled.
+          # Keep the Space's existing ZeroGPU hardware. This workflow never
+          # requests paid hardware or changes the Space hardware setting.
           runtime = api.get_space_runtime(repo_id=repo_id)
           print(f"SPACE_HARDWARE_BEFORE={runtime.hardware}")
           print(f"SPACE_REQUESTED_HARDWARE_BEFORE={runtime.requested_hardware}")
-          if runtime.requested_hardware == "zero-a10g":
-              print("SPACE_HARDWARE_RETAINED=zero-a10g; no paid hardware change requested.")
-          else:
-              print("SPACE_HARDWARE_UNCHANGED")
 
           api.upload_folder(
               repo_id=repo_id,
               repo_type="space",
-              folder_path="hf_space",
-              commit_message="Deploy ZeroGPU-compatible AETHRION-LLM Space",
+              folder_path=os.environ["SPACE_STAGING_DIR"],
+              commit_message="Deploy canonical native-only AETHRION runtime",
           )
           print("Space upload completed.")
 
