@@ -97,3 +97,37 @@ Add `--source-review private-data/base/source-review.csv` for URL-attributed rec
 The Hugging Face Space ZeroGPU allocation is request-scoped and short-lived. The Space's 11-model preflight is a synthetic forward/backward smoke test, not a persistent training worker and not a BASE training job. GitHub Actions is CI, not a GPU trainer. Do not start an incomplete training run in the preflight endpoint or claim it produced a model checkpoint.
 
 Before launching a real BASE job, the selected runtime must be explicitly configured to run the approved training command and preserve its output/checkpoints securely. If the only available runtime is the short ZeroGPU preflight, full BASE training cannot be launched there.
+
+
+## Source-disjoint partitions and tokenizer provenance
+
+The current BASE preparation pipeline requires at least three independent provenance groups.
+Each plain-text source file is one group; URL-attributed JSONL records are grouped by exact
+hostname; non-URL JSONL records may provide a stable `group_id`. Keep records from the same
+author, conversation, speaker, document or source together. Do not use per-record unique IDs
+as group IDs when records share a provenance relationship.
+
+After the human review opens the dataset gate, `aethrion.prepare_data` writes three
+separate files: `corpus-train.txt`, `corpus-validation.txt`, and `corpus-test.txt`.
+The validator rebuilds partitions from the current reviewed raw sources, verifies exact
+file contents and SHA-256 values, and rejects a provenance group appearing in more than
+one partition.
+
+Train the tokenizer only on the approved training partition:
+
+```bash
+python -m aethrion.tokenizer \
+  --train data/processed/corpus-train.txt \
+  --corpus data/processed/corpus.txt \
+  --output artifacts/tokenizer.json \
+  --dataset-manifest data/processed/corpus_manifest.json \
+  --source-manifest private-data/base/sources.json \
+  --source-root private-data/base \
+  --corpus-report data/processed/corpus-report.json
+```
+
+Add `--source-review private-data/base/source-review.csv` when URL-attributed records
+are present. The command writes `artifacts/tokenizer.json.provenance.json`, binding
+the tokenizer hash to the exact combined corpus, train/validation/test partition hashes,
+dataset manifest, source manifest and optional domain-review file. The BASE trainer
+requires this sidecar and re-verifies it before training and again when resuming.
