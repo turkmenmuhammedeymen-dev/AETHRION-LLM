@@ -97,3 +97,48 @@ jobs:
 
           print("SPACE_RUNTIME_SMOKE_TEST_OK")
           PY
+      - name: Launch Space and verify live Gradio endpoints
+        working-directory: hf_space
+        env:
+          PYTHONPATH: .
+          PORT: "7860"
+        run: |
+          set -euo pipefail
+          python app.py > /tmp/aethrion-space.log 2>&1 &
+          app_pid=$!
+          cleanup() {
+            kill "$app_pid" 2>/dev/null || true
+            wait "$app_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          ready=0
+          for attempt in $(seq 1 30); do
+            if ! kill -0 "$app_pid" 2>/dev/null; then
+              cat /tmp/aethrion-space.log
+              echo "Space app process exited before becoming ready."
+              exit 1
+            fi
+            if curl --silent --show-error --fail http://127.0.0.1:7860/config -o /tmp/aethrion-config.json; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/aethrion-space.log
+            echo "Space app did not expose /config within 60 seconds."
+            exit 1
+          fi
+          curl --silent --show-error --fail http://127.0.0.1:7860/info -o /tmp/aethrion-info.json
+          python - <<'PY'
+          import json
+          with open("/tmp/aethrion-config.json", encoding="utf-8") as handle:
+              config = json.load(handle)
+          with open("/tmp/aethrion-info.json", encoding="utf-8") as handle:
+              info = json.load(handle)
+          assert len(config.get("components", [])) >= 20, "Live config is missing UI components"
+          assert isinstance(info, dict), "Live /info response is not a JSON object"
+          print(f"LIVE_CONFIG_COMPONENTS={len(config['components'])}")
+          print("LIVE_INFO_ENDPOINT=PASS")
+          PY
+          echo "SPACE_LIVE_SERVER_TEST_OK"
