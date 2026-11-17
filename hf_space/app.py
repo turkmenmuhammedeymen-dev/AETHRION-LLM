@@ -55,7 +55,7 @@ def status():
     if not SPACE_AUTH_ENABLED:
         rows.append("- **Local model access**: DISABLED — Space authentication is not configured")
     rows.append("- **External model/API providers**: DISABLED — native-only policy")
-    return "### Native model release status\\n" + "\\n".join(rows)
+    return "### Native model release status\n" + "\n".join(rows)
 
 def chat(message, history):
     if not SPACE_AUTH_ENABLED:
