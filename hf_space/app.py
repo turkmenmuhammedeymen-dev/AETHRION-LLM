@@ -134,7 +134,7 @@ def research(query):
             )
         return "\n\n".join(lines)
     except CapabilityUnavailable:
-        return "AETHRION-RESEARCH model or local approved index is not ready. No hosted search API is used."
+        return "AETHRION-RESEARCH is not trained and released, or its local approved index is not installed. No hosted search API is used."
     except Exception as exc:
         return "Local research failed: " + type(exc).__name__
 
