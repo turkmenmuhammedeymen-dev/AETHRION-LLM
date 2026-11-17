@@ -109,6 +109,17 @@ class NativeModelRegistryTests(unittest.TestCase):
             self.assertEqual(resolved.model_config, {"vocab_size": 256})
             self.assertEqual(registry.status("chat"), "ready")
 
+            evaluation_path = models / "evaluation.json"
+            evaluation_payload = json.loads(evaluation_path.read_text(encoding="utf-8"))
+            evaluation_payload["checkpoint_sha256"] = "f" * 64
+            evaluation_path.write_text(json.dumps(evaluation_payload), encoding="utf-8")
+            entry["evaluation_report_sha256"] = hashlib.sha256(
+                evaluation_path.read_bytes()
+            ).hexdigest()
+            write_manifest(root, entry)
+            with self.assertRaises(NativeModelIntegrityError):
+                NativeModelRegistry(root).resolve("chat")
+
     def test_trained_model_without_release_approval_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
