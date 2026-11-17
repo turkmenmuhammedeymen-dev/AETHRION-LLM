@@ -342,7 +342,7 @@ def train_specialist(
                 "rng_state": _capture_rng_state(),
             })
             write_json_atomic({
-                "status": "training_complete_not_released",
+                "status": "training_in_progress_not_released",
                 "release_status": "NOT_RELEASED",
                 "model_id": model_id, "step": step,
                 "dataset_sha256": approval["dataset_sha256"],
