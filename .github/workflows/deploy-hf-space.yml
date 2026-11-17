@@ -1,0 +1,37 @@
+name: Deploy AETHRION-LLM to Hugging Face Space
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "hf_space/**"
+      - ".github/workflows/deploy-hf-space.yml"
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade huggingface_hub
+      - name: Upload Space files
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          from huggingface_hub import HfApi
+          token = os.environ.get("HF_TOKEN", "")
+          if not token:
+              raise SystemExit("Missing HF_TOKEN repository secret.")
+          HfApi(token=token).upload_folder(
+              repo_id="vizyon2027/AETHRION-LLM",
+              repo_type="space",
+              folder_path="hf_space",
+              commit_message="Deploy AETHRION-LLM multimodal Space",
+          )
+          print("Space upload completed.")
+          PY
