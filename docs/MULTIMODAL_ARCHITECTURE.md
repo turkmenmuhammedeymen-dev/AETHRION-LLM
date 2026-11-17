@@ -1,58 +1,77 @@
 # AETHRION native multimodal architecture
 
-AETHRION uses a family of separately trained first-party models. No hosted
-model APIs, pretrained third-party weights, model proxies, or provider
-fallbacks are permitted in production inference.
+AETHRION uses separately initialized and separately trained first-party models.
+Production inference must not download, call, proxy, distill from or silently
+fall back to pretrained third-party models or hosted inference/search APIs.
 
-The model family includes:
+## Independent model family
 
-- AETHRION-BASE: multilingual chat and reasoning.
-- AETHRION-CODE: code generation, explanation, debugging and repair.
-- AETHRION-VISION: image understanding and visual question answering.
-- AETHRION-IMAGE: text-to-image and image editing.
-- AETHRION-ASR: speech recognition.
-- AETHRION-TTS: speech generation.
-- AETHRION-3D: text/image-to-3D and 3D understanding.
-- AETHRION-RESEARCH: local retrieval, ranking and evidence-grounded synthesis.
-- AETHRION-DOC: document layout, OCR and semantic understanding.
-- AETHRION-SAFE: separately evaluated safety classification and policy support.
+- **AETHRION-BASE:** multilingual causal language model; separate pretraining
+  and response-only instruction tuning.
+- **AETHRION-CODE:** independent causal model for code completion, generation
+  and repair.
+- **AETHRION-VISION:** image/text dual encoder for visual representation and
+  contrastive image-text learning. It is not yet a visual conversational model.
+- **AETHRION-IMAGE:** text-conditioned pixel diffusion research model. Its
+  current low-resolution U-Net is a research scaffold, not a frontier image
+  generator.
+- **AETHRION-ASR:** acoustic encoder trained with a CTC transcription objective.
+- **AETHRION-TTS:** transcript-to-mel predictor with duration modelling.
+- **AETHRION-VOCODER:** separate mel-to-waveform network. TTS is not complete
+  or releasable without a separately trained and evaluated Vocoder.
+- **AETHRION-3D:** text-conditioned point-cloud diffusion. The present
+  implementation exports vertex-only OBJ point clouds; it does not yet create
+  complete watertight meshes, topology or textures.
+- **AETHRION-RESEARCH:** query/passage dual encoder for local retrieval. A
+  production local corpus index, provenance and evidence citation pipeline
+  remain to be completed.
+- **AETHRION-DOC:** document text/layout encoder with token tagging and
+  extractive-QA heads. OCR/layout extraction and complete page understanding
+  are not yet complete.
+- **AETHRION-SAFE:** separate ALLOW/REVIEW/BLOCK text classifier with reason
+  scores. It is not an active safety barrier until trained, calibrated and
+  independently evaluated.
 
-Each specialist has its own architecture, processor/tokenizer, training
-corpus, training and recovery pipeline, checkpoint, evaluation suite, safety
-tests and local inference handler. The shared router selects a specialist but
-must never silently substitute another model.
+## Training and release contract
 
-## Runtime contract
+The repository contains a fail-closed multimodal NPZ dataset validator,
+per-model training configurations, a resumable specialist trainer, BASE
+instruction tuning, audio WAV/log-mel preprocessing, and shape/loss smoke tests.
+Each model has its own checkpoint path and model manifest entry.
 
-A capability is available only when its first-party local checkpoint and all
-required companion artifacts exist and pass SHA-256 verification through
-aethrion/native_registry.py. Missing or untrained artifacts return an explicit
-unavailable status. A capability is not ready merely because its UI tab,
-Python class, or API route exists.
+A dataset must have recorded source provenance, license and training rights,
+source-file SHA-256 values, privacy review, speaker consent where relevant,
+deduplication and independent train/validation/test partitions. The model
+training flag and owner approval must be exact JSON booleans and explicitly
+approved by a responsible human. A training run produces a checkpoint and a
+report marked NOT_RELEASED; it never automatically publishes a model.
 
-The model manifest template is models/manifest.example.json. All models are
-initially marked not_trained. A trained status must not be asserted before
-dataset approval, completed training, independent evaluation and release
-review.
+The native registry resolves a model only when its checkpoint, tokenizer or
+processor, training report, evaluation report, model card and dataset hashes
+match; explicit release, quality and safety gates must all be true. TTS also
+requires the separate AETHRION-VOCODER release.
 
-## Data and safety
+## Runtime and safety
 
-Use only data with documented rights for the intended training. Speech data
-requires speaker consent and suitable privacy controls. Image and 3D datasets
-require documented licenses and provenance. Deduplicate and separate training,
-validation and held-out test sets. Review privacy, personal data, bias,
-copyright, contamination and unsafe content. Keep the training approval gate
-closed until these reviews are complete.
+The production router is local-only. Missing or untrained models return an
+explicit unavailable state. No capability tab or Python class may be labelled
+ready simply because it exists.
 
-Safety requires both trained AETHRION-SAFE components and ordinary runtime
-controls: input/output validation, resource limits, access control, audit logs,
-abuse testing and human review for consequential actions.
+AETHRION-SAFE must be independently trained and evaluated before a serving
+mode can claim model-based safety screening. Application-level controls remain
+required: authentication, input validation, rate limits, resource limits,
+audit logs, abuse tests and human review for consequential operations.
 
-## Current status
+## Current implementation versus completion
 
-The repository currently contains a small from-scratch decoder-only text
-Transformer, a byte-level BPE tokenizer, corpus preparation and training
-utilities, a local-only model artifact registry, basic document utilities,
-and the Gradio interface. The registry and architecture plan do not mean the
-specialist models are trained. No production-ready checkpoint for the model
-family is claimed. See docs/NATIVE_ONLY_MODEL_FAMILY.md.
+The repository now has independent research architectures and training
+entrypoints for the model family, but the model weights are not trained and
+the data manifests remain fail-closed. Passing unit/forward tests confirms
+software mechanics only; it does not demonstrate language, image, speech, 3D,
+retrieval, document or safety quality.
+
+Major remaining work includes large-scale lawful datasets, robust high-capacity
+architectures, distributed/mixed-precision training validation, model-specific
+held-out benchmarks, calibration, OCR/layout tooling, mesh topology and
+texturing, research indexing/citations, complete local modality inference
+adapters and a production end-to-end release review.
