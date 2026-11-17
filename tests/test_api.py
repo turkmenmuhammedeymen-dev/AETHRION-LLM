@@ -2,10 +2,11 @@ import unittest
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
+from types import SimpleNamespace
 from fastapi.testclient import TestClient
 from aethrion import api
 from aethrion.api import build_router
-from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter
+from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
 
 class ApiRegistrationTests(unittest.TestCase):
     def test_empty_environment_registers_no_remote_provider(self):
@@ -63,6 +64,82 @@ class ApiRegistrationTests(unittest.TestCase):
         with patch.dict("os.environ",env,clear=False):
             with self.assertRaisesRegex(ValueError, "native-only policy"):
                 build_router(allow_remote_providers=True)
+
+
+class _FakeSafetyRegistry:
+    def __init__(self, statuses):
+        self.statuses = statuses
+
+    def status(self, model_id):
+        return self.statuses.get(model_id, "not_trained")
+
+    def resolve(self, model_id):
+        return SimpleNamespace(architecture=f"native:{model_id}")
+
+
+class _FakeSafetyRuntime:
+    def __init__(self, statuses, decisions=None, output_text="safe generated output"):
+        self.registry = _FakeSafetyRegistry(statuses)
+        self.decisions = decisions or {}
+        self.output_text = output_text
+        self.reviewed = []
+
+    def classify_safety(self, text):
+        self.reviewed.append(text)
+        return {"decision": self.decisions.get(text, "ALLOW")}
+
+    def handle(self, capability, request):
+        if capability == "safety":
+            return {"decision": self.decisions.get(request.prompt, "ALLOW")}
+        return {"text": self.output_text}
+
+
+class SafeRuntimeGateTests(unittest.TestCase):
+    def _build(self, statuses, decisions=None, output_text="safe generated output"):
+        runtime = _FakeSafetyRuntime(statuses, decisions, output_text)
+        with patch.object(api, "NativeModelRuntime", return_value=runtime):
+            router, providers = build_router(allow_remote_providers=False)
+        return router, providers, runtime
+
+    def test_untrained_safe_model_disables_other_ready_capabilities(self):
+        router, _, _ = self._build({"chat": "ready", "safety": "not_trained"})
+        self.assertNotIn("chat", router.available())
+        self.assertNotIn("safety", router.available())
+
+    def test_safe_allow_is_required_for_prompt_and_generated_text(self):
+        router, _, runtime = self._build({"chat": "ready", "safety": "ready"})
+        result = router.dispatch("chat", CapabilityRequest("hello", {}))
+        self.assertEqual(result.output["text"], "safe generated output")
+        self.assertEqual(runtime.reviewed, ["hello", "safe generated output"])
+
+    def test_blocked_prompt_is_not_forwarded_to_chat(self):
+        router, _, runtime = self._build(
+            {"chat": "ready", "safety": "ready"},
+            decisions={"blocked prompt": "BLOCK"},
+        )
+        with self.assertRaises(CapabilityUnavailable):
+            router.dispatch("chat", CapabilityRequest("blocked prompt", {}))
+        self.assertEqual(runtime.reviewed, ["blocked prompt"])
+
+    def test_reviewed_generated_output_is_not_returned(self):
+        router, _, runtime = self._build(
+            {"chat": "ready", "safety": "ready"},
+            decisions={"generated unsafe output": "REVIEW"},
+            output_text="generated unsafe output",
+        )
+        with self.assertRaises(CapabilityUnavailable):
+            router.dispatch("chat", CapabilityRequest("benign prompt", {}))
+        self.assertEqual(runtime.reviewed, ["benign prompt", "generated unsafe output"])
+
+    def test_safe_classifier_route_does_not_gate_itself(self):
+        router, _, runtime = self._build(
+            {"safety": "ready"},
+            decisions={"classify this": "REVIEW"},
+        )
+        result = router.dispatch("safety", CapabilityRequest("classify this", {}))
+        self.assertEqual(result.output["decision"], "REVIEW")
+        self.assertEqual(runtime.reviewed, [])
+
 
 class ApiHttpIntegrationTests(unittest.TestCase):
     def setUp(self):
