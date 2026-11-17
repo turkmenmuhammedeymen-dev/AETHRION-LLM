@@ -55,6 +55,7 @@ class NativeModelRegistryTests(unittest.TestCase):
                 "review.txt": b"Human release review evidence for a synthetic unit test fixture.",
                 "evaluation.json": json.dumps({
                     "model_id": "chat", "dataset_sha256": "a" * 64,
+                    "checkpoint_sha256": hashlib.sha256(b"first-party-checkpoint").hexdigest(),
                     "status": "approved_for_release",
                     "quality_gate_passed": True,
                     "safety_gate_passed": True,
@@ -66,8 +67,8 @@ class NativeModelRegistryTests(unittest.TestCase):
                         b"Human release review evidence for a synthetic unit test fixture."
                     ).hexdigest(),
                     "benchmarks": {
-                        "held_out_lm_loss": {"metric": "loss", "value": 1.0, "passed": True},
-                        "instruction_following": {"metric": "pass_rate", "value": 0.9, "passed": True}
+                        "held_out_lm_loss": {"metric": "loss", "value": 1.0, "threshold": 2.0, "passed": True, "evidence": "held-out corpus report"},
+                        "instruction_following": {"metric": "pass_rate", "value": 0.9, "threshold": 0.8, "passed": True, "evidence": "human-reviewed evaluation"}
                     }
                 }).encode(),
                 "MODEL_CARD.md": (
