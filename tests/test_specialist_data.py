@@ -20,9 +20,13 @@ class SpecialistDataApprovalTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(["a", "b", "c", "d", "e", "f"]),
+            group_id=np.asarray(["ga", "gb", "gc", "gd", "ge", "gf"]),
             split=np.asarray(["train", "train", "validation", "validation", "test", "test"]),
             token_ids=np.random.default_rng(1).integers(0, 300, size=(6, 12), dtype=np.int64),
         )
+        from aethrion.tokenizer import ByteBPETokenizer
+        tokenizer_path = root / "tokenizer.json"
+        ByteBPETokenizer().save(tokenizer_path)
         payload = {
             "format": "aethrion-specialist-dataset-v1",
             "dataset_id": "unit-test-only",
@@ -33,6 +37,8 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             "privacy_reviewed": approved,
             "dataset_path": "dataset.npz",
             "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+            "tokenizer_path": "tokenizer.json",
+            "tokenizer_sha256": hashlib.sha256(tokenizer_path.read_bytes()).hexdigest(),
             "sources": [{
                 "source_id": "synthetic-fixture",
                 "source_uri": "unit-test://synthetic-fixture",
@@ -90,7 +96,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
         for split in ("train", "validation", "test"):
             for label in range(3):
                 for index in range(per_class):
-                    sample_ids.append(f"{split}-{label}-{index}")
+                            sample_ids.append(f"{split}-{label}-{index}")
                     splits.append(split)
                     decisions.append(label)
         count = len(sample_ids)
@@ -100,11 +106,15 @@ class SpecialistDataApprovalTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(sample_ids),
+            group_id=np.asarray(sample_ids),
             split=np.asarray(splits),
             token_ids=np.random.default_rng(7).integers(0, 256, size=(count, 12), dtype=np.int64),
             decision_labels=np.asarray(decisions, dtype=np.int64),
             reason_labels=reasons,
         )
+        from aethrion.tokenizer import ByteBPETokenizer
+        tokenizer_path = root / "tokenizer.json"
+        ByteBPETokenizer().save(tokenizer_path)
         payload = {
             "format": "aethrion-specialist-dataset-v1",
             "dataset_id": "synthetic-safety-taxonomy-test-only",
@@ -116,6 +126,8 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             "safety_min_per_class": 25,
             "dataset_path": "safety.npz",
             "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+            "tokenizer_path": "tokenizer.json",
+            "tokenizer_sha256": hashlib.sha256(tokenizer_path.read_bytes()).hexdigest(),
             "sources": [{
                 "source_id": "synthetic-taxonomy-fixture",
                 "source_uri": "unit-test://safety-taxonomy",
@@ -153,6 +165,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             np.savez(
                 dataset,
                 sample_id=np.asarray(["a", "b", "c"]),
+                group_id=np.asarray(["ga", "gb", "gc"]),
                 split=np.asarray(["train", "train", "validation"]),
                 token_ids=np.random.default_rng(1).integers(0, 300, size=(3, 12), dtype=np.int64),
             )
