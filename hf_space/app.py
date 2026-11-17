@@ -3,7 +3,7 @@ import spaces
 from pathlib import Path
 import gradio as gr
 from fastapi import HTTPException
-from aethrion.api import build_router, get_native_model_statuses, _require_safety_allow_http, _require_safety_allow_chunks
+from aethrion.api import build_router, get_native_model_statuses, _require_safety_allow_http, _require_safety_allow_chunks_http
 from aethrion.document_tools import create_document, extract_document_text, replace_document_text
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
 from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError, read_project_zip
@@ -274,7 +274,7 @@ def edit_project(path,task):
         _require_safety_allow_http(runtime, task)
         project_bytes = Path(path).read_bytes()
         for filename, source_text in read_project_zip(project_bytes).items():
-            _require_safety_allow_chunks(runtime, source_text)
+            _require_safety_allow_chunks_http(runtime, source_text)
         def local_code_provider(request):
             return dispatch(Capability.CODE, request.prompt, {"max_new_tokens": 4096, "temperature": 0.1})
         raw, summary = ProjectWorkspaceAgent(local_code_provider).propose(
