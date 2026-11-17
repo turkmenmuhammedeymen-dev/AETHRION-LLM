@@ -20,17 +20,18 @@ def _resolve_space_auth(environ=None):
 
 
 SPACE_AUTH = _resolve_space_auth()
-REMOTE_PROVIDERS_ENABLED = SPACE_AUTH is not None
-router, providers = build_router(allow_remote_providers=REMOTE_PROVIDERS_ENABLED, allow_local_model=REMOTE_PROVIDERS_ENABLED)
-audio = (
-    OpenAISpeechProvider()
-    if REMOTE_PROVIDERS_ENABLED and (os.getenv("AETHRION_AUDIO_API_KEY") or os.getenv("OPENAI_API_KEY"))
-    else None
-)
+SPACE_AUTH_ENABLED = SPACE_AUTH is not None
+# Production Space is native-only: no hosted inference/search/model APIs are enabled.
+REMOTE_PROVIDERS_ENABLED = False
+router, providers = build_router(allow_remote_providers=False, allow_local_model=SPACE_AUTH_ENABLED)
+audio = None
 
 
 def _remote_disabled_message():
-    return "Model and provider features are disabled. Configure AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD in Space Secrets to enable authenticated access."
+    return "This AETHRION-native specialist model is not trained or installed yet. No external model or API fallback is used."
+
+def _auth_required_message():
+    return "Local AETHRION model access is disabled. Configure Space authentication before enabling private local inference."
 
 def dispatch(capability, prompt, options=None):
     return router.dispatch(capability, CapabilityRequest(prompt, options or {})).output
@@ -52,13 +53,14 @@ def _gpu_local_chat(prompt):
 def status():
     available = router.available()
     rows = [f"- **{c.value}**: {available.get(c.value, 'NOT CONFIGURED')}" for c in Capability]
-    if not REMOTE_PROVIDERS_ENABLED:
-        rows.append("- **Authenticated model/providers**: DISABLED — Space authentication is not configured")
+    if not SPACE_AUTH_ENABLED:
+        rows.append("- **Local model access**: DISABLED — Space authentication is not configured")
+    rows.append("- **External model/API providers**: DISABLED — native-only policy")
     return "### Capability status\n" + "\n".join(rows)
 
 def chat(message, history):
-    if not REMOTE_PROVIDERS_ENABLED:
-        return _remote_disabled_message()
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
     if Capability.CHAT.value not in router.available():
         return "AETHRION's own trained checkpoint/tokenizer is not loaded. No third-party model is silently substituted."
     context = []
@@ -75,7 +77,7 @@ def code(prompt):
         r=dispatch(Capability.CODE,prompt[:10000],{"max_tokens":4096,"temperature":0.1})
         return r.get("text",str(r)) if isinstance(r,dict) else str(r)
     except CapabilityUnavailable:
-        return _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL."
+        return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-CODE is not trained or installed. No external code model is used."
 
 def image(prompt):
     try:
@@ -86,12 +88,12 @@ def image(prompt):
             p=Path(tempfile.gettempdir())/("aethrion-"+os.urandom(5).hex()+".png");p.write_bytes(raw);return str(p)
         return item.get("url")
     except CapabilityUnavailable as e:
-        message = _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure AETHRION_IMAGE_API_KEY or OPENAI_API_KEY."
+        message = _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-IMAGE is not trained or installed. No external image model is used."
         raise gr.Error(message) from e
 
 def three_d_text(prompt):
     provider=providers.get("3d")
-    if not provider:return (_remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure MESHY_API_KEY."),""
+    if not provider:return (_auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-3D is not trained or installed. No external 3D model is used."),""
     try:
         r=provider(CapabilityRequest(prompt[:2000]))
         task_ref="text:"+r["task_id"]
@@ -100,7 +102,7 @@ def three_d_text(prompt):
 
 def three_d_image(path,texture_prompt):
     provider=providers.get("3d")
-    if not provider:return (_remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure MESHY_API_KEY."),""
+    if not provider:return (_auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-3D is not trained or installed. No external 3D model is used."),""
     if not path:return "Upload a JPG, PNG or WebP reference image.",""
     try:
         r=provider.image_to_3d(path,texture_prompt or "")
@@ -110,7 +112,7 @@ def three_d_image(path,texture_prompt):
 
 def three_d_poll(task_ref):
     provider=providers.get("3d")
-    if not provider:return (_remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure MESHY_API_KEY."),None
+    if not provider:return (_auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-3D is not trained or installed. No external 3D model is used."),None
     if not task_ref or ":" not in task_ref:return "Enter a task reference.",None
     kind,task_id=task_ref.split(":",1)
     try:
@@ -134,11 +136,11 @@ def three_d_poll(task_ref):
 
 def research(query):
     try:return str(dispatch(Capability.RESEARCH,query[:2000],{"max_results":6}))
-    except CapabilityUnavailable:return _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure TAVILY_API_KEY."
+    except CapabilityUnavailable:return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-RESEARCH is not trained or its local index is not built. No external search API is used."
 
 def analyse(file_path,question):
     provider=providers.get("file_analysis")
-    if not provider:return _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL."
+    if not provider:return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-DOC is not trained or installed. Local text extraction remains available."
     if not file_path:return "Upload a file."
     p=Path(file_path)
     if p.stat().st_size>8*1024*1024:return "Maximum upload size: 8 MiB."
@@ -147,7 +149,7 @@ def analyse(file_path,question):
     return r.get("text",str(r)) if isinstance(r,dict) else str(r)
 
 def voice(path):
-    if audio is None:return (_remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure AETHRION_AUDIO_API_KEY or OPENAI_API_KEY."),None
+    if audio is None:return (_auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-ASR and AETHRION-TTS are not trained or installed. No external speech API is used."),None
     if not path:return "Record or upload audio.",None
     try:
         transcript=audio.transcribe(path,"tr")
@@ -176,7 +178,7 @@ def edit_doc(path,find_text,replacement,fmt):
 
 def edit_project(path,task):
     provider=providers.get("file_analysis")
-    if not provider:return _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure code provider.",None
+    if not provider:return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-CODE is not trained or installed. Project editing is unavailable until its native model passes tests.",None
     if not path:return "Upload a project ZIP.",None
     raw,summary=ProjectWorkspaceAgent(provider).propose(Path(path).read_bytes(),task)
     p=Path(tempfile.gettempdir())/("aethrion-review-"+os.urandom(5).hex()+".zip");p.write_bytes(raw)
