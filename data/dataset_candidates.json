@@ -136,15 +136,262 @@
         ],
         "next_gate": "Do not request gated access or share contact information. Use only an authorized release with source-level licenses, provenance, current opt-out exclusions and pinned hashes."
       }
+    },
+    {
+      "id": "doclaynet-v1",
+      "model_ids": [
+        "document"
+      ],
+      "uri": "https://huggingface.co/datasets/docling-project/DocLayNet",
+      "declared_license": "CDLA-Permissive-1.0 (dataset card)",
+      "review_status": "source_provenance_privacy_and_schema_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Confirm upstream document/source rights for the exact release; dataset-level terms do not replace review of embedded source documents",
+        "Review pages for personal or sensitive information and define redaction/exclusion before training",
+        "Current AETHRION-DOCUMENT needs OCR text tokens paired with layout boxes; DocLayNet layout labels alone do not complete the OCR pipeline",
+        "Pin revision, inventory files, hash source and prepared artifacts"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Hugging Face dataset card describes 80,863 human-annotated pages from six document categories and declares CDLA-Permissive-1.0. This is a strong layout-supervision candidate, not an already cleared OCR/text corpus.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/docling-project/DocLayNet",
+          "https://huggingface.co/datasets/docling-project/DocLayNet/blob/main/README.md"
+        ],
+        "next_gate": "Inspect exact revision, source provenance, privacy exposure and OCR/text availability; prepare only after human review."
+      }
+    },
+    {
+      "id": "open-images-v7",
+      "model_ids": [
+        "vision"
+      ],
+      "uri": "https://storage.googleapis.com/openimages/web/factsfigures_v7.html",
+      "declared_license": "CC-BY-4.0 annotations; images listed as CC-BY-2.0 individually, subject to per-image verification",
+      "review_status": "per_image_rights_and_privacy_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Google states it makes no representation or warranty about each image's license; verify each selected image and retain its license evidence",
+        "Preserve annotation attribution and source metadata",
+        "Review images for personal/sensitive content and applicable restrictions",
+        "Open Images is not a natural-language caption corpus; do not use it as IMAGE text-pair training without separately authored/licensed captions",
+        "Pin release and hash selected image/annotation files"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Official Open Images V7 facts page states annotations are CC BY 4.0 and images are listed as CC BY 2.0, while explicitly requiring users to verify image licenses themselves. It is a possible VISION candidate only after item-level review.",
+        "evidence_urls": [
+          "https://storage.googleapis.com/openimages/web/factsfigures_v7.html"
+        ],
+        "next_gate": "No image ingestion until every selected image has verified rights, privacy filtering and attribution metadata."
+      }
+    },
+    {
+      "id": "codesearchnet-license-filtered",
+      "model_ids": [
+        "code"
+      ],
+      "uri": "https://github.com/github/CodeSearchNet",
+      "declared_license": "Mixed original repository/file licenses; dataset repository tooling is MIT",
+      "review_status": "per_file_license_filter_and_provenance_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Read each language archive's _licenses.pkl and retain the source repository/file license per sample",
+        "Exclude unknown, incompatible or unapproved source files; do not infer MIT from the dataset tooling license",
+        "Preserve original copyright notices and repository provenance",
+        "Remove secrets, credentials, personal data and disallowed content",
+        "Pin dataset release and hashes"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "The official CodeSearchNet repository says source-code licenses are supplied in per-language _licenses.pkl files. The repository's MIT license covers its code/documentation, not every code sample in the dataset.",
+        "evidence_urls": [
+          "https://github.com/github/CodeSearchNet",
+          "https://github.com/github/CodeSearchNet/blob/master/LICENSE"
+        ],
+        "next_gate": "Build a source-level allowlist only after verifying each source license and permitted ML-training use."
+      }
+    },
+    {
+      "id": "ms-marco-passage-ranking",
+      "model_ids": [
+        "research"
+      ],
+      "uri": "https://microsoft.github.io/msmarco/Datasets.html",
+      "declared_license": "Microsoft Research dataset terms; non-commercial research use only; no underlying IP rights granted",
+      "review_status": "noncommercial_terms_and_underlying_rights_incompatible_or_unresolved",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Official terms limit use to non-commercial research and grant no underlying intellectual-property rights; do not use for a commercial-intent product",
+        "Underlying web-document rights are not guaranteed by Microsoft",
+        "Terms are automatically accepted by use; no download or acceptance is authorized",
+        "Prefer an independently rights-cleared retrieval corpus"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Official MS MARCO terms state the datasets are intended for non-commercial research only and are made available without extending IP rights; Microsoft warns it may not own underlying document rights.",
+        "evidence_urls": [
+          "https://microsoft.github.io/msmarco/Datasets.html",
+          "https://microsoft.github.io/msmarco/"
+        ],
+        "next_gate": "Do not use for AETHRION product training under current intended-use assumptions; select a rights-cleared alternative."
+      }
+    },
+    {
+      "id": "speechdataai-turkish-conversational-speech",
+      "model_ids": [
+        "asr",
+        "tts",
+        "vocoder"
+      ],
+      "uri": "https://huggingface.co/datasets/SpeechDataAI/turkish-conversational-speech",
+      "declared_license": "Custom commercial license claimed by provider; paid; not hosted on Hugging Face",
+      "review_status": "commercial_contract_and_speaker_consent_evidence_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Audio is not hosted in the HF dataset repository; no access or files acquired",
+        "Provider contract, exact permitted use, redistribution terms and full speaker-consent evidence require independent review",
+        "Commercial acquisition has a stated price; no purchase, quote request or provider contact is authorized",
+        "Do not use TTS/Vocoder until consent explicitly covers speech synthesis and the intended use"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Provider's HF dataset card claims 2,000 hours of Turkish conversational audio, 200 speakers and a commercial license for ASR/TTS/voice AI, but says audio is not hosted and samples are provided on request. Vendor page lists a paid per-hour price; no purchase or contact was made.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/SpeechDataAI/turkish-conversational-speech",
+          "https://www.speechdata.ai/datasets/turkish"
+        ],
+        "next_gate": "Only reconsider after an adult-authorized contract review, full speaker-consent scope evidence, price approval and exact data provenance review."
+      }
+    },
+    {
+      "id": "turkasr-bench-tts-synthetic-evaluation",
+      "model_ids": [
+        "asr",
+        "tts",
+        "vocoder"
+      ],
+      "uri": "https://huggingface.co/datasets/yagmurtuncer/turkasr-bench-tts",
+      "declared_license": "Mixed per-engine/source licenses; gated access",
+      "review_status": "evaluation_only_mixed_license_and_access_gate",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Dataset is a synthetic-speech benchmark, not evidence of real human speech or speaker consent",
+        "Dataset card identifies engines with non-commercial or share-alike restrictions; inspect every engine and source-text license",
+        "Gated access requires acceptance of terms; no terms accepted or data downloaded",
+        "Keep for evaluation research only if exact terms permit; do not train production TTS/Vocoder from this mixed corpus"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "HF card describes synthetic Turkish speech generated by nine TTS engines and notes mixed per-engine licenses, including non-commercial and share-alike terms. It is gated and intended as an evaluation benchmark.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/yagmurtuncer/turkasr-bench-tts"
+        ],
+        "next_gate": "No access or training until terms and per-engine/source licenses are reviewed; benchmark-only role preferred."
+      }
+    },
+    {
+      "id": "turkish-asr-benchmark-metrics",
+      "model_ids": [
+        "asr"
+      ],
+      "uri": "https://huggingface.co/datasets/turkmedstt/turkish-asr-benchmark",
+      "declared_license": "CC-BY-4.0 for benchmark metadata",
+      "review_status": "evaluation_metadata_only_no_training_audio",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Repository contains benchmark metrics only and does not redistribute source audio, transcripts or hypotheses",
+        "Cannot create ASR training examples from metric tables",
+        "Use only as evaluation/provenance reference if the license and source terms are verified"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "HF dataset card says the release publishes ASR benchmark metrics only; source audio and reference transcripts are not distributed and original source licenses/access conditions continue to apply.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/turkmedstt/turkish-asr-benchmark"
+        ],
+        "next_gate": "Evaluation metadata only; acquire no source audio through this dataset."
+      }
+    },
+    {
+      "id": "shapenetcore-noncommercial",
+      "model_ids": [
+        "3d"
+      ],
+      "uri": "https://huggingface.co/datasets/ShapeNet/ShapeNetCore-archive",
+      "declared_license": "ShapeNet terms: non-commercial research and educational use only",
+      "review_status": "noncommercial_terms_incompatible_with_product_training",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Terms restrict use to non-commercial research and education; do not use for commercial-intent AETHRION model training",
+        "Gated access requires acceptance of terms; no access or terms accepted",
+        "Prefer per-asset-cleared Objaverse CC0/CC-BY items or original procedural geometry"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "The official ShapeNetCore card requires agreement to ShapeNet terms that restrict use to non-commercial research and educational purposes.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/ShapeNet/ShapeNetCore-archive",
+          "https://huggingface.co/datasets/ShapeNet/ShapeNetCore"
+        ],
+        "next_gate": "Exclude from product training under current intended-use assumptions."
+      }
+    },
+    {
+      "id": "aethrion-safe-original-curated-v1",
+      "model_ids": [
+        "safety"
+      ],
+      "uri": "urn:aethrion:internal:safety-corpus",
+      "declared_license": "Original AETHRION-authored and human-reviewed content; corpus not yet created",
+      "review_status": "authoring_and_independent_human_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "No approved SAFE corpus currently exists",
+        "Create non-operational, age-appropriate classification examples with ALLOW/REVIEW/BLOCK and reason labels",
+        "Use independent human review, disagreement resolution, source-disjoint held-out splits and bias checks",
+        "Do not include procedural harmful instructions or private user conversations",
+        "Keep runtime fail-closed until trained model calibration and independent evaluation pass"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "No external public dataset has been approved for AETHRION-SAFE. The safer first-party path is a new, documented, human-reviewed classification corpus authored for the policy taxonomy; this record does not contain training samples.",
+        "evidence_urls": [
+          "configs/safety/policy_v1.json",
+          "data/safety/README.md"
+        ],
+        "next_gate": "Author and independently review the dataset before setting any approval flag."
+      }
     }
   ],
   "owner_approval": {
     "recorded_at": "2026-11-17",
     "record_path": "docs/OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md",
-    "scope": "public-source review, evidence recording, non-destructive validation and preparation planning",
-    "permits_training": false,
+    "scope": "public-source review, evidence recording, non-destructive preparation, and training only on exact datasets whose source-specific rights, privacy and consent gates have passed",
+    "permits_training": true,
     "permits_restricted_download": false,
     "permits_accepting_provider_legal_terms": false,
-    "note": "Project-owner authorization to proceed with review is recorded. It does not grant third-party rights or satisfy per-source, per-item, privacy, consent, provenance, or license checks."
+    "permits_paid_acquisition": false,
+    "permits_paid_compute": false,
+    "note": "The project owner authorizes training on fully cleared data. This does not approve any current dataset, grant third-party rights, accept click-through terms, authorize paid purchases/jobs, or satisfy privacy, per-item license, provenance or speaker-consent review."
   }
 }
