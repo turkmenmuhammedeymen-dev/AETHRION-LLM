@@ -107,6 +107,30 @@ def main() -> None:
     print(f"Device: {device}")
     tokenizer_path, data_path = Path(cfg["tokenizer_path"]), Path(cfg["data_path"])
     tokenizer = ByteBPETokenizer.load(tokenizer_path)
+    provenance_path = Path(str(tokenizer_path) + ".provenance.json")
+    if not provenance_path.is_file():
+        raise ValueError("Training blocked: tokenizer provenance sidecar is missing.")
+    try:
+        tokenizer_provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError("Training blocked: tokenizer provenance sidecar is invalid.") from exc
+    expected_provenance = {
+        "format": "aethrion-tokenizer-provenance-v1",
+        "tokenizer_sha256": sha256_file(tokenizer_path),
+        "corpus_sha256": sha256_file(data_path),
+        "corpus_report_sha256": sha256_file(Path(args.corpus_report)),
+        "dataset_manifest_sha256": sha256_file(Path(args.dataset_manifest)),
+        "source_manifest_sha256": sha256_file(Path(args.source_manifest)),
+        "source_review_sha256": (
+            sha256_file(Path(args.source_review)) if args.source_review else None
+        ),
+        "train_split_sha256": split_info["train"]["sha256"],
+        "validation_split_sha256": split_info["validation"]["sha256"],
+        "test_split_sha256": split_info["test"]["sha256"],
+    }
+    if tokenizer_provenance != expected_provenance:
+        raise ValueError("Training blocked: tokenizer provenance does not match the approved corpus, source manifests and split hashes.")
+    tokenizer_provenance_hash = sha256_file(provenance_path)
     if tokenizer.vocab_size != cfg["vocab_size"]:
         cfg["vocab_size"] = tokenizer.vocab_size
         print(f"Tokenizer vocabulary overrides config: {cfg['vocab_size']}")
@@ -127,6 +151,8 @@ def main() -> None:
         if checkpoint.get("model_config") != model.config_dict(): raise ValueError("Checkpoint model config differs.")
         if checkpoint.get("data_sha256") != data_hash: raise ValueError("Training corpus changed; refusing unsafe resume.")
         if checkpoint.get("tokenizer_sha256") != tokenizer_hash: raise ValueError("Tokenizer changed; refusing unsafe resume.")
+        if checkpoint.get("tokenizer_provenance_sha256") != tokenizer_provenance_hash:
+            raise ValueError("Tokenizer provenance changed; refusing unsafe resume.")
         if checkpoint.get("split_sha256") != split_hashes:
             raise ValueError("Approved train/validation/test split changed; refusing unsafe resume.")
         checkpoint_step = checkpoint.get("step")
@@ -210,6 +236,7 @@ def main() -> None:
                 "model_config": model.config_dict(),
                 "tokenizer_path": str(tokenizer_path),
                 "tokenizer_sha256": tokenizer_hash,
+                "tokenizer_provenance_sha256": tokenizer_provenance_hash,
                 "data_path": str(data_path),
                 "data_sha256": data_hash,
                 "split_sha256": split_hashes,
@@ -257,6 +284,7 @@ def main() -> None:
             "dataset_sha256": data_hash,
             "split_sha256": split_hashes,
             "tokenizer_sha256": tokenizer_hash,
+            "tokenizer_provenance_sha256": tokenizer_provenance_hash,
             "checkpoint_sha256": sha256_file(checkpoint_path),
             "model_config": model.config_dict(),
             "metrics": last_metrics,
