@@ -69,20 +69,34 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.router=CapabilityRouter()
         self.router.register(Capability.CODE,"test-code",lambda req:{"text":"generated code"})
         self.client=TestClient(api.app)
+        self.env_patch=patch.dict("os.environ", {"AETHRION_API_TOKEN": "test-api-token"})
+        self.env_patch.start()
+        self.addCleanup(self.env_patch.stop)
+        self.auth={"Authorization": "Bearer test-api-token"}
         self.patch=patch.object(api,"router",self.router)
         self.patch.start()
         self.addCleanup(self.patch.stop)
+    def test_health_endpoint_remains_public(self):
+        response=self.client.get("/health")
+        self.assertEqual(response.status_code,200)
+
+    def test_protected_routes_reject_missing_or_invalid_bearer_token(self):
+        missing=self.client.get("/capabilities")
+        invalid=self.client.get("/capabilities",headers={"Authorization":"Bearer wrong-token"})
+        self.assertEqual(missing.status_code,401)
+        self.assertEqual(invalid.status_code,401)
+
     def test_capabilities_endpoint_reports_registered_handlers(self):
-        response=self.client.get("/capabilities")
+        response=self.client.get("/capabilities",headers=self.auth)
         self.assertEqual(response.status_code,200)
         self.assertEqual(response.json()["available"],{"code":"test-code"})
         self.assertIn("image",response.json()["unavailable"])
     def test_dispatch_endpoint_routes_selected_capability(self):
-        response=self.client.post("/dispatch",json={"capability":"code","prompt":"write a function"})
+        response=self.client.post("/dispatch",json={"capability":"code","prompt":"write a function"},headers=self.auth)
         self.assertEqual(response.status_code,200)
         self.assertEqual(response.json()["result"]["text"],"generated code")
     def test_dispatch_unconfigured_capability_returns_503(self):
-        response=self.client.post("/dispatch",json={"capability":"3d","prompt":"create a model"})
+        response=self.client.post("/dispatch",json={"capability":"3d","prompt":"create a model"},headers=self.auth)
         self.assertEqual(response.status_code,503)
 
 if __name__=="__main__": unittest.main()
