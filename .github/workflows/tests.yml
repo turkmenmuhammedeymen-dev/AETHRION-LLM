@@ -69,6 +69,13 @@ jobs:
           import app
 
           assert isinstance(app.demo, gr.Blocks), "Gradio Blocks UI was not constructed"
+          assert app._resolve_space_auth({}) is None
+          assert app._resolve_space_auth({"AETHRION_SPACE_USERNAME": "tester"}) is None
+          assert app._resolve_space_auth({
+              "AETHRION_SPACE_USERNAME": "tester",
+              "AETHRION_SPACE_PASSWORD": "test-password"
+          }) == ("tester", "test-password")
+          assert app.REMOTE_PROVIDERS_ENABLED is False, "Remote providers must be disabled without Space auth"
           config = app.demo.get_config_file()
           assert isinstance(config, dict) and config.get("components"), "Gradio UI config is empty"
           assert len(config["components"]) >= 20, "Expected all Space tabs and controls in UI config"
