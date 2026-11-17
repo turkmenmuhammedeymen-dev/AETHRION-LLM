@@ -200,9 +200,9 @@ def prepare_visual_dataset(
             "source_uri": str(row.get("source_uri") or source_uri),
             "source_path": f"{model_id}/{'point_clouds' if model_id == '3d' else 'images'}/{name}",
             "sha256": _sha256(copied),
-            "license": license_name,
-            "permitted_use": permitted_use,
-            "evidence_uri": evidence_uri,
+            "license": str(row.get("license") or license_name),
+            "permitted_use": str(row.get("permitted_use") or permitted_use),
+            "evidence_uri": str(row.get("evidence_uri") or evidence_uri),
             "allow_training": False,
             "privacy_reviewed": False,
         })
