@@ -1,6 +1,6 @@
 """Prepare auditable text-family datasets from owner-supplied JSONL records.
 
-Supported IDs: chat, code, research, document, safety.
+Supported IDs: code, research, document, safety.
 This tool never approves data. It always emits training_allowed=false and
 owner_approval=false; a human must review provenance, rights and privacy.
 """
@@ -17,7 +17,7 @@ import numpy as np
 
 from aethrion.tokenizer import ByteBPETokenizer
 
-SUPPORTED = {"chat", "code", "research", "document", "safety"}
+SUPPORTED = {"code", "research", "document", "safety"}
 SPLITS = ("train", "validation", "test")
 
 
@@ -82,24 +82,12 @@ def _build_arrays(model_id: str, rows: list[dict[str, Any]], tokenizer: ByteBPET
         "sample_id": np.asarray(ids, dtype=np.str_),
         "split": np.asarray(splits, dtype=np.str_),
     }
-    if model_id in {"chat", "code"}:
-        sequences, labels = [], []
-        for row_id, row in zip(ids, rows):
-            if model_id == "chat":
-                prompt_ids = tokenizer.encode(_required_text(row, "prompt", row_id))
-                response_ids = tokenizer.encode(_required_text(row, "response", row_id))
-                combined = (prompt_ids + response_ids)[:max_length]
-                supervised = min(len(prompt_ids), len(combined))
-                label = [-100] * supervised + combined[supervised:]
-                sequences.append(_pad(combined, max_length))
-                labels.append(label + [-100] * (max_length - len(label)))
-            else:
-                sequences.append(_pad(tokenizer.encode(_required_text(row, "text", row_id)), max_length))
-        if model_id == "chat":
-            arrays["input_ids"] = np.asarray(sequences, dtype=np.int64)
-            arrays["labels"] = np.asarray(labels, dtype=np.int64)
-        else:
-            arrays["token_ids"] = np.asarray(sequences, dtype=np.int64)
+    if model_id == "code":
+        sequences = [
+            _pad(tokenizer.encode(_required_text(row, "text", row_id)), max_length)
+            for row_id, row in zip(ids, rows)
+        ]
+        arrays["token_ids"] = np.asarray(sequences, dtype=np.int64)
     elif model_id == "research":
         queries, passages = [], []
         for row_id, row in zip(ids, rows):
@@ -180,7 +168,7 @@ def prepare_text_dataset(
     rows = _read_jsonl(source)
     corpus_fields = []
     for row in rows:
-        for key in ("text", "prompt", "response", "query", "passage"):
+        for key in ("text", "query", "passage"):
             if isinstance(row.get(key), str):
                 corpus_fields.append(row[key])
     if not corpus_fields:
@@ -221,7 +209,7 @@ def prepare_text_dataset(
         "format": "aethrion-specialist-dataset-v1",
         "dataset_id": f"{model_id}-prepared-{_sha256(dataset_path)[:12]}",
         "model_id": model_id,
-        "modality": "text" if model_id in {"chat", "research", "safety"} else ("code" if model_id == "code" else "document"),
+        "modality": "text" if model_id in {"research", "safety"} else ("code" if model_id == "code" else "document"),
         "training_allowed": False,
         "owner_approval": False,
         "privacy_reviewed": False,
