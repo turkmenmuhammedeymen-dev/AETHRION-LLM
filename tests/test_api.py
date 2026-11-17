@@ -143,10 +143,16 @@ class SafeRuntimeGateTests(unittest.TestCase):
             {"safety": "ready"},
             decisions={"BLOCK" + "B" * 395: "BLOCK"},
         )
-        with self.assertRaises(api.HTTPException) as caught:
+        with self.assertRaises(CapabilityUnavailable):
             api._require_safety_allow_chunks(runtime, "A" * 400 + "BLOCK" + "B" * 400, chunk_chars=400)
-        self.assertEqual(caught.exception.status_code, 503)
         self.assertEqual(len(runtime.reviewed), 2)
+
+
+    def test_safe_chunk_http_wrapper_returns_service_unavailable(self):
+        runtime = _FakeSafetyRuntime({"safety": "ready"}, decisions={"BLOCK": "BLOCK"})
+        with self.assertRaises(api.HTTPException) as caught:
+            api._require_safety_allow_chunks_http(runtime, "BLOCK")
+        self.assertEqual(caught.exception.status_code, 503)
 
     def test_safe_classifier_route_does_not_gate_itself(self):
         router, _, runtime = self._build(
