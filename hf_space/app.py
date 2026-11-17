@@ -366,7 +366,7 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             gr.Button("Create from text").click(three_d_text,inputs=p,outputs=[task_msg,task_ref])
             image_ref=gr.Image(type="filepath",sources=["upload"],label="Image-to-3D reference")
             texture=gr.Textbox(label="Optional texture prompt")
-            gr.Button("Image-to-3D (not yet implemented)").click(three_d_image,inputs=[image_ref,texture],outputs=[task_msg,task_ref])
+            gr.Button("Image-to-3D unavailable — not implemented", interactive=False)
             task_status=gr.Markdown();model_file=gr.File(label="Generated OBJ point cloud (vertices only)")
             gr.Button("Check / download OBJ point cloud").click(three_d_poll,inputs=task_ref,outputs=[task_status,model_file])
         with gr.Tab("Research"):
