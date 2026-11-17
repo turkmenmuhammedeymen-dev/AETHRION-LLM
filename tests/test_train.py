@@ -91,10 +91,21 @@ class TrainingUtilityTests(unittest.TestCase):
                 report_path=corpus_report,
                 dataset_manifest_path=dataset_manifest,
             )
-            tokenizer = ByteBPETokenizer()
             train_path = data_path.with_name("corpus-train.txt")
-            tokenizer.train(train_path.read_text(encoding="utf-8"), vocab_size=256)
-            tokenizer.save(tokenizer_path)
+            tokenizer_command = [
+                sys.executable, "-m", "aethrion.tokenizer",
+                "--train", str(train_path), "--corpus", str(data_path),
+                "--output", str(tokenizer_path), "--vocab-size", "256",
+                "--dataset-manifest", str(dataset_manifest),
+                "--source-manifest", str(source_manifest),
+                "--source-root", str(raw_dir),
+                "--corpus-report", str(corpus_report),
+            ]
+            tokenized = subprocess.run(
+                tokenizer_command, cwd=root, capture_output=True, text=True, timeout=120
+            )
+            self.assertEqual(tokenized.returncode, 0, tokenized.stdout + tokenized.stderr)
+            self.assertTrue(Path(str(tokenizer_path) + ".provenance.json").is_file())
             config = {
                 "seed": 42, "data_path": str(data_path), "tokenizer_path": str(tokenizer_path),
                 "output_dir": str(output), "vocab_size": 256, "block_size": 8,
@@ -103,7 +114,7 @@ class TrainingUtilityTests(unittest.TestCase):
                 "learning_rate": 0.001, "min_learning_rate": 0.0001,
                 "weight_decay": 0.0, "max_steps": 2, "warmup_steps": 1,
                 "eval_interval": 1, "eval_batches": 1, "save_interval": 1,
-                "train_split": 0.8, "grad_clip": 1.0, "amp": False
+                "grad_clip": 1.0, "amp": False
             }
             config_path.write_text(json.dumps(config), encoding="utf-8")
             command = [
