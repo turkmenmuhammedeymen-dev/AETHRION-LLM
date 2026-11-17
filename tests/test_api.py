@@ -13,6 +13,18 @@ class ApiRegistrationTests(unittest.TestCase):
         with patch.dict("os.environ",env,clear=False):
             router,providers=build_router()
         self.assertEqual(router.available(),{}); self.assertEqual(providers,{})
+    def test_remote_providers_can_be_disabled_even_when_secrets_exist(self):
+        env={"AETHRION_CODE_API_KEY":"dummy","AETHRION_CODE_MODEL":"dummy-model",
+             "AETHRION_IMAGE_API_KEY":"dummy","OPENAI_API_KEY":"dummy",
+             "MESHY_API_KEY":"dummy","TAVILY_API_KEY":"dummy",
+             "AETHRION_AUDIO_API_KEY":"dummy",
+             "AETHRION_CHECKPOINT":"/missing/checkpoint.pt",
+             "AETHRION_TOKENIZER":"/missing/tokenizer.json"}
+        with patch.dict("os.environ",env,clear=False):
+            router,providers=build_router(allow_remote_providers=False)
+        self.assertEqual(router.available(),{})
+        self.assertEqual(providers,{})
+
     def test_code_and_research_register_from_env(self):
         env={"AETHRION_CODE_API_KEY":"dummy","AETHRION_CODE_MODEL":"dummy-model",
              "AETHRION_CODE_BASE_URL":"https://example.test/v1","AETHRION_IMAGE_API_KEY":"",
