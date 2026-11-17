@@ -51,14 +51,15 @@ class NativeModelRuntimeTests(unittest.TestCase):
         evaluation.write_text(json.dumps({
             "model_id": "code", "dataset_sha256": "a" * 64,
             "status": "approved_for_release",
+            "checkpoint_sha256": digest(checkpoint),
             "quality_gate_passed": True, "safety_gate_passed": True,
             "human_reviewed": True, "reviewer": "unit-test-reviewer",
             "reviewed_at": "2026-11-17T16:00:00Z",
             "approval_evidence_path": "models/release_review.txt",
             "approval_evidence_sha256": digest(review),
             "benchmarks": {
-                "unit_test_pass_rate": {"metric": "pass_rate", "value": 1.0, "passed": True},
-                "security_regression": {"metric": "pass_rate", "value": 1.0, "passed": True}
+                "unit_test_pass_rate": {"metric": "pass_rate", "value": 1.0, "threshold": 0.95, "passed": True, "evidence": "Synthetic test fixture"},
+                "security_regression": {"metric": "pass_rate", "value": 1.0, "threshold": 1.0, "passed": True, "evidence": "Synthetic test fixture"}
             }
         }), encoding="utf-8")
         card = folder / "MODEL_CARD.md"
