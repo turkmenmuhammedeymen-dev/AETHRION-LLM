@@ -4,9 +4,7 @@ import os
 from pathlib import Path
 from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
-from aethrion.providers import MeshyTextTo3DProvider,OpenAICompatibleChatProvider,OpenAIImageProvider,TavilyResearchProvider
-from aethrion.file_agent import FileAnalysisAgent,FileAnalysisError
-from aethrion.audio import OpenAISpeechProvider,AudioProviderError
+from aethrion.file_agent import FileAnalysisError
 from aethrion.document_tools import create_document,extract_document_text,DocumentError
 from aethrion.workspace_agent import ProjectWorkspaceAgent,WorkspaceError
 from aethrion.security import require_api_token
@@ -104,7 +102,7 @@ async def audio_transcriptions(file: UploadFile = File(...), language: str | Non
     with tempfile.NamedTemporaryFile(suffix=suffix) as handle:
         handle.write(raw); handle.flush()
         try: text=audio_provider.transcribe(handle.name,language)
-        except AudioProviderError as exc: raise HTTPException(status_code=502,detail=str(exc)) from exc
+        except Exception as exc: raise HTTPException(status_code=502,detail=str(exc)) from exc
     return {"text":text}
 
 @app.post("/audio/speech", dependencies=[Depends(require_api_token)])
