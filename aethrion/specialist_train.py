@@ -290,7 +290,7 @@ def train_specialist(
     train_idx = np.flatnonzero(split_names == "train")
     val_idx = np.flatnonzero(split_names == "validation")
     test_idx = np.flatnonzero(split_names == "test")
-    keys = sorted(set(arrays) - {"sample_id", "split"})
+    keys = sorted(set(arrays) - {"sample_id", "group_id", "split"})
     if not len(train_idx) or not len(val_idx) or not len(test_idx):
         raise ValueError("Train, validation and test partitions must all be populated.")
 
