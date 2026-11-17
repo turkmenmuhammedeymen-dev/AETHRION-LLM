@@ -7,7 +7,8 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))\nsys.path.insert(1, str(ROOT / "hf_space"))
+sys.path.insert(0, str(ROOT))
+sys.path.insert(1, str(ROOT / "hf_space"))
 
 import gradio as gr
 import app as space
