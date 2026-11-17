@@ -1,4 +1,6 @@
 import unittest
+import tempfile
+from pathlib import Path
 from unittest.mock import patch
 from fastapi.testclient import TestClient
 from aethrion import api
@@ -24,6 +26,31 @@ class ApiRegistrationTests(unittest.TestCase):
             router,providers=build_router(allow_remote_providers=False)
         self.assertEqual(router.available(),{})
         self.assertEqual(providers,{})
+
+    def test_local_model_can_be_disabled_without_authentication(self):
+        with tempfile.TemporaryDirectory() as folder:
+            checkpoint = Path(folder) / "checkpoint.pt"
+            tokenizer = Path(folder) / "tokenizer.json"
+            checkpoint.touch()
+            tokenizer.touch()
+            env = {
+                "AETHRION_CHECKPOINT": str(checkpoint),
+                "AETHRION_TOKENIZER": str(tokenizer),
+                "AETHRION_CODE_API_KEY": "",
+                "AETHRION_CODE_MODEL": "",
+                "OPENAI_API_KEY": "",
+                "AETHRION_IMAGE_API_KEY": "",
+                "MESHY_API_KEY": "",
+                "TAVILY_API_KEY": "",
+                "AETHRION_AUDIO_API_KEY": "",
+            }
+            with patch.dict("os.environ", env, clear=False):
+                router, providers = build_router(
+                    allow_remote_providers=False,
+                    allow_local_model=False,
+                )
+            self.assertEqual(router.available(), {})
+            self.assertEqual(providers, {})
 
     def test_code_and_research_register_from_env(self):
         env={"AETHRION_CODE_API_KEY":"dummy","AETHRION_CODE_MODEL":"dummy-model",
