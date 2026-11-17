@@ -66,6 +66,48 @@ class MeshyTextTo3DProvider:
         task_id=data.get("result") or data.get("id")
         if not isinstance(task_id,str) or not task_id: raise ProviderError("Meshy returned no task identifier.")
         return {"provider":"meshy","task_id":task_id,"status":"PENDING"}
+    def image_to_3d(self,image_path:str,texture_prompt:str="")->dict[str,Any]:
+        """Create an asynchronous Meshy Image-to-3D task from a bounded local image."""
+        from pathlib import Path
+        import base64
+        try:
+            from PIL import Image
+        except ImportError as exc:
+            raise ProviderError("Image-to-3D requires Pillow.") from exc
+        path=Path(image_path)
+        if not path.is_file() or path.stat().st_size<1 or path.stat().st_size>20*1024*1024:
+            raise ProviderError("Image must be between 1 byte and 20 MiB.")
+        try:
+            with Image.open(path) as image:
+                fmt=(image.format or "").upper()
+                width,height=image.size
+                if fmt not in {"JPEG","PNG","WEBP"} or width<32 or height<32 or width*height>178_956_970:
+                    raise ProviderError("Image must be JPG, PNG or WebP and meet Meshy dimension limits.")
+                mime={"JPEG":"image/jpeg","PNG":"image/png","WEBP":"image/webp"}[fmt]
+            encoded=base64.b64encode(path.read_bytes()).decode("ascii")
+            root=self.base_url.split("/openapi/")[0]
+            payload={"image_url":f"data:{mime};base64,{encoded}",
+                     "ai_model":os.environ.get("AETHRION_MESHY_IMAGE_MODEL","meshy-7.1"),
+                     "target_formats":["glb"],"moderation":True}
+            if texture_prompt:
+                payload["texture_prompt"]=texture_prompt[:800]
+            data=_request_json(root+"/openapi/v1/image-to-3d",api_key=self.api_key,timeout=120,payload=payload)
+        except ProviderError:
+            raise
+        except Exception as exc:
+            raise ProviderError(f"Image-to-3D request failed: {type(exc).__name__}") from exc
+        task_id=data.get("result") or data.get("id")
+        if not isinstance(task_id,str) or not task_id:
+            raise ProviderError("Meshy returned no image-to-3D task identifier.")
+        return {"provider":"meshy","task_id":task_id,"task_type":"image-to-3d","status":"PENDING"}
+
+    def get_image_task(self,task_id:str)->dict[str,Any]:
+        if not task_id or "/" in task_id or ".." in task_id:
+            raise ValueError("Invalid task identifier.")
+        root=self.base_url.split("/openapi/")[0]
+        return _request_json(root+"/openapi/v1/image-to-3d/"+urllib.parse.quote(task_id,safe=""),
+                             method="GET",api_key=self.api_key,timeout=45)
+
     def get_task(self,task_id:str)->dict[str,Any]:
         if not task_id or "/" in task_id or ".." in task_id: raise ValueError("Invalid task identifier.")
         return _request_json(self.base_url+"/text-to-3d/"+urllib.parse.quote(task_id,safe=""),
