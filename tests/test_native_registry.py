@@ -57,7 +57,6 @@ class NativeModelRegistryTests(unittest.TestCase):
                     "model_id": "chat", "dataset_sha256": "a" * 64,
                     "checkpoint_sha256": hashlib.sha256(b"first-party-checkpoint").hexdigest(),
                     "status": "approved_for_release",
-                    "checkpoint_sha256": digests["checkpoint.pt"],
                     "quality_gate_passed": True,
                     "safety_gate_passed": True,
                     "human_reviewed": True,
