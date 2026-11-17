@@ -126,13 +126,13 @@ def research(query):
         lines = ["## Local AETHRION research results"]
         for row in rows:
             lines.append(
-                f"### {row.get('title', 'Untitled')}\\n"
-                f"{row.get('excerpt', '')}\\n"
-                f"Source: {row.get('source_uri', 'unknown')}\\n"
-                f"License: {row.get('license', 'unknown')}\\n"
+                f"### {row.get('title', 'Untitled')}\n"
+                f"{row.get('excerpt', '')}\n"
+                f"Source: {row.get('source_uri', 'unknown')}\n"
+                f"License: {row.get('license', 'unknown')}\n"
                 f"Relevance: {row.get('score', 0):.4f}"
             )
-        return "\\n\\n".join(lines)
+        return "\n\n".join(lines)
     except CapabilityUnavailable:
         return "AETHRION-RESEARCH model or local approved index is not ready. No hosted search API is used."
     except Exception as exc:
@@ -150,9 +150,9 @@ def analyse(file_path,question):
             {"document_path": str(file_path)}
         )
         return (
-            f"**AETHRION-DOC result**\\n\\n{result.get('extractive_span', '')}"
-            f"\\n\\n**Limitations:** {result.get('limitations', '')}"
-            f"\\n\\n**Extracted text:**\\n{result.get('text', '')[:12000]}"
+            f"**AETHRION-DOC result**\n\n{result.get('extractive_span', '')}"
+            f"\n\n**Limitations:** {result.get('limitations', '')}"
+            f"\n\n**Extracted text:**\n{result.get('text', '')[:12000]}"
         )
     except CapabilityUnavailable:
         return "AETHRION-DOC is not trained and released yet."
@@ -173,7 +173,7 @@ def voice(path):
         spoken = dispatch(Capability.TTS, answer, {})
         audio_path = spoken.get("audio_path")
         return (
-            f"**Transcript:** {transcript}\\n\\n**AETHRION-BASE:** {answer}",
+            f"**Transcript:** {transcript}\n\n**AETHRION-BASE:** {answer}",
             audio_path
         )
     except CapabilityUnavailable:
@@ -212,7 +212,7 @@ def edit_project(path,task):
             "aethrion-review-" + os.urandom(5).hex() + ".zip"
         )
         output.write_bytes(raw)
-        return summary + "\\n\\nUploaded code was never executed; review the ZIP before applying it.", str(output)
+        return summary + "\n\nUploaded code was never executed; review the ZIP before applying it.", str(output)
     except CapabilityUnavailable:
         return "AETHRION-CODE is not trained and released yet.", None
     except WorkspaceError as exc:
