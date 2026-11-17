@@ -51,7 +51,7 @@ def status():
         model_status = get_native_model_statuses()
     except Exception as exc:
         model_status = {"registry": "ERROR — " + type(exc).__name__}
-    rows = [f"- **AETHRION-{name.upper()}**: {state}" for name, state in model_status.items()]
+    rows = [f"- **{name}**: {state.upper()}" for name, state in model_status.items()]
     if not SPACE_AUTH_ENABLED:
         rows.append("- **Local model access**: DISABLED — Space authentication is not configured")
     rows.append("- **External model/API providers**: DISABLED — native-only policy")
