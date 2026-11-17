@@ -559,7 +559,7 @@ def validate_training_approval(
             for chunk in iter(lambda: split_handle.read(1024 * 1024), b""):
                 combined_digest.update(chunk)
         expected_rows = expected_partitions[split_name]
-        expected_bytes = "".join(row["text"] + "\\n" for row in expected_rows).encode("utf-8")
+        expected_bytes = "".join(row["text"] + "\n" for row in expected_rows).encode("utf-8")
         if split_path.read_bytes() != expected_bytes:
             raise ValueError(
                 f"Training blocked: {split_name} split content does not reproduce from reviewed source records."
