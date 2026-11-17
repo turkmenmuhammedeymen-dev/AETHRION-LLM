@@ -39,6 +39,14 @@ because `training_allowed` is intentionally false.
 7. Evaluates only on a separate reviewed held-out file, reporting loss,
    perplexity, tokens/second, parameter count and peak GPU memory.
 
+## Checkpoint recovery and safe interruption
+
+- Checkpoints are written atomically as `checkpoint_last.pt` with a matching `.sha256` integrity file.
+- One previously verified checkpoint generation is retained for recovery if the newest file is incomplete or corrupted.
+- `progress.json` records the current state; `metrics.jsonl` records periodic training/validation metrics and throughput.
+- Ctrl+C or a termination signal requests a safe stop after the current optimizer step and forces a checkpoint save. Resume with the same data, tokenizer, and approval manifests using `--resume`.
+- A hard power loss or forced kill cannot be guaranteed to run a signal handler; the last completed checkpoint remains the recovery point.
+
 ## Human review before training
 
 Never change approval flags just to make the pipeline continue. Verify rights
