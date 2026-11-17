@@ -20,9 +20,13 @@ class SpecialistTrainingTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(["s1", "s2", "s3", "s4", "s5", "s6"]),
+            group_id=np.asarray(["g1", "g2", "g3", "g4", "g5", "g6"]),
             split=np.asarray(["train", "train", "validation", "validation", "test", "test"]),
             token_ids=np.random.default_rng(42).integers(0, 256, size=(6, 12), dtype=np.int64),
         )
+        from aethrion.tokenizer import ByteBPETokenizer
+        tokenizer_path = root / "tokenizer.json"
+        ByteBPETokenizer().save(tokenizer_path)
         manifest = root / "manifest.json"
         payload = {
             "format": "aethrion-specialist-dataset-v1",
@@ -34,6 +38,8 @@ class SpecialistTrainingTests(unittest.TestCase):
             "privacy_reviewed": approved,
             "dataset_path": "dataset.npz",
             "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+            "tokenizer_path": "tokenizer.json",
+            "tokenizer_sha256": hashlib.sha256(tokenizer_path.read_bytes()).hexdigest(),
             "sources": [{
                 "source_id": "synthetic-fixture",
                 "source_uri": "unit-test://synthetic",
