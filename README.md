@@ -105,3 +105,8 @@ No license is granted to third-party training data by this repository. Add an ex
 See [docs/KAGGLE_RUNBOOK.md](docs/KAGGLE_RUNBOOK.md) for the single-cell Kaggle setup and fail-closed pipeline. The first run performs environment checks, tests, and optional bounded data import, then stops at the approval gate while training permission remains false.
 
 See [docs/MULTIMODAL_ARCHITECTURE.md](docs/MULTIMODAL_ARCHITECTURE.md) for capability routing and [docs/PROVIDER_SETUP.md](docs/PROVIDER_SETUP.md) for real provider configuration. Code, image, 3D, research, and file-analysis adapters register only when their credentials are configured. Held-out evaluation reports loss, perplexity, throughput, parameter count, and GPU memory.
+
+
+### Standalone API security
+
+Set `AETHRION_API_TOKEN` as a server-side environment secret before exposing the FastAPI service. All API routes except `/health` require an `Authorization: Bearer <token>` header. If the token is not configured, protected routes fail closed with HTTP 503. Never commit the token or place it in browser-side code.
