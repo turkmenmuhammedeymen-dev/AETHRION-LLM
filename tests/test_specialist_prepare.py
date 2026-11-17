@@ -59,7 +59,7 @@ class SpecialistPreparationTests(unittest.TestCase):
                 for _ in range(25):
                     while _split(f"safe-{index}", 1337) != split:
                         index += 1
-                    rows.append({"id": f"safe-{index}", "group_id": f"group-{index}", "text": "Benign policy example.",
+                    rows.append({"id": f"safe-{index}", "group_id": f"safe-{index}", "text": "Benign policy example.",
                                  "decision": decision, "reasons": [0]})
                     index += 1
             # Add the other two labels to every split so all three decisions are balanced.
