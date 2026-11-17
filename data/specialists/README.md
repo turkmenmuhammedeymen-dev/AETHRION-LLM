@@ -46,6 +46,45 @@ trained Vocoder learns mel-to-waveform conversion; both datasets require
 documented speaker consent. TTS cannot be released unless its companion
 AETHRION-VOCODER also passes its own evaluation and release gates.
 
+## Raw JSONL preparation (chat, code, research, document, SAFE)
+
+The first-party preparation CLI converts owner-supplied, reviewed JSONL records
+into the NPZ contract above, learns a byte-BPE tokenizer from only those records,
+copies the original source file for provenance, and writes SHA-256 hashes.
+
+Supported record shapes:
+
+- `chat`: `{"id":"...","prompt":"...","response":"..."}`
+- `code`: `{"id":"...","text":"..."}`
+- `research`: `{"id":"...","query":"...","passage":"..."}`
+- `document`: `{"id":"...","text":"...","boxes":[[x0,y0,x1,y1],...],"layout_ids":[...],"tag_labels":[...]}`; layout arrays must align with byte-BPE token positions.
+- `safety`: `{"id":"...","text":"...","decision":"ALLOW|REVIEW|BLOCK","reasons":[integer,...]}`; decisions are human-supplied, never inferred by the tool.
+
+Example (CODE):
+
+```bash
+python -m aethrion.specialist_prepare \
+  --input data/incoming/code-reviewed.jsonl \
+  --model code \
+  --output-root data/specialists \
+  --license "record the exact source license" \
+  --permitted-use "record the exact permitted training use" \
+  --evidence-uri "https://source.example/license-or-terms"
+```
+
+The command always writes `training_allowed=false`, `owner_approval=false`,
+`privacy_reviewed=false`, and source-level training/privacy approvals false.
+It is a preparation tool, not a license verifier or approval workflow. Do not
+change these flags until the actual source terms, creator rights, privacy,
+attribution, and any required consent have been reviewed and documented.
+Use `group_id` for records that must remain in the same split; the split is
+deterministic and group-aware. SAFE requires at least 25 manually reviewed
+examples of each decision in every split.
+
+This first JSONL adapter does not yet preprocess raw images, WAV audio, point
+clouds, or OCR itself. Those modalities require their own source-specific
+decoders and provenance checks; do not relabel text records as multimodal data.
+
 ## Training
 
 Create a per-model manifest by copying `manifest.template.json`, filling the
