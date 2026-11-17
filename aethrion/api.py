@@ -50,7 +50,7 @@ def _require_safety_allow(runtime: Any, text: str) -> dict[str, Any]:
 def _require_safety_allow_http(runtime: Any, text: str) -> dict[str, Any]:
     """Translate a fail-closed SAFE verdict into a protected API response."""
     try:
-        return _require_safety_allow_http(runtime, text)
+        return _require_safety_allow(runtime, text)
     except CapabilityUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -165,7 +165,7 @@ def analyze_file(request:FileRequest):
         handle.write(raw); handle.flush()
         try:
             result=runtime.analyze_document(handle.name)
-            _require_safety_allow(runtime, str(result.get("text", "")))
+            _require_safety_allow_http(runtime, str(result.get("text", "")))
         except CapabilityUnavailable:
             raise HTTPException(status_code=503,detail="AETHRION-SAFE did not allow this document output.")
         except HTTPException:
@@ -210,7 +210,7 @@ async def vision_compare(file:UploadFile=File(...),text:str=Form(...)):
     suffix=Path(file.filename or "image.png").suffix.lower()
     if suffix not in {".png",".jpg",".jpeg",".webp"}:
         raise HTTPException(status_code=400,detail="Supported image formats are PNG, JPG and WebP.")
-    _require_safety_allow(runtime, text)
+    _require_safety_allow_http(runtime, text)
     with tempfile.NamedTemporaryFile(suffix=suffix) as handle:
         handle.write(raw); handle.flush()
         try: score=runtime.image_text_similarity(handle.name,text)
