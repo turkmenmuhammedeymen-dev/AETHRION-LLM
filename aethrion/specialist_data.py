@@ -12,7 +12,7 @@ import numpy as np
 FORMAT = "aethrion-specialist-dataset-v1"
 MODEL_MODALITIES = {
     "chat": "text", "code": "code", "vision": "vision", "image": "image", "asr": "audio",
-    "tts": "audio", "3d": "3d", "research": "text",
+    "tts": "audio", "vocoder": "audio", "3d": "3d", "research": "text",
     "document": "document", "safety": "text",
 }
 REQUIRED_ARRAYS = {
@@ -21,7 +21,7 @@ REQUIRED_ARRAYS = {
     "vision": {"sample_id", "split", "images", "token_ids"},
     "image": {"sample_id", "split", "images", "token_ids"},
     "asr": {"sample_id", "split", "features", "input_lengths", "targets", "target_lengths"},
-    "tts": {"sample_id", "split", "token_ids", "frame_to_token", "target_mels", "durations"},
+    "tts": {"sample_id", "split", "token_ids", "frame_to_token", "target_mels", "durations"},\n    "vocoder": {"sample_id", "split", "target_mels", "target_waveforms"},
     "3d": {"sample_id", "split", "points", "token_ids"},
     "research": {"sample_id", "split", "query_ids", "passage_ids"},
     "document": {"sample_id", "split", "token_ids", "boxes", "layout_ids", "tag_labels"},
@@ -84,7 +84,7 @@ def validate_specialist_dataset(
         raise SpecialistDataError("Training blocked: specialist dataset and owner approvals are not true.")
     if payload.get("privacy_reviewed") is not True:
         raise SpecialistDataError("Training blocked: privacy review is not approved.")
-    if model_id in {"asr", "tts"} and payload.get("speaker_consent_reviewed") is not True:
+    if model_id in {"asr", "tts", "vocoder"} and payload.get("speaker_consent_reviewed") is not True:
         raise SpecialistDataError("Training blocked: speaker consent review is not approved.")
 
     sources = payload.get("sources")
