@@ -37,6 +37,10 @@ class AETHRIONTTS(nn.Module):
             batch_first=True, norm_first=True
         )
         self.encoder = nn.TransformerEncoder(layer, config.layers)
+        self.duration_predictor = nn.Sequential(
+            nn.Linear(config.width, config.width), nn.GELU(),
+            nn.Linear(config.width, 1)
+        )
         self.decoder = nn.Sequential(
             nn.Conv1d(config.width, config.width, 5, padding=2),
             nn.GELU(), nn.Conv1d(config.width, config.width, 5, padding=2),
@@ -57,6 +61,39 @@ class AETHRIONTTS(nn.Module):
         encoded = self.encoder(self.embedding(token_ids))
         aligned = encoded.gather(1, frame_to_token.unsqueeze(-1).expand(-1, -1, encoded.size(-1)))
         return self.decoder(aligned.transpose(1, 2)).transpose(1, 2)
+
+    def predict_durations(self, token_ids: torch.Tensor, min_frames: int = 1,
+                          max_frames: int = 200) -> torch.Tensor:
+        if min_frames < 1 or max_frames < min_frames:
+            raise ValueError("Invalid duration prediction bounds")
+        if token_ids.ndim != 2 or token_ids.dtype != torch.long:
+            raise ValueError("token_ids must be [batch,tokens] long tensor")
+        encoded = self.encoder(self.embedding(token_ids))
+        predicted = torch.expm1(self.duration_predictor(encoded).squeeze(-1)).round()
+        return predicted.clamp(min=min_frames, max=max_frames).long()
+
+    @staticmethod
+    def durations_to_alignment(durations: torch.Tensor) -> torch.Tensor:
+        if durations.ndim != 2 or durations.dtype != torch.long or durations.min().item() < 1:
+            raise ValueError("durations must be a positive [batch,tokens] long tensor")
+        rows = []
+        for row in durations:
+            rows.append(torch.repeat_interleave(
+                torch.arange(row.numel(), device=row.device), row
+            ))
+        lengths = torch.tensor([row.numel() for row in rows], dtype=torch.long, device=durations.device)
+        max_length = int(lengths.max().item())
+        padded = [F.pad(row, (0, max_length - row.numel()), value=0) for row in rows]
+        return torch.stack(padded), lengths
+
+    def duration_loss(self, token_ids, target_durations):
+        if target_durations.shape != token_ids.shape or target_durations.dtype != torch.long:
+            raise ValueError("target_durations must be a long tensor matching token_ids")
+        if target_durations.min().item() < 1:
+            raise ValueError("target_durations must be positive")
+        encoded = self.encoder(self.embedding(token_ids))
+        predicted_log = self.duration_predictor(encoded).squeeze(-1)
+        return F.smooth_l1_loss(predicted_log, torch.log1p(target_durations.float()))
 
     def acoustic_loss(self, token_ids, frame_to_token, target_mels, frame_mask=None):
         predicted = self(token_ids, frame_to_token)
