@@ -37,6 +37,24 @@ class ExtendedMultimodalTests(unittest.TestCase):
         with self.assertRaisesRegex(WorkspaceError,"per-file size limit"):
             read_project_zip(buf.getvalue())
 
+    def test_native_vision_rejects_oversized_image_dimensions_before_model_load(self):
+        from unittest.mock import patch
+        from aethrion.native_runtime import NativeModelRuntime, NativeRuntimeError
+
+        class OversizedImage:
+            format = "PNG"
+            size = (9000, 100)
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+
+        runtime = NativeModelRuntime.__new__(NativeModelRuntime)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "oversized.png"
+            path.write_bytes(b"not-decoded-test-image")
+            with patch("PIL.Image.open", return_value=OversizedImage()):
+                with self.assertRaisesRegex(NativeRuntimeError, "safe dimensions"):
+                    runtime.image_text_similarity(path, "description")
+
     def test_docx_archive_rejects_missing_required_document_xml(self):
         from aethrion.document_tools import _validate_docx_archive
         buf=io.BytesIO()
