@@ -55,10 +55,13 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def _group_id(row: dict[str, Any], *, fallback: str = "id") -> str:
-    value = row.get("group_id", row.get(fallback, row.get("id", "")))
+def _group_id(row: dict[str, Any], *, fallback: str | None = None) -> str:
+    value = row.get("group_id")
+    if (not isinstance(value, str) or not value.strip()) and fallback:
+        value = row.get(fallback)
     if not isinstance(value, str) or not value.strip():
-        raise PreparationError("Every record requires a non-empty group_id (or fallback identifier).")
+        required = "group_id" if fallback is None else f"group_id or {fallback}"
+        raise PreparationError(f"Every record requires a non-empty {required} for leakage-safe splitting.")
     return value.strip()
 
 
