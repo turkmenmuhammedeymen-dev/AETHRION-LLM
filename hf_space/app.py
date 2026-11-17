@@ -65,7 +65,7 @@ def chat(message, history):
     for item in (history or [])[-8:]:
         if isinstance(item, dict) and isinstance(item.get("content"), str):
             context.append(str(item.get("role", "user")) + ": " + item["content"][:1500])
-    prompt = "\\n".join(context + ["user: " + message[:4000], "assistant:"])
+    prompt = "\n".join(context + ["user: " + message[:4000], "assistant:"])
     try:
         return _gpu_local_chat(prompt)
     except CapabilityUnavailable:
