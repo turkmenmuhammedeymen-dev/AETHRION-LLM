@@ -114,13 +114,41 @@ class NativeModelRegistryTests(unittest.TestCase):
     def test_hash_mismatch_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            checkpoint = root / "models" / "chat.pt"
-            checkpoint.parent.mkdir(parents=True)
+            models = root / "models"
+            models.mkdir()
+            checkpoint = models / "chat.pt"
             checkpoint.write_bytes(b"tampered")
+            tokenizer = models / "tokenizer.json"
+            tokenizer.write_text('{"format":"test"}', encoding="utf-8")
+            training = models / "training.json"
+            training.write_text(json.dumps({
+                "model_id": "chat", "dataset_sha256": "a" * 64
+            }), encoding="utf-8")
+            evaluation = models / "evaluation.json"
+            evaluation.write_text(json.dumps({
+                "model_id": "chat", "dataset_sha256": "a" * 64,
+                "status": "approved_for_release"
+            }), encoding="utf-8")
+            card = models / "MODEL_CARD.md"
+            card.write_text("# Test model", encoding="utf-8")
+            digest = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
             write_manifest(root, {
                 "architecture": "aethrion.model:AETHRIONLM",
+                "model_config": {"vocab_size": 256},
                 "checkpoint": "models/chat.pt",
                 "checkpoint_sha256": "0" * 64,
+                "tokenizer": "models/tokenizer.json",
+                "tokenizer_sha256": digest(tokenizer),
+                "training_report": "models/training.json",
+                "training_report_sha256": digest(training),
+                "evaluation_report": "models/evaluation.json",
+                "evaluation_report_sha256": digest(evaluation),
+                "model_card": "models/MODEL_CARD.md",
+                "model_card_sha256": digest(card),
+                "dataset_sha256": "a" * 64,
+                "release_approval": True,
+                "quality_gate_passed": True,
+                "safety_gate_passed": True,
                 "status": "trained",
             })
             registry = NativeModelRegistry(root)
