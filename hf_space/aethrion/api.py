@@ -9,7 +9,8 @@ from aethrion.file_agent import FileAnalysisAgent,FileAnalysisError
 from aethrion.audio import OpenAISpeechProvider,AudioProviderError
 from aethrion.document_tools import create_document,extract_document_text,DocumentError
 from aethrion.workspace_agent import ProjectWorkspaceAgent,WorkspaceError
-from fastapi import UploadFile,File,Form,Response
+from aethrion.security import require_api_token
+from fastapi import UploadFile,File,Form,Response,Depends
 try:
     from fastapi import FastAPI,HTTPException
     from pydantic import BaseModel,Field
@@ -82,12 +83,12 @@ code_provider=providers.get("file_analysis")
 @app.get("/health")
 def health(): return {"status":"ok","service":"AETHRION-LLM","version":"0.3.0"}
 
-@app.get("/capabilities")
+@app.get("/capabilities", dependencies=[Depends(require_api_token)])
 def capabilities():
     available=router.available(); all_names=[c.value for c in Capability]
     return {"available":available,"unavailable":[n for n in all_names if n not in available],"credentials_exposed":False}
 
-@app.post("/dispatch")
+@app.post("/dispatch", dependencies=[Depends(require_api_token)])
 def dispatch(request:DispatchRequest):
     try:
         result=router.dispatch(request.capability,CapabilityRequest(request.prompt,request.options))
@@ -96,7 +97,7 @@ def dispatch(request:DispatchRequest):
     except CapabilityUnavailable as exc: raise HTTPException(status_code=503,detail=str(exc)) from exc
     except Exception as exc: raise HTTPException(status_code=502,detail=f"Provider operation failed: {type(exc).__name__}") from exc
 
-@app.post("/files/analyze")
+@app.post("/files/analyze", dependencies=[Depends(require_api_token)])
 def analyze_file(request:FileRequest):
     provider=providers.get("file_analysis")
     if provider is None: raise HTTPException(status_code=503,detail="Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL.")
@@ -106,7 +107,7 @@ def analyze_file(request:FileRequest):
     except FileAnalysisError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
     except Exception as exc: raise HTTPException(status_code=502,detail=f"File analysis failed: {type(exc).__name__}") from exc
 
-@app.get("/3d/tasks/{task_id}")
+@app.get("/3d/tasks/{task_id}", dependencies=[Depends(require_api_token)])
 def get_3d_task(task_id:str):
     provider=providers.get("3d")
     if provider is None: raise HTTPException(status_code=503,detail="MESHY_API_KEY is not configured.")
@@ -114,7 +115,7 @@ def get_3d_task(task_id:str):
     except Exception as exc: raise HTTPException(status_code=502,detail=f"3D task lookup failed: {type(exc).__name__}") from exc
 
 
-@app.post("/audio/transcriptions")
+@app.post("/audio/transcriptions", dependencies=[Depends(require_api_token)])
 async def audio_transcriptions(file: UploadFile = File(...), language: str | None = Form(default=None)):
     if audio_provider is None:
         raise HTTPException(status_code=503, detail="Configure AETHRION_AUDIO_API_KEY or OPENAI_API_KEY.")
@@ -129,7 +130,7 @@ async def audio_transcriptions(file: UploadFile = File(...), language: str | Non
         except AudioProviderError as exc: raise HTTPException(status_code=502,detail=str(exc)) from exc
     return {"text":text}
 
-@app.post("/audio/speech")
+@app.post("/audio/speech", dependencies=[Depends(require_api_token)])
 def audio_speech(request: dict[str,Any]):
     if audio_provider is None:
         raise HTTPException(status_code=503,detail="Configure AETHRION_AUDIO_API_KEY or OPENAI_API_KEY.")
@@ -139,7 +140,7 @@ def audio_speech(request: dict[str,Any]):
     except AudioProviderError as exc:
         raise HTTPException(status_code=400,detail=str(exc)) from exc
 
-@app.post("/documents/extract")
+@app.post("/documents/extract", dependencies=[Depends(require_api_token)])
 async def documents_extract(file: UploadFile = File(...)):
     import tempfile
     suffix=Path(file.filename or "").suffix[:12]
@@ -151,14 +152,14 @@ async def documents_extract(file: UploadFile = File(...)):
         except (DocumentError,UnicodeError,ValueError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
     return {"filename":file.filename,"text":content}
 
-@app.post("/documents/create")
+@app.post("/documents/create", dependencies=[Depends(require_api_token)])
 def documents_create(request: dict[str,Any]):
     try:
         raw,name,mime=create_document(str(request.get("title","")),str(request.get("content","")),str(request.get("format","docx")))
         return Response(content=raw,media_type=mime,headers={"Content-Disposition":f'attachment; filename="{name}"',"Cache-Control":"no-store"})
     except DocumentError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
 
-@app.post("/workspace/propose")
+@app.post("/workspace/propose", dependencies=[Depends(require_api_token)])
 async def workspace_propose(file: UploadFile = File(...), task: str = Form(...)):
     if code_provider is None:
         raise HTTPException(status_code=503,detail="Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL.")
