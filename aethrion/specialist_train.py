@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import random
+import shutil
 import time
 from typing import Any
 
@@ -134,10 +135,46 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _capture_rng_state() -> dict[str, Any]:
+    py = random.getstate()
+    np_state = np.random.get_state()
+    state = {
+        "python": {"version": int(py[0]), "state": list(py[1]), "gauss": py[2]},
+        "numpy": {
+            "algorithm": str(np_state[0]), "keys": np_state[1].tolist(),
+            "position": int(np_state[2]), "has_gauss": int(np_state[3]),
+            "cached_gaussian": float(np_state[4]),
+        },
+        "torch": torch.get_rng_state(),
+    }
+    if torch.cuda.is_available():
+        state["cuda"] = torch.cuda.get_rng_state_all()
+    return state
+
+
+def _restore_rng_state(state: dict[str, Any]) -> None:
+    py = state["python"]
+    random.setstate((int(py["version"]), tuple(int(x) for x in py["state"]), py["gauss"]))
+    ns = state["numpy"]
+    np.random.set_state((
+        str(ns["algorithm"]), np.asarray(ns["keys"], dtype=np.uint32),
+        int(ns["position"]), int(ns["has_gauss"]), float(ns["cached_gaussian"]),
+    ))
+    torch.set_rng_state(state["torch"].cpu())
+    if torch.cuda.is_available() and "cuda" in state:
+        torch.cuda.set_rng_state_all([item.cpu() for item in state["cuda"]])
+
+
 def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
+    """Atomically save a checkpoint and retain the previous verified generation."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = Path(str(path) + ".tmp")
-    checksum_tmp = Path(str(path) + ".sha256.tmp")
+    checksum_path = Path(str(path) + ".sha256")
+    checksum_tmp = Path(str(checksum_path) + ".tmp")
+    previous = Path(str(path) + ".previous")
+    previous_checksum = Path(str(previous) + ".sha256")
+    previous_tmp = Path(str(previous) + ".tmp")
+    previous_checksum_tmp = Path(str(previous_checksum) + ".tmp")
     try:
         torch.save(payload, tmp)
         with tmp.open("rb+") as handle:
@@ -145,24 +182,42 @@ def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
             os.fsync(handle.fileno())
         digest = _sha256(tmp)
         checksum_tmp.write_text(digest + "\n", encoding="ascii")
+        if path.is_file() and checksum_path.is_file():
+            expected = checksum_path.read_text(encoding="ascii").strip().split()
+            if expected and _sha256(path) == expected[0]:
+                shutil.copy2(path, previous_tmp)
+                shutil.copy2(checksum_path, previous_checksum_tmp)
+                os.replace(previous_tmp, previous)
+                os.replace(previous_checksum_tmp, previous_checksum)
         os.replace(tmp, path)
-        os.replace(checksum_tmp, Path(str(path) + ".sha256"))
+        os.replace(checksum_tmp, checksum_path)
         return digest
     finally:
-        tmp.unlink(missing_ok=True)
-        checksum_tmp.unlink(missing_ok=True)
+        for candidate in (tmp, checksum_tmp, previous_tmp, previous_checksum_tmp):
+            candidate.unlink(missing_ok=True)
 
 
 def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
-    sidecar = Path(str(path) + ".sha256")
-    if not path.is_file() or not sidecar.is_file():
-        raise ValueError("Resume checkpoint or integrity sidecar is missing.")
-    expected = sidecar.read_text(encoding="ascii").strip().split()
-    if not expected or _sha256(path) != expected[0]:
-        raise ValueError("Resume checkpoint SHA-256 verification failed.")
-    payload = torch.load(path, map_location=device, weights_only=True)
+    def verified(candidate: Path) -> bool:
+        sidecar = Path(str(candidate) + ".sha256")
+        if not candidate.is_file() or not sidecar.is_file():
+            return False
+        expected = sidecar.read_text(encoding="ascii").strip().split()
+        return bool(expected and _sha256(candidate) == expected[0])
+
+    load_path = path
+    if not verified(path):
+        previous = Path(str(path) + ".previous")
+        if not verified(previous):
+            raise ValueError("Resume checkpoint and its verified previous generation are unavailable.")
+        load_path = previous
+    payload = torch.load(load_path, map_location=device, weights_only=True)
     if not isinstance(payload, dict) or payload.get("format") != "aethrion-specialist-checkpoint-v1":
         raise ValueError("Unsupported specialist checkpoint format.")
+    required = {"model_id", "step", "model_config", "model_state", "optimizer_state",
+                "dataset_sha256", "rng_state"}
+    if required - set(payload):
+        raise ValueError("Specialist checkpoint is missing required resume fields.")
     return payload
 
 
@@ -242,7 +297,7 @@ def train_specialist(
             raise ValueError("Resume model configuration differs from checkpoint.")
         model.load_state_dict(state["model_state"])
         optimizer.load_state_dict(state["optimizer_state"])
-        torch.random.set_rng_state(state["torch_rng_state"].cpu())
+        _restore_rng_state(state["rng_state"])
         start_step = int(state["step"]) + 1
 
     metrics_path = output / "metrics.jsonl"
@@ -284,7 +339,7 @@ def train_specialist(
                 "model_state": model.state_dict(),
                 "optimizer_state": optimizer.state_dict(),
                 "dataset_sha256": approval["dataset_sha256"],
-                "torch_rng_state": torch.random.get_rng_state(),
+                "rng_state": _capture_rng_state(),
             })
             write_json_atomic({
                 "status": "training_complete_not_released",
