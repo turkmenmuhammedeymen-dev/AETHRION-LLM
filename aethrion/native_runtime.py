@@ -336,11 +336,116 @@ class NativeModelRuntime:
             return {"asset_path": str(output), "format": "obj-point-cloud",
                     "model": "AETHRION-3D",
                     "note": "Vertex-only point cloud; not a watertight mesh or textured asset."}
+        if capability == "research":
+            return self.search_research(prompt, top_k=min(int(options.get("top_k", 5)), 20))
+        if capability == "document":
+            document_path = options.get("document_path")
+            if not isinstance(document_path, str) or not document_path:
+                raise ValueError("Document inference requires a local document_path option.")
+            return self.analyze_document(document_path)
         if capability == "safety":
             return self.classify_safety(prompt)
         raise NativeRuntimeError(
             f"Local inference adapter for '{capability}' is not yet implemented or released."
         )
+
+    @torch.no_grad()
+    def search_research(self, query: str, top_k: int = 5) -> dict[str, Any]:
+        """Retrieve evidence from a previously built and hash-verified local corpus index."""
+        if not 1 <= top_k <= 20:
+            raise ValueError("top_k must be between 1 and 20.")
+        model = self.model("research")
+        tokenizer = self.tokenizer("research")
+        processor = self.processor("research")
+        if processor.get("format") != "aethrion-local-research-index-v1":
+            raise NativeRuntimeError("Research processor does not describe an AETHRION local index.")
+        def verified_local_file(path_key: str, hash_key: str) -> Path:
+            relative = processor.get(path_key)
+            expected = processor.get(hash_key)
+            if not isinstance(relative, str) or not relative or not isinstance(expected, str):
+                raise NativeRuntimeError(f"Research processor missing {path_key}/{hash_key}.")
+            candidate = Path(relative)
+            if candidate.is_absolute() or chr(92) in relative or any(x in {"", ".", ".."} for x in relative.split("/")):
+                raise NativeRuntimeError("Research index paths must be safe repository-relative paths.")
+            resolved = (self.root / candidate).resolve()
+            try:
+                resolved.relative_to(self.root)
+            except ValueError as exc:
+                raise NativeRuntimeError("Research index path escapes repository root.") from exc
+            if not resolved.is_file() or self._digest(resolved) != expected.lower():
+                raise NativeRuntimeError(f"Research index integrity failure: {path_key}.")
+            return resolved
+        index_path = verified_local_file("index_path", "index_sha256")
+        metadata_path = verified_local_file("metadata_path", "metadata_sha256")
+        if processor.get("tokenizer_sha256") != self._digest(self.registry.resolve("research").tokenizer):
+            raise NativeRuntimeError("Research index tokenizer hash does not match the released model tokenizer.")
+        try:
+            with np.load(index_path, allow_pickle=False) as archive:
+                passage_ids = np.array(archive["passage_ids"], copy=True)
+                passage_mask = np.array(archive["passage_mask"], copy=True)
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, KeyError, UnicodeError, json.JSONDecodeError) as exc:
+            raise NativeRuntimeError("Could not load verified local research index.") from exc
+        if passage_ids.ndim != 2 or passage_mask.shape != passage_ids.shape:
+            raise NativeRuntimeError("Research index token and mask arrays have invalid shapes.")
+        if not isinstance(metadata, list) or len(metadata) != passage_ids.shape[0]:
+            raise NativeRuntimeError("Research metadata count does not match index rows.")
+        context = self._text_context(tokenizer, model, query, self.device)
+        passage_tensor = torch.as_tensor(passage_ids, dtype=torch.long, device=self.device)
+        mask_tensor = torch.as_tensor(passage_mask, dtype=torch.bool, device=self.device)
+        scores, indices = model.retrieve(context, passage_tensor, mask_tensor, top_k=top_k)
+        results = []
+        for score, index in zip(scores[0].tolist(), indices[0].tolist()):
+            record = metadata[int(index)]
+            results.append({
+                "title": record["title"],
+                "source_uri": record["source_uri"],
+                "license": record["license"],
+                "evidence_uri": record["evidence_uri"],
+                "excerpt": record["excerpt"],
+                "score": float(score),
+                "doc_id": record["doc_id"],
+            })
+        return {"results": results, "index_type": "local_only", "model": "AETHRION-RESEARCH"}
+
+    @torch.no_grad()
+    def analyze_document(self, document_path: str | Path) -> dict[str, Any]:
+        """Run the released text/layout classifier over locally extracted document text.
+
+        The current preprocessing flattens extracted text and assigns a full-page
+        placeholder box. It is not OCR and does not preserve true page geometry.
+        """
+        from aethrion.document_tools import extract_document_text
+        model = self.model("document")
+        tokenizer = self.tokenizer("document")
+        processor = self.processor("document")
+        text = extract_document_text(document_path)
+        context = self._text_context(tokenizer, model, text, self.device)
+        length = context.size(1)
+        boxes = torch.zeros((1, length, 4), dtype=torch.float32, device=self.device)
+        boxes[..., 2] = 1.0
+        boxes[..., 3] = 1.0
+        layout_ids = torch.zeros((1, length), dtype=torch.long, device=self.device)
+        output = model(context, boxes, layout_ids)
+        tag_ids = output["tag_logits"][0].argmax(dim=-1).tolist()
+        tag_names = processor.get("tag_labels", [])
+        labels = [
+            tag_names[tag_id] if isinstance(tag_names, list) and tag_id < len(tag_names)
+            else f"TAG_{tag_id}"
+            for tag_id in tag_ids
+        ]
+        start, end = output["qa_logits"][0].argmax(dim=-1).tolist()
+        if end < start:
+            start, end = end, start
+        answer = tokenizer.decode(context[0, start:end + 1].tolist())
+        return {
+            "text": text,
+            "token_tags": labels,
+            "extractive_span": answer,
+            "model": "AETHRION-DOC",
+            "layout_mode": "flattened_text_placeholder",
+            "limitations": "No OCR or true page-coordinate preservation is performed by this adapter.",
+        }
 
     @torch.no_grad()
     def classify_safety(self, text: str) -> dict[str, Any]:
