@@ -160,7 +160,8 @@
       "optional_models": [],
       "status": "blocked_until_native_release",
       "limitations": [
-        "Translation quality requires dedicated held-out multilingual evaluation"
+        "Translation quality requires dedicated held-out multilingual evaluation",
+        "The smartTranslate name is listed in the README legacy contract and referenced by the UI, but an active backend implementation was not located in the audited default-branch code search."
       ]
     },
     {
@@ -177,7 +178,8 @@
       "status": "blocked_until_native_release",
       "limitations": [
         "Current architecture outputs point clouds, not watertight textured meshes",
-        "Image-to-3D conditioning is not implemented"
+        "Image-to-3D conditioning is not implemented",
+        "The documented generate3DWithHF backend implementation was not located in the audited default-branch code search; preserve this as a compatibility target until verified."
       ]
     },
     {
@@ -196,7 +198,8 @@
       "status": "blocked_until_native_release",
       "limitations": [
         "No first-party video-generation model exists in the current model family",
-        "Rendering must use bounded deterministic media tooling; do not claim generative video capability"
+        "Rendering must use bounded deterministic media tooling; do not claim generative video capability",
+        "The documented createVideoClip backend implementation was not located in the audited default-branch code search; preserve this as a compatibility target until verified."
       ]
     },
     {
