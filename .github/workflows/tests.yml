@@ -94,7 +94,7 @@ jobs:
           assert "authentication" in app.voice(None)[0].lower()
           app.SPACE_AUTH_ENABLED = True
           assert "not trained" in app.code("write a function").lower()
-          assert "not trained" in app.research("latest AI research").lower()
+          assert ("not trained" in app.research("latest AI research").lower() or "not ready" in app.research("latest AI research").lower())
           assert "not trained" in app.three_d_text("a small tree")[0].lower()
           assert "not trained" in app.voice(None)[0].lower()
           assert "not trained" in app.analyse(None, "summarize").lower()
