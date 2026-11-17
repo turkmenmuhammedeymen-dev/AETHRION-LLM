@@ -84,3 +84,15 @@ request to `main`. The Hugging Face Space deployment workflow publishes only
 the tracked `hf_space/` directory after changes reach `main`; it does not
 upload training data or checkpoints. Never edit Vizyon2027's separate source
 repository as part of this workflow.
+
+## Read-only resource and model preflight
+
+After the dev container finishes installing dependencies, run:
+
+```bash
+python scripts/codespaces_preflight.py
+```
+
+This reports the container's effective CPU quota, RAM limit/availability, disk capacity, Python/PyTorch/CUDA status, the global dataset gate, all model registry statuses and whether checkpoint files exist. It does not modify files, download data, create checkpoints, or start training. A four-core selection is preferable to two cores for CPU tests and bounded preprocessing, but CPU cores do not replace a training GPU.
+
+Do not paste secrets or access tokens into the terminal output or chat. Share only the resource summary and any error text with credentials removed.
