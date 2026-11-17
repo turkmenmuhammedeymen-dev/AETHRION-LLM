@@ -12,7 +12,7 @@ from typing import Any
 FORMAT = "aethrion-native-model-family-v1"
 POLICY = "local_only"
 CAPABILITIES = frozenset({
-    "chat", "code", "vision", "image", "asr", "tts", "3d",
+    "chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d",
     "research", "document", "safety",
 })
 PROCESSOR_REQUIRED = frozenset({"vision", "image", "asr", "tts", "3d", "document"})
