@@ -217,14 +217,31 @@ def main() -> None:
 
     if not interrupted:
         elapsed = max(time.perf_counter() - started, 1e-9)
+        final_step = max(start_step - 1, cfg["max_steps"] - 1)
         write_json_atomic({
             "status": "completed",
-            "step": max(start_step - 1, cfg["max_steps"] - 1),
+            "step": final_step,
             "max_steps": cfg["max_steps"],
             "elapsed_seconds": elapsed,
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             **last_metrics,
         }, progress_path)
-        print("Training finished. Evaluate on an independent held-out corpus before capability claims.")
+        checkpoint_path = output / "checkpoint_last.pt"
+        if not checkpoint_path.is_file():
+            raise RuntimeError("Completed BASE training has no final checkpoint.")
+        write_json_atomic({
+            "status": "training_complete_not_released",
+            "release_status": "NOT_RELEASED",
+            "model_id": "chat",
+            "step": final_step,
+            "dataset_sha256": data_hash,
+            "tokenizer_sha256": tokenizer_hash,
+            "checkpoint_sha256": sha256_file(checkpoint_path),
+            "model_config": model.config_dict(),
+            "metrics": last_metrics,
+            "device": str(device),
+            "note": "Independent instruction-following, factuality, multilingual and safety benchmarks are mandatory before release."
+        }, output / "training_report.json")
+        print("Training finished. Evaluate instruction-following and safety on independent held-out datasets before release.")
 
 if __name__ == "__main__": main()
