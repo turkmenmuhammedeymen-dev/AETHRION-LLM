@@ -52,17 +52,14 @@ class ApiRegistrationTests(unittest.TestCase):
             self.assertEqual(router.available(), {})
             self.assertEqual(providers, {})
 
-    def test_code_and_research_register_from_env(self):
+    def test_external_provider_registration_is_rejected(self):
         env={"AETHRION_CODE_API_KEY":"dummy","AETHRION_CODE_MODEL":"dummy-model",
              "AETHRION_CODE_BASE_URL":"https://example.test/v1","AETHRION_IMAGE_API_KEY":"",
              "OPENAI_API_KEY":"","MESHY_API_KEY":"","TAVILY_API_KEY":"dummy",
              "AETHRION_CHECKPOINT":"/missing/checkpoint.pt","AETHRION_TOKENIZER":"/missing/tokenizer.json"}
         with patch.dict("os.environ",env,clear=False):
-            router,providers=build_router(allow_remote_providers=True)
-        self.assertIn(Capability.CODE.value,router.available())
-        self.assertIn(Capability.RESEARCH.value,router.available())
-        self.assertIn(Capability.FILE_ANALYSIS.value,router.available())
-        self.assertIn("file_analysis",providers)
+            with self.assertRaisesRegex(ValueError, "native-only policy"):
+                build_router(allow_remote_providers=True)
 
 class ApiHttpIntegrationTests(unittest.TestCase):
     def setUp(self):
