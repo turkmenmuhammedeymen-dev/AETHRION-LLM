@@ -1,10 +1,15 @@
 # AETHRION-LLM in GitHub Codespaces
 
+> **Optional fallback only:** Codespaces is not the primary workflow. Start with
+> [HUGGINGFACE_WORKFLOW.md](HUGGINGFACE_WORKFLOW.md). Use this runbook only when
+> GitHub's web editor/CI and the Hugging Face Space cannot complete a specific
+> development or diagnostic task.
+
 ## Purpose and limits
 
-Codespaces is the supported remote development environment for this repository.
-It is intended for editing, CPU-based unit tests, data-manifest review, bounded
-preprocessing, and local Space/API smoke tests. The included dev container does
+Codespaces is an optional remote development environment for this repository.
+Use it only for a task that needs a persistent shell, CPU-based unit tests,
+data-manifest review, bounded preprocessing, or a local Space/API smoke test. The included dev container does
 not provide a CUDA GPU. Do not use it for long-running or production-scale model
 training, and do not assume the Hugging Face Space's ZeroGPU runtime is a
 persistent training machine.

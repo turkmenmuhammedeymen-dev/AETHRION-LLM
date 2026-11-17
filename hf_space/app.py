@@ -41,6 +41,41 @@ def _zerogpu_registration_noop():
     return None
 
 
+@spaces.GPU(duration=5)
+def gpu_diagnostics():
+    """Report the GPU visible inside an actual ZeroGPU request, without loading models."""
+    try:
+        import torch
+    except Exception as exc:
+        return "### ZeroGPU diagnostics\n- PyTorch import failed: " + type(exc).__name__
+    if not torch.cuda.is_available():
+        return (
+            "### ZeroGPU diagnostics\n"
+            "- GPU request completed, but CUDA is not visible in this execution.\n"
+            "- No model was loaded and no training was started."
+        )
+    try:
+        device_name = torch.cuda.get_device_name(0)
+        properties = torch.cuda.get_device_properties(0)
+        total_gib = properties.total_memory / (1024 ** 3)
+        free_gib, _ = torch.cuda.mem_get_info(0)
+        free_gib /= 1024 ** 3
+        return (
+            "### ZeroGPU diagnostics\n"
+            f"- CUDA: **available**\n"
+            f"- Device: **{device_name}**\n"
+            f"- Device memory: **{total_gib:.2f} GiB total**\n"
+            f"- Currently free: **{free_gib:.2f} GiB**\n"
+            "- This was a short diagnostic request only; no training was started."
+        )
+    except Exception as exc:
+        return (
+            "### ZeroGPU diagnostics\n"
+            "- CUDA is available, but device details could not be read: "
+            + type(exc).__name__
+        )
+
+
 @spaces.GPU(duration=60)
 def _gpu_local_chat(prompt):
     result = dispatch(Capability.CHAT, prompt, {"max_new_tokens": 256})
@@ -263,6 +298,8 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
         api_name=False,
     )
     s=gr.Markdown(status());gr.Button("Refresh status").click(status,outputs=s)
+    gpu_report=gr.Markdown("ZeroGPU status has not been checked in this session.")
+    gr.Button("Check ZeroGPU hardware").click(gpu_diagnostics,outputs=gpu_report)
     with gr.Tabs():
         with gr.Tab("AI Chat"):
             gr.ChatInterface(chat,type="messages",chatbot=gr.Chatbot(type="messages",height=420))
