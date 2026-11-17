@@ -3,11 +3,13 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import torch
 
-from aethrion.specialist_train import train_specialist
+import aethrion.specialist_train as specialist_train
+from aethrion.specialist_train import _to_batch, train_specialist
 
 
 class SpecialistTrainingTests(unittest.TestCase):
@@ -72,6 +74,41 @@ class SpecialistTrainingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Training blocked"):
                 train_specialist(self._config(root), manifest)
             self.assertFalse((root / "artifacts" / "checkpoint_last.pt").exists())
+
+    def test_safety_reason_labels_are_converted_to_integer_tensors(self):
+        arrays = {"reason_labels": np.asarray([[0, 2]], dtype=np.int32)}
+        batch = _to_batch(arrays, ["reason_labels"], torch.tensor([0]), torch.device("cpu"))
+        self.assertEqual(batch["reason_labels"].dtype, torch.long)
+
+    def test_signal_stop_writes_checkpoint_and_resumes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            config["max_steps"] = 2
+            specialist_train._STOP_REQUESTED = False
+            original_loss = specialist_train._loss
+
+            def request_stop_after_training_batch(model, model_id, batch):
+                loss = original_loss(model, model_id, batch)
+                if model.training:
+                    specialist_train._STOP_REQUESTED = True
+                return loss
+
+            try:
+                with patch("aethrion.specialist_train._loss", side_effect=request_stop_after_training_batch):
+                    paused = train_specialist(config, manifest)
+                self.assertEqual(paused["status"], "training_interrupted_not_released")
+                self.assertEqual(paused["steps"], 1)
+                checkpoint = root / "artifacts" / "checkpoint_last.pt"
+                self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
+
+                specialist_train._STOP_REQUESTED = False
+                resumed = train_specialist(config, manifest, resume=checkpoint)
+                self.assertEqual(resumed["status"], "training_complete_not_released")
+                self.assertEqual(resumed["steps"], 2)
+            finally:
+                specialist_train._STOP_REQUESTED = False
 
     def test_code_specialist_training_emits_integrity_checked_unreleased_artifact(self):
         with tempfile.TemporaryDirectory() as directory:
