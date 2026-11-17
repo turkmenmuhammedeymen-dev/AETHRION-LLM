@@ -37,7 +37,10 @@ def verify_checkpoint(path: str | Path) -> str:
         raise ValueError(f"Checkpoint does not exist: {target}")
     if not sidecar.is_file():
         raise ValueError(f"Checkpoint integrity file is missing: {sidecar}")
-    expected = sidecar.read_text(encoding="ascii").strip().split()[0]
+    fields = sidecar.read_text(encoding="ascii").strip().split()
+    if not fields:
+        raise ValueError(f"Checkpoint integrity file is empty: {sidecar}")
+    expected = fields[0]
     actual = sha256_file(target)
     if len(expected) != 64 or not hmac.compare_digest(expected.lower(), actual):
         raise ValueError(f"Checkpoint SHA-256 verification failed: {target}")
@@ -111,7 +114,10 @@ def load_checkpoint(
     state = torch.load(load_path, map_location=map_location, weights_only=False)
     if not isinstance(state, dict) or state.get("format_version") != 3:
         raise ValueError("Unsupported or invalid AETHRION checkpoint format.")
-    required = {"step", "model", "optimizer", "model_config", "data_sha256", "tokenizer_sha256"}
+    required = {
+        "step", "model", "optimizer", "scaler", "model_config",
+        "data_sha256", "tokenizer_sha256", "rng_state",
+    }
     missing = sorted(required - set(state))
     if missing:
         raise ValueError("Checkpoint is missing required fields: " + ", ".join(missing))
