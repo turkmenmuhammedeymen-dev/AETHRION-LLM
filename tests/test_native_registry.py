@@ -87,9 +87,8 @@ class NativeModelRegistryTests(unittest.TestCase):
                 "checkpoint_sha256": "0" * 64,
                 "status": "trained",
             })
-            registry = NativeModelRegistry(root)
             with self.assertRaises(NativeModelError):
-                registry.resolve("chat")
+                NativeModelRegistry(root)
 
     def test_remote_url_fields_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
