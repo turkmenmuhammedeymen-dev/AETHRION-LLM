@@ -315,13 +315,18 @@ async def documents_extract(file: UploadFile = File(...)):
 @app.post("/documents/create", dependencies=[Depends(require_api_token)])
 def documents_create(request: dict[str,Any]):
     runtime=providers.get("runtime")
-    title=str(request.get("title",""))
-    content=str(request.get("content",""))
+    if runtime is None or runtime.registry.status(Capability.SAFETY.value) != "ready":
+        raise HTTPException(status_code=503,detail="AETHRION-SAFE is not trained and released.")
+    title=request.get("title")
+    content=request.get("content")
+    output_format=request.get("format","docx")
+    if not isinstance(title,str) or not isinstance(content,str) or not isinstance(output_format,str):
+        raise HTTPException(status_code=400,detail="title, content and format must be strings.")
     if len(title)+len(content)>20000:
         raise HTTPException(status_code=413,detail="Document text exceeds the 20,000-character safety review limit.")
-    _require_safety_allow_chunks_http(runtime, title+"\\n"+content)
+    _require_safety_allow_chunks_http(runtime, title+"\n"+content)
     try:
-        raw,name,mime=create_document(title,content,str(request.get("format","docx")))
+        raw,name,mime=create_document(title,content,output_format)
         return Response(content=raw,media_type=mime,headers={"Content-Disposition":f'attachment; filename="{name}"',"Cache-Control":"no-store"})
     except DocumentError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
 
