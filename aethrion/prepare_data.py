@@ -168,13 +168,17 @@ def _assign_group_splits(records: list[dict], seed: int) -> dict[str, str]:
             "for train, validation and test. Add source files or record-level group_id metadata."
         )
     names = ("train", "validation", "test")
-    targets = {"train": len(records) * 0.90, "validation": len(records) * 0.05, "test": len(records) * 0.05}
+    targets = {"train": len(records) * 0.80, "validation": len(records) * 0.10, "test": len(records) * 0.10}
     counts = {name: 0 for name in names}
     ordered = list(groups)
     random.Random(seed).shuffle(ordered)
     ordered.sort(key=lambda group_id: len(groups[group_id]), reverse=True)
     assignments: dict[str, str] = {}
-    for group_id in ordered:
+    # Seed every partition with a distinct whole group before balancing the remainder.
+    for group_id, split_name in zip(ordered[:3], names):
+        assignments[group_id] = split_name
+        counts[split_name] += len(groups[group_id])
+    for group_id in ordered[3:]:
         selected = max(names, key=lambda name: targets[name] - counts[name])
         assignments[group_id] = selected
         counts[selected] += len(groups[group_id])
@@ -306,10 +310,13 @@ def build_corpus(
             for item in selected:
                 handle.write(item["text"] + "\n")
 
-    _write_records(output_path, records)
     split_report = {}
+    ordered_split_records = []
     for split_name in ("train", "validation", "test"):
         selected = [item for item in records if assignments[item["group_id"]] == split_name]
+        if not selected:
+            raise ValueError(f"Training blocked: deterministic group split left {split_name} empty.")
+        ordered_split_records.extend(selected)
         split_path = output_path.with_name(
             f"{output_path.stem}-{split_name}{output_path.suffix or '.txt'}"
         )
@@ -325,6 +332,8 @@ def build_corpus(
             "records": len(selected),
             "groups": group_hashes,
         }
+    # The combined corpus is exactly the concatenation of the three disjoint partitions.
+    _write_records(output_path, ordered_split_records)
 
     domain_report = []
     if domain_reviews is not None:
@@ -381,8 +390,8 @@ def validate_training_approval(
     corpus_path: Path,
     corpus_report_path: Path,
     source_review_path: Path | None = None,
-) -> None:
-    """Re-check approvals and prove the training corpus matches reviewed sources."""
+) -> dict[str, dict]:
+    """Re-check approvals and prove the corpus and all group-disjoint splits match."""
     require_training_enabled(dataset_manifest_path)
     if not source_manifest_path.is_file():
         raise ValueError(f"Training blocked: source manifest does not exist: {source_manifest_path}")
@@ -469,6 +478,7 @@ def validate_training_approval(
     derived = {}
     seen_groups: dict[str, str] = {}
     split_record_total = 0
+    combined_digest = hashlib.sha256()
     for split_name in ("train", "validation", "test"):
         item = split_report.get(split_name)
         if not isinstance(item, dict):
@@ -483,6 +493,9 @@ def validate_training_approval(
             raise ValueError(f"Training blocked: {split_name} split SHA-256 mismatch.")
         if item.get("bytes") != split_path.stat().st_size:
             raise ValueError(f"Training blocked: {split_name} split size mismatch.")
+        with split_path.open("rb") as split_handle:
+            for chunk in iter(lambda: split_handle.read(1024 * 1024), b""):
+                combined_digest.update(chunk)
         record_count = item.get("records")
         groups = item.get("groups")
         if type(record_count) is not int or record_count < 1:
@@ -511,6 +524,8 @@ def validate_training_approval(
         }
     if split_record_total != report.get("totals", {}).get("records_kept"):
         raise ValueError("Training blocked: split record counts do not cover the approved corpus.")
+    if combined_digest.hexdigest() != sha256_file(corpus_path):
+        raise ValueError("Training blocked: combined corpus is not the exact concatenation of approved splits.")
     return derived
 
 
