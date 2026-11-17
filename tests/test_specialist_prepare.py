@@ -146,7 +146,7 @@ class SpecialistPreparationTests(unittest.TestCase):
                 for _ in range(30):
                     while _split(f"safe-{index}", 1337) != split:
                         index += 1
-                    rows.append({"id": f"safe-{index}", "text": "Benign policy example.",
+                    rows.append({"id": f"safe-{index}", "group_id": f"safe-{index}", "text": "Benign policy example.",
                                  "decision": label, "reasons": [0]})
                     index += 1
             self._write_jsonl(source, rows)
