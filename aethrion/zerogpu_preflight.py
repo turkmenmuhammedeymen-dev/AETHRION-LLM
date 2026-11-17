@@ -64,6 +64,15 @@ def _synthetic_batch(model_id: str, device: torch.device) -> dict[str, torch.Ten
     raise ValueError(f"Unknown model: {model_id}")
 
 
+def _build_preflight_model(model_id: str, device: torch.device) -> torch.nn.Module:
+    """Construct each native architecture directly on the allocated test device."""
+    if model_id == "chat":
+        model = AETHRIONLM(ModelConfig(vocab_size=2048, block_size=128, n_layer=4, n_head=4, n_embd=256, dropout=0.0))
+    else:
+        model = _build_model(model_id, SPECIALIST_CONFIGS[model_id])
+    return model.to(device)
+
+
 def run_zero_gpu_preflight() -> dict[str, Any]:
     """Run one synthetic forward/backward per native model; never optimizer.step()."""
     if not torch.cuda.is_available():
@@ -75,13 +84,12 @@ def run_zero_gpu_preflight() -> dict[str, Any]:
     for model_id in MODEL_IDS:
         model = None
         try:
+            model = _build_preflight_model(model_id, device)
             if model_id == "chat":
-                model = AETHRIONLM(ModelConfig(vocab_size=2048, block_size=128, n_layer=4, n_head=4, n_embd=256, dropout=0.0))
                 token_ids = torch.randint(0, 2048, (1, 16), device=device)
                 targets = token_ids.clone()
                 _, loss = model(token_ids, targets)
             else:
-                model = _build_model(model_id, SPECIALIST_CONFIGS[model_id])
                 batch = _synthetic_batch(model_id, device)
                 loss = _loss(model, model_id, batch)
             if loss is None or loss.ndim != 0 or not torch.isfinite(loss).item():
