@@ -21,9 +21,6 @@ class Capability(str, Enum):
     RESEARCH = "research"
     DOCUMENT = "document"
     SAFETY = "safety"
-    # Legacy interface names remain unavailable aliases until migrated.
-    FILE_ANALYSIS = "file_analysis"
-    AUDIO = "audio"
 
 
 @dataclass(frozen=True)
