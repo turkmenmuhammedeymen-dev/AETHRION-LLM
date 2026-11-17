@@ -36,7 +36,7 @@ else:
 
 
 # The Gradio project path must inspect the uploaded source with the same SAFE gate.
-assert "_require_safety_allow_chunks" in space.edit_project.__code__.co_names
+assert "_require_safety_allow_chunks_http" in space.edit_project.__code__.co_names
 assert "read_project_zip" in space.edit_project.__code__.co_names
 
 class _SmokeSafetyRegistry:
