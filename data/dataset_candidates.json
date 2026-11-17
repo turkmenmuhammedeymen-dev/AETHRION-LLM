@@ -34,25 +34,29 @@
       "model_ids": [
         "asr"
       ],
-      "uri": "https://commonvoice.mozilla.org/en/datasets",
+      "uri": "https://commonvoice.mozilla.org/lss/datasets",
       "declared_license": "CC0-1.0",
       "review_status": "release_and_consent_metadata_review_required",
       "owner_review_authorized": true,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
-        "Pin exact Turkish release and verify dataset metadata",
-        "Record source and prepared dataset SHA-256",
-        "Confirm speaker-consent provenance and privacy review"
+        "Acquire only through the official Mozilla Data Collective catalogue; do not use the legacy Hugging Face mirror as the source of the v27 release",
+        "Pin the exact Turkish v27 release, record downloaded file inventory and SHA-256 values",
+        "Verify release-specific speaker contribution, consent/provenance and privacy metadata before preparation",
+        "Confirm sufficient persistent storage for the listed 2.79 GB release plus extracted/prepared data",
+        "Keep training_allowed=false until the exact prepared dataset and human review are approved"
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
-        "finding": "Official Mozilla Data Collective catalogue lists Common Voice Scripted Speech 27.0 Turkish (tr), ASR, CC0-1.0, 2.79 GB. Mozilla legal terms effective 2025-10-31 describe contributor assurances and CC0 dedication.",
+        "finding": "Official Mozilla Data Collective catalogue lists Common Voice Scripted Speech 27.0 Turkish (tr), ASR, CC0-1.0, MP3, 2.79 GB. Direct Hugging Face inspection found the legacy mozilla-foundation/common_voice_17_0 dataset empty with a notice that Common Voice datasets moved exclusively to Mozilla Data Collective effective October 2025; the candidate v27 HF repo ID was not found. Therefore the official MCD catalogue is the current discovery/download source; this does not establish speaker-level provenance/consent or authorize training.",
         "evidence_urls": [
           "https://commonvoice.mozilla.org/lss/datasets",
-          "https://commonvoice.mozilla.org/en/terms"
+          "https://commonvoice.mozilla.org/en/terms",
+          "https://huggingface.co/datasets/mozilla-foundation/common_voice_17_0",
+          "https://huggingface.co/datasets/mozilla-foundation/common_voice_27_0"
         ],
-        "next_gate": "Exact downloadable release and metadata hashes, dataset-specific provenance/consent evidence, privacy filtering and available storage must be checked before acquisition/preparation."
+        "next_gate": "Use the official Mozilla Data Collective release only. Before any download/preparation, verify dataset-specific contributor/consent metadata, exact release contents, storage capacity and checksums; training remains blocked until a prepared dataset manifest receives explicit review."
       }
     },
     {

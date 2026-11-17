@@ -50,3 +50,14 @@ The following public metadata was checked again on this date. These checks impro
 The project owner's 17 November 2026 authorization to continue public-source review, evidence recording and non-destructive preparation planning is recorded in [OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md](OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md). This is project authorization only. It does not grant third-party rights, authorize gated access, or approve any data for training.
 
 The dataset candidate register now records the owner-approval scope and the public metadata findings above. All candidate entries remain downloaded=false and training_allowed=false; the global and specialist training gates remain closed.
+
+
+## Hugging Face mirror verification — Common Voice v27.0 (17 November 2026)
+
+A direct Hugging Face Hub metadata inspection was performed in addition to the official catalogue review:
+
+- `mozilla-foundation/common_voice_17_0` remains discoverable, but its dataset card says that, effective October 2025, Common Voice datasets are exclusively available through Mozilla Data Collective. The Hub Dataset Viewer reports the legacy dataset as empty.
+- The expected `mozilla-foundation/common_voice_27_0` repository ID was not found on the Hub.
+- The official [Mozilla Data Collective catalogue](https://commonvoice.mozilla.org/lss/datasets) currently lists **Common Voice Scripted Speech 27.0 — Turkish (tr)** as **CC0-1.0**, ASR, MP3, **2.79 GB**. Mozilla's [release announcement](https://discourse.mozilla.org/t/common-voice-scripted-speech-v27-0-and-spontaneous-speech-v5-0-released/149490) dates v27.0 availability to 18 September 2026.
+
+**Operational decision:** use the official Mozilla Data Collective catalogue as the only current source for discovering the v27.0 Turkish release. Do not build an ingestion job around the legacy Hugging Face dataset ID. This catalogue evidence does not prove the downloaded archive's exact revision, file hashes, speaker-level consent/provenance or privacy status. No download was made and no training permission was granted. The ASR gate remains closed until those exact release checks are recorded and the prepared dataset receives explicit review.
