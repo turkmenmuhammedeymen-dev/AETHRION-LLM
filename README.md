@@ -28,17 +28,22 @@ TdevKuantum is documented in [the product AI integration matrix](docs/PRODUCT_AI
 Dataset candidates and their rights-review findings are tracked in
 [the dataset source review](docs/DATASET_SOURCE_REVIEW.md).
 
-## Development environment: GitHub Codespaces
+## Primary workflow: GitHub + Hugging Face
 
-Use the repository's `.devcontainer` configuration for remote development,
-CPU unit tests, bounded preprocessing and local Space preview. Start with
-[the Codespaces runbook](docs/CODESPACES_RUNBOOK.md).
+GitHub is the source of truth for code, branches, pull requests, automated
+tests and the Space deployment workflow. The Hugging Face Space is the live
+application and its existing ZeroGPU allocation is used only for bounded,
+GPU-decorated inference/diagnostic requests. See the
+[Hugging Face-first workflow](docs/HUGGINGFACE_WORKFLOW.md).
 
-Codespaces is not a GPU training service. The current Hugging Face Space
-ZeroGPU runtime is also not a persistent, long-running training environment.
-With only those environments, full-scale training of all specialist models is
-not currently feasible. Do not represent a smoke test or synthetic fixture as
-a trained model.
+Codespaces is optional: use it only when a local shell, dependency debugging
+or a task that cannot be completed through GitHub's repository interface and
+CI is genuinely needed. It is CPU-only in this project.
+
+ZeroGPU is not a persistent training machine and does not make a full model
+family trainable by itself. Do not start paid HF Jobs or change Space hardware
+without a separately approved compute plan. Do not represent a smoke test or
+synthetic fixture as a trained model.
 
 ## Install locally
 
