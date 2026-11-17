@@ -252,7 +252,7 @@ def build_corpus(
                     raise ValueError(
                         f"Record in {path.name}:{line_number} has an invalid group_id."
                     )
-                group_id = f"source:{source['source_id']}:group:{explicit_group.strip()}"
+                group_id = f"group:{explicit_group.strip()}"
 
             value = normalize_text(raw)
             if len(value) < min_chars:
@@ -509,7 +509,7 @@ def validate_training_approval(
                     raise ValueError(
                         f"Training blocked: invalid group_id in {source_path.name}:{line_number}"
                     )
-                group_id = f"source:{source['source_id']}:group:{explicit_group.strip()}"
+                group_id = f"group:{explicit_group.strip()}"
             value = normalize_text(raw)
             if (
                 len(value) < filters["min_chars"]
