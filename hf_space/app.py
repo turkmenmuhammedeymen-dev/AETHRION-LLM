@@ -193,4 +193,11 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             gr.Button("Recognize and respond").click(voice,inputs=a,outputs=[text,spoken])
     gr.Markdown("---\nCredentials stay in Space Secrets. Uploaded project code is never executed. Training is not started from this interface.")
 
-if __name__=="__main__":demo.queue(default_concurrency_limit=2,max_size=20).launch()
+if __name__ == "__main__":
+    demo.queue(default_concurrency_limit=2, max_size=20).launch(
+        server_name="0.0.0.0",
+        server_port=int(os.environ.get("PORT", "7860")),
+        prevent_thread_lock=False,
+        ssr_mode=False,
+        show_error=True,
+    )
