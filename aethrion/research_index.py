@@ -69,6 +69,17 @@ def build_local_research_index(
             raise ResearchIndexError(f"Research indexing blocked: {key} must be explicitly true.")
     if not records_file.is_file() or not tokenizer_file.is_file():
         raise ResearchIndexError("Records JSONL and local tokenizer files are required.")
+    records_relative = approval.get("records_path")
+    records_digest = approval.get("records_sha256")
+    if not isinstance(records_relative, str) or not records_relative.strip():
+        raise ResearchIndexError("Research approval must bind the exact records_path.")
+    if not isinstance(records_digest, str) or len(records_digest) != 64:
+        raise ResearchIndexError("Research approval must include the records JSONL SHA-256.")
+    approved_records = _safe_path(approval_file.parent.resolve(), records_relative)
+    if records_file != approved_records:
+        raise ResearchIndexError("Research records path differs from the approved records_path.")
+    if _sha256(records_file) != records_digest.lower():
+        raise ResearchIndexError("Research records JSONL SHA-256 differs from the approved content.")
     sources = approval.get("sources")
     if not isinstance(sources, list) or not sources:
         raise ResearchIndexError("At least one approved local research source is required.")
