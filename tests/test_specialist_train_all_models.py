@@ -70,7 +70,11 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
         elif model_id == "tts":
             arrays.update({
                 "token_ids": ids[:, :4],
+                "token_mask": np.ones((n, 4), dtype=np.bool_),
+                "token_lengths": np.full(n, 4, dtype=np.int64),
                 "frame_to_token": np.tile(np.arange(4, dtype=np.int64), (n, 1)),
+                "frame_mask": np.ones((n, 4), dtype=np.bool_),
+                "frame_lengths": np.full(n, 4, dtype=np.int64),
                 "target_mels": rng.normal(size=(n, 4, 16)).astype(np.float32),
                 "durations": np.ones((n, 4), dtype=np.int64),
             })
@@ -78,6 +82,8 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
             arrays.update({
                 "target_mels": rng.normal(size=(n, 4, 16)).astype(np.float32),
                 "target_waveforms": rng.normal(size=(n, 16)).astype(np.float32),
+                "frame_lengths": np.full(n, 4, dtype=np.int64),
+                "waveform_mask": np.ones((n, 16), dtype=np.bool_),
             })
         elif model_id == "3d":
             arrays.update({
