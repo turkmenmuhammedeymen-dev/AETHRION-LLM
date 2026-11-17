@@ -249,7 +249,7 @@ def audio_speech(request:dict[str,Any]):
     text=request.get("text")
     if not isinstance(text,str) or not text.strip() or len(text)>4096:
         raise HTTPException(status_code=400,detail="text must contain 1–4096 characters.")
-    _require_safety_allow(runtime, text)
+    _require_safety_allow_http(runtime, text)
     path=None
     try:
         path=runtime.synthesize_wav(text)
