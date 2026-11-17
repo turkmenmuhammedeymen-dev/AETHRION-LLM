@@ -88,10 +88,12 @@ def prepare_audio_dataset(
     vocab_size: int = 2048,
     n_mels: int = 80,
     sample_rate: int = 16000,
-    hop_length: int = 160,
+    hop_length: int | None = None,
 ) -> dict[str, Any]:
     if model_id not in AUDIO_MODELS:
         raise AudioPreparationError("model_id must be asr, tts or vocoder.")
+    if hop_length is None:
+        hop_length = 256 if model_id == "vocoder" else 160
     if not all(isinstance(value, str) and value.strip()
                for value in (license_name, permitted_use, evidence_uri, source_uri)):
         raise AudioPreparationError("License, permitted use, evidence and canonical source URI are required.")
@@ -311,7 +313,7 @@ def main() -> None:
     parser.add_argument("--vocab-size", type=int, default=2048)
     parser.add_argument("--n-mels", type=int, default=80)
     parser.add_argument("--sample-rate", type=int, default=16000)
-    parser.add_argument("--hop-length", type=int, default=160)
+    parser.add_argument("--hop-length", type=int, default=None)
     args = parser.parse_args()
     result = prepare_audio_dataset(
         args.input, model_id=args.model, output_root=args.output_root,
