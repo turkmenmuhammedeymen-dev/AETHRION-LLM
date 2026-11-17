@@ -20,7 +20,7 @@ class SpecialistPreparationTests(unittest.TestCase):
             result = prepare_text_dataset(
                 source, model_id="code", output_root=root / "prepared",
                 license_name="Unit test only", permitted_use="CI fixture only",
-                evidence_uri="unit-test://source", max_length=32,
+                evidence_uri="unit-test://source", source_uri="unit-test://dataset", max_length=32,
             )
             self.assertTrue(Path(result["dataset"]).is_file())
             self.assertTrue(Path(result["tokenizer"]).is_file())
@@ -45,7 +45,7 @@ class SpecialistPreparationTests(unittest.TestCase):
                 prepare_text_dataset(
                     source, model_id="document", output_root=root / "prepared",
                     license_name="Unit test only", permitted_use="CI fixture only",
-                    evidence_uri="unit-test://source", max_length=16,
+                    evidence_uri="unit-test://source", source_uri="unit-test://dataset", max_length=16,
                 )
 
     def test_safety_accepts_balanced_manual_labels_but_keeps_approval_closed(self):
@@ -75,7 +75,7 @@ class SpecialistPreparationTests(unittest.TestCase):
             result = prepare_text_dataset(
                 source, model_id="safety", output_root=root / "prepared",
                 license_name="Unit test only", permitted_use="CI fixture only",
-                evidence_uri="unit-test://source", max_length=16,
+                evidence_uri="unit-test://source", source_uri="unit-test://dataset", max_length=16,
             )
             manifest = json.loads(Path(result["manifest"]).read_text(encoding="utf-8"))
             self.assertFalse(manifest["training_allowed"])
@@ -100,7 +100,7 @@ class SpecialistPreparationTests(unittest.TestCase):
                 prepare_text_dataset(
                     source, model_id="safety", output_root=root / "prepared",
                     license_name="Unit test only", permitted_use="CI fixture only",
-                    evidence_uri="unit-test://source", max_length=16,
+                    evidence_uri="unit-test://source", source_uri="unit-test://dataset", max_length=16,
                 )
 
 
