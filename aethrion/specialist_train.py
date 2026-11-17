@@ -93,9 +93,11 @@ def _loss(model: nn.Module, model_id: str, batch: dict[str, torch.Tensor]) -> to
         flattened = torch.cat([targets[i, :int(lengths[i].item())] for i in range(targets.size(0))])
         return model.ctc_loss(batch["features"], flattened, batch["input_lengths"], lengths)
     if model_id == "tts":
-        return model.acoustic_loss(
+        acoustic = model.acoustic_loss(
             batch["token_ids"], batch["frame_to_token"], batch["target_mels"], batch.get("frame_mask")
         )
+        duration = model.duration_loss(batch["token_ids"], batch["durations"])
+        return acoustic + 0.1 * duration
     if model_id == "3d":
         return model.diffusion_loss(batch["points"], batch["token_ids"])
     if model_id == "research":
