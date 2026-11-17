@@ -1,0 +1,20 @@
+{
+  "model_id": "research",
+  "model_config": {
+    "vocab_size": 2048,
+    "max_length": 512,
+    "width": 128,
+    "layers": 4,
+    "heads": 4,
+    "embedding_dim": 256
+  },
+  "output_dir": "artifacts/models/research",
+  "seed": 42,
+  "max_steps": 2000,
+  "batch_size": 4,
+  "learning_rate": 0.0003,
+  "weight_decay": 0.01,
+  "grad_clip": 1,
+  "eval_interval": 100,
+  "save_interval": 100
+}

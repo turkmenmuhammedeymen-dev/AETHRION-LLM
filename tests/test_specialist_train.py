@@ -1,0 +1,160 @@
+import hashlib
+import json
+from pathlib import Path
+import tempfile
+import unittest
+from unittest.mock import patch
+
+import numpy as np
+import torch
+
+import aethrion.specialist_train as specialist_train
+from aethrion.specialist_train import _to_batch, train_specialist
+
+
+class SpecialistTrainingTests(unittest.TestCase):
+    def _fixture(self, root: Path, approved: bool):
+        source = root / "source.txt"
+        source.write_text("Synthetic test-only code text.", encoding="utf-8")
+        dataset = root / "dataset.npz"
+        np.savez(
+            dataset,
+            sample_id=np.asarray(["s1", "s2", "s3", "s4", "s5", "s6"]),
+            split=np.asarray(["train", "train", "validation", "validation", "test", "test"]),
+            token_ids=np.random.default_rng(42).integers(0, 256, size=(6, 12), dtype=np.int64),
+        )
+        manifest = root / "manifest.json"
+        payload = {
+            "format": "aethrion-specialist-dataset-v1",
+            "dataset_id": "synthetic-unit-test-only",
+            "model_id": "code",
+            "modality": "code",
+            "training_allowed": approved,
+            "owner_approval": approved,
+            "privacy_reviewed": approved,
+            "dataset_path": "dataset.npz",
+            "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+            "sources": [{
+                "source_id": "synthetic-fixture",
+                "source_uri": "unit-test://synthetic",
+                "source_path": "source.txt",
+                "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+                "license": "Synthetic unit test fixture",
+                "permitted_use": "This fixture may only be used by the unit test",
+                "evidence_uri": "unit-test://fixture-license",
+                "allow_training": approved,
+                "privacy_reviewed": approved,
+            }],
+        }
+        manifest.write_text(json.dumps(payload), encoding="utf-8")
+        return manifest
+
+    def _config(self, root: Path):
+        return {
+            "model_id": "code",
+            "model_config": {
+                "vocab_size": 256, "block_size": 16, "n_layer": 1,
+                "n_head": 2, "n_embd": 16, "dropout": 0.0
+            },
+            "output_dir": str(root / "artifacts"),
+            "seed": 11,
+            "max_steps": 1,
+            "batch_size": 2,
+            "learning_rate": 0.001,
+            "weight_decay": 0.0,
+            "grad_clip": 1.0,
+            "eval_interval": 1,
+            "save_interval": 1,
+        }
+
+    def test_unapproved_specialist_data_never_starts_training(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=False)
+            with self.assertRaisesRegex(ValueError, "Training blocked"):
+                train_specialist(self._config(root), manifest)
+            self.assertFalse((root / "artifacts" / "checkpoint_last.pt").exists())
+
+    def test_safety_reason_labels_are_converted_to_integer_tensors(self):
+        arrays = {"reason_labels": np.asarray([[0, 2]], dtype=np.int32)}
+        batch = _to_batch(arrays, ["reason_labels"], torch.tensor([0]), torch.device("cpu"))
+        self.assertEqual(batch["reason_labels"].dtype, torch.long)
+
+    def test_signal_stop_writes_checkpoint_and_resumes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            config["max_steps"] = 2
+            specialist_train._STOP_REQUESTED = False
+            original_loss = specialist_train._loss
+
+            def request_stop_after_training_batch(model, model_id, batch):
+                loss = original_loss(model, model_id, batch)
+                if model.training:
+                    specialist_train._STOP_REQUESTED = True
+                return loss
+
+            try:
+                with patch("aethrion.specialist_train._loss", side_effect=request_stop_after_training_batch):
+                    paused = train_specialist(config, manifest)
+                self.assertEqual(paused["status"], "training_interrupted_not_released")
+                self.assertEqual(paused["steps"], 1)
+                checkpoint = root / "artifacts" / "checkpoint_last.pt"
+                self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
+
+                specialist_train._STOP_REQUESTED = False
+                resumed = train_specialist(config, manifest, resume=checkpoint)
+                self.assertEqual(resumed["status"], "training_complete_not_released")
+                self.assertEqual(resumed["steps"], 2)
+            finally:
+                specialist_train._STOP_REQUESTED = False
+
+    def test_code_specialist_training_emits_integrity_checked_unreleased_artifact(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            report = train_specialist(self._config(root), manifest)
+            checkpoint = root / "artifacts" / "checkpoint_last.pt"
+            self.assertTrue(checkpoint.is_file())
+            self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
+            self.assertEqual(report["release_status"], "NOT_RELEASED")
+            self.assertTrue((root / "artifacts" / "metrics.jsonl").is_file())
+            self.assertTrue((root / "artifacts" / "training_report.json").is_file())
+
+
+    def test_training_resumes_and_preserves_verified_previous_checkpoint(self):
+        from aethrion.specialist_train import _load_checkpoint
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            config["max_steps"] = 2
+            report = train_specialist(config, manifest)
+            checkpoint = root / "artifacts" / "checkpoint_last.pt"
+            previous = Path(str(checkpoint) + ".previous")
+            self.assertTrue(previous.is_file())
+            state = _load_checkpoint(checkpoint, torch.device("cpu"))
+            self.assertEqual(state["step"], 1)
+            checkpoint.write_bytes(b"corrupt newest generation")
+            recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
+            self.assertEqual(recovered["step"], 0)
+            self.assertEqual(recovered["model_id"], "code")
+            self.assertEqual(report["release_status"], "NOT_RELEASED")
+
+    def test_training_resume_continues_after_verified_checkpoint(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            first = train_specialist(config, manifest)
+            checkpoint = root / "artifacts" / "checkpoint_last.pt"
+            config["max_steps"] = 2
+            second = train_specialist(config, manifest, resume=checkpoint)
+            self.assertEqual(second["steps"], 2)
+            self.assertEqual(second["dataset_sha256"], first["dataset_sha256"])
+            self.assertEqual(second["release_status"], "NOT_RELEASED")
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,15 +1,17 @@
 """AETHRION API with explicit local and specialist capability routing."""
 from __future__ import annotations
 import os
+import base64
+import tempfile
 from pathlib import Path
 from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
-from aethrion.providers import MeshyTextTo3DProvider,OpenAICompatibleChatProvider,OpenAIImageProvider,TavilyResearchProvider
-from aethrion.file_agent import FileAnalysisAgent,FileAnalysisError
-from aethrion.audio import OpenAISpeechProvider,AudioProviderError
+from aethrion.native_registry import NativeModelRegistry,NativeModelUnavailable,NativeModelError
+from aethrion.native_runtime import NativeModelRuntime
+from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError
 from aethrion.document_tools import create_document,extract_document_text,DocumentError
-from aethrion.workspace_agent import ProjectWorkspaceAgent,WorkspaceError
-from fastapi import UploadFile,File,Form,Response
+from aethrion.security import require_api_token
+from fastapi import UploadFile,File,Form,Response,Depends
 try:
     from fastapi import FastAPI,HTTPException
     from pydantic import BaseModel,Field
@@ -24,120 +26,165 @@ class FileRequest(BaseModel):
     content_base64:str=Field(min_length=1,max_length=12_000_000)
     question:str=Field(default="Summarize and analyze this file.",max_length=2000)
 
-def build_router()->tuple[CapabilityRouter,dict[str,Any]]:
-    router=CapabilityRouter(); providers={}
-    code_key=os.environ.get("AETHRION_CODE_API_KEY") or os.environ.get("OPENAI_API_KEY")
-    code_model=os.environ.get("AETHRION_CODE_MODEL")
-    code_base=os.environ.get("AETHRION_CODE_BASE_URL","https://api.openai.com/v1")
-    if code_key and code_model:
-        code=OpenAICompatibleChatProvider(code_key,code_model,code_base)
-        router.register(Capability.CODE,"openai-compatible-code",code)
-        router.register(Capability.FILE_ANALYSIS,"openai-compatible-file-agent",code)
-        providers["file_analysis"]=code
-    image_key=os.environ.get("AETHRION_IMAGE_API_KEY") or os.environ.get("OPENAI_API_KEY")
-    if image_key:
-        router.register(Capability.IMAGE,"openai-images",OpenAIImageProvider(
-            image_key,os.environ.get("AETHRION_IMAGE_MODEL","gpt-image-2"),
-            os.environ.get("AETHRION_IMAGE_BASE_URL","https://api.openai.com/v1")))
-    meshy_key=os.environ.get("MESHY_API_KEY")
-    if meshy_key:
-        meshy=MeshyTextTo3DProvider(meshy_key,os.environ.get("AETHRION_MESHY_BASE_URL","https://api.meshy.ai/openapi/v2"))
-        router.register(Capability.THREE_D,"meshy-text-to-3d",meshy); providers["3d"]=meshy
-    tavily_key=os.environ.get("TAVILY_API_KEY")
-    if tavily_key: router.register(Capability.RESEARCH,"tavily-search",TavilyResearchProvider(tavily_key))
-    checkpoint=Path(os.environ.get("AETHRION_CHECKPOINT","artifacts/checkpoint_last.pt"))
-    tokenizer_path=Path(os.environ.get("AETHRION_TOKENIZER","artifacts/tokenizer.json"))
-    if checkpoint.is_file() and tokenizer_path.is_file():
-        def local_chat(request:CapabilityRequest)->dict[str,str]:
-            import torch
-            from aethrion.chat import load_model
-            from aethrion.tokenizer import ByteBPETokenizer
-            device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            model=load_model(str(checkpoint),device); tokenizer=ByteBPETokenizer.load(tokenizer_path)
-            ids=tokenizer.encode(request.prompt)
-            if not ids: raise ValueError("Prompt produced no tokens.")
-            context=torch.tensor([ids],dtype=torch.long,device=device)
-            with torch.no_grad(): result=model.generate(context,min(int(request.options.get("max_new_tokens",128)),512))
-            return {"text":tokenizer.decode(result[0,len(ids):].tolist()),"model":"AETHRIONLM"}
-        router.register(Capability.CHAT,"local-aethrionlm",local_chat)
-    audio_key=os.environ.get("AETHRION_AUDIO_API_KEY") or os.environ.get("OPENAI_API_KEY")
-    if audio_key:
-        from aethrion.audio import OpenAISpeechProvider
-        import base64
-        speech=OpenAISpeechProvider(api_key=audio_key)
-        def audio_handler(request:CapabilityRequest)->dict[str,Any]:
-            raw=speech.synthesize(request.prompt,voice=str(request.options.get("voice","marin")))
-            return {"format":"mp3","audio_base64":base64.b64encode(raw).decode("ascii")}
-        router.register(Capability.AUDIO,"openai-turn-based-speech",audio_handler)
+def get_native_model_statuses(manifest: str | Path | None = None) -> dict[str, str]:
+    """Report verified per-model release status without loading model weights."""
+    selected = Path(manifest or os.environ.get("AETHRION_MODEL_MANIFEST", "models/manifest.json"))
+    registry = NativeModelRegistry(Path.cwd(), selected)
+    return {name: registry.status(name) for name in sorted(registry.capabilities())}
+
+
+def build_router(*, allow_remote_providers: bool = False, allow_local_model: bool = True)->tuple[CapabilityRouter,dict[str,Any]]:
+    """Build a native-only router from independently trained and verified local model releases."""
+    if allow_remote_providers:
+        raise ValueError("AETHRION native-only policy forbids external model and search APIs.")
+    router=CapabilityRouter()
+    providers={}
+    if not allow_local_model:
+        return router,providers
+    manifest=Path(os.environ.get("AETHRION_MODEL_MANIFEST","models/manifest.json"))
+    try:
+        runtime=NativeModelRuntime(Path.cwd(),manifest)
+    except NativeModelError as exc:
+        providers["runtime_error"]=type(exc).__name__
+        return router,providers
+    providers["runtime"]=runtime
+    # The retrieval and layout/OCR adapters are not registered until their own
+    # local index and document preprocessing pipelines have passed release tests.
+    supported = (
+        Capability.CHAT, Capability.CODE, Capability.VISION, Capability.IMAGE,
+        Capability.ASR, Capability.TTS, Capability.THREE_D, Capability.RESEARCH,
+        Capability.DOCUMENT, Capability.SAFETY,
+    )
+    for capability in supported:
+        if runtime.registry.status(capability.value) != "ready":
+            continue
+        def handler(request: CapabilityRequest, selected=capability.value):
+            return runtime.handle(selected,request)
+        router.register(capability,runtime.registry.resolve(capability.value).architecture,handler)
     return router,providers
 
 app=FastAPI(title="AETHRION-LLM API",version="0.4.0")
 router,providers=build_router()
-audio_key=os.environ.get("AETHRION_AUDIO_API_KEY") or os.environ.get("OPENAI_API_KEY")
-audio_provider=OpenAISpeechProvider(api_key=audio_key) if audio_key else None
-code_provider=providers.get("file_analysis")
 
 @app.get("/health")
 def health(): return {"status":"ok","service":"AETHRION-LLM","version":"0.3.0"}
 
-@app.get("/capabilities")
+@app.get("/capabilities", dependencies=[Depends(require_api_token)])
 def capabilities():
     available=router.available(); all_names=[c.value for c in Capability]
-    return {"available":available,"unavailable":[n for n in all_names if n not in available],"credentials_exposed":False}
+    try:
+        model_status = get_native_model_statuses()
+    except Exception as exc:
+        model_status = {"registry": f"error:{type(exc).__name__}"}
+    return {"available":available,"unavailable":[n for n in all_names if n not in available],
+            "model_status":model_status,"execution_policy":"local_only","credentials_exposed":False}
 
-@app.post("/dispatch")
+@app.post("/dispatch", dependencies=[Depends(require_api_token)])
 def dispatch(request:DispatchRequest):
     try:
         result=router.dispatch(request.capability,CapabilityRequest(request.prompt,request.options))
         return {"capability":result.capability.value,"provider":result.provider,"result":result.output}
     except (ValueError,TypeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
     except CapabilityUnavailable as exc: raise HTTPException(status_code=503,detail=str(exc)) from exc
-    except Exception as exc: raise HTTPException(status_code=502,detail=f"Provider operation failed: {type(exc).__name__}") from exc
+    except Exception as exc: raise HTTPException(status_code=500,detail=f"Native capability operation failed: {type(exc).__name__}") from exc
 
-@app.post("/files/analyze")
+@app.post("/files/analyze", dependencies=[Depends(require_api_token)])
 def analyze_file(request:FileRequest):
-    provider=providers.get("file_analysis")
-    if provider is None: raise HTTPException(status_code=503,detail="Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL.")
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.DOCUMENT.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-DOC is not trained and released.")
     try:
-        result=FileAnalysisAgent(provider).analyze(request.filename,request.content_base64,request.question)
-        return {"capability":"file_analysis","provider":"openai-compatible-file-agent","result":result}
-    except FileAnalysisError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
-    except Exception as exc: raise HTTPException(status_code=502,detail=f"File analysis failed: {type(exc).__name__}") from exc
+        raw=base64.b64decode(request.content_base64,validate=True)
+    except (ValueError,TypeError) as exc:
+        raise HTTPException(status_code=400,detail="Invalid base64 document content.") from exc
+    if not raw or len(raw)>8*1024*1024:
+        raise HTTPException(status_code=413,detail="Document must be between 1 byte and 8 MiB.")
+    with tempfile.NamedTemporaryFile(suffix=Path(request.filename).suffix.lower()) as handle:
+        handle.write(raw); handle.flush()
+        try:
+            result=runtime.analyze_document(handle.name)
+        except Exception as exc:
+            raise HTTPException(status_code=422,detail=f"Native document analysis failed: {type(exc).__name__}") from exc
+    result["question"]=request.question
+    return {"capability":"document","result":result}
 
-@app.get("/3d/tasks/{task_id}")
+@app.get("/3d/tasks/{task_id}", dependencies=[Depends(require_api_token)])
 def get_3d_task(task_id:str):
-    provider=providers.get("3d")
-    if provider is None: raise HTTPException(status_code=503,detail="MESHY_API_KEY is not configured.")
-    try: return provider.get_task(task_id)
-    except Exception as exc: raise HTTPException(status_code=502,detail=f"3D task lookup failed: {type(exc).__name__}") from exc
+    raise HTTPException(status_code=410,detail="Native 3D generation is synchronous. Use POST /3d/generate; no hosted task service is used.")
 
+@app.post("/3d/generate", dependencies=[Depends(require_api_token)])
+def generate_3d(request:dict[str,Any]):
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.THREE_D.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-3D is not trained and released.")
+    prompt=request.get("prompt")
+    if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>4000:
+        raise HTTPException(status_code=400,detail="prompt must contain 1–4000 characters.")
+    path=None
+    try:
+        path=runtime.generate_point_cloud(prompt,inference_steps=min(int(request.get("inference_steps",50)),100))
+        return Response(content=path.read_bytes(),media_type="text/plain",
+            headers={"Content-Disposition":'attachment; filename="aethrion-point-cloud.obj"',
+                     "X-Aethrion-3D-Format":"vertex-only-obj"})
+    except Exception as exc:
+        raise HTTPException(status_code=422,detail=f"Native point-cloud generation failed: {type(exc).__name__}") from exc
+    finally:
+        if path is not None: path.unlink(missing_ok=True)
 
-@app.post("/audio/transcriptions")
-async def audio_transcriptions(file: UploadFile = File(...), language: str | None = Form(default=None)):
-    if audio_provider is None:
-        raise HTTPException(status_code=503, detail="Configure AETHRION_AUDIO_API_KEY or OPENAI_API_KEY.")
-    import tempfile
-    suffix=Path(file.filename or "audio.bin").suffix[:12] or ".bin"
-    raw=await file.read(OpenAISpeechProvider.MAX_AUDIO_BYTES+1)
-    if not raw or len(raw)>OpenAISpeechProvider.MAX_AUDIO_BYTES:
-        raise HTTPException(status_code=413,detail="Audio exceeds 25 MiB.")
+@app.post("/vision/compare", dependencies=[Depends(require_api_token)])
+async def vision_compare(file:UploadFile=File(...),text:str=Form(...)):
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.VISION.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-VISION is not trained and released.")
+    raw=await file.read(20*1024*1024+1)
+    if not raw or len(raw)>20*1024*1024:
+        raise HTTPException(status_code=413,detail="Image must be between 1 byte and 20 MiB.")
+    suffix=Path(file.filename or "image.png").suffix.lower()
+    if suffix not in {".png",".jpg",".jpeg",".webp"}:
+        raise HTTPException(status_code=400,detail="Supported image formats are PNG, JPG and WebP.")
     with tempfile.NamedTemporaryFile(suffix=suffix) as handle:
         handle.write(raw); handle.flush()
-        try: text=audio_provider.transcribe(handle.name,language)
-        except AudioProviderError as exc: raise HTTPException(status_code=502,detail=str(exc)) from exc
-    return {"text":text}
+        try: score=runtime.image_text_similarity(handle.name,text)
+        except Exception as exc: raise HTTPException(status_code=422,detail=f"Native image comparison failed: {type(exc).__name__}") from exc
+    return {"capability":"vision","similarity":score,
+            "note":"Embedding similarity only; not a natural-language image description."}
 
-@app.post("/audio/speech")
-def audio_speech(request: dict[str,Any]):
-    if audio_provider is None:
-        raise HTTPException(status_code=503,detail="Configure AETHRION_AUDIO_API_KEY or OPENAI_API_KEY.")
+@app.post("/audio/transcriptions", dependencies=[Depends(require_api_token)])
+async def audio_transcriptions(file:UploadFile=File(...)):
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.ASR.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-ASR is not trained and released.")
+    raw=await file.read(25*1024*1024+1)
+    if not raw or len(raw)>25*1024*1024:
+        raise HTTPException(status_code=413,detail="Audio must be between 1 byte and 25 MiB.")
+    suffix=Path(file.filename or "audio.wav").suffix.lower()
+    if suffix!=".wav":
+        raise HTTPException(status_code=400,detail="Native ASR currently accepts PCM WAV only.")
+    with tempfile.NamedTemporaryFile(suffix=".wav") as handle:
+        handle.write(raw); handle.flush()
+        try: transcript=runtime.transcribe_wav(handle.name)
+        except Exception as exc: raise HTTPException(status_code=422,detail=f"Native ASR failed: {type(exc).__name__}") from exc
+    return {"capability":"asr","text":transcript}
+
+@app.post("/audio/speech", dependencies=[Depends(require_api_token)])
+def audio_speech(request:dict[str,Any]):
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.TTS.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-TTS and AETHRION-VOCODER are not trained and released.")
+    text=request.get("text")
+    if not isinstance(text,str) or not text.strip() or len(text)>4096:
+        raise HTTPException(status_code=400,detail="text must contain 1–4096 characters.")
+    path=None
     try:
-        raw=audio_provider.synthesize(str(request.get("text","")),voice=str(request.get("voice","marin")))
-        return Response(content=raw,media_type="audio/mpeg",headers={"Cache-Control":"no-store"})
-    except AudioProviderError as exc:
-        raise HTTPException(status_code=400,detail=str(exc)) from exc
+        path=runtime.synthesize_wav(text)
+        return Response(content=path.read_bytes(),media_type="audio/wav",
+                        headers={"Cache-Control":"no-store"})
+    except Exception as exc:
+        raise HTTPException(status_code=422,detail=f"Native TTS failed: {type(exc).__name__}") from exc
+    finally:
+        if path is not None: path.unlink(missing_ok=True)
 
-@app.post("/documents/extract")
+@app.post("/documents/extract", dependencies=[Depends(require_api_token)])
 async def documents_extract(file: UploadFile = File(...)):
     import tempfile
     suffix=Path(file.filename or "").suffix[:12]
@@ -149,20 +196,29 @@ async def documents_extract(file: UploadFile = File(...)):
         except (DocumentError,UnicodeError,ValueError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
     return {"filename":file.filename,"text":content}
 
-@app.post("/documents/create")
+@app.post("/documents/create", dependencies=[Depends(require_api_token)])
 def documents_create(request: dict[str,Any]):
     try:
         raw,name,mime=create_document(str(request.get("title","")),str(request.get("content","")),str(request.get("format","docx")))
         return Response(content=raw,media_type=mime,headers={"Content-Disposition":f'attachment; filename="{name}"',"Cache-Control":"no-store"})
     except DocumentError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
 
-@app.post("/workspace/propose")
-async def workspace_propose(file: UploadFile = File(...), task: str = Form(...)):
-    if code_provider is None:
-        raise HTTPException(status_code=503,detail="Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL.")
+@app.post("/workspace/propose", dependencies=[Depends(require_api_token)])
+async def workspace_propose(file:UploadFile=File(...),task:str=Form(...)):
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.CODE.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-CODE is not trained and released.")
     raw=await file.read(8*1024*1024+1)
-    if len(raw)>8*1024*1024: raise HTTPException(status_code=413,detail="Project ZIP exceeds 8 MiB.")
+    if not raw or len(raw)>8*1024*1024:
+        raise HTTPException(status_code=413,detail="Project ZIP must be between 1 byte and 8 MiB.")
+    def local_code_provider(request):
+        return runtime.generate_text("code",request.prompt,max_new_tokens=1024,temperature=0.1)
     try:
-        output,summary=ProjectWorkspaceAgent(code_provider).propose(raw,task)
-        return Response(content=output,media_type="application/zip",headers={"Content-Disposition":'attachment; filename="aethrion-project-proposal.zip"',"X-Aethrion-Summary":summary[:500],"Cache-Control":"no-store"})
-    except WorkspaceError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+        output,summary=ProjectWorkspaceAgent(local_code_provider).propose(raw,task)
+        return Response(content=output,media_type="application/zip",
+            headers={"Content-Disposition":'attachment; filename="aethrion-review.zip"',
+                     "X-Aethrion-Summary":summary[:500],"Cache-Control":"no-store"})
+    except WorkspaceError as exc:
+        raise HTTPException(status_code=400,detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=422,detail=f"Native project review failed: {type(exc).__name__}") from exc

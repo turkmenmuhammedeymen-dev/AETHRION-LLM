@@ -7,10 +7,11 @@ import torch
 
 from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.tokenizer import ByteBPETokenizer
+from aethrion.checkpoint import load_checkpoint
 
 
 def load_model(checkpoint_path: str, device: torch.device):
-    state = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    state = load_checkpoint(checkpoint_path, map_location=device)
     config = ModelConfig(**state["model_config"])
     model = AETHRIONLM(config).to(device)
     model.load_state_dict(state["model"])

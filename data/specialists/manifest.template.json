@@ -1,0 +1,13 @@
+{
+  "format": "aethrion-specialist-dataset-v1",
+  "dataset_id": "REPLACE_WITH_REVIEWED_DATASET_ID",
+  "model_id": "REPLACE_WITH_SPECIALIST_MODEL_ID",
+  "modality": "REPLACE_WITH_MODALITY",
+  "training_allowed": false,
+  "owner_approval": false,
+  "privacy_reviewed": false,
+  "speaker_consent_reviewed": false,
+  "dataset_path": "prepared/dataset.npz",
+  "dataset_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "sources": []
+}

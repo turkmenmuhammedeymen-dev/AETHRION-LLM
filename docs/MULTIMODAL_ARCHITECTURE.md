@@ -1,54 +1,78 @@
-# AETHRION capability architecture
+# AETHRION native multimodal architecture
 
-## Goal
+AETHRION uses separately initialized and separately trained first-party models.
+Production inference must not download, call, proxy, distill from or silently
+fall back to pretrained third-party models or hosted inference/search APIs.
 
-AETHRION presents one product interface while dispatching explicitly selected
-work to specialist backends. The base AETHRIONLM is a decoder-only text model;
-it is not, by itself, an image generator, 3D generator, speech system, or
-repository-editing agent.
+## Independent model family
 
-## Capability map
+- **AETHRION-BASE:** multilingual causal language model; separate pretraining
+  and response-only instruction tuning.
+- **AETHRION-CODE:** independent causal model for code completion, generation
+  and repair.
+- **AETHRION-VISION:** image/text dual encoder for visual representation and
+  contrastive image-text learning. It is not yet a visual conversational model.
+- **AETHRION-IMAGE:** text-conditioned pixel diffusion research model. Its
+  current low-resolution U-Net is a research scaffold, not a frontier image
+  generator.
+- **AETHRION-ASR:** acoustic encoder trained with a CTC transcription objective.
+- **AETHRION-TTS:** transcript-to-mel predictor with duration modelling.
+- **AETHRION-VOCODER:** separate mel-to-waveform network. TTS is not complete
+  or releasable without a separately trained and evaluated Vocoder.
+- **AETHRION-3D:** text-conditioned point-cloud diffusion. The present
+  implementation exports vertex-only OBJ point clouds; it does not yet create
+  complete watertight meshes, topology or textures.
+- **AETHRION-RESEARCH:** query/passage dual encoder for local retrieval. An
+  approval-gated local index builder now binds prepared records to an exact
+  SHA-256 and source provenance. A trained retriever, semantic deduplication,
+  reranking, citation validation and freshness policy remain incomplete.
+- **AETHRION-DOC:** document text/layout encoder with token tagging and
+  extractive-QA heads. OCR/layout extraction and complete page understanding
+  are not yet complete.
+- **AETHRION-SAFE:** separate ALLOW/REVIEW/BLOCK text classifier with reason
+  scores. It is not an active safety barrier until trained, calibrated and
+  independently evaluated.
 
-| UI selection | Capability key | Intended backend |
-|---|---|---|
-| Chat | chat | AETHRION text model |
-| Code | code | Code model plus a sandboxed coding agent |
-| Image | image | Image-generation model/service |
-| 3D | 3d | Text/image-to-3D model/service |
-| Research | research | Search, retrieval, and source-verification tools |
-| File analysis | file_analysis | Format-aware parsers and analysis models |
-| Audio | audio | Speech recognition and synthesis services |
+## Training and release contract
 
-## Dispatch contract
+The repository contains a fail-closed multimodal NPZ dataset validator,
+per-model training configurations, a resumable specialist trainer, BASE
+instruction tuning, audio WAV/log-mel preprocessing, and shape/loss smoke tests.
+Each model has its own checkpoint path and model manifest entry.
 
-The aethrion.routing.CapabilityRouter module is the first backend-neutral
-dispatch boundary. The UI or API must pass the selected capability explicitly.
-A provider is available only after its real handler is registered. An
-unconfigured capability raises CapabilityUnavailable; it must not silently
-fall back to text chat or return a fabricated success.
+A dataset must have recorded source provenance, license and training rights,
+source-file SHA-256 values, privacy review, speaker consent where relevant,
+deduplication and independent train/validation/test partitions. The model
+training flag and owner approval must be exact JSON booleans and explicitly
+approved by a responsible human. A training run produces a checkpoint and a
+report marked NOT_RELEASED; it never automatically publishes a model.
 
-Provider handlers receive a CapabilityRequest and return their real result.
-Credentials belong in environment variables or a secret manager, never in
-source files, committed configuration, logs, or client bundles. Provider
-adapters must validate input sizes, timeouts, response types, and output
-artifacts. File-writing or repository-editing agents must use an isolated
-workspace, inspect diffs, run tests, and require approval before publishing
-changes.
+The native registry resolves a model only when its checkpoint, tokenizer or
+processor, training report, evaluation report, model card and dataset hashes
+match; explicit release, quality and safety gates must all be true. TTS also
+requires the separate AETHRION-VOCODER release.
 
-## Delivery phases
+## Runtime and safety
 
-1. Keep the text-model training pipeline independent and fail-closed.
-2. Add and test the capability registry/router.
-3. Implement one provider adapter per capability, starting with code and image.
-4. Add the 3D provider adapter and validate exported GLB/GLTF/OBJ artifacts.
-5. Connect the product UI to the API's explicit capability key.
-6. Add integration tests with mocked providers, then opt-in live provider tests.
-7. Measure each capability separately; do not claim parity with other assistants
-   without reproducible benchmark results.
+The production router is local-only. Missing or untrained models return an
+explicit unavailable state. No capability tab or Python class may be labelled
+ready simply because it exists.
 
-## Current implementation status
+AETHRION-SAFE must be independently trained and evaluated before a serving
+mode can claim model-based safety screening. Application-level controls remain
+required: authentication, input validation, rate limits, resource limits,
+audit logs, abuse tests and human review for consequential operations.
 
-The routing contract and unit tests are present. This is infrastructure, not a
-claim that image, 3D, audio, research, or code providers are already connected.
-Those capabilities remain unavailable until their adapters and credentials are
-configured and integration-tested.
+## Current implementation versus completion
+
+The repository now has independent research architectures and training
+entrypoints for the model family, but the model weights are not trained and
+the data manifests remain fail-closed. Passing unit/forward tests confirms
+software mechanics only; it does not demonstrate language, image, speech, 3D,
+retrieval, document or safety quality.
+
+Major remaining work includes large-scale lawful datasets, robust high-capacity
+architectures, distributed/mixed-precision training validation, model-specific
+held-out benchmarks, calibration, OCR/layout tooling, mesh topology and
+texturing, trained research retrieval/reranking and citation validation,
+complete local modality inference adapters and a production end-to-end release review.

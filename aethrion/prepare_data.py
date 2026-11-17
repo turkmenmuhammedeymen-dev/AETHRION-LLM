@@ -72,6 +72,12 @@ def load_sources_manifest(path: Path, root: Path) -> list[dict]:
             raise ValueError(f"Source entry missing: {', '.join(missing)}")
         if entry["allow_training"] is not True:
             raise ValueError(f"Source is not approved for training: {entry['source_id']}")
+        if not isinstance(entry["license"], str) or entry["license"].strip().upper() in {
+            "UNKNOWN", "PENDING", "PENDING_HUMAN_REVIEW", "UNVERIFIED", "TBD"
+        }:
+            raise ValueError(f"Source license is not verified: {entry['source_id']}")
+        if not isinstance(entry["permitted_uses"], str) or "train" not in entry["permitted_uses"].lower():
+            raise ValueError(f"Source permitted_uses must explicitly include training: {entry['source_id']}")
 
         source = (root / entry["path"]).resolve()
         if root not in source.parents:
@@ -306,6 +312,96 @@ def build_corpus(
             f"Only {len(records)} unique records remain; minimum required is {min_records}."
         )
     return report
+
+
+
+def validate_training_approval(
+    dataset_manifest_path: Path,
+    source_manifest_path: Path,
+    input_dir: Path,
+    corpus_path: Path,
+    corpus_report_path: Path,
+    source_review_path: Path | None = None,
+) -> None:
+    """Re-check approvals and prove the training corpus matches reviewed sources."""
+    require_training_enabled(dataset_manifest_path)
+    if not source_manifest_path.is_file():
+        raise ValueError(f"Training blocked: source manifest does not exist: {source_manifest_path}")
+
+    sources = load_sources_manifest(source_manifest_path, input_dir)
+    if not sources:
+        raise ValueError("Training blocked: source manifest contains no approved sources.")
+
+    source_ids = [source["source_id"] for source in sources]
+    if len(source_ids) != len(set(source_ids)):
+        raise ValueError("Training blocked: source manifest contains duplicate source IDs.")
+
+    domain_reviews = load_domain_review(source_review_path) if source_review_path else None
+    pending_domains = (
+        sorted(domain for domain, review in domain_reviews.items() if not review["approved"])
+        if domain_reviews is not None else []
+    )
+    if pending_domains:
+        raise ValueError(
+            "Training blocked: source review contains unapproved domains: "
+            + ", ".join(pending_domains[:20])
+        )
+
+    for source in sources:
+        source_path = source["_resolved_path"]
+        for line_number, _, metadata in iter_records(source_path):
+            if "url" not in metadata:
+                continue
+            url = metadata.get("url")
+            parsed = urlparse(url) if isinstance(url, str) else None
+            domain = (parsed.hostname or "").lower().rstrip(".") if parsed else ""
+            if parsed is None or parsed.scheme not in {"http", "https"} or not domain:
+                raise ValueError(
+                    f"Training blocked: invalid source URL in {source_path.name}:{line_number}"
+                )
+            if domain_reviews is None:
+                raise ValueError(
+                    "Training blocked: URL-attributed records require --source-review."
+                )
+            review = domain_reviews.get(domain)
+            if review is None or not review["approved"]:
+                raise ValueError(
+                    f"Training blocked: hostname has no evidence-backed approval: {domain}"
+                )
+
+    if not corpus_path.is_file():
+        raise ValueError(f"Training blocked: prepared corpus does not exist: {corpus_path}")
+    if not corpus_report_path.is_file():
+        raise ValueError(f"Training blocked: corpus audit report does not exist: {corpus_report_path}")
+    report = json.loads(corpus_report_path.read_text(encoding="utf-8"))
+    if not isinstance(report, dict) or report.get("format") != "aethrion-corpus-report-v2":
+        raise ValueError("Training blocked: unsupported or invalid corpus audit report.")
+
+    output = report.get("output")
+    if not isinstance(output, dict):
+        raise ValueError("Training blocked: corpus audit report has no output metadata.")
+    reported_path = Path(str(output.get("path", ""))).resolve()
+    if reported_path != corpus_path.resolve():
+        raise ValueError("Training blocked: corpus path does not match its audit report.")
+    if output.get("sha256") != sha256_file(corpus_path):
+        raise ValueError("Training blocked: prepared corpus SHA-256 does not match its audit report.")
+    if output.get("bytes") != corpus_path.stat().st_size:
+        raise ValueError("Training blocked: prepared corpus size does not match its audit report.")
+
+    reported_sources = report.get("sources")
+    if not isinstance(reported_sources, list):
+        raise ValueError("Training blocked: corpus audit report has no source list.")
+    expected = {
+        source["source_id"]: (source["path"], sha256_file(source["_resolved_path"]))
+        for source in sources
+    }
+    observed = {}
+    for item in reported_sources:
+        if not isinstance(item, dict) or not item.get("source_id") or item["source_id"] in observed:
+            raise ValueError("Training blocked: corpus audit report has invalid or duplicate sources.")
+        observed[item["source_id"]] = (item.get("path"), item.get("sha256"))
+    if observed != expected:
+        raise ValueError("Training blocked: corpus audit sources differ from the current approved source manifest.")
 
 
 def main():

@@ -1,0 +1,20 @@
+{
+  "model_config": {
+    "vocab_size": 2048,
+    "block_size": 256,
+    "n_layer": 4,
+    "n_head": 4,
+    "n_embd": 256,
+    "dropout": 0.1
+  },
+  "tokenizer_path": "artifacts/tokenizer.json",
+  "output_dir": "artifacts/models/chat",
+  "seed": 42,
+  "max_steps": 1000,
+  "batch_size": 4,
+  "learning_rate": 0.00005,
+  "weight_decay": 0.01,
+  "grad_clip": 1,
+  "eval_interval": 50,
+  "save_interval": 50
+}

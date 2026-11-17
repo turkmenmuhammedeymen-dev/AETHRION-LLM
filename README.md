@@ -45,6 +45,7 @@ python -m aethrion.import_hf_dataset --max-records 5000
 # Complete a per-host review CSV with license evidence and explicit AI-training permission.
 python -m aethrion.prepare_data --input data/raw/cosmos \
   --manifest data/raw/cosmos/sources.json \
+  --dataset-manifest data/processed/corpus_manifest.json \
   --source-review data/processed/privacy_review/source_review_template.csv \
   --output data/processed/corpus.txt \
   --report data/processed/corpus-report.json
@@ -103,4 +104,28 @@ No license is granted to third-party training data by this repository. Add an ex
 
 See [docs/KAGGLE_RUNBOOK.md](docs/KAGGLE_RUNBOOK.md) for the single-cell Kaggle setup and fail-closed pipeline. The first run performs environment checks, tests, and optional bounded data import, then stops at the approval gate while training permission remains false.
 
-See [docs/MULTIMODAL_ARCHITECTURE.md](docs/MULTIMODAL_ARCHITECTURE.md) for capability routing and [docs/PROVIDER_SETUP.md](docs/PROVIDER_SETUP.md) for real provider configuration. Code, image, 3D, research, and file-analysis adapters register only when their credentials are configured. Held-out evaluation reports loss, perplexity, throughput, parameter count, and GPU memory.
+See [docs/NATIVE_ONLY_MODEL_FAMILY.md](docs/NATIVE_ONLY_MODEL_FAMILY.md) for the native-only model family and release gates. Distinct randomly initialized PyTorch architectures and configs now exist for AETHRION-BASE, CODE, VISION, IMAGE, ASR, TTS, VOCODER, 3D, RESEARCH, DOC and SAFE. The specialist training runner, dataset approval gate, BASE instruction-tuning command, and local SHA-256 model registry are implemented. No specialist weights are considered trained or production-ready yet. The local research-index builder now binds the exact prepared-record SHA-256 and per-source approvals; it is still not a trained retriever or complete cited-search service.
+
+Prepare an NPZ dataset using the schema in [data/specialists/README.md](data/specialists/README.md). Only after each source license, privacy review and (for audio) speaker consent have been documented and approved may a human set the manifest approvals to true. Example CODE training:
+
+~~~bash
+python -m aethrion.specialist_train \\
+  --config configs/specialists/code.json \\
+  --manifest data/specialists/code/manifest.json
+~~~
+
+BASE instruction tuning is a separate stage after pretraining has produced a verified checkpoint. Its labels use `-100` to mask prompt tokens so the loss is calculated only on supervised response tokens:
+
+~~~bash
+python -m aethrion.instruction_tune \\
+  --config configs/instruction_tuning.json \\
+  --manifest data/specialists/chat-instructions/manifest.json \\
+  --base-checkpoint artifacts/checkpoint_last.pt
+~~~
+
+Both trainers save checkpoints, integrity hashes, metrics and a report marked `NOT_RELEASED`. Neither automatically marks a model `trained`. The registry requires matching dataset provenance, training and held-out evaluation reports, a model card, verified local artifacts, quality and safety gates, and explicit release approval. External inference and hosted-search APIs are disabled in production.
+
+
+### Standalone API security
+
+Set `AETHRION_API_TOKEN` as a server-side environment secret before exposing the FastAPI service. All API routes except `/health` require an `Authorization: Bearer <token>` header. If the token is not configured, protected routes fail closed with HTTP 503. Never commit the token or place it in browser-side code.

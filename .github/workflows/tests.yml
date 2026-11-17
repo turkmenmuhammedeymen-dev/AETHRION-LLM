@@ -30,7 +30,7 @@ jobs:
           python -m pip install "torch>=2.2" --index-url https://download.pytorch.org/whl/cpu
           python -m pip install -e ".[api]"
       - name: Space application syntax checks
-        run: python -m compileall -q hf_space/app.py hf_space/aethrion
+        run: python -m compileall -q aethrion hf_space/app.py hf_space/aethrion
       - name: Unit tests
         run: python -m unittest discover -s tests -v
       - name: Synthetic end-to-end smoke test
@@ -69,6 +69,13 @@ jobs:
           import app
 
           assert isinstance(app.demo, gr.Blocks), "Gradio Blocks UI was not constructed"
+          assert app._resolve_space_auth({}) is None
+          assert app._resolve_space_auth({"AETHRION_SPACE_USERNAME": "tester"}) is None
+          assert app._resolve_space_auth({
+              "AETHRION_SPACE_USERNAME": "tester",
+              "AETHRION_SPACE_PASSWORD": "test-password"
+          }) == ("tester", "test-password")
+          assert app.REMOTE_PROVIDERS_ENABLED is False, "Remote providers must be disabled without Space auth"
           config = app.demo.get_config_file()
           assert isinstance(config, dict) and config.get("components"), "Gradio UI config is empty"
           assert len(config["components"]) >= 20, "Expected all Space tabs and controls in UI config"
@@ -76,15 +83,25 @@ jobs:
           assert isinstance(api_info, dict), "Gradio API schema generation failed"
 
           status = app.status()
-          for capability in ("chat", "code", "image", "3d", "research", "file_analysis", "audio"):
-              assert capability in status, f"Missing capability status: {capability}"
+          for capability in ("chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d", "research", "document", "safety"):
+              assert capability in status, f"Missing native model status: {capability}"
 
-          assert "checkpoint/tokenizer" in app.chat("hello", [] ).lower()
-          assert "configure" in app.code("write a function").lower()
-          assert "configure" in app.research("latest AI research").lower()
-          assert "configure" in app.three_d_text("a small tree")[0].lower()
-          assert "configure" in app.analyse(None, "summarize").lower()
-          assert "configure" in app.voice(None)[0].lower()
+          assert "authentication" in app.chat("hello", [] ).lower()
+          assert "authentication" in app.code("write a function").lower()
+          assert "authentication" in app.research("latest AI research").lower()
+          assert "authentication" in app.vision_compare("placeholder.png", "cat").lower()
+          assert "authentication" in app.three_d_text("a small tree")[0].lower()
+          assert "authentication" in app.analyse(None, "summarize").lower()
+          assert "authentication" in app.voice(None)[0].lower()
+          app.SPACE_AUTH_ENABLED = True
+          assert "not trained" in app.code("write a function").lower()
+          assert ("not trained" in app.research("latest AI research").lower() or "not ready" in app.research("latest AI research").lower())
+          assert "not trained" in app.vision_compare("placeholder.png", "cat").lower()
+          assert "not trained" in app.three_d_text("a small tree")[0].lower()
+          assert "not trained" in app.voice("placeholder.wav")[0].lower()
+          assert "not trained" in app.analyse("placeholder.pdf", "summarize").lower()
+          app.SPACE_AUTH_ENABLED = False
+          assert app.REMOTE_PROVIDERS_ENABLED is False, "The production Space must remain native-only"
 
           with tempfile.TemporaryDirectory() as temp:
               created = app.make_doc("AETHRION smoke test", "first paragraph\n\nsecond paragraph", "docx")

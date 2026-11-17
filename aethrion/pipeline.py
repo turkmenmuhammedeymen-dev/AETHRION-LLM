@@ -243,7 +243,15 @@ def main() -> int:
         "--output", str(TOKENIZER),
         "--vocab-size", str(config["vocab_size"]),
     ])
-    run([sys.executable, "-m", "aethrion.train", "--config", args.config])
+    run([
+        sys.executable, "-m", "aethrion.train",
+        "--config", args.config,
+        "--dataset-manifest", str(DATASET_MANIFEST),
+        "--source-manifest", str(SOURCE_MANIFEST),
+        "--source-root", str(RAW_DIR),
+        "--corpus-report", str(REPORT),
+        *review_arg,
+    ])
 
     checkpoint = ROOT / config["output_dir"] / "checkpoint_last.pt"
     print("\nTraining finished:", checkpoint)

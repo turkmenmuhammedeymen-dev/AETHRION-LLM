@@ -33,6 +33,7 @@ python -m aethrion.import_hf_dataset --max-records 5000
 # The dataset-level manifest gate and every exact-host review must be approved.
 python -m aethrion.prepare_data --input data/raw/cosmos \
   --manifest data/raw/cosmos/sources.json \
+  --dataset-manifest data/processed/corpus_manifest.json \
   --source-review data/processed/privacy_review/source_review_template.csv \
   --output data/processed/corpus.txt \
   --report data/processed/corpus-report.json
@@ -61,7 +62,12 @@ encoding, privacy, and license compatibility.
 ~~~bash
 python -m aethrion.tokenizer --train data/processed/corpus.txt \
   --output artifacts/tokenizer.json --vocab-size 512
-python -m aethrion.train --config configs/turkish_pilot.json
+python -m aethrion.train --config configs/turkish_pilot.json \
+  --dataset-manifest data/processed/corpus_manifest.json \
+  --source-manifest data/raw/cosmos/sources.json \
+  --source-root data/raw/cosmos \
+  --corpus-report data/processed/corpus-report.json \
+  --source-review data/processed/privacy_review/source_review_template.csv
 python -m aethrion.evaluate --checkpoint artifacts/turkish_pilot/checkpoint_last.pt \
   --tokenizer artifacts/tokenizer.json --data data/heldout/approved-eval.txt
 ~~~

@@ -1,15 +1,9 @@
 import base64, io, json, tempfile, unittest, zipfile
 from pathlib import Path
-from aethrion.audio import OpenAISpeechProvider, AudioProviderError
 from aethrion.document_tools import create_document, extract_document_text, DocumentError
 from aethrion.workspace_agent import read_project_zip, WorkspaceError
 
 class ExtendedMultimodalTests(unittest.TestCase):
-    def test_audio_fails_closed_without_key(self):
-        provider=OpenAISpeechProvider(api_key="")
-        with self.assertRaises(AudioProviderError):
-            provider.synthesize("Hello")
-
     def test_document_creation_and_text_roundtrip(self):
         raw,name,mime=create_document("AETHRION","Merhaba dünya","txt")
         self.assertTrue(name.endswith(".txt"))

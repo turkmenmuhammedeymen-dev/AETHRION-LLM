@@ -1,0 +1,9 @@
+{
+  "format": "aethrion-research-index-approval-v1",
+  "index_allowed": false,
+  "owner_approval": false,
+  "privacy_reviewed": false,
+  "records_path": "records.jsonl",
+  "records_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "sources": []
+}

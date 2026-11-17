@@ -13,11 +13,14 @@ from typing import Any, Callable, Mapping
 class Capability(str, Enum):
     CHAT = "chat"
     CODE = "code"
+    VISION = "vision"
     IMAGE = "image"
     THREE_D = "3d"
+    ASR = "asr"
+    TTS = "tts"
     RESEARCH = "research"
-    FILE_ANALYSIS = "file_analysis"
-    AUDIO = "audio"
+    DOCUMENT = "document"
+    SAFETY = "safety"
 
 
 @dataclass(frozen=True)
