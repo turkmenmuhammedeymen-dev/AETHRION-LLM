@@ -100,7 +100,17 @@ def extract_document_text(path):
         try:
             from pypdf import PdfReader
             reader = PdfReader(io.BytesIO(raw))
-            return "\n".join(page.extract_text() or "" for page in reader.pages[:100])[:MAX_TEXT_CHARS]
+            parts = []
+            remaining = MAX_TEXT_CHARS
+            for page in reader.pages[:100]:
+                if remaining <= 0:
+                    break
+                page_text = page.extract_text() or ""
+                if page_text:
+                    clipped = page_text[:remaining]
+                    parts.append(clipped)
+                    remaining -= len(clipped)
+            return "\\n".join(parts)[:MAX_TEXT_CHARS]
         except Exception as exc:
             raise DocumentError("PDF could not be read.") from exc
     raise DocumentError("Supported formats: TXT, MD, LOG, JSON, CSV, DOCX and PDF.")
