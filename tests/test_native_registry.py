@@ -41,26 +41,76 @@ class NativeModelRegistryTests(unittest.TestCase):
     def test_valid_local_artifacts_resolve_after_hash_verification(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            checkpoint = root / "models" / "chat.pt"
-            tokenizer = root / "models" / "tokenizer.json"
-            checkpoint.parent.mkdir(parents=True)
-            checkpoint.write_bytes(b"first-party-checkpoint")
-            tokenizer.write_text('{"format":"aethrion-test"}', encoding="utf-8")
+            models = root / "models"
+            models.mkdir()
+            artifacts = {
+                "checkpoint.pt": b"first-party-checkpoint",
+                "tokenizer.json": b'{"format":"aethrion-test"}',
+                "training.json": json.dumps({
+                    "model_id": "chat", "dataset_sha256": "a" * 64,
+                    "release_status": "NOT_RELEASED"
+                }).encode(),
+                "evaluation.json": json.dumps({
+                    "model_id": "chat", "dataset_sha256": "a" * 64,
+                    "status": "approved_for_release"
+                }).encode(),
+                "MODEL_CARD.md": b"# Test-only model card",
+            }
+            digests = {}
+            for name, raw in artifacts.items():
+                target = models / name
+                target.write_bytes(raw)
+                digests[name] = hashlib.sha256(raw).hexdigest()
             entry = {
                 "architecture": "aethrion.model:AETHRIONLM",
-                "checkpoint": "models/chat.pt",
-                "checkpoint_sha256": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+                "model_config": {"vocab_size": 256},
+                "checkpoint": "models/checkpoint.pt",
+                "checkpoint_sha256": digests["checkpoint.pt"],
                 "tokenizer": "models/tokenizer.json",
-                "tokenizer_sha256": hashlib.sha256(tokenizer.read_bytes()).hexdigest(),
+                "tokenizer_sha256": digests["tokenizer.json"],
+                "training_report": "models/training.json",
+                "training_report_sha256": digests["training.json"],
+                "evaluation_report": "models/evaluation.json",
+                "evaluation_report_sha256": digests["evaluation.json"],
+                "model_card": "models/MODEL_CARD.md",
+                "model_card_sha256": digests["MODEL_CARD.md"],
+                "dataset_sha256": "a" * 64,
+                "release_approval": True,
+                "quality_gate_passed": True,
+                "safety_gate_passed": True,
                 "status": "trained",
             }
             write_manifest(root, entry)
             registry = NativeModelRegistry(root)
             resolved = registry.resolve("chat")
-            self.assertEqual(resolved.checkpoint, checkpoint.resolve())
-            self.assertEqual(resolved.tokenizer, tokenizer.resolve())
+            self.assertEqual(resolved.checkpoint, (models / "checkpoint.pt").resolve())
+            self.assertEqual(resolved.tokenizer, (models / "tokenizer.json").resolve())
+            self.assertEqual(resolved.model_config, {"vocab_size": 256})
             self.assertEqual(registry.status("chat"), "ready")
 
+    def test_trained_model_without_release_approval_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with self.assertRaisesRegex(NativeModelError, "release_approval=true"):
+                write_manifest(root, {
+                    "architecture": "aethrion.model:AETHRIONLM",
+                    "model_config": {"vocab_size": 256},
+                    "checkpoint": "models/chat.pt",
+                    "checkpoint_sha256": "0" * 64,
+                    "tokenizer": "models/tokenizer.json",
+                    "tokenizer_sha256": "0" * 64,
+                    "training_report": "models/train.json",
+                    "training_report_sha256": "0" * 64,
+                    "evaluation_report": "models/eval.json",
+                    "evaluation_report_sha256": "0" * 64,
+                    "model_card": "models/card.md",
+                    "model_card_sha256": "0" * 64,
+                    "dataset_sha256": "0" * 64,
+                    "release_approval": False,
+                    "quality_gate_passed": True,
+                    "safety_gate_passed": True,
+                    "status": "trained",
+                })
     def test_hash_mismatch_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
