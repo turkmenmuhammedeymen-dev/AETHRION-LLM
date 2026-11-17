@@ -86,7 +86,7 @@ class _FakeSafetyRuntime:
 
     def classify_safety(self, text):
         self.reviewed.append(text)
-        return {"decision": self.decisions.get(text, "ALLOW")}
+        return {"decision": self.decisions.get(text, "ALLOW"), "confidence": 0.99}
 
     def handle(self, capability, request):
         if capability == "safety":
@@ -130,6 +130,53 @@ class SafeRuntimeGateTests(unittest.TestCase):
         with self.assertRaises(CapabilityUnavailable):
             router.dispatch("chat", CapabilityRequest("benign prompt", {}))
         self.assertEqual(runtime.reviewed, ["benign prompt", "generated unsafe output"])
+
+
+
+    def test_safe_low_or_invalid_confidence_never_allows(self):
+        class _LowConfidenceRuntime(_FakeSafetyRuntime):
+            def classify_safety(self, text):
+                self.reviewed.append(text)
+                return {"decision": "ALLOW", "confidence": 0.4}
+        runtime = _LowConfidenceRuntime({"safety": "ready"})
+        with self.assertRaises(CapabilityUnavailable):
+            api._require_safety_allow(runtime, "uncertain")
+        class _InvalidConfidenceRuntime(_FakeSafetyRuntime):
+            def classify_safety(self, text):
+                self.reviewed.append(text)
+                return {"decision": "ALLOW", "confidence": float("nan")}
+        runtime = _InvalidConfidenceRuntime({"safety": "ready"})
+        with self.assertRaises(CapabilityUnavailable):
+            api._require_safety_allow(runtime, "invalid score")
+
+    def test_safe_chunk_gate_checks_every_segment(self):
+        runtime = _FakeSafetyRuntime({"safety": "ready"})
+        api._require_safety_allow_chunks(runtime, "x" * 1001, chunk_chars=400)
+        self.assertEqual(len(runtime.reviewed), 3)
+        self.assertEqual([len(item) for item in runtime.reviewed], [400, 400, 201])
+
+    def test_safe_chunk_gate_stops_on_first_non_allow_segment(self):
+        runtime = _FakeSafetyRuntime(
+            {"safety": "ready"},
+            decisions={"BLOCK" + "B" * 395: "BLOCK"},
+        )
+        with self.assertRaises(CapabilityUnavailable):
+            api._require_safety_allow_chunks(runtime, "A" * 400 + "BLOCK" + "B" * 400, chunk_chars=400)
+        self.assertEqual(len(runtime.reviewed), 2)
+
+
+    def test_safe_chunk_http_wrapper_returns_service_unavailable(self):
+        runtime = _FakeSafetyRuntime({"safety": "ready"}, decisions={"BLOCK": "BLOCK"})
+        with self.assertRaises(api.HTTPException) as caught:
+            api._require_safety_allow_chunks_http(runtime, "BLOCK")
+        self.assertEqual(caught.exception.status_code, 503)
+
+
+    def test_research_excerpts_are_included_in_output_safety_review(self):
+        self.assertEqual(
+            api._text_for_safety({"results": [{"title": "Title", "excerpt": "Passage"}]}),
+            "Passage\nTitle",
+        )
 
     def test_safe_classifier_route_does_not_gate_itself(self):
         router, _, runtime = self._build(

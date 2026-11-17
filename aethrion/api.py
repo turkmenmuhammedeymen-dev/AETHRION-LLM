@@ -3,12 +3,13 @@ from __future__ import annotations
 import os
 import base64
 import tempfile
+import math
 from pathlib import Path
 from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
 from aethrion.native_registry import NativeModelRegistry,NativeModelUnavailable,NativeModelError
 from aethrion.native_runtime import NativeModelRuntime
-from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError
+from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError, read_project_zip
 from aethrion.document_tools import create_document,extract_document_text,DocumentError
 from aethrion.security import require_api_token
 from fastapi import UploadFile,File,Form,Response,Depends
@@ -40,9 +41,17 @@ def _require_safety_allow(runtime: Any, text: str) -> dict[str, Any]:
     except Exception as exc:
         raise CapabilityUnavailable("AETHRION-SAFE inference failed; request stopped.") from exc
     decision = verdict.get("decision") if isinstance(verdict, dict) else None
-    if decision != "ALLOW":
+    confidence = verdict.get("confidence") if isinstance(verdict, dict) else None
+    if (
+        decision != "ALLOW"
+        or not isinstance(confidence, (int, float))
+        or not math.isfinite(float(confidence))
+        or not 0.65 <= float(confidence) <= 1.0
+    ):
         label = decision if decision in {"REVIEW", "BLOCK"} else "UNKNOWN"
-        raise CapabilityUnavailable(f"AETHRION-SAFE returned {label}; request stopped.")
+        raise CapabilityUnavailable(
+            f"AETHRION-SAFE returned {label} or an untrusted confidence score; request stopped."
+        )
     return verdict
 
 
@@ -51,6 +60,24 @@ def _require_safety_allow_http(runtime: Any, text: str) -> dict[str, Any]:
     """Translate a fail-closed SAFE verdict into a protected API response."""
     try:
         return _require_safety_allow(runtime, text)
+    except CapabilityUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+
+def _require_safety_allow_chunks(runtime: Any, text: str, *, chunk_chars: int = 400) -> list[dict[str, Any]]:
+    """Screen every bounded segment so SAFE's finite context cannot silently truncate input."""
+    if not isinstance(text, str) or not text.strip() or chunk_chars < 1:
+        raise CapabilityUnavailable("AETHRION-SAFE received no reviewable text; request stopped.")
+    verdicts = []
+    for offset in range(0, len(text), chunk_chars):
+        verdicts.append(_require_safety_allow(runtime, text[offset:offset + chunk_chars]))
+    return verdicts
+
+
+def _require_safety_allow_chunks_http(runtime: Any, text: str, *, chunk_chars: int = 400) -> list[dict[str, Any]]:
+    try:
+        return _require_safety_allow_chunks(runtime, text, chunk_chars=chunk_chars)
     except CapabilityUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -68,7 +95,7 @@ def _text_for_safety(result: Any) -> str:
     if isinstance(rows, list):
         for row in rows:
             if isinstance(row, dict):
-                for key in ("text", "passage", "snippet", "content"):
+                for key in ("text", "passage", "snippet", "content", "excerpt", "title", "description"):
                     value = row.get(key)
                     if isinstance(value, str) and value.strip():
                         pieces.append(value)
@@ -115,6 +142,10 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
         def handler(request: CapabilityRequest, selected=capability.value):
             if selected != Capability.SAFETY.value:
                 _require_safety_allow(runtime, request.prompt)
+            if selected == Capability.DOCUMENT.value:
+                document_path = request.options.get("document_path")
+                if isinstance(document_path, str) and document_path:
+                    _require_safety_allow_chunks(runtime, extract_document_text(document_path))
             result = runtime.handle(selected, request)
             if selected != Capability.SAFETY.value:
                 output_text = _text_for_safety(result)
@@ -164,8 +195,10 @@ def analyze_file(request:FileRequest):
     with tempfile.NamedTemporaryFile(suffix=Path(request.filename).suffix.lower()) as handle:
         handle.write(raw); handle.flush()
         try:
+            source_text = extract_document_text(handle.name)
+            _require_safety_allow_chunks_http(runtime, source_text)
             result=runtime.analyze_document(handle.name)
-            _require_safety_allow_http(runtime, str(result.get("text", "")))
+            _require_safety_allow_chunks_http(runtime, str(result.get("text", "")))
         except CapabilityUnavailable:
             raise HTTPException(status_code=503,detail="AETHRION-SAFE did not allow this document output.")
         except HTTPException:
@@ -281,8 +314,14 @@ async def documents_extract(file: UploadFile = File(...)):
 
 @app.post("/documents/create", dependencies=[Depends(require_api_token)])
 def documents_create(request: dict[str,Any]):
+    runtime=providers.get("runtime")
+    title=str(request.get("title",""))
+    content=str(request.get("content",""))
+    if len(title)+len(content)>20000:
+        raise HTTPException(status_code=413,detail="Document text exceeds the 20,000-character safety review limit.")
+    _require_safety_allow_chunks_http(runtime, title+"\\n"+content)
     try:
-        raw,name,mime=create_document(str(request.get("title","")),str(request.get("content","")),str(request.get("format","docx")))
+        raw,name,mime=create_document(title,content,str(request.get("format","docx")))
         return Response(content=raw,media_type=mime,headers={"Content-Disposition":f'attachment; filename="{name}"',"Cache-Control":"no-store"})
     except DocumentError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
 
@@ -295,6 +334,14 @@ async def workspace_propose(file:UploadFile=File(...),task:str=Form(...)):
     if not raw or len(raw)>8*1024*1024:
         raise HTTPException(status_code=413,detail="Project ZIP must be between 1 byte and 8 MiB.")
     _require_safety_allow_http(runtime, task)
+    try:
+        uploaded_files = read_project_zip(raw)
+        for filename, source_text in uploaded_files.items():
+            _require_safety_allow_chunks_http(runtime, source_text)
+    except HTTPException:
+        raise
+    except WorkspaceError as exc:
+        raise HTTPException(status_code=400,detail=str(exc)) from exc
     def local_code_provider(request):
         _require_safety_allow_http(runtime, request.prompt)
         generated = runtime.generate_text("code",request.prompt,max_new_tokens=1024,temperature=0.1)

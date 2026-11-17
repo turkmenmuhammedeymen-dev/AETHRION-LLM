@@ -2,10 +2,13 @@
 from __future__ import annotations
 import os
 import sys
+import tempfile
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "hf_space"))
+sys.path.insert(0, str(ROOT))
+sys.path.insert(1, str(ROOT / "hf_space"))
 
 import gradio as gr
 import app as space
@@ -32,6 +35,39 @@ except gr.Error:
 else:
     raise AssertionError("Image route should clearly report missing provider credentials")
 
+
+# The Gradio project path must inspect the uploaded source with the same SAFE gate.
+assert "_require_safety_allow_chunks_http" in space.edit_project.__code__.co_names
+assert "read_project_zip" in space.edit_project.__code__.co_names
+
+class _SmokeSafetyRegistry:
+    def status(self, model_id):
+        return "ready" if model_id == "safety" else "not_trained"
+
+class _SmokeSafetyRuntime:
+    registry = _SmokeSafetyRegistry()
+    def __init__(self):
+        self.reviewed = []
+    def classify_safety(self, text):
+        self.reviewed.append(text)
+        return {"decision": "BLOCK" if "BLOCK_ME" in text else "ALLOW", "confidence": 0.99}
+
+old_auth, old_providers = space.SPACE_AUTH_ENABLED, space.providers
+try:
+    space.SPACE_AUTH_ENABLED = True
+    smoke_runtime = _SmokeSafetyRuntime()
+    space.providers = {"runtime": smoke_runtime}
+    with tempfile.TemporaryDirectory() as folder:
+        archive_path = Path(folder) / "project.zip"
+        with zipfile.ZipFile(archive_path, "w") as archive:
+            archive.writestr("main.py", "# BLOCK_ME\\nprint('hello')\\n")
+        rejected, output = space.edit_project(str(archive_path), "review this project")
+        assert "rejected by AETHRION-SAFE" in rejected
+        assert output is None
+        assert any("BLOCK_ME" in segment for segment in smoke_runtime.reviewed)
+finally:
+    space.SPACE_AUTH_ENABLED, space.providers = old_auth, old_providers
+
 # Exercise document create, extract and edit paths without network calls.
 docx_path = space.make_doc("AETHRION Smoke Test", "first paragraph\n\nsecond paragraph", "docx")
 assert Path(docx_path).is_file() and Path(docx_path).stat().st_size > 0
@@ -51,4 +87,4 @@ print("GRADIO_BLOCKS=PASS")
 print("SEVEN_CAPABILITY_ROUTES=PASS")
 print("NO_CREDENTIAL_FALLBACKS=PASS")
 print("DOCUMENT_CREATE_EXTRACT_EDIT=PASS")
-print("DOCUMENT_FORMATS=PASS")
+print("DOCUMENT_FORMATS=PASS")\nprint("GRADIO_PROJECT_SAFE_GATE=PASS")
