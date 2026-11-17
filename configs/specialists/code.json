@@ -1,0 +1,20 @@
+{
+  "model_id": "code",
+  "model_config": {
+    "vocab_size": 2048,
+    "block_size": 512,
+    "n_layer": 4,
+    "n_head": 4,
+    "n_embd": 128,
+    "dropout": 0.1
+  },
+  "output_dir": "artifacts/models/code",
+  "seed": 42,
+  "max_steps": 2000,
+  "batch_size": 4,
+  "learning_rate": 0.0003,
+  "weight_decay": 0.01,
+  "grad_clip": 1,
+  "eval_interval": 100,
+  "save_interval": 100
+}
