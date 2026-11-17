@@ -58,7 +58,7 @@ class ApiRegistrationTests(unittest.TestCase):
              "OPENAI_API_KEY":"","MESHY_API_KEY":"","TAVILY_API_KEY":"dummy",
              "AETHRION_CHECKPOINT":"/missing/checkpoint.pt","AETHRION_TOKENIZER":"/missing/tokenizer.json"}
         with patch.dict("os.environ",env,clear=False):
-            router,providers=build_router()
+            router,providers=build_router(allow_remote_providers=True)
         self.assertIn(Capability.CODE.value,router.available())
         self.assertIn(Capability.RESEARCH.value,router.available())
         self.assertIn(Capability.FILE_ANALYSIS.value,router.available())
