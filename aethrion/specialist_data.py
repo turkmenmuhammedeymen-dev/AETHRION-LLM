@@ -11,12 +11,12 @@ import numpy as np
 
 FORMAT = "aethrion-specialist-dataset-v1"
 MODEL_MODALITIES = {
-    "code": "code", "vision": "vision", "image": "image", "asr": "audio",
+    "chat": "text", "code": "code", "vision": "vision", "image": "image", "asr": "audio",
     "tts": "audio", "3d": "3d", "research": "text",
     "document": "document", "safety": "text",
 }
 REQUIRED_ARRAYS = {
-    "code": {"sample_id", "split", "token_ids"},
+    "chat": {"sample_id", "split", "input_ids", "labels"},\n    "code": {"sample_id", "split", "token_ids"},
     "vision": {"sample_id", "split", "images", "token_ids"},
     "image": {"sample_id", "split", "images", "token_ids"},
     "asr": {"sample_id", "split", "features", "input_lengths", "targets", "target_lengths"},
