@@ -56,8 +56,21 @@ jobs:
           python -m pip install -r /tmp/space-requirements.txt
           python -m pip install "gradio[oauth,mcp]==5.49.1" "spaces==0.51.3"
           python -m pip check
+      - name: Assemble Space exactly as the deployment workflow does
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          staging="$RUNNER_TEMP/aethrion-space"
+          rm -rf "$staging"
+          mkdir -p "$staging/aethrion" "$staging/models"
+          cp -a hf_space/. "$staging/"
+          rm -rf "$staging/aethrion"
+          mkdir -p "$staging/aethrion"
+          cp -a aethrion/. "$staging/aethrion/"
+          cp models/manifest.json "$staging/models/manifest.json"
       - name: Import and construct the actual Space UI
-        working-directory: hf_space
+        working-directory: ${{ runner.temp }}/aethrion-space
         env:
           PYTHONPATH: .
         run: |
