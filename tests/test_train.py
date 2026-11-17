@@ -34,7 +34,7 @@ class TrainingUtilityTests(unittest.TestCase):
                 "source_id": "synthetic-test-fixture",
                 "path": "fixture.txt",
                 "license": "Synthetic test fixture",
-                "permitted_uses": "unit tests only",
+                "permitted_uses": "machine-learning training for unit-test fixture only",
                 "allow_training": True
             }]}), encoding="utf-8")
             command = [
@@ -59,7 +59,7 @@ class TrainingUtilityTests(unittest.TestCase):
             output = work / "artifacts"
             raw_dir = work / "raw"
             raw_dir.mkdir()
-            source_text = "\\n".join(
+            source_text = "\n".join(
                 f"Synthetic AETHRION unit-test record number {index} with Turkish sample text."
                 for index in range(120)
             )
@@ -119,6 +119,11 @@ class TrainingUtilityTests(unittest.TestCase):
             checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
             self.assertEqual(checkpoint["step"], 2)
             self.assertEqual(checkpoint["format_version"], 2)
+
+            data_path.write_text(data_path.read_text(encoding="utf-8") + "tampered", encoding="utf-8")
+            tampered = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=120)
+            self.assertNotEqual(tampered.returncode, 0)
+            self.assertIn("prepared corpus SHA-256", tampered.stdout + tampered.stderr)
 
 if __name__ == "__main__":
     unittest.main()
