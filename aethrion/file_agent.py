@@ -1,6 +1,7 @@
 """Bounded extraction for common document formats and LLM-assisted analysis."""
 from __future__ import annotations
 import base64,csv,io,json,zipfile
+from aethrion.document_tools import _validate_docx_archive
 from pathlib import PurePosixPath
 from xml.etree import ElementTree
 MAX_FILE_BYTES=8*1024*1024
@@ -26,7 +27,12 @@ def extract_text(filename:str,content_base64:str)->str:
         reader=PdfReader(io.BytesIO(raw))
         return "\n".join(page.extract_text() or "" for page in reader.pages[:100])[:200_000]
     try:
-        with zipfile.ZipFile(io.BytesIO(raw)) as archive: xml=archive.read("word/document.xml")
+        _validate_docx_archive(raw)
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            with archive.open("word/document.xml", "r") as entry:
+                xml = entry.read(16 * 1024 * 1024 + 1)
+                if len(xml) > 16 * 1024 * 1024 or entry.read(1):
+                    raise FileAnalysisError("DOCX document.xml exceeds its decompressed size limit.")
         root=ElementTree.fromstring(xml); paragraphs=[]
         for p in root.iter():
             if p.tag.endswith("}p"):
