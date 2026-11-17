@@ -125,6 +125,78 @@ def validate_specialist_dataset(
     if actual_hash != dataset_hash.lower():
         raise SpecialistDataError("Prepared specialist dataset SHA-256 mismatch.")
 
+def _validate_modality_shapes(model_id: str, arrays: Any, sample_count: int) -> None:
+    """Validate fixed-shape tensors before any model or optimizer is constructed."""
+    if model_id in {"chat", "code"}:
+        key = "input_ids" if model_id == "chat" else "token_ids"
+        ids = arrays[key]
+        if ids.ndim != 2 or ids.shape[1] < 2 or not np.issubdtype(ids.dtype, np.integer):
+            raise SpecialistDataError(f"{key} must be an integer [samples, sequence>=2] array.")
+        if model_id == "chat":
+            labels = arrays["labels"]
+            if labels.shape != ids.shape or not np.issubdtype(labels.dtype, np.integer):
+                raise SpecialistDataError("Instruction labels must be an integer array matching input_ids.")
+            if np.any(np.all(labels == -100, axis=1)):
+                raise SpecialistDataError("Every instruction sample must contain supervised response tokens.")
+    elif model_id in {"vision", "image"}:
+        images, ids = arrays["images"], arrays["token_ids"]
+        if images.ndim != 4 or images.shape[1] != 3 or ids.ndim != 2:
+            raise SpecialistDataError("Image-model arrays require images [N,3,H,W] and token_ids [N,L].")
+        if images.shape[-1] < 16 or images.shape[-2] < 16:
+            raise SpecialistDataError("Image dimensions must be at least 16x16.")
+        if not np.issubdtype(ids.dtype, np.integer):
+            raise SpecialistDataError("Image conditioning token IDs must be integers.")
+    elif model_id == "asr":
+        features, input_lengths = arrays["features"], arrays["input_lengths"]
+        targets, target_lengths = arrays["targets"], arrays["target_lengths"]
+        if features.ndim != 3 or input_lengths.shape != (sample_count,):
+            raise SpecialistDataError("ASR features must be [N,frames,mels] with one input length per sample.")
+        if targets.ndim != 2 or target_lengths.shape != (sample_count,):
+            raise SpecialistDataError("ASR targets must be padded [N,target_length] with one target length per sample.")
+        if np.any(input_lengths < 1) or np.any(input_lengths > features.shape[1]):
+            raise SpecialistDataError("ASR input lengths are outside the feature sequence.")
+        if np.any(target_lengths < 1) or np.any(target_lengths > targets.shape[1]):
+            raise SpecialistDataError("ASR target lengths are outside the padded target sequence.")
+    elif model_id == "tts":
+        ids, alignment = arrays["token_ids"], arrays["frame_to_token"]
+        mels, durations = arrays["target_mels"], arrays["durations"]
+        if ids.ndim != 2 or alignment.ndim != 2 or mels.ndim != 3 or durations.shape != ids.shape:
+            raise SpecialistDataError("TTS requires token_ids [N,L], frame_to_token [N,F], target_mels [N,F,M] and durations [N,L].")
+        if alignment.shape[:2] != mels.shape[:2] or np.any(durations < 1):
+            raise SpecialistDataError("TTS frame alignment or positive duration targets are invalid.")
+        if np.any(durations.sum(axis=1) != alignment.shape[1]):
+            raise SpecialistDataError("TTS token durations must sum to the target mel frame count.")
+        if np.any(alignment < 0) or np.any(alignment >= ids.shape[1]):
+            raise SpecialistDataError("TTS alignment references token positions outside the transcript.")
+    elif model_id == "vocoder":
+        mels, audio = arrays["target_mels"], arrays["target_waveforms"]
+        if mels.ndim != 3 or audio.ndim != 2:
+            raise SpecialistDataError("Vocoder requires target_mels [N,frames,mel_bins] and target_waveforms [N,samples].")
+    elif model_id == "3d":
+        points, ids = arrays["points"], arrays["token_ids"]
+        if points.ndim != 3 or points.shape[2] != 3 or ids.ndim != 2:
+            raise SpecialistDataError("3D data requires points [N,points,3] and token_ids [N,L].")
+        if points.shape[1] < 16 or not np.issubdtype(ids.dtype, np.integer):
+            raise SpecialistDataError("3D point clouds or conditioning token IDs are invalid.")
+    elif model_id == "research":
+        if arrays["query_ids"].ndim != 2 or arrays["passage_ids"].ndim != 2:
+            raise SpecialistDataError("Research query_ids and passage_ids must be padded 2D integer arrays.")
+        if not np.issubdtype(arrays["query_ids"].dtype, np.integer) or not np.issubdtype(arrays["passage_ids"].dtype, np.integer):
+            raise SpecialistDataError("Research token arrays must use integer dtypes.")
+    elif model_id == "document":
+        ids, boxes, layouts, tags = arrays["token_ids"], arrays["boxes"], arrays["layout_ids"], arrays["tag_labels"]
+        if ids.ndim != 2 or boxes.shape != (*ids.shape, 4) or layouts.shape != ids.shape or tags.shape != ids.shape:
+            raise SpecialistDataError("Document token, layout, boxes and tag arrays have inconsistent shapes.")
+        if np.any(boxes < 0) or np.any(boxes > 1):
+            raise SpecialistDataError("Document boxes must be normalized to [0,1].")
+    elif model_id == "safety":
+        ids, decisions, reasons = arrays["token_ids"], arrays["decision_labels"], arrays["reason_labels"]
+        if ids.ndim != 2 or decisions.shape != (sample_count,) or reasons.ndim != 2 or reasons.shape[0] != sample_count:
+            raise SpecialistDataError("Safety token, decision and reason arrays have inconsistent shapes.")
+        if np.any(decisions < 0) or np.any(decisions > 2):
+            raise SpecialistDataError("Safety decision labels must be ALLOW=0, REVIEW=1 or BLOCK=2.")
+
+
     try:
         with np.load(file_path, allow_pickle=False) as arrays:
             keys = set(arrays.files)
@@ -145,6 +217,7 @@ def validate_specialist_dataset(
             if any(counts[name] == 0 for name in counts):
                 raise SpecialistDataError("Dataset requires non-empty train, validation and test splits.")
             sample_count = len(ids)
+            _validate_modality_shapes(model_id, arrays, sample_count)
             for key in keys - {"sample_id", "split"}:
                 value = arrays[key]
                 if value.dtype.hasobject:
