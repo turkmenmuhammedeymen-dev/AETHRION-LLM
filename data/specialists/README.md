@@ -10,17 +10,17 @@ SHA-256 values are recorded in their dataset manifests.
 
 | Model | Required NPZ arrays |
 |---|---|
-| BASE instruction tuning | `sample_id, split, input_ids, labels` |
-| Code | `sample_id, split, token_ids` |
-| Vision | `sample_id, split, images, token_ids` |
-| Image | `sample_id, split, images, token_ids` |
-| ASR | `sample_id, split, features, input_lengths, targets, target_lengths` |
-| TTS | `sample_id, split, token_ids, frame_to_token, target_mels, durations` |
-| Vocoder | `sample_id, split, target_mels, target_waveforms` |
-| 3D | `sample_id, split, points, token_ids` |
-| Research | `sample_id, split, query_ids, passage_ids` |
-| Document | `sample_id, split, token_ids, boxes, layout_ids, tag_labels` |
-| Safety | `sample_id, split, token_ids, decision_labels, reason_labels` |
+| BASE instruction tuning | `sample_id, group_id, split, input_ids, labels` |
+| Code | `sample_id, group_id, split, token_ids` |
+| Vision | `sample_id, group_id, split, images, token_ids` |
+| Image | `sample_id, group_id, split, images, token_ids` |
+| ASR | `sample_id, group_id, split, features, input_lengths, targets, target_lengths` |
+| TTS | `sample_id, group_id, split, token_ids, frame_to_token, target_mels, durations` |
+| Vocoder | `sample_id, group_id, split, target_mels, target_waveforms` |
+| 3D | `sample_id, group_id, split, points, token_ids` |
+| Research | `sample_id, group_id, split, query_ids, passage_ids` |
+| Document | `sample_id, group_id, split, token_ids, boxes, layout_ids, tag_labels` |
+| Safety | `sample_id, group_id, split, token_ids, decision_labels, reason_labels` |
 
 The manifest is fail-closed. It requires exact boolean approval fields,
 reviewed sources with local source paths and matching SHA-256 values, license
@@ -49,11 +49,14 @@ trained Vocoder learns mel-to-waveform conversion; both datasets require
 documented speaker consent. TTS cannot be released unless its companion
 AETHRION-VOCODER also passes its own evaluation and release gates.
 
-## Raw JSONL preparation (CODE, RESEARCH, DOCUMENT, SAFE)
+## Raw JSONL preparation (CHAT, CODE, RESEARCH, DOCUMENT, SAFE)
 
 The first-party preparation CLI converts owner-supplied, reviewed JSONL records
-into the NPZ contract above, learns a byte-BPE tokenizer from only those records,
-copies the original source file for provenance, and writes SHA-256 hashes.
+into the NPZ contract above, learns byte-BPE tokenizers only from training-split
+records for specialist text tasks, copies the original source file for provenance,
+and writes SHA-256 hashes. CHAT is the exception: it must reuse the exact BASE
+tokenizer from the pretraining checkpoint; the command refuses to create a new
+instruction tokenizer that could be incompatible with the BASE weights.
 
 Supported record shapes:
 
@@ -63,6 +66,21 @@ Supported record shapes:
 - `research`: `{"id":"...","group_id":"...","query":"...","passage":"..."}`
 - `document`: `{"id":"...","group_id":"...","text":"...","boxes":[[x0,y0,x1,y1],...],"layout_ids":[...],"tag_labels":[...]}`; layout arrays must align with byte-BPE token positions.
 - `safety`: `{"id":"...","group_id":"...","text":"...","decision":"ALLOW|REVIEW|BLOCK","reasons":[integer,...]}`; decisions are human-supplied, never inferred by the tool.
+
+For CHAT, pass the exact BASE tokenizer generated during BASE pretraining. Do not
+train a new tokenizer for the instruction dataset:
+
+```bash
+python -m aethrion.specialist_prepare \
+  --input data/incoming/chat-reviewed.jsonl \
+  --model chat \
+  --output-root data/specialists \
+  --tokenizer artifacts/tokenizer.json \
+  --license "record the exact source license" \
+  --permitted-use "record the exact permitted training use" \
+  --evidence-uri "https://source.example/license-or-terms" \
+  --source-uri "https://source.example/dataset-release"
+```
 
 Example (CODE):
 
