@@ -8,7 +8,7 @@ import json
 import random
 import re
 import unicodedata
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -157,6 +157,30 @@ def iter_records(path: Path):
                 yield number, value, item
 
 
+def _assign_group_splits(records: list[dict], seed: int) -> dict[str, str]:
+    """Assign each provenance group wholly to exactly one deterministic split."""
+    groups: dict[str, list[dict]] = defaultdict(list)
+    for record in records:
+        groups[record["group_id"]].append(record)
+    if len(groups) < 3:
+        raise ValueError(
+            "Training blocked: at least three independent source groups are required "
+            "for train, validation and test. Add source files or record-level group_id metadata."
+        )
+    names = ("train", "validation", "test")
+    targets = {"train": len(records) * 0.90, "validation": len(records) * 0.05, "test": len(records) * 0.05}
+    counts = {name: 0 for name in names}
+    ordered = list(groups)
+    random.Random(seed).shuffle(ordered)
+    ordered.sort(key=lambda group_id: len(groups[group_id]), reverse=True)
+    assignments: dict[str, str] = {}
+    for group_id in ordered:
+        selected = max(names, key=lambda name: targets[name] - counts[name])
+        assignments[group_id] = selected
+        counts[selected] += len(groups[group_id])
+    return assignments
+
+
 def build_corpus(
     input_dir: Path,
     manifest_path: Path,
@@ -180,7 +204,7 @@ def build_corpus(
     domain_reviews = (
         load_domain_review(source_review_path) if source_review_path is not None else None
     )
-    unique = {}
+    unique: dict[str, dict[str, str]] = {}
     stats = []
     totals = Counter()
     domain_counts = Counter()
@@ -189,7 +213,8 @@ def build_corpus(
     for source in sources:
         path = source["_resolved_path"]
         counts = Counter()
-        for _, raw, metadata in iter_records(path):
+        for line_number, raw, metadata in iter_records(path):
+            group_id = f"source:{source['source_id']}"
             totals["records_read"] += 1
             counts["records_read"] += 1
 
@@ -212,10 +237,18 @@ def build_corpus(
                         "URL-attributed JSONL requires --source-review with explicit "
                         "approval for every source hostname."
                     )
+                group_id = f"host:{domain}"
                 domain_counts[domain] += 1
                 review = domain_reviews.get(domain)
                 if review is None or not review["approved"]:
                     blocked_domains.add(domain)
+            elif "group_id" in metadata:
+                explicit_group = metadata.get("group_id")
+                if not isinstance(explicit_group, str) or not explicit_group.strip():
+                    raise ValueError(
+                        f"Record in {path.name}:{line_number} has an invalid group_id."
+                    )
+                group_id = f"source:{source['source_id']}:group:{explicit_group.strip()}"
 
             value = normalize_text(raw)
             if len(value) < min_chars:
@@ -236,7 +269,7 @@ def build_corpus(
                 totals["duplicates"] += 1
                 counts["duplicates"] += 1
                 continue
-            unique[key] = value
+            unique[key] = {"text": value, "group_id": group_id}
             totals["records_kept"] += 1
             counts["records_kept"] += 1
 
@@ -260,11 +293,38 @@ def build_corpus(
         )
 
     records = list(unique.values())
+    if len(records) < min_records:
+        raise ValueError(
+            f"Only {len(records)} unique records remain; minimum required is {min_records}."
+        )
+    assignments = _assign_group_splits(records, seed)
     random.Random(seed).shuffle(records)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8", newline="\n") as handle:
-        for value in records:
-            handle.write(value + "\n")
+
+    def _write_records(target: Path, selected: list[dict[str, str]]) -> None:
+        with target.open("w", encoding="utf-8", newline="\n") as handle:
+            for item in selected:
+                handle.write(item["text"] + "\n")
+
+    _write_records(output_path, records)
+    split_report = {}
+    for split_name in ("train", "validation", "test"):
+        selected = [item for item in records if assignments[item["group_id"]] == split_name]
+        split_path = output_path.with_name(
+            f"{output_path.stem}-{split_name}{output_path.suffix or '.txt'}"
+        )
+        _write_records(split_path, selected)
+        group_hashes = sorted({
+            hashlib.sha256(item["group_id"].encode("utf-8")).hexdigest()
+            for item in selected
+        })
+        split_report[split_name] = {
+            "path": str(split_path),
+            "sha256": sha256_file(split_path),
+            "bytes": split_path.stat().st_size,
+            "records": len(selected),
+            "groups": group_hashes,
+        }
 
     domain_report = []
     if domain_reviews is not None:
@@ -296,7 +356,10 @@ def build_corpus(
             "path": str(output_path),
             "sha256": sha256_file(output_path),
             "bytes": output_path.stat().st_size,
+            "records": len(records),
         },
+        "split_strategy": "whole-source-or-exact-hostname-group-v1",
+        "splits": split_report,
         "sources": stats,
         "warning": (
             "Automated checks do not replace human license, privacy, or quality review. "
@@ -307,10 +370,6 @@ def build_corpus(
     report_path.write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
-    if len(records) < min_records:
-        raise ValueError(
-            f"Only {len(records)} unique records remain; minimum required is {min_records}."
-        )
     return report
 
 
@@ -402,6 +461,57 @@ def validate_training_approval(
         observed[item["source_id"]] = (item.get("path"), item.get("sha256"))
     if observed != expected:
         raise ValueError("Training blocked: corpus audit sources differ from the current approved source manifest.")
+
+    split_report = report.get("splits")
+    required_splits = {"train", "validation", "test"}
+    if not isinstance(split_report, dict) or set(split_report) != required_splits:
+        raise ValueError("Training blocked: corpus report requires train, validation and test split metadata.")
+    derived = {}
+    seen_groups: dict[str, str] = {}
+    split_record_total = 0
+    for split_name in ("train", "validation", "test"):
+        item = split_report.get(split_name)
+        if not isinstance(item, dict):
+            raise ValueError(f"Training blocked: invalid {split_name} split metadata.")
+        expected_path = corpus_path.with_name(
+            f"{corpus_path.stem}-{split_name}{corpus_path.suffix or '.txt'}"
+        ).resolve()
+        split_path = Path(str(item.get("path", ""))).resolve()
+        if split_path != expected_path or not split_path.is_file():
+            raise ValueError(f"Training blocked: {split_name} split path is missing or unexpected.")
+        if item.get("sha256") != sha256_file(split_path):
+            raise ValueError(f"Training blocked: {split_name} split SHA-256 mismatch.")
+        if item.get("bytes") != split_path.stat().st_size:
+            raise ValueError(f"Training blocked: {split_name} split size mismatch.")
+        record_count = item.get("records")
+        groups = item.get("groups")
+        if type(record_count) is not int or record_count < 1:
+            raise ValueError(f"Training blocked: {split_name} split is empty or has invalid record count.")
+        if not isinstance(groups, list) or not groups:
+            raise ValueError(f"Training blocked: {split_name} split has no provenance groups.")
+        if len(set(groups)) != len(groups) or any(
+            not isinstance(value, str) or len(value) != 64
+            or any(char not in "0123456789abcdef" for char in value)
+            for value in groups
+        ):
+            raise ValueError(f"Training blocked: {split_name} split group hashes are invalid.")
+        for group_hash in groups:
+            previous = seen_groups.get(group_hash)
+            if previous is not None:
+                raise ValueError(
+                    f"Training blocked: provenance group appears in both {previous} and {split_name}."
+                )
+            seen_groups[group_hash] = split_name
+        split_record_total += record_count
+        derived[split_name] = {
+            "path": split_path,
+            "sha256": item["sha256"],
+            "records": record_count,
+            "groups": groups,
+        }
+    if split_record_total != report.get("totals", {}).get("records_kept"):
+        raise ValueError("Training blocked: split record counts do not cover the approved corpus.")
+    return derived
 
 
 def main():
