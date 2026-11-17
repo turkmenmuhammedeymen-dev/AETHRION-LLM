@@ -20,7 +20,7 @@ MODEL_IDS = (
 SPECIALISTS = frozenset(MODEL_IDS) - {"chat"}
 
 
-class FamilyTrainingError(RuntimeError):
+class FamilyTrainingError(ValueError):
     """A model cannot enter the training queue."""
 
 
