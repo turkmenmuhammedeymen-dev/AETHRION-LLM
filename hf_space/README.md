@@ -12,9 +12,9 @@ pinned: false
 # AETHRION-LLM
 Intelligence Without Limits.
 
-The Space interface groups Chat, Code, Vision, Image, 3D, Research, Files and Audio.
-The production runtime is native-only: no third-party inference, image,
-speech, 3D, code or hosted-search APIs are called.
+The Space interface groups Chat, Code, Vision, Image, 3D, Research, Files and
+Audio. The production runtime is native-only: no third-party inference,
+image, speech, 3D, code or hosted-search APIs are called.
 
 Set AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD under Space Secrets
 to enable authenticated access to local model inference. No model API keys
@@ -30,5 +30,7 @@ Deterministic document creation and text extraction are available as software
 utilities; they are not a trained document-understanding model. Uploaded
 project code is not executed. Training is not started from the Space UI.
 
-See the [native-only model-family specification](https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/feature/native-specialist-family/docs/NATIVE_ONLY_MODEL_FAMILY.md) for the model-family plan and completion criteria. The dataset approval manifest remains fail-closed until
-source rights, privacy, and quality checks are completed.
+See the [native-only model-family specification](https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/docs/NATIVE_ONLY_MODEL_FAMILY.md)
+for model-family status and completion criteria. Dataset approval remains
+fail-closed until source rights, privacy, provenance and quality checks are
+completed.
