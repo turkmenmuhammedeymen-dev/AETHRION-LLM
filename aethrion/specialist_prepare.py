@@ -77,7 +77,7 @@ def _required_text(row: dict[str, Any], key: str, row_id: str) -> str:
 def _build_arrays(model_id: str, rows: list[dict[str, Any]], tokenizer: ByteBPETokenizer,
                   max_length: int, reason_classes: int, seed: int) -> dict[str, np.ndarray]:
     ids = [str(row["id"]) for row in rows]
-    splits = [_split(item, seed) for item in ids]
+    splits = [_split(str(row.get("group_id", item)), seed) for item, row in zip(ids, rows)]
     arrays: dict[str, np.ndarray] = {
         "sample_id": np.asarray(ids, dtype=np.str_),
         "split": np.asarray(splits, dtype=np.str_),
