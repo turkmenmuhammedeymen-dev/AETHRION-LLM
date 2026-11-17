@@ -48,7 +48,9 @@ class NativeModelRegistryTests(unittest.TestCase):
                 "tokenizer.json": b'{"format":"aethrion-test"}',
                 "training.json": json.dumps({
                     "model_id": "chat", "dataset_sha256": "a" * 64,
-                    "release_status": "NOT_RELEASED"
+                    "status": "instruction_tuning_complete_not_released",
+                    "release_status": "NOT_RELEASED",
+                    "checkpoint_sha256": hashlib.sha256(b"first-party-checkpoint").hexdigest()
                 }).encode(),
                 "review.txt": b"Human release review evidence for a synthetic unit test fixture.",
                 "evaluation.json": json.dumps({
@@ -64,7 +66,8 @@ class NativeModelRegistryTests(unittest.TestCase):
                         b"Human release review evidence for a synthetic unit test fixture."
                     ).hexdigest(),
                     "benchmarks": {
-                        "held_out_lm_loss": {"metric": "loss", "value": 1.0, "passed": True}
+                        "held_out_lm_loss": {"metric": "loss", "value": 1.0, "passed": True},
+                        "instruction_following": {"metric": "pass_rate", "value": 0.9, "passed": True}
                     }
                 }).encode(),
                 "MODEL_CARD.md": (
