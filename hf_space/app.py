@@ -1,14 +1,10 @@
 import os, base64, tempfile
-import httpx
 import spaces
 from pathlib import Path
 import gradio as gr
 from aethrion.api import build_router
-from aethrion.audio import OpenAISpeechProvider
 from aethrion.document_tools import create_document, extract_document_text, replace_document_text
-from aethrion.file_agent import FileAnalysisAgent
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
-from aethrion.workspace_agent import ProjectWorkspaceAgent
 
 def _resolve_space_auth(environ=None):
     env = os.environ if environ is None else environ
@@ -111,42 +107,14 @@ def three_d_image(path,texture_prompt):
     except Exception as e:return "Image-to-3D failed: "+type(e).__name__,""
 
 def three_d_poll(task_ref):
-    provider=providers.get("3d")
-    if not provider:return (_auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-3D is not trained or installed. No external 3D model is used."),None
-    if not task_ref or ":" not in task_ref:return "Enter a task reference.",None
-    kind,task_id=task_ref.split(":",1)
-    try:
-        result=provider.get_image_task(task_id) if kind=="image" else provider.get_task(task_id)
-        state=result.get("status","UNKNOWN")
-        detail="**Status:** "+str(state)
-        if result.get("progress") is not None:detail+=" · **Progress:** "+str(result["progress"])+"%"
-        if state=="SUCCEEDED":
-            url=(result.get("model_urls") or {}).get("glb")
-            if url:
-                response=httpx.get(url,timeout=90,follow_redirects=True)
-                response.raise_for_status()
-                if len(response.content)>100*1024*1024:return detail+"\nGLB exceeds 100 MiB.",None
-                path=Path(tempfile.gettempdir())/("aethrion-3d-"+os.urandom(5).hex()+".glb")
-                path.write_bytes(response.content)
-                return detail+"\nGLB model is ready.",str(path)
-        if state in {"FAILED","CANCELED"}:detail+="\n"+str(result.get("task_error") or "Provider task failed.")
-        else:detail+="\nTask is still processing; poll again later."
-        return detail,None
-    except Exception as e:return "Task check failed: "+type(e).__name__,None
+    return "AETHRION-3D is not trained or installed. No external 3D model or API is used.", None
 
 def research(query):
     try:return str(dispatch(Capability.RESEARCH,query[:2000],{"max_results":6}))
     except CapabilityUnavailable:return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-RESEARCH is not trained or its local index is not built. No external search API is used."
 
 def analyse(file_path,question):
-    provider=providers.get("file_analysis")
-    if not provider:return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-DOC is not trained or installed. Local text extraction remains available."
-    if not file_path:return "Upload a file."
-    p=Path(file_path)
-    if p.stat().st_size>8*1024*1024:return "Maximum upload size: 8 MiB."
-    data=base64.b64encode(p.read_bytes()).decode("ascii")
-    r=FileAnalysisAgent(provider).analyze(p.name,data,question or "Summarize this file.")
-    return r.get("text",str(r)) if isinstance(r,dict) else str(r)
+    return "AETHRION-DOC is not trained or installed. Local deterministic text extraction remains available."
 
 def voice(path):
     if audio is None:return (_auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-ASR and AETHRION-TTS are not trained or installed. No external speech API is used."),None
@@ -177,12 +145,8 @@ def edit_doc(path,find_text,replacement,fmt):
     return "Edited copy created. Original file was not modified.",str(p)
 
 def edit_project(path,task):
-    provider=providers.get("file_analysis")
-    if not provider:return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-CODE is not trained or installed. Project editing is unavailable until its native model passes tests.",None
-    if not path:return "Upload a project ZIP.",None
-    raw,summary=ProjectWorkspaceAgent(provider).propose(Path(path).read_bytes(),task)
-    p=Path(tempfile.gettempdir())/("aethrion-review-"+os.urandom(5).hex()+".zip");p.write_bytes(raw)
-    return summary+"\n\nReview the ZIP; uploaded code was not executed.",str(p)
+    return "AETHRION-CODE is not trained or installed. No external code model is used.", None
+
 
 with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.themes.Soft()) as demo:
     gr.Markdown("# AETHRION-LLM\n### Intelligence Without Limits")
