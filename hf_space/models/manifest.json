@@ -155,6 +155,16 @@
       "tokenizer": "artifacts/models/safety/tokenizer.json",
       "status": "not_trained",
       "processor": "artifacts/models/safety/processor.json"
+    },
+    "vocoder": {
+      "architecture": "aethrion.tts_model:AETHRIONVocoder",
+      "model_config": {
+        "mel_bins": 80,
+        "channels": 128,
+        "hop_length": 256
+      },
+      "checkpoint": "artifacts/models/vocoder/checkpoint_last.pt",
+      "status": "not_trained"
     }
   }
 }
