@@ -174,7 +174,7 @@ def main() -> None:
     if args.output:
         target = Path(args.output)
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(rendered + "\\n", encoding="utf-8")
+        target.write_text(rendered + "\n", encoding="utf-8")
     print(rendered)
 
 
