@@ -72,6 +72,7 @@ def chat(message, history):
         return _gpu_local_chat(prompt)
     except CapabilityUnavailable:
         return "AETHRION's own trained checkpoint/tokenizer is not available. No third-party model is silently substituted."
+@spaces.GPU(duration=60)
 def code(prompt):
     try:
         r=dispatch(Capability.CODE,prompt[:10000],{"max_tokens":4096,"temperature":0.1})
@@ -79,6 +80,7 @@ def code(prompt):
     except CapabilityUnavailable:
         return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-CODE is not trained or installed. No external code model is used."
 
+@spaces.GPU(duration=60)
 def image(prompt):
     if not SPACE_AUTH_ENABLED:
         raise gr.Error(_auth_required_message())
@@ -93,6 +95,7 @@ def image(prompt):
     except Exception as exc:
         raise gr.Error("Native image generation failed: " + type(exc).__name__) from exc
 
+@spaces.GPU(duration=60)
 def three_d_text(prompt):
     if not SPACE_AUTH_ENABLED:
         return _auth_required_message(), ""
@@ -115,6 +118,7 @@ def three_d_poll(asset_path):
         return "Local OBJ point cloud is ready. It contains vertices only; no faces or textures.", asset_path
     return "No local OBJ asset found. Generate a text-conditioned point cloud first.", None
 
+@spaces.GPU(duration=60)
 def research(query):
     if not SPACE_AUTH_ENABLED:
         return _auth_required_message()
@@ -138,6 +142,7 @@ def research(query):
     except Exception as exc:
         return "Local research failed: " + type(exc).__name__
 
+@spaces.GPU(duration=60)
 def analyse(file_path,question):
     if not SPACE_AUTH_ENABLED:
         return _auth_required_message()
@@ -159,6 +164,7 @@ def analyse(file_path,question):
     except Exception as exc:
         return "Native document analysis failed: " + type(exc).__name__
 
+@spaces.GPU(duration=60)
 def voice(path):
     if not SPACE_AUTH_ENABLED:
         return _auth_required_message(), None
@@ -195,6 +201,7 @@ def edit_doc(path,find_text,replacement,fmt):
     p.write_bytes(raw)
     return "Edited copy created. Original file was not modified.",str(p)
 
+@spaces.GPU(duration=60)
 def edit_project(path,task):
     if not SPACE_AUTH_ENABLED:
         return _auth_required_message(), None
@@ -247,11 +254,11 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             gr.Button("Generate image").click(image,inputs=p,outputs=o)
         with gr.Tab("3D Studio"):
             p=gr.Textbox(lines=3,label="Text-to-3D prompt");task_msg=gr.Markdown()
-            task_ref=gr.Textbox(label="3D task reference")
+            task_ref=gr.Textbox(label="Local OBJ file path")
             gr.Button("Create from text").click(three_d_text,inputs=p,outputs=[task_msg,task_ref])
             image_ref=gr.Image(type="filepath",sources=["upload"],label="Image-to-3D reference")
             texture=gr.Textbox(label="Optional texture prompt")
-            gr.Button("Create from image").click(three_d_image,inputs=[image_ref,texture],outputs=[task_msg,task_ref])
+            gr.Button("Image-to-3D (not yet implemented)").click(three_d_image,inputs=[image_ref,texture],outputs=[task_msg,task_ref])
             task_status=gr.Markdown();model_file=gr.File(label="Generated OBJ point cloud (vertices only)")
             gr.Button("Check / download OBJ point cloud").click(three_d_poll,inputs=task_ref,outputs=[task_status,model_file])
         with gr.Tab("Research"):
