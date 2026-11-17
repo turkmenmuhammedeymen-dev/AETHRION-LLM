@@ -1,7 +1,7 @@
 name: tests
 on:
   push:
-    branches: ["main", "hardening/**", "feature/**"]
+    branches: ["main", "hardening/**", "feature/**", "feat/**"]
   pull_request:
     branches: ["main"]
 permissions:
@@ -28,7 +28,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install "numpy>=1.24"
           python -m pip install "torch>=2.2" --index-url https://download.pytorch.org/whl/cpu
-          python -m pip install -e ".[api]"
+          python -m pip install -e ".[api,visual]"
       - name: Space application syntax checks
         run: python -m compileall -q aethrion hf_space/app.py hf_space/aethrion
       - name: Unit tests

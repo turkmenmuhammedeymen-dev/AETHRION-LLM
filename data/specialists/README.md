@@ -46,6 +46,117 @@ trained Vocoder learns mel-to-waveform conversion; both datasets require
 documented speaker consent. TTS cannot be released unless its companion
 AETHRION-VOCODER also passes its own evaluation and release gates.
 
+## Raw JSONL preparation (CODE, RESEARCH, DOCUMENT, SAFE)
+
+The first-party preparation CLI converts owner-supplied, reviewed JSONL records
+into the NPZ contract above, learns a byte-BPE tokenizer from only those records,
+copies the original source file for provenance, and writes SHA-256 hashes.
+
+Supported record shapes:
+
+- `code`: `{"id":"...","text":"..."}`
+- `research`: `{"id":"...","query":"...","passage":"..."}`
+- `document`: `{"id":"...","text":"...","boxes":[[x0,y0,x1,y1],...],"layout_ids":[...],"tag_labels":[...]}`; layout arrays must align with byte-BPE token positions.
+- `safety`: `{"id":"...","text":"...","decision":"ALLOW|REVIEW|BLOCK","reasons":[integer,...]}`; decisions are human-supplied, never inferred by the tool.
+
+Example (CODE):
+
+```bash
+python -m aethrion.specialist_prepare \
+  --input data/incoming/code-reviewed.jsonl \
+  --model code \
+  --output-root data/specialists \
+  --license "record the exact source license" \
+  --permitted-use "record the exact permitted training use" \
+  --evidence-uri "https://source.example/license-or-terms" \\\n  --source-uri "https://source.example/dataset-release"
+```
+
+The command always writes `training_allowed=false`, `owner_approval=false`,
+`privacy_reviewed=false`, and source-level training/privacy approvals false.
+It is a preparation tool, not a license verifier or approval workflow. Do not
+change these flags until the actual source terms, creator rights, privacy,
+attribution, and any required consent have been reviewed and documented.
+Use `group_id` for records that must remain in the same split; the split is
+deterministic and group-aware. SAFE requires at least 25 manually reviewed
+examples of each decision in every split.
+
+BASE continues to use the separate audited corpus/tokenizer pipeline in `aethrion.prepare_data` and `aethrion.train`. This first JSONL adapter does not yet preprocess raw images, WAV audio, point
+clouds, or OCR itself. Those modalities require their own source-specific
+decoders and provenance checks; do not relabel text records as multimodal data.
+
+## Raw WAV preparation (ASR, TTS, Vocoder)
+
+The audio adapter `aethrion.specialist_prepare_audio` reads local uncompressed
+PCM WAV files, resamples to 16 kHz, extracts native log-mel features, creates
+the required padded arrays, and copies each source WAV into the provenance
+folder with SHA-256. The JSONL file contains one record per clip:
+
+- ASR: `{"id":"clip-001","wav_path":"audio/clip-001.wav","transcript":"..."}`
+- TTS: the same fields plus `"durations":[...]`, one positive frame count per
+  byte-BPE token. Durations must come from a documented, reviewed alignment
+  process and must sum exactly to that clip's mel-frame count.
+- Vocoder: `{"id":"clip-001","wav_path":"audio/clip-001.wav"}`
+
+Example:
+
+```bash
+python -m aethrion.specialist_prepare_audio \
+  --input data/incoming/speech-reviewed.jsonl \
+  --model asr \
+  --output-root data/specialists \
+  --license "record the exact source license" \
+  --permitted-use "record the exact permitted training use" \
+  --evidence-uri "https://source.example/license-or-terms" \
+  --source-uri "https://source.example/dataset-release"
+```
+
+For TTS, include the per-token `durations` arrays. For Vocoder, the default
+hop length matches the current model config (256 samples); ASR/TTS default to
+160. The tool never infers speaker consent: all audio source records keep
+`speaker_consent_verified=false`, and the dataset manifest keeps
+`speaker_consent_reviewed=false`, `privacy_reviewed=false`,
+`training_allowed=false` and `owner_approval=false`. A responsible adult
+must review the actual license and speaker-consent scope before any approval
+is changed. The tool does not download datasets or accept terms.
+
+## Raw image and point-cloud preparation (VISION, IMAGE, 3D)
+
+Install the optional image decoder once:
+
+```bash
+python -m pip install -e ".[visual]"
+```
+
+VISION and IMAGE JSONL records use `id`, `image_path` (relative to the JSONL
+folder), and `caption`. Images are decoded as RGB, bounded, resized to the
+exact native model input size (VISION 224px; IMAGE 64px), and stored as uint8
+NCHW arrays. The trainer performs the [-1,1] conversion.
+
+3D records use `id`, `point_path` (a local NPY file), and `text`. Point
+clouds must already be finite and normalized to [-1,1]; the tool deterministically
+samples or repeats points to the configured count (512 by default). This
+trains point-cloud generation only, not watertight mesh generation.
+
+Example:
+
+```bash
+python -m aethrion.specialist_prepare_visual \
+  --input data/incoming/vision-reviewed.jsonl \
+  --model vision \
+  --output-root data/specialists \
+  --license "record exact image rights" \
+  --permitted-use "record exact permitted use" \
+  --evidence-uri "https://source.example/terms" \
+  --source-uri "https://source.example/dataset-release"
+```
+
+Per-asset records may override `source_uri`, `license`, `permitted_use`
+and `evidence_uri`. This is important for collections such as 3D asset
+repositories where each object can carry a different license. The tool still
+sets all approval flags false. For DOCUMENT, this tool does not perform OCR:
+supply reviewed OCR text, token-aligned normalized boxes and label IDs to the
+text/document JSONL adapter. No OCR quality or image rights are inferred.
+
 ## Training
 
 Create a per-model manifest by copying `manifest.template.json`, filling the

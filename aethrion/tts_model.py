@@ -86,14 +86,20 @@ class AETHRIONTTS(nn.Module):
         padded = [F.pad(row, (0, max_length - row.numel()), value=0) for row in rows]
         return torch.stack(padded), lengths
 
-    def duration_loss(self, token_ids, target_durations):
+    def duration_loss(self, token_ids, target_durations, token_mask=None):
         if target_durations.shape != token_ids.shape or target_durations.dtype != torch.long:
             raise ValueError("target_durations must be a long tensor matching token_ids")
-        if target_durations.min().item() < 1:
-            raise ValueError("target_durations must be positive")
+        if token_mask is None:
+            token_mask = torch.ones_like(target_durations, dtype=torch.bool)
+        if token_mask.shape != token_ids.shape or not token_mask.bool().any():
+            raise ValueError("token_mask must identify at least one real token per batch")
+        if target_durations[token_mask.bool()].min().item() < 1 or torch.any(target_durations[~token_mask.bool()] != 0):
+            raise ValueError("real-token durations must be positive and padded durations must be zero")
         encoded = self.encoder(self.embedding(token_ids))
         predicted_log = self.duration_predictor(encoded).squeeze(-1)
-        return F.smooth_l1_loss(predicted_log, torch.log1p(target_durations.float()))
+        losses = F.smooth_l1_loss(predicted_log, torch.log1p(target_durations.float()), reduction="none")
+        mask = token_mask.to(losses.dtype)
+        return (losses * mask).sum() / mask.sum().clamp_min(1)
 
     def acoustic_loss(self, token_ids, frame_to_token, target_mels, frame_mask=None):
         predicted = self(token_ids, frame_to_token)
