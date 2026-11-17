@@ -1,11 +1,14 @@
 """AETHRION API with explicit local and specialist capability routing."""
 from __future__ import annotations
 import os
+import base64
+import tempfile
 from pathlib import Path
 from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
 from aethrion.native_registry import NativeModelRegistry,NativeModelUnavailable,NativeModelError
 from aethrion.native_runtime import NativeModelRuntime
+from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError
 from aethrion.document_tools import create_document,extract_document_text,DocumentError
 from aethrion.security import require_api_token
 from fastapi import UploadFile,File,Form,Response,Depends
@@ -62,8 +65,6 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
 
 app=FastAPI(title="AETHRION-LLM API",version="0.4.0")
 router,providers=build_router()
-audio_provider=None  # Native-only policy: AETHRION-ASR/TTS must be trained locally.
-code_provider=providers.get("file_analysis")
 
 @app.get("/health")
 def health(): return {"status":"ok","service":"AETHRION-LLM","version":"0.3.0"}
@@ -89,19 +90,99 @@ def dispatch(request:DispatchRequest):
 
 @app.post("/files/analyze", dependencies=[Depends(require_api_token)])
 def analyze_file(request:FileRequest):
-    raise HTTPException(status_code=503,detail="AETHRION-DOC is not trained or installed. No external model fallback is permitted.")
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.DOCUMENT.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-DOC is not trained and released.")
+    try:
+        raw=base64.b64decode(request.content_base64,validate=True)
+    except (ValueError,TypeError) as exc:
+        raise HTTPException(status_code=400,detail="Invalid base64 document content.") from exc
+    if not raw or len(raw)>8*1024*1024:
+        raise HTTPException(status_code=413,detail="Document must be between 1 byte and 8 MiB.")
+    with tempfile.NamedTemporaryFile(suffix=Path(request.filename).suffix.lower()) as handle:
+        handle.write(raw); handle.flush()
+        try:
+            result=runtime.analyze_document(handle.name)
+        except Exception as exc:
+            raise HTTPException(status_code=422,detail=f"Native document analysis failed: {type(exc).__name__}") from exc
+    result["question"]=request.question
+    return {"capability":"document","result":result}
 
 @app.get("/3d/tasks/{task_id}", dependencies=[Depends(require_api_token)])
 def get_3d_task(task_id:str):
-    raise HTTPException(status_code=503,detail="AETHRION-3D is not trained or installed. No external model fallback is permitted.")
+    raise HTTPException(status_code=410,detail="Native 3D generation is synchronous. Use POST /3d/generate; no hosted task service is used.")
+
+@app.post("/3d/generate", dependencies=[Depends(require_api_token)])
+def generate_3d(request:dict[str,Any]):
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.THREE_D.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-3D is not trained and released.")
+    prompt=request.get("prompt")
+    if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>4000:
+        raise HTTPException(status_code=400,detail="prompt must contain 1–4000 characters.")
+    path=None
+    try:
+        path=runtime.generate_point_cloud(prompt,inference_steps=min(int(request.get("inference_steps",50)),100))
+        return Response(content=path.read_bytes(),media_type="text/plain",
+            headers={"Content-Disposition":'attachment; filename="aethrion-point-cloud.obj"',
+                     "X-Aethrion-3D-Format":"vertex-only-obj"})
+    except Exception as exc:
+        raise HTTPException(status_code=422,detail=f"Native point-cloud generation failed: {type(exc).__name__}") from exc
+    finally:
+        if path is not None: path.unlink(missing_ok=True)
+
+@app.post("/vision/compare", dependencies=[Depends(require_api_token)])
+async def vision_compare(file:UploadFile=File(...),text:str=Form(...)):
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.VISION.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-VISION is not trained and released.")
+    raw=await file.read(20*1024*1024+1)
+    if not raw or len(raw)>20*1024*1024:
+        raise HTTPException(status_code=413,detail="Image must be between 1 byte and 20 MiB.")
+    suffix=Path(file.filename or "image.png").suffix.lower()
+    if suffix not in {".png",".jpg",".jpeg",".webp"}:
+        raise HTTPException(status_code=400,detail="Supported image formats are PNG, JPG and WebP.")
+    with tempfile.NamedTemporaryFile(suffix=suffix) as handle:
+        handle.write(raw); handle.flush()
+        try: score=runtime.image_text_similarity(handle.name,text)
+        except Exception as exc: raise HTTPException(status_code=422,detail=f"Native image comparison failed: {type(exc).__name__}") from exc
+    return {"capability":"vision","similarity":score,
+            "note":"Embedding similarity only; not a natural-language image description."}
 
 @app.post("/audio/transcriptions", dependencies=[Depends(require_api_token)])
-async def audio_transcriptions(file: UploadFile = File(...), language: str | None = Form(default=None)):
-    raise HTTPException(status_code=503, detail="AETHRION-ASR is not trained or installed. No external speech API is used.")
+async def audio_transcriptions(file:UploadFile=File(...)):
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.ASR.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-ASR is not trained and released.")
+    raw=await file.read(25*1024*1024+1)
+    if not raw or len(raw)>25*1024*1024:
+        raise HTTPException(status_code=413,detail="Audio must be between 1 byte and 25 MiB.")
+    suffix=Path(file.filename or "audio.wav").suffix.lower()
+    if suffix!=".wav":
+        raise HTTPException(status_code=400,detail="Native ASR currently accepts PCM WAV only.")
+    with tempfile.NamedTemporaryFile(suffix=".wav") as handle:
+        handle.write(raw); handle.flush()
+        try: transcript=runtime.transcribe_wav(handle.name)
+        except Exception as exc: raise HTTPException(status_code=422,detail=f"Native ASR failed: {type(exc).__name__}") from exc
+    return {"capability":"asr","text":transcript}
 
 @app.post("/audio/speech", dependencies=[Depends(require_api_token)])
-def audio_speech(request: dict[str,Any]):
-    raise HTTPException(status_code=503, detail="AETHRION-TTS is not trained or installed. No external speech API is used.")
+def audio_speech(request:dict[str,Any]):
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.TTS.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-TTS and AETHRION-VOCODER are not trained and released.")
+    text=request.get("text")
+    if not isinstance(text,str) or not text.strip() or len(text)>4096:
+        raise HTTPException(status_code=400,detail="text must contain 1–4096 characters.")
+    path=None
+    try:
+        path=runtime.synthesize_wav(text)
+        return Response(content=path.read_bytes(),media_type="audio/wav",
+                        headers={"Cache-Control":"no-store"})
+    except Exception as exc:
+        raise HTTPException(status_code=422,detail=f"Native TTS failed: {type(exc).__name__}") from exc
+    finally:
+        if path is not None: path.unlink(missing_ok=True)
 
 @app.post("/documents/extract", dependencies=[Depends(require_api_token)])
 async def documents_extract(file: UploadFile = File(...)):
@@ -123,5 +204,21 @@ def documents_create(request: dict[str,Any]):
     except DocumentError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
 
 @app.post("/workspace/propose", dependencies=[Depends(require_api_token)])
-async def workspace_propose(file: UploadFile = File(...), task: str = Form(...)):
-    raise HTTPException(status_code=503,detail="AETHRION-CODE is not trained or installed. No external code model is used.")
+async def workspace_propose(file:UploadFile=File(...),task:str=Form(...)):
+    runtime=providers.get("runtime")
+    if runtime is None or Capability.CODE.value not in router.available():
+        raise HTTPException(status_code=503,detail="AETHRION-CODE is not trained and released.")
+    raw=await file.read(8*1024*1024+1)
+    if not raw or len(raw)>8*1024*1024:
+        raise HTTPException(status_code=413,detail="Project ZIP must be between 1 byte and 8 MiB.")
+    def local_code_provider(request):
+        return runtime.generate_text("code",request.prompt,max_new_tokens=1024,temperature=0.1)
+    try:
+        output,summary=ProjectWorkspaceAgent(local_code_provider).propose(raw,task)
+        return Response(content=output,media_type="application/zip",
+            headers={"Content-Disposition":'attachment; filename="aethrion-review.zip"',
+                     "X-Aethrion-Summary":summary[:500],"Cache-Control":"no-store"})
+    except WorkspaceError as exc:
+        raise HTTPException(status_code=400,detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=422,detail=f"Native project review failed: {type(exc).__name__}") from exc
