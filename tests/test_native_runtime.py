@@ -58,8 +58,8 @@ class NativeModelRuntimeTests(unittest.TestCase):
             "approval_evidence_path": "models/release_review.txt",
             "approval_evidence_sha256": digest(review),
             "benchmarks": {
-                "unit_test_pass_rate": {"metric": "pass_rate", "value": 1.0, "threshold": 0.95, "passed": True, "evidence": "Synthetic test fixture"},
-                "security_regression": {"metric": "pass_rate", "value": 1.0, "threshold": 1.0, "passed": True, "evidence": "Synthetic test fixture"}
+                "unit_test_pass_rate": {"metric": "pass_rate", "direction": "max", "value": 1.0, "threshold": 0.95, "passed": True, "evidence": "Synthetic test fixture"},
+                "security_regression": {"metric": "pass_rate", "direction": "max", "value": 1.0, "threshold": 1.0, "passed": True, "evidence": "Synthetic test fixture"}
             }
         }), encoding="utf-8")
         card = folder / "MODEL_CARD.md"
