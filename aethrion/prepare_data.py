@@ -246,7 +246,7 @@ def build_corpus(
                 review = domain_reviews.get(domain)
                 if review is None or not review["approved"]:
                     blocked_domains.add(domain)
-            elif "group_id" in metadata:
+            if "group_id" in metadata:
                 explicit_group = metadata.get("group_id")
                 if not isinstance(explicit_group, str) or not explicit_group.strip():
                     raise ValueError(
@@ -503,7 +503,7 @@ def validate_training_approval(
                 if review is None or not review["approved"]:
                     raise ValueError(f"Training blocked: hostname is not approved: {domain}")
                 group_id = f"host:{domain}"
-            elif "group_id" in metadata:
+            if "group_id" in metadata:
                 explicit_group = metadata.get("group_id")
                 if not isinstance(explicit_group, str) or not explicit_group.strip():
                     raise ValueError(
