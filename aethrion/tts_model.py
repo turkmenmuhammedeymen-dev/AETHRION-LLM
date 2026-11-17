@@ -81,10 +81,10 @@ class AETHRIONTTS(nn.Module):
             rows.append(torch.repeat_interleave(
                 torch.arange(row.numel(), device=row.device), row
             ))
-        lengths = {int(row.numel()) for row in rows}
-        if len(lengths) != 1:
-            raise ValueError("Predicted speech durations must be padded to equal frame lengths per batch.")
-        return torch.stack(rows)
+        lengths = torch.tensor([row.numel() for row in rows], dtype=torch.long, device=durations.device)
+        max_length = int(lengths.max().item())
+        padded = [F.pad(row, (0, max_length - row.numel()), value=0) for row in rows]
+        return torch.stack(padded), lengths
 
     def duration_loss(self, token_ids, target_durations):
         if target_durations.shape != token_ids.shape or target_durations.dtype != torch.long:
