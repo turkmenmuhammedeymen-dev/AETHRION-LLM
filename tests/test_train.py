@@ -16,6 +16,37 @@ class TrainingUtilityTests(unittest.TestCase):
     def test_rejects_too_short_data(self):
         with self.assertRaises(ValueError):
             get_batch(torch.arange(9), 2, 8, torch.device("cpu"))
+    def test_training_blocks_when_dataset_manifest_is_false(self):
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            work = Path(directory)
+            raw_dir = work / "raw"
+            raw_dir.mkdir()
+            (raw_dir / "fixture.txt").write_text("Synthetic test-only source text. " * 100, encoding="utf-8")
+            dataset_manifest = work / "dataset_manifest.json"
+            dataset_manifest.write_text(json.dumps({
+                "project": "AETHRION-LLM-test",
+                "training_allowed": False
+            }), encoding="utf-8")
+            source_manifest = work / "sources.json"
+            source_manifest.write_text(json.dumps({"sources": [{
+                "source_id": "synthetic-test-fixture",
+                "path": "fixture.txt",
+                "license": "Synthetic test fixture",
+                "permitted_uses": "unit tests only",
+                "allow_training": True
+            }]}), encoding="utf-8")
+            command = [
+                sys.executable, "-m", "aethrion.train",
+                "--config", str(root / "configs/small.json"),
+                "--dataset-manifest", str(dataset_manifest),
+                "--source-manifest", str(source_manifest),
+                "--source-root", str(raw_dir),
+            ]
+            result = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=120)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Training blocked", result.stdout + result.stderr)
+
     def test_training_checkpoint_and_resume_end_to_end(self):
         root = Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as directory:
@@ -25,6 +56,25 @@ class TrainingUtilityTests(unittest.TestCase):
             config_path = work / "config.json"
             output = work / "artifacts"
             data_path.write_text(("Türkçe AETHRION dil modeli eğitim denemesi. " * 120), encoding="utf-8")
+            raw_dir = work / "raw"
+            raw_dir.mkdir()
+            (raw_dir / "approved_fixture.txt").write_text(
+                "Synthetic unit-test fixture; not a real training corpus. " * 120,
+                encoding="utf-8",
+            )
+            dataset_manifest = work / "dataset_manifest.json"
+            dataset_manifest.write_text(json.dumps({
+                "project": "AETHRION-LLM-test",
+                "training_allowed": True
+            }), encoding="utf-8")
+            source_manifest = work / "sources.json"
+            source_manifest.write_text(json.dumps({"sources": [{
+                "source_id": "synthetic-test-fixture",
+                "path": "approved_fixture.txt",
+                "license": "Synthetic test fixture",
+                "permitted_uses": "unit tests only",
+                "allow_training": True
+            }]}), encoding="utf-8")
             tokenizer = ByteBPETokenizer()
             tokenizer.train(data_path.read_text(encoding="utf-8"), vocab_size=256)
             tokenizer.save(tokenizer_path)
@@ -39,7 +89,13 @@ class TrainingUtilityTests(unittest.TestCase):
                 "train_split": 0.8, "grad_clip": 1.0, "amp": False
             }
             config_path.write_text(json.dumps(config), encoding="utf-8")
-            command = [sys.executable, "-m", "aethrion.train", "--config", str(config_path)]
+            command = [
+                sys.executable, "-m", "aethrion.train",
+                "--config", str(config_path),
+                "--dataset-manifest", str(dataset_manifest),
+                "--source-manifest", str(source_manifest),
+                "--source-root", str(raw_dir),
+            ]
             first = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=120)
             self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
             checkpoint_path = output / "checkpoint_last.pt"
