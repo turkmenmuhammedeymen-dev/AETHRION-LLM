@@ -97,7 +97,7 @@ class NativeModelRegistry:
                 normalized = value
                 if (
                     normalized.startswith("/")
-                    or "\\\\" in normalized
+                    or chr(92) in normalized
                     or "://" in normalized
                     or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", normalized)
                     or any(part == ".." for part in normalized.split("/"))
