@@ -3,6 +3,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
+import numpy as np
+
 from aethrion.specialist_prepare import PreparationError, _split, prepare_text_dataset
 from aethrion.specialist_data import validate_specialist_dataset, SpecialistDataError
 
