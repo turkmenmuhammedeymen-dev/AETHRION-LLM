@@ -94,9 +94,10 @@ class NativeModelRegistry:
             if value is not None:
                 if not isinstance(value, str) or not value.strip():
                     raise NativeModelError(f"Invalid {key} path for {capability}.")
-                normalized = value.replace("\\\\", "/")
+                normalized = value
                 if (
                     normalized.startswith("/")
+                    or chr(92) in normalized
                     or "://" in normalized
                     or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", normalized)
                     or any(part == ".." for part in normalized.split("/"))
