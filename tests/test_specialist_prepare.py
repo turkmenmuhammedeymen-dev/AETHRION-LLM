@@ -15,7 +15,7 @@ class SpecialistPreparationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             source = root / "code.jsonl"
-            rows = [{"id": f"code-{i}", "text": f"def function_{i}(): return {i}"} for i in range(80)]
+            rows = [{"id": f"code-{i}", "group_id": f"group-{i}", "text": f"def function_{i}(): return {i}"} for i in range(80)]
             self._write_jsonl(source, rows)
             result = prepare_text_dataset(
                 source, model_id="code", output_root=root / "prepared",
@@ -37,7 +37,7 @@ class SpecialistPreparationTests(unittest.TestCase):
             root = Path(directory)
             source = root / "document.jsonl"
             self._write_jsonl(source, [
-                {"id": f"doc-{i}", "text": "AB", "boxes": [[0, 0, 1, 1]],
+                {"id": f"doc-{i}", "group_id": f"group-{i}", "text": "AB", "boxes": [[0, 0, 1, 1]],
                  "layout_ids": [0, 0], "tag_labels": [0, 0]}
                 for i in range(80)
             ])
@@ -59,7 +59,7 @@ class SpecialistPreparationTests(unittest.TestCase):
                 for _ in range(25):
                     while _split(f"safe-{index}", 1337) != split:
                         index += 1
-                    rows.append({"id": f"safe-{index}", "text": "Benign policy example.",
+                    rows.append({"id": f"safe-{index}", "group_id": f"group-{index}", "text": "Benign policy example.",
                                  "decision": decision, "reasons": [0]})
                     index += 1
             # Add the other two labels to every split so all three decisions are balanced.
@@ -68,7 +68,7 @@ class SpecialistPreparationTests(unittest.TestCase):
                     for _ in range(25):
                         while _split(f"safe-{index}", 1337) != split:
                             index += 1
-                        rows.append({"id": f"safe-{index}", "text": "Benign policy example.",
+                        rows.append({"id": f"safe-{index}", "group_id": f"group-{index}", "text": "Benign policy example.",
                                      "decision": decision, "reasons": [0]})
                         index += 1
             self._write_jsonl(source, rows)
