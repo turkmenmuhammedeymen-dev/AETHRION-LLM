@@ -85,5 +85,38 @@ class SpecialistTrainingTests(unittest.TestCase):
             self.assertTrue((root / "artifacts" / "training_report.json").is_file())
 
 
+    def test_training_resumes_and_preserves_verified_previous_checkpoint(self):
+        from aethrion.specialist_train import _load_checkpoint
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            config["max_steps"] = 2
+            report = train_specialist(config, manifest)
+            checkpoint = root / "artifacts" / "checkpoint_last.pt"
+            previous = Path(str(checkpoint) + ".previous")
+            self.assertTrue(previous.is_file())
+            state = _load_checkpoint(checkpoint, torch.device("cpu"))
+            self.assertEqual(state["step"], 1)
+            checkpoint.write_bytes(b"corrupt newest generation")
+            recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
+            self.assertEqual(recovered["step"], 0)
+            self.assertEqual(recovered["model_id"], "code")
+            self.assertEqual(report["release_status"], "NOT_RELEASED")
+
+    def test_training_resume_continues_after_verified_checkpoint(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            first = train_specialist(config, manifest)
+            checkpoint = root / "artifacts" / "checkpoint_last.pt"
+            config["max_steps"] = 2
+            second = train_specialist(config, manifest, resume=checkpoint)
+            self.assertEqual(second["steps"], 2)
+            self.assertEqual(second["dataset_sha256"], first["dataset_sha256"])
+            self.assertEqual(second["release_status"], "NOT_RELEASED")
+
+
 if __name__ == "__main__":
     unittest.main()
