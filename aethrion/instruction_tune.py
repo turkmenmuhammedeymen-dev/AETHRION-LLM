@@ -191,6 +191,7 @@ def tune_instructions(
             checkpoint_hash = save_checkpoint(payload, checkpoint_path)
             write_json_atomic({
                 "status": "instruction_tuning_complete_not_released",
+                "model_id": "chat",
                 "release_status": "NOT_RELEASED",
                 "checkpoint_sha256": checkpoint_hash,
                 "dataset_sha256": approval["dataset_sha256"],
@@ -202,6 +203,7 @@ def tune_instructions(
     test_loss = _evaluate(model, arrays, test_indices, device, config["batch_size"])
     report = {
         "status": "instruction_tuning_complete_not_released",
+        "model_id": "chat",
         "release_status": "NOT_RELEASED",
         "steps": config["max_steps"],
         "dataset_sha256": approval["dataset_sha256"],
