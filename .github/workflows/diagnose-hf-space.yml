@@ -47,7 +47,7 @@ jobs:
 
           if stage in {"RUNTIME_ERROR", "PAUSED"}:
               print("SPACE_RESTART=REQUESTED", flush=True)
-              runtime = api.restart_space(repo_id=repo_id, token=token)
+              runtime = api.restart_space(repo_id=repo_id, token=token, factory_reboot=True)
               stage = str(runtime.stage)
               print(f"SPACE_RESTART_STAGE={stage}", flush=True)
 

@@ -54,6 +54,8 @@ jobs:
         run: |
           grep -v -E '^torch([<=>]|$)' hf_space/requirements.txt > /tmp/space-requirements.txt
           python -m pip install -r /tmp/space-requirements.txt
+          python -m pip install "gradio[oauth,mcp]==5.49.1" "spaces==0.51.3"
+          python -m pip check
       - name: Import and construct the actual Space UI
         working-directory: hf_space
         env:
