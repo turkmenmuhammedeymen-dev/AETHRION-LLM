@@ -175,7 +175,7 @@ class SafeRuntimeGateTests(unittest.TestCase):
     def test_research_excerpts_are_included_in_output_safety_review(self):
         self.assertEqual(
             api._text_for_safety({"results": [{"title": "Title", "excerpt": "Passage"}]}),
-            "Title\\nPassage",
+            "Passage\nTitle",
         )
 
     def test_safe_classifier_route_does_not_gate_itself(self):
