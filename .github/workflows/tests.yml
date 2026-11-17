@@ -111,25 +111,35 @@ jobs:
             wait "$app_pid" 2>/dev/null || true
           }
           trap cleanup EXIT
-          ready=0
-          for attempt in $(seq 1 30); do
-            if ! kill -0 "$app_pid" 2>/dev/null; then
+          for endpoint in / /config /info; do
+            ready=0
+            for attempt in $(seq 1 30); do
+              if ! kill -0 "$app_pid" 2>/dev/null; then
+                cat /tmp/aethrion-space.log
+                echo "Space app process exited while waiting for $endpoint."
+                exit 1
+              fi
+              code=$(curl --silent --show-error -o /tmp/aethrion-response.json -w "%{http_code}" "http://127.0.0.1:7860$endpoint" || true)
+              if [ "$code" = "200" ]; then
+                ready=1
+                case "$endpoint" in
+                  /) cp /tmp/aethrion-response.json /tmp/aethrion-root.html ;;
+                  /config) cp /tmp/aethrion-response.json /tmp/aethrion-config.json ;;
+                  /info) cp /tmp/aethrion-response.json /tmp/aethrion-info.json ;;
+                esac
+                break
+              fi
+              sleep 2
+            done
+            if [ "$ready" -ne 1 ]; then
+              echo "Endpoint $endpoint returned HTTP $code."
+              echo "Response body:"
+              cat /tmp/aethrion-response.json 2>/dev/null || true
+              echo "Application log:"
               cat /tmp/aethrion-space.log
-              echo "Space app process exited before becoming ready."
               exit 1
             fi
-            if curl --silent --show-error --fail http://127.0.0.1:7860/config -o /tmp/aethrion-config.json; then
-              ready=1
-              break
-            fi
-            sleep 2
           done
-          if [ "$ready" -ne 1 ]; then
-            cat /tmp/aethrion-space.log
-            echo "Space app did not expose /config within 60 seconds."
-            exit 1
-          fi
-          curl --silent --show-error --fail http://127.0.0.1:7860/info -o /tmp/aethrion-info.json
           python - <<'PY'
           import json
           with open("/tmp/aethrion-config.json", encoding="utf-8") as handle:
