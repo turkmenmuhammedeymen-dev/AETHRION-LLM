@@ -76,7 +76,7 @@ class TrainingUtilityTests(unittest.TestCase):
                 "source_id": "synthetic-test-fixture",
                 "path": "approved_fixture.txt",
                 "license": "Synthetic test fixture",
-                "permitted_uses": "unit tests only",
+                "permitted_uses": "machine-learning training for unit-test fixture only",
                 "allow_training": True
             }]}), encoding="utf-8")
             corpus_report = work / "corpus-report.json"
@@ -113,6 +113,8 @@ class TrainingUtilityTests(unittest.TestCase):
             self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
             checkpoint_path = output / "checkpoint_last.pt"
             self.assertTrue(checkpoint_path.exists())
+            self.assertTrue((output / "progress.json").is_file())
+            self.assertTrue((output / "metrics.jsonl").is_file())
             config["max_steps"] = 3
             config_path.write_text(json.dumps(config), encoding="utf-8")
             resumed = subprocess.run(command + ["--resume", str(checkpoint_path)],
