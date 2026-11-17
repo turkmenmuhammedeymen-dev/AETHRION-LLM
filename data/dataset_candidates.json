@@ -1,0 +1,95 @@
+{
+  "format": "aethrion-dataset-candidate-register-v1",
+  "owner_review_authorized": true,
+  "training_approval_granted": false,
+  "notes": "Owner authorized review and preparation planning. Source rights, per-item licenses, privacy, provenance, consent, exact downloaded release and hashes remain separate fail-closed requirements.",
+  "candidates": [
+    {
+      "id": "cosmos-turkish-v1",
+      "model_ids": [
+        "chat"
+      ],
+      "uri": "https://huggingface.co/datasets/ytu-ce-cosmos/Cosmos-Turkish-Corpus-v1.0",
+      "declared_license": "CC-BY-4.0",
+      "review_status": "source_rights_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Third-party website/forum/news/Wikipedia content requires source-level rights and attribution policy",
+        "Pin exact revision and compute source/prepared hashes",
+        "Content-level deduplication and privacy filtering"
+      ]
+    },
+    {
+      "id": "common-voice-tr-scripted-27",
+      "model_ids": [
+        "asr"
+      ],
+      "uri": "https://commonvoice.mozilla.org/en/datasets",
+      "declared_license": "CC0-1.0",
+      "review_status": "release_and_consent_metadata_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Pin exact Turkish release and verify dataset metadata",
+        "Record source and prepared dataset SHA-256",
+        "Confirm speaker-consent provenance and privacy review"
+      ]
+    },
+    {
+      "id": "objaverse-filtered-assets",
+      "model_ids": [
+        "3d"
+      ],
+      "uri": "https://huggingface.co/datasets/allenai/objaverse",
+      "declared_license": "ODC-By-1.0 plus per-asset licenses",
+      "review_status": "per_asset_license_filter_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Inspect each asset license",
+        "Exclude non-commercial assets for commercial-intent training",
+        "Preserve ODC-By and per-asset attribution",
+        "Pin revision and hashes"
+      ]
+    },
+    {
+      "id": "coco-2014-annotations-and-images",
+      "model_ids": [
+        "vision",
+        "image"
+      ],
+      "uri": "https://cocodataset.org/",
+      "declared_license": "CC-BY-4.0 annotations; images subject to Flickr/source terms",
+      "review_status": "image_rights_not_cleared",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "COCO does not own underlying image copyrights",
+        "Verify per-image rights and applicable Flickr terms",
+        "Do not treat annotation license as image training permission"
+      ]
+    },
+    {
+      "id": "the-stack-code",
+      "model_ids": [
+        "code"
+      ],
+      "uri": "https://huggingface.co/datasets/bigcode/the-stack-dedup",
+      "declared_license": "Mixed/source-specific; gated access",
+      "review_status": "access_and_per_file_rights_unverified",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Dataset access was restricted",
+        "Obtain authorized access and verify each source repository/file license",
+        "Preserve provenance and remove disallowed files"
+      ]
+    }
+  ]
+}
