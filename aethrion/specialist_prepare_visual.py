@@ -175,6 +175,8 @@ def prepare_visual_dataset(
         for index, (row, asset) in enumerate(assets):
             try:
                 with Image.open(asset) as image:
+                    if image.width < 1 or image.height < 1 or image.width > 8192 or image.height > 8192 or image.width * image.height > 40_000_000:
+                        raise VisualPreparationError(f"Image for {row['id']!r} exceeds safe dimension limits.")
                     image.load()
                     fitted = ImageOps.fit(image.convert("RGB"), (image_size, image_size), method=Image.Resampling.BICUBIC)
                     images[index] = np.asarray(fitted, dtype=np.uint8).transpose(2, 0, 1)
