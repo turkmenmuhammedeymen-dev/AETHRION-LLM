@@ -226,12 +226,28 @@ class NativeModelRuntime:
     @torch.no_grad()
     def image_text_similarity(self, image_path: str | Path, text: str) -> float:
         from PIL import Image
+        image_file = Path(image_path)
+        if (
+            not image_file.is_file() or image_file.stat().st_size < 1
+            or image_file.stat().st_size > 20 * 1024 * 1024
+        ):
+            raise NativeRuntimeError("Image must be a local file between 1 byte and 20 MiB.")
+        with Image.open(image_file) as source:
+            if source.format not in {"PNG", "JPEG", "WEBP"}:
+                raise NativeRuntimeError("Only PNG, JPEG and WebP images are supported.")
+            width, height = source.size
+            if (
+                width < 1 or height < 1 or width > 8192 or height > 8192
+                or width * height > 40_000_000
+            ):
+                raise NativeRuntimeError(
+                    "Image exceeds safe dimensions (8192 per side; 40 megapixels total)."
+                )
+            source.load()
+            source = source.convert("RGB").resize((224, 224))
+            array = np.asarray(source, dtype=np.float32) / 127.5 - 1.0
         model = self.model("vision")
         tokenizer = self.tokenizer("vision")
-        config = model.config
-        with Image.open(image_path) as source:
-            source = source.convert("RGB").resize((config.image_size, config.image_size))
-            array = np.asarray(source, dtype=np.float32) / 127.5 - 1.0
         image = torch.from_numpy(array).permute(2, 0, 1).unsqueeze(0).to(self.device)
         context = self._text_context(tokenizer, model, text, self.device)
         visual = model.encode_image(image)
