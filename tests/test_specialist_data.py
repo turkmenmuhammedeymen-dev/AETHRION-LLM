@@ -22,7 +22,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             sample_id=np.asarray(["a", "b", "c", "d", "e", "f"]),
             group_id=np.asarray(["ga", "gb", "gc", "gd", "ge", "gf"]),
             split=np.asarray(["train", "train", "validation", "validation", "test", "test"]),
-            token_ids=np.random.default_rng(1).integers(0, 300, size=(6, 12), dtype=np.int64),
+            token_ids=np.random.default_rng(1).integers(0, 256, size=(6, 12), dtype=np.int64),
         )
         from aethrion.tokenizer import ByteBPETokenizer
         tokenizer_path = root / "tokenizer.json"
@@ -167,7 +167,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                 sample_id=np.asarray(["a", "b", "c"]),
                 group_id=np.asarray(["ga", "gb", "gc"]),
                 split=np.asarray(["train", "train", "validation"]),
-                token_ids=np.random.default_rng(1).integers(0, 300, size=(3, 12), dtype=np.int64),
+                token_ids=np.random.default_rng(1).integers(0, 256, size=(3, 12), dtype=np.int64),
             )
             payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
             manifest.write_text(json.dumps(payload), encoding="utf-8")
