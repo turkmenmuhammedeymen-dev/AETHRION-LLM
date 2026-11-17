@@ -34,3 +34,19 @@ No dataset has been downloaded, hashed, prepared or approved for training by thi
 8. Use a compute plan that fits the available machine. The current Codespaces container is CPU-only and cannot train the full model family at useful scale.
 
 Do not set `training_allowed: true` or mark a model `trained` from a catalog entry, a synthetic fixture, a unit test or a partial preprocessing run.
+
+## Fresh public-catalog checks — 17 November 2026
+
+The following public metadata was checked again on this date. These checks improve source triage; they do not change any training decision.
+
+- **Common Voice Turkish 27.0:** Mozilla Data Collective currently lists the Turkish (tr) scripted-speech ASR release as CC0-1.0 and 2.79 GB. Mozilla's legal terms effective 31 October 2025 describe contributor assurances and the CC0 dedication. This is the strongest current ASR candidate, but the exact downloadable release, metadata, provenance/consent evidence, privacy filtering and file hashes still need to be recorded before preparation. Evidence: https://commonvoice.mozilla.org/lss/datasets and https://commonvoice.mozilla.org/en/terms
+- **Cosmos Turkish Corpus v1.0:** the public card currently reports CC-BY-4.0, 9,075,453 rows and 22.8 GB, with URL-attributed content collected from third-party websites, forums, news and Wikipedia. The top-level dataset license does not resolve each underlying source's rights. Evidence: https://huggingface.co/datasets/ytu-ce-cosmos/Cosmos-Turkish-Corpus-v1.0
+- **COCO:** the official terms explicitly distinguish CC-BY-4.0 annotations from images whose copyright COCO does not own; image use remains subject to Flickr/source terms. Image training remains blocked without item-level rights evidence. Evidence: https://cocodataset.org/dataset/termsofuse.htm
+- **Objaverse:** the dataset card states ODC-By 1.0 for the collection and lists multiple per-object Creative Commons licenses, including non-commercial and share-alike variants. Every asset must be filtered and attributed according to its own metadata. Evidence: https://huggingface.co/datasets/allenai/objaverse
+- **The Stack:** BigCode documentation states that each code item remains subject to its original repository license and attribution requirements. The current Hugging Face repository is gated and its access flow requires agreement to terms and sharing contact information with maintainers. No access request or contact-information sharing was made. Evidence: https://www.bigcode-project.org/docs/about/the-stack/ and https://huggingface.co/datasets/bigcode/the-stack
+
+## Owner authorization recorded
+
+The project owner's 17 November 2026 authorization to continue public-source review, evidence recording and non-destructive preparation planning is recorded in [OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md](OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md). This is project authorization only. It does not grant third-party rights, authorize gated access, or approve any data for training.
+
+The dataset candidate register now records the owner-approval scope and the public metadata findings above. All candidate entries remain downloaded=false and training_allowed=false; the global and specialist training gates remain closed.

@@ -19,7 +19,15 @@
         "Third-party website/forum/news/Wikipedia content requires source-level rights and attribution policy",
         "Pin exact revision and compute source/prepared hashes",
         "Content-level deduplication and privacy filtering"
-      ]
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Public dataset card currently reports CC-BY-4.0, 9,075,453 rows and 22.8 GB; records include source URLs and corpus aggregates third-party websites, forums, news and Wikipedia.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/ytu-ce-cosmos/Cosmos-Turkish-Corpus-v1.0"
+        ],
+        "next_gate": "No ingestion until source-level rights, attribution, privacy, exact revision and file hashes are verified."
+      }
     },
     {
       "id": "common-voice-tr-scripted-27",
@@ -36,7 +44,16 @@
         "Pin exact Turkish release and verify dataset metadata",
         "Record source and prepared dataset SHA-256",
         "Confirm speaker-consent provenance and privacy review"
-      ]
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Official Mozilla Data Collective catalogue lists Common Voice Scripted Speech 27.0 Turkish (tr), ASR, CC0-1.0, 2.79 GB. Mozilla legal terms effective 2025-10-31 describe contributor assurances and CC0 dedication.",
+        "evidence_urls": [
+          "https://commonvoice.mozilla.org/lss/datasets",
+          "https://commonvoice.mozilla.org/en/terms"
+        ],
+        "next_gate": "Exact downloadable release and metadata hashes, dataset-specific provenance/consent evidence, privacy filtering and available storage must be checked before acquisition/preparation."
+      }
     },
     {
       "id": "objaverse-filtered-assets",
@@ -54,7 +71,15 @@
         "Exclude non-commercial assets for commercial-intent training",
         "Preserve ODC-By and per-asset attribution",
         "Pin revision and hashes"
-      ]
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Dataset card states collection ODC-By 1.0 and per-object licenses include CC-BY-4.0, CC-BY-NC-4.0, CC-BY-NC-SA-4.0, CC-BY-SA-4.0 and CC0 1.0.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/allenai/objaverse"
+        ],
+        "next_gate": "Read each asset's license and metadata; exclude incompatible/non-commercial assets for commercial-intent use; preserve attribution and review share-alike obligations."
+      }
     },
     {
       "id": "coco-2014-annotations-and-images",
@@ -72,7 +97,15 @@
         "COCO does not own underlying image copyrights",
         "Verify per-image rights and applicable Flickr terms",
         "Do not treat annotation license as image training permission"
-      ]
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Official COCO terms license annotations and website CC-BY-4.0 but explicitly state COCO does not own image copyrights and images remain subject to Flickr terms.",
+        "evidence_urls": [
+          "https://cocodataset.org/dataset/termsofuse.htm"
+        ],
+        "next_gate": "Image training remains blocked without item-level image rights evidence; annotation license does not clear image pixels."
+      }
     },
     {
       "id": "the-stack-code",
@@ -89,7 +122,25 @@
         "Dataset access was restricted",
         "Obtain authorized access and verify each source repository/file license",
         "Preserve provenance and remove disallowed files"
-      ]
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "BigCode documentation says each code item remains subject to its original repository license and attribution. Current Hugging Face dataset page is gated and requires agreement to terms and sharing contact information with maintainers.",
+        "evidence_urls": [
+          "https://www.bigcode-project.org/docs/about/the-stack/",
+          "https://huggingface.co/datasets/bigcode/the-stack"
+        ],
+        "next_gate": "Do not request gated access or share contact information. Use only an authorized release with source-level licenses, provenance, current opt-out exclusions and pinned hashes."
+      }
     }
-  ]
+  ],
+  "owner_approval": {
+    "recorded_at": "2026-11-17",
+    "record_path": "docs/OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md",
+    "scope": "public-source review, evidence recording, non-destructive validation and preparation planning",
+    "permits_training": false,
+    "permits_restricted_download": false,
+    "permits_accepting_provider_legal_terms": false,
+    "note": "Project-owner authorization to proceed with review is recorded. It does not grant third-party rights or satisfy per-source, per-item, privacy, consent, provenance, or license checks."
+  }
 }

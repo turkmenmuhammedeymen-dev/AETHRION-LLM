@@ -15,3 +15,4 @@ artifacts/tokenizer.json
 .pytest_cache/
 .coverage
 !data/processed/corpus_manifest.json
+*.egg-info/
