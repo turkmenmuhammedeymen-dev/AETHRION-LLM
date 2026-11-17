@@ -130,7 +130,7 @@ jobs:
           print("SPACE_RUNTIME_SMOKE_TEST_OK")
           PY
       - name: Launch Space and verify live Gradio endpoints
-        working-directory: hf_space
+        working-directory: ${{ runner.temp }}/aethrion-space
         env:
           PYTHONPATH: .
           PORT: "7860"
