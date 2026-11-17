@@ -1,4 +1,4 @@
-gradio>=5.0,<7
+gradio==5.0.0
 torch>=2.2
 numpy>=1.24
 fastapi>=0.110
