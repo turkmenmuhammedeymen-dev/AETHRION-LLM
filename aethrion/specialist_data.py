@@ -92,12 +92,17 @@ def validate_specialist_dataset(
     for source in sources:
         if not isinstance(source, dict):
             raise SpecialistDataError("Each source review must be an object.")
-        required_text = ("source_id", "source_uri", "license", "permitted_use", "evidence_uri")
+        required_text = ("source_id", "source_uri", "source_path", "license", "permitted_use", "evidence_uri")
         if any(not isinstance(source.get(key), str) or not source[key].strip() for key in required_text):
             raise SpecialistDataError("Each source requires an ID, URI, license, permitted use and evidence.")
         digest = source.get("sha256")
         if not isinstance(digest, str) or not SHA256.fullmatch(digest.lower()):
             raise SpecialistDataError("Each source requires a valid SHA-256.")
+        source_file = _safe_local_path(manifest_file.parent.resolve(), source["source_path"])
+        if not source_file.is_file() or source_file.stat().st_size == 0:
+            raise SpecialistDataError("A reviewed source file is missing or empty.")
+        if sha256_file(source_file) != digest.lower():
+            raise SpecialistDataError("A reviewed source file SHA-256 mismatch.")
         if type(source.get("allow_training")) is not bool or source["allow_training"] is not True:
             raise SpecialistDataError("Training blocked: one or more source licenses are not approved.")
         if source.get("privacy_reviewed") is not True:
