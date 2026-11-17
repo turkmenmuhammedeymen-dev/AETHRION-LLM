@@ -22,6 +22,13 @@ class FileRequest(BaseModel):
     content_base64:str=Field(min_length=1,max_length=12_000_000)
     question:str=Field(default="Summarize and analyze this file.",max_length=2000)
 
+def get_native_model_statuses(manifest: str | Path | None = None) -> dict[str, str]:
+    """Report verified per-model release status without loading model weights."""
+    selected = Path(manifest or os.environ.get("AETHRION_MODEL_MANIFEST", "models/manifest.json"))
+    registry = NativeModelRegistry(Path.cwd(), selected)
+    return {name: registry.status(name) for name in sorted(registry.capabilities())}
+
+
 def build_router(*, allow_remote_providers: bool = False, allow_local_model: bool = True)->tuple[CapabilityRouter,dict[str,Any]]:
     """Build a native-only router from hash-verified local first-party artifacts."""
     if allow_remote_providers:
@@ -66,7 +73,12 @@ def health(): return {"status":"ok","service":"AETHRION-LLM","version":"0.3.0"}
 @app.get("/capabilities", dependencies=[Depends(require_api_token)])
 def capabilities():
     available=router.available(); all_names=[c.value for c in Capability]
-    return {"available":available,"unavailable":[n for n in all_names if n not in available],"credentials_exposed":False}
+    try:
+        model_status = get_native_model_statuses()
+    except Exception as exc:
+        model_status = {"registry": f"error:{type(exc).__name__}"}
+    return {"available":available,"unavailable":[n for n in all_names if n not in available],
+            "model_status":model_status,"execution_policy":"local_only","credentials_exposed":False}
 
 @app.post("/dispatch", dependencies=[Depends(require_api_token)])
 def dispatch(request:DispatchRequest):
