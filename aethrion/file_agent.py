@@ -32,7 +32,7 @@ def extract_text(filename:str,content_base64:str)->str:
             if page_text:
                 clipped=page_text[:remaining]
                 parts.append(clipped); remaining-=len(clipped)
-        return "\\n".join(parts)[:200_000]
+        return "\n".join(parts)[:200_000]
     try:
         _validate_docx_archive(raw)
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
