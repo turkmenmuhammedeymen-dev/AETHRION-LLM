@@ -51,7 +51,7 @@ jobs:
 
           # Remove retired remote inference adapters from older Space revisions.
           for legacy_path in ("aethrion/audio.py", "aethrion/providers.py"):
-              if api.file_exists(path=legacy_path, repo_id=repo_id, repo_type="space"):
+              if api.file_exists(repo_id=repo_id, filename=legacy_path, repo_type="space"):
                   api.delete_file(
                       path_in_repo=legacy_path,
                       repo_id=repo_id,
