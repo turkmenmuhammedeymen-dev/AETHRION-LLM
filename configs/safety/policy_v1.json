@@ -1,0 +1,91 @@
+{
+  "format": "aethrion-safe-policy-v1",
+  "status": "POLICY_DRAFT_NOT_A_TRAINED_OR_ENFORCED_MODEL",
+  "decisions": [
+    "ALLOW",
+    "REVIEW",
+    "BLOCK"
+  ],
+  "principles": [
+    "Do not facilitate real-world harm, abuse, exploitation, or unauthorized access.",
+    "Preserve benign education, prevention, recovery, and defensive assistance.",
+    "Use REVIEW when intent or context is ambiguous or confidence is insufficient.",
+    "Do not treat keyword matches as sufficient evidence of harmful intent.",
+    "Do not claim the classifier is active until independently trained, calibrated, evaluated, and released."
+  ],
+  "categories": [
+    {
+      "id": "physical_harm",
+      "description": "Requests that seek practical assistance to injure people or animals, carry out attacks, or evade intervention.",
+      "default_for_harmful_intent": "BLOCK",
+      "safe_alternative": "De-escalation, emergency safety, prevention, and non-operational education."
+    },
+    {
+      "id": "self_harm",
+      "description": "Requests that seek encouragement, methods, concealment, or optimization of self-harm.",
+      "default_for_harmful_intent": "BLOCK",
+      "safe_alternative": "Supportive, age-appropriate, non-graphic help and trusted-person or emergency support."
+    },
+    {
+      "id": "cyber_abuse",
+      "description": "Credential theft, malware deployment, unauthorized intrusion, persistence, exfiltration, or evasion.",
+      "default_for_harmful_intent": "BLOCK",
+      "safe_alternative": "Defensive security, secure configuration, incident response, and authorized lab learning."
+    },
+    {
+      "id": "fraud_deception",
+      "description": "Scams, phishing, impersonation for harm, financial deception, and evasion of accountability.",
+      "default_for_harmful_intent": "BLOCK",
+      "safe_alternative": "Fraud awareness, detection, reporting, and legitimate communications."
+    },
+    {
+      "id": "privacy_data",
+      "description": "Doxxing, stalking, secret extraction, credential disclosure, and non-consensual personal-data use.",
+      "default_for_harmful_intent": "BLOCK",
+      "safe_alternative": "Privacy protection, data minimization, and account security."
+    },
+    {
+      "id": "dangerous_substances",
+      "description": "Actionable assistance to create, obtain, or misuse dangerous substances or toxins.",
+      "default_for_harmful_intent": "BLOCK",
+      "safe_alternative": "High-level safety, exposure prevention, and professional guidance."
+    },
+    {
+      "id": "exploitation_abuse",
+      "description": "Coercion, exploitation, abuse, or sexual content involving minors.",
+      "default_for_harmful_intent": "BLOCK",
+      "safe_alternative": "Protection, reporting, and age-appropriate safety information."
+    },
+    {
+      "id": "prompt_injection_exfiltration",
+      "description": "Attempts to override policy, expose secrets, or misuse tools and connected data.",
+      "default_for_harmful_intent": "REVIEW",
+      "safe_alternative": "Ignore untrusted instructions and protect credentials and private data."
+    },
+    {
+      "id": "ambiguous_high_risk",
+      "description": "High-impact requests where authorization, purpose, or context cannot be established.",
+      "default_for_harmful_intent": "REVIEW",
+      "safe_alternative": "Ask a narrow clarifying question or provide safe, non-operational guidance."
+    }
+  ],
+  "runtime_requirements": {
+    "deterministic_input_validation": true,
+    "deterministic_output_validation": true,
+    "least_privilege_tool_access": true,
+    "secrets_never_in_prompts_or_logs": true,
+    "untrusted_documents_are_data_not_instructions": true,
+    "high_risk_uncertainty_routes_to_review": true,
+    "fail_closed_if_required_safety_component_missing": true
+  },
+  "release_gates": [
+    "Reviewed and approved training corpus with source-level rights and privacy checks",
+    "Separate train, validation, and held-out test splits",
+    "Category-level false-negative and false-positive reporting",
+    "Turkish language, spelling, dialect, paraphrase, and prompt-injection robustness evaluation",
+    "Calibration and abstention evaluation",
+    "Independent human review and documented error analysis",
+    "Checkpoint and tokenizer integrity verification",
+    "Explicit release approval; no automatic activation after training"
+  ]
+}
