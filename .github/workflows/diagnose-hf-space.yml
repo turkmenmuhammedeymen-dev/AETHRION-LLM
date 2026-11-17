@@ -1,0 +1,65 @@
+name: Diagnose AETHRION Hugging Face Space
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/diagnose-hf-space.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Hugging Face client
+        run: python -m pip install --upgrade huggingface_hub
+      - name: Read Space runtime and logs
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+          import time
+          from huggingface_hub import HfApi
+
+          token = os.environ.get("HF_TOKEN", "")
+          if not token:
+              raise SystemExit("HF_TOKEN repository secret is missing.")
+          api = HfApi(token=token)
+          repo_id = "vizyon2027/AETHRION-LLM"
+
+          runtime = None
+          for attempt in range(40):
+              try:
+                  runtime = api.get_space_runtime(repo_id=repo_id)
+                  stage = str(runtime.stage)
+                  print(f"SPACE_STAGE={stage}")
+                  print(f"SPACE_HARDWARE={runtime.hardware}")
+                  if stage not in {"BUILDING", "STARTING"}:
+                      break
+              except Exception as exc:
+                  print(f"RUNTIME_QUERY_ERROR={type(exc).__name__}: {exc}")
+                  break
+              time.sleep(15)
+
+          for label, build in (("BUILD_LOGS", True), ("RUNTIME_LOGS", False)):
+              print(f"\\n===== {label} =====")
+              try:
+                  lines = list(api.fetch_space_logs(repo_id=repo_id, build=build))
+                  if not lines:
+                      print("(No log lines returned.)")
+                  for line in lines[-250:]:
+                      safe = str(line).replace(token, "[REDACTED_HF_TOKEN]")
+                      print(safe, end="" if safe.endswith("\\n") else "\\n")
+              except Exception as exc:
+                  print(f"{label}_ERROR={type(exc).__name__}: {exc}")
+
+          if runtime is None:
+              sys.exit(2)
+          print("\\nDiagnostics completed.")
+          PY
