@@ -23,9 +23,10 @@ Set these under Space Settings → Variables and secrets:
 - AETHRION_AUDIO_API_KEY or OPENAI_API_KEY
 - AETHRION_CHECKPOINT and AETHRION_TOKENIZER for the trained AETHRION model
 
-Remote provider adapters stay disabled unless both Space authentication variables
-are configured. This prevents an unauthenticated public Space from spending
-provider credits through its UI. The app still boots with provider features disabled.
+Local model inference and remote provider adapters stay disabled unless both
+Space authentication variables are configured. This prevents unauthenticated
+visitors from consuming model resources or spending provider credits through
+the UI. The app still boots with model/provider features disabled.
 
 Chat remains unavailable until its matching checkpoint/tokenizer are supplied; no third-party model silently replaces it. A trained checkpoint must be accompanied by its matching `checkpoint_last.pt.sha256` integrity file; only trusted project checkpoints should be uploaded. 3D jobs are asynchronous. File-analysis inputs are bounded. Project changes are returned as review ZIPs and uploaded code is never executed. Audio is turn-based, not continuous realtime.
 
