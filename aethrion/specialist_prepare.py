@@ -1,6 +1,6 @@
 """Prepare auditable text-family datasets from owner-supplied JSONL records.
 
-Supported IDs: code, research, document, safety.
+Supported IDs: chat, code, research, document, safety.
 This tool never approves data. It always emits training_allowed=false and
 owner_approval=false; a human must review provenance, rights and privacy.
 """
@@ -17,7 +17,7 @@ import numpy as np
 
 from aethrion.tokenizer import ByteBPETokenizer
 
-SUPPORTED = {"code", "research", "document", "safety"}
+SUPPORTED = {"chat", "code", "research", "document", "safety"}
 SPLITS = ("train", "validation", "test")
 
 
@@ -95,7 +95,28 @@ def _build_arrays(model_id: str, rows: list[dict[str, Any]], tokenizer: ByteBPET
         "group_id": np.asarray(group_ids, dtype=np.str_),
         "split": np.asarray(splits, dtype=np.str_),
     }
-    if model_id == "code":
+    if model_id == "chat":
+        inputs, labels = [], []
+        for row_id, row in zip(ids, rows):
+            prompt = _required_text(row, "prompt", row_id)
+            response = _required_text(row, "response", row_id)
+            prompt_ids = tokenizer.encode(prompt + "\\n")
+            response_ids = tokenizer.encode(response)
+            if not response_ids:
+                raise PreparationError(f"Record {row_id!r} has no response tokens.")
+            prompt_ids = prompt_ids[:max_length - 1]
+            response_ids = response_ids[:max_length - len(prompt_ids)]
+            if not response_ids:
+                raise PreparationError(
+                    f"Record {row_id!r} prompt leaves no room for a supervised response token."
+                )
+            sequence = prompt_ids + response_ids
+            target = [-100] * len(prompt_ids) + response_ids
+            inputs.append(_pad(sequence, max_length))
+            labels.append(target + [-100] * (max_length - len(target)))
+        arrays["input_ids"] = np.asarray(inputs, dtype=np.int64)
+        arrays["labels"] = np.asarray(labels, dtype=np.int64)
+    elif model_id == "code":
         sequences = [
             _pad(tokenizer.encode(_required_text(row, "text", row_id)), max_length)
             for row_id, row in zip(ids, rows)
@@ -192,7 +213,7 @@ def prepare_text_dataset(
     for row, split_name in zip(rows, split_names):
         if split_name != "train":
             continue
-        for key in ("text", "query", "passage"):
+        for key in ("prompt", "response", "text", "query", "passage"):
             if isinstance(row.get(key), str):
                 corpus_fields.append(row[key])
     if not corpus_fields:
@@ -234,7 +255,10 @@ def prepare_text_dataset(
         "format": "aethrion-specialist-dataset-v1",
         "dataset_id": f"{model_id}-prepared-{_sha256(dataset_path)[:12]}",
         "model_id": model_id,
-        "modality": "text" if model_id in {"research", "safety"} else ("code" if model_id == "code" else "document"),
+        "modality": (
+            "text" if model_id in {"chat", "research", "safety"}
+            else ("code" if model_id == "code" else "document")
+        ),
         "training_allowed": False,
         "owner_approval": False,
         "privacy_reviewed": False,
