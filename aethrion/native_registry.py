@@ -227,6 +227,36 @@ class NativeModelRegistry:
             raise NativeModelIntegrityError(f"{capability} evaluation report does not match its dataset.")
         if evaluation.get("status") != "approved_for_release":
             raise NativeModelUnavailable(f"{capability} evaluation report is not approved for release.")
+        for flag in ("quality_gate_passed", "safety_gate_passed", "human_reviewed"):
+            if type(evaluation.get(flag)) is not bool or evaluation[flag] is not True:
+                raise NativeModelUnavailable(
+                    f"{capability} evaluation report requires {flag}=true."
+                )
+        for key in ("reviewer", "reviewed_at", "approval_evidence_path",
+                    "approval_evidence_sha256"):
+            if not isinstance(evaluation.get(key), str) or not evaluation[key].strip():
+                raise NativeModelUnavailable(
+                    f"{capability} evaluation report is missing human review evidence: {key}."
+                )
+        benchmark_results = evaluation.get("benchmarks")
+        if not isinstance(benchmark_results, dict) or not benchmark_results:
+            raise NativeModelUnavailable(f"{capability} evaluation report has no benchmark results.")
+        for benchmark_name, result in benchmark_results.items():
+            if not isinstance(benchmark_name, str) or not benchmark_name.strip():
+                raise NativeModelIntegrityError("Benchmark names must be non-empty strings.")
+            if not isinstance(result, dict) or not result:
+                raise NativeModelIntegrityError(f"Invalid benchmark record: {benchmark_name}.")
+            if result.get("passed") is not True or not isinstance(result.get("metric"), str):
+                raise NativeModelUnavailable(
+                    f"Benchmark {benchmark_name} has not passed with a named metric."
+                )
+        evidence_path = self._safe_path(evaluation["approval_evidence_path"])
+        if not evidence_path.is_file() or self._digest(evidence_path) != evaluation["approval_evidence_sha256"].lower():
+            raise NativeModelIntegrityError(f"{capability} human release evidence is missing or hash-mismatched.")
+        card_text = model_card.read_text(encoding="utf-8")
+        for heading in ("## Intended use", "## Training data", "## Evaluation", "## Limitations"):
+            if heading not in card_text:
+                raise NativeModelUnavailable(f"{capability} model card must include '{heading}'.")
         if capability == "tts" and self.status("vocoder") != "ready":
             raise NativeModelUnavailable("AETHRION-TTS requires a separately trained and released AETHRION-VOCODER.")
         return NativeModelArtifacts(
