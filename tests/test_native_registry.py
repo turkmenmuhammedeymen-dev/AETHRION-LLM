@@ -111,6 +111,7 @@ class NativeModelRegistryTests(unittest.TestCase):
                     "safety_gate_passed": True,
                     "status": "trained",
                 })
+                NativeModelRegistry(root)
     def test_hash_mismatch_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
