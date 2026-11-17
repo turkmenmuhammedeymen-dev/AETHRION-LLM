@@ -253,7 +253,7 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             texture=gr.Textbox(label="Optional texture prompt")
             gr.Button("Create from image").click(three_d_image,inputs=[image_ref,texture],outputs=[task_msg,task_ref])
             task_status=gr.Markdown();model_file=gr.File(label="Generated OBJ point cloud (vertices only)")
-            gr.Button("Check task / download GLB").click(three_d_poll,inputs=task_ref,outputs=[task_status,model_file])
+            gr.Button("Check / download OBJ point cloud").click(three_d_poll,inputs=task_ref,outputs=[task_status,model_file])
         with gr.Tab("Research"):
             q=gr.Textbox(lines=3,label="Research question");o=gr.Markdown()
             gr.Button("Search").click(research,inputs=q,outputs=o)
