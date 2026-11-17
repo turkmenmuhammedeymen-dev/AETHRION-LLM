@@ -67,8 +67,8 @@ class NativeModelRegistryTests(unittest.TestCase):
                         b"Human release review evidence for a synthetic unit test fixture."
                     ).hexdigest(),
                     "benchmarks": {
-                        "held_out_lm_loss": {"metric": "loss", "value": 1.0, "threshold": 2.0, "passed": True, "evidence": "held-out corpus report"},
-                        "instruction_following": {"metric": "pass_rate", "value": 0.9, "threshold": 0.8, "passed": True, "evidence": "human-reviewed evaluation"}
+                        "held_out_lm_loss": {"metric": "loss", "direction": "min", "value": 1.0, "threshold": 2.0, "passed": True, "evidence": "held-out corpus report"},
+                        "instruction_following": {"metric": "pass_rate", "direction": "max", "value": 0.9, "threshold": 0.8, "passed": True, "evidence": "human-reviewed evaluation"}
                     }
                 }).encode(),
                 "MODEL_CARD.md": (
