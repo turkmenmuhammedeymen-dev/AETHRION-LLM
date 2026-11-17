@@ -111,7 +111,7 @@ jobs:
             wait "$app_pid" 2>/dev/null || true
           }
           trap cleanup EXIT
-          for endpoint in / /config /info; do
+          for endpoint in / /config /gradio_api/info; do
             ready=0
             for attempt in $(seq 1 10); do
               if ! kill -0 "$app_pid" 2>/dev/null; then
@@ -125,7 +125,7 @@ jobs:
                 case "$endpoint" in
                   /) cp /tmp/aethrion-response.json /tmp/aethrion-root.html ;;
                   /config) cp /tmp/aethrion-response.json /tmp/aethrion-config.json ;;
-                  /info) cp /tmp/aethrion-response.json /tmp/aethrion-info.json ;;
+                  /gradio_api/info) cp /tmp/aethrion-response.json /tmp/aethrion-info.json ;;
                 esac
                 break
               fi
@@ -147,7 +147,7 @@ jobs:
           with open("/tmp/aethrion-info.json", encoding="utf-8") as handle:
               info = json.load(handle)
           assert len(config.get("components", [])) >= 20, "Live config is missing UI components"
-          assert isinstance(info, dict), "Live /info response is not a JSON object"
+          assert isinstance(info, dict), "Live /gradio_api/info response is not a JSON object"
           print(f"LIVE_CONFIG_COMPONENTS={len(config['components'])}")
           print("LIVE_INFO_ENDPOINT=PASS")
           PY
