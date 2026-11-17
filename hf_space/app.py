@@ -7,6 +7,7 @@ from aethrion.api import build_router, get_native_model_statuses, _require_safet
 from aethrion.document_tools import create_document, extract_document_text, replace_document_text
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
 from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError, read_project_zip
+from aethrion.zerogpu_preflight import run_zero_gpu_preflight
 
 def _resolve_space_auth(environ=None):
     env = os.environ if environ is None else environ
@@ -81,6 +82,35 @@ def gpu_diagnostics():
 def _gpu_local_chat(prompt):
     result = dispatch(Capability.CHAT, prompt, {"max_new_tokens": 256})
     return result.get("text", str(result)) if isinstance(result, dict) else str(result)
+
+
+@spaces.GPU(duration=60)
+def gpu_model_preflight():
+    """Exercise every native architecture with disposable synthetic tensors only."""
+    try:
+        report = run_zero_gpu_preflight()
+    except Exception as exc:
+        return "### Native model GPU preflight failed\\n" + type(exc).__name__ + ": " + str(exc)[:300]
+    lines = [
+        "### AETHRION native-model ZeroGPU preflight",
+        f"- **GPU:** {report['device']}",
+        f"- **VRAM:** {report['total_memory_gib']} GiB total",
+        f"- **Peak allocated:** {report['peak_allocated_gib']} GiB",
+        f"- **Architectures:** {report['models_passed']}/{report['models_tested']} passed",
+        "",
+        "| Model | Result | Parameters | Synthetic loss |",
+        "|---|---:|---:|---:|",
+    ]
+    for row in report["results"]:
+        lines.append(
+            f"| {row['model']} | {row['status']} | {row.get('parameters', '—'):,} | {row.get('synthetic_loss', '—')} |"
+        )
+    lines.extend([
+        "",
+        "**Safety:** synthetic tensors only; no dataset read, no optimizer step, no checkpoint written, no production training started.",
+        f"**Overall:** {report['status']} — all models remain NOT_RELEASED.",
+    ])
+    return "\\n".join(lines)
 
 
 def status():
@@ -308,6 +338,8 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
     s=gr.Markdown(status());gr.Button("Refresh status").click(status,outputs=s)
     gpu_report=gr.Markdown("ZeroGPU status has not been checked in this session.")
     gr.Button("Check ZeroGPU hardware").click(gpu_diagnostics,outputs=gpu_report)
+    preflight_report=gr.Markdown("Native architecture preflight has not been run in this session.")
+    gr.Button("Run 11-model ZeroGPU preflight").click(gpu_model_preflight,outputs=preflight_report)
     with gr.Tabs():
         with gr.Tab("AI Chat"):
             gr.ChatInterface(chat,type="messages",chatbot=gr.Chatbot(type="messages",height=420))
