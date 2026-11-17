@@ -24,7 +24,8 @@ class AudioPreparationTests(unittest.TestCase):
         self._wav(audio)
         rows = []
         for index in range(30):
-            row = {"id": f"speech-{index}", "wav_path": "sample.wav"}
+            speaker_id = "speaker-1" if index < 10 else ("speaker-21" if index < 20 else "speaker-0")
+            row = {"id": f"speech-{index}", "speaker_id": speaker_id, "wav_path": "sample.wav"}
             if transcript:
                 row["transcript"] = "a"
             if durations:
