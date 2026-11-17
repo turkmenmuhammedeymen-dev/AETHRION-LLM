@@ -39,7 +39,7 @@ def status():
     rows = [f"- **{c.value}**: {available.get(c.value, 'NOT CONFIGURED')}" for c in Capability]
     if not REMOTE_PROVIDERS_ENABLED:
         rows.append("- **Remote providers**: DISABLED — Space authentication is not configured")
-    return "### Capability status\\n" + "\\n".join(rows)
+    return "### Capability status\n" + "\n".join(rows)
 
 def chat(message, history):
     context=[]
