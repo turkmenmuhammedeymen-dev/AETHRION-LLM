@@ -275,6 +275,13 @@ def train_specialist(
     model_id = config["model_id"]
     if approval["model_id"] != model_id:
         raise ValueError("Training config model_id differs from approved dataset manifest.")
+    model_config = config.get("model_config")
+    if not isinstance(model_config, dict) or not model_config:
+        raise ValueError("model_config must be a non-empty object.")
+    if approval["tokenizer_vocab_size"] is not None:
+        model_vocab_size = model_config.get("vocab_size")
+        if type(model_vocab_size) is not int or model_vocab_size < approval["tokenizer_vocab_size"]:
+            raise ValueError("Model vocab_size must be at least the verified tokenizer vocabulary size.")
 
     manifest_file = Path(manifest_path).resolve()
     with np.load(approval["dataset_path"], allow_pickle=False) as archive:
@@ -306,6 +313,8 @@ def train_specialist(
             raise ValueError("Resume model or approved dataset differs from checkpoint.")
         if state.get("model_config") != config["model_config"]:
             raise ValueError("Resume model configuration differs from checkpoint.")
+        if state.get("tokenizer_sha256") != approval["tokenizer_sha256"]:
+            raise ValueError("Resume tokenizer differs from the verified specialist tokenizer.")
         model.load_state_dict(state["model_state"])
         optimizer.load_state_dict(state["optimizer_state"])
         _restore_rng_state(state["rng_state"])
@@ -329,7 +338,11 @@ def train_specialist(
         if not torch.isfinite(loss):
             raise FloatingPointError(f"Non-finite {model_id} training loss at step {step}.")
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), float(config["grad_clip"]))
+        grad_norm = torch.nn.utils.clip_grad_norm_(
+            model.parameters(), float(config["grad_clip"]), error_if_nonfinite=True
+        )
+        if not torch.isfinite(grad_norm).item():
+            raise FloatingPointError(f"Non-finite {model_id} gradient norm at step {step}.")
         optimizer.step()
 
         if step % config["eval_interval"] == 0 or step == config["max_steps"] - 1 or _STOP_REQUESTED:
@@ -355,6 +368,7 @@ def train_specialist(
                 "model_state": model.state_dict(),
                 "optimizer_state": optimizer.state_dict(),
                 "dataset_sha256": approval["dataset_sha256"],
+                "tokenizer_sha256": approval["tokenizer_sha256"],
                 "rng_state": _capture_rng_state(),
             })
             write_json_atomic({
@@ -362,6 +376,7 @@ def train_specialist(
                 "release_status": "NOT_RELEASED",
                 "model_id": model_id, "step": step,
                 "dataset_sha256": approval["dataset_sha256"],
+                "tokenizer_sha256": approval["tokenizer_sha256"],
                 "checkpoint_sha256": checkpoint_hash,
                 "validation_loss": last_validation,
                 "note": "Training alone does not authorize registry status=trained; run independent quality and safety evaluation."
@@ -390,10 +405,12 @@ def train_specialist(
         "model_id": model_id,
         "steps": config["max_steps"],
         "dataset_sha256": approval["dataset_sha256"],
+        "tokenizer_sha256": approval["tokenizer_sha256"],
         "checkpoint_sha256": _sha256(checkpoint_path),
         "validation_loss": last_validation,
         "held_out_test_loss": test_loss,
         "sample_counts": approval["split_counts"],
+        "provenance_group_count": approval["group_count"],
         "device": str(device),
         "note": "Independent benchmark, calibration, safety review and release approval remain required."
     }
