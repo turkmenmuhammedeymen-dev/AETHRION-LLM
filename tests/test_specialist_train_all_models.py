@@ -52,6 +52,7 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
         )
         arrays = {
             "sample_id": np.asarray([f"{model_id}-{i}" for i in range(n)]),
+            "group_id": np.asarray([f"{model_id}-group-{i}" for i in range(n)]),
             "split": np.asarray(splits),
         }
         ids = rng.integers(1, 255, size=(n, 8), dtype=np.int64)
@@ -121,6 +122,10 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
                 )
                 dataset = root / "synthetic_data.npz"
                 np.savez(dataset, **self._arrays(model_id))
+                tokenizer_path = root / "tokenizer.json"
+                if model_id != "vocoder":
+                    from aethrion.tokenizer import ByteBPETokenizer
+                    ByteBPETokenizer().save(tokenizer_path)
                 audio = model_id in {"asr","tts","vocoder"}
                 source_record = {
                     "source_id":"generated-test-fixture",
@@ -148,6 +153,9 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
                     "safety_min_per_class":25 if model_id == "safety" else None,
                     "dataset_path":dataset.name,
                     "dataset_sha256":hashlib.sha256(dataset.read_bytes()).hexdigest(),
+                    **({"tokenizer_path": tokenizer_path.name,
+                        "tokenizer_sha256": hashlib.sha256(tokenizer_path.read_bytes()).hexdigest()}
+                       if model_id != "vocoder" else {}),
                     "sources":[source_record],
                     "synthetic_test_only":True,
                 }), encoding="utf-8")
