@@ -18,7 +18,7 @@ def require_api_token(authorization: str | None = Header(default=None)) -> None:
     if (
         not separator
         or scheme.lower() != "bearer"
-        or not secrets.compare_digest(supplied, expected)
+        or not secrets.compare_digest(supplied.encode("utf-8"), expected.encode("utf-8"))
     ):
         raise HTTPException(
             status_code=401,
