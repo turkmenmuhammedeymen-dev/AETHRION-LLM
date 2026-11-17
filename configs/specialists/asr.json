@@ -1,0 +1,21 @@
+{
+  "model_id": "asr",
+  "model_config": {
+    "vocab_size": 2048,
+    "n_mels": 80,
+    "width": 128,
+    "layers": 4,
+    "heads": 4,
+    "dropout": 0.1,
+    "blank_id": 0
+  },
+  "output_dir": "artifacts/models/asr",
+  "seed": 42,
+  "max_steps": 2000,
+  "batch_size": 4,
+  "learning_rate": 0.0003,
+  "weight_decay": 0.01,
+  "grad_clip": 1,
+  "eval_interval": 100,
+  "save_interval": 100
+}
