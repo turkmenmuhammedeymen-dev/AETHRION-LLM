@@ -80,6 +80,11 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         response=self.client.get("/health")
         self.assertEqual(response.status_code,200)
 
+    def test_protected_routes_fail_closed_when_server_token_is_unset(self):
+        with patch.dict("os.environ", {"AETHRION_API_TOKEN": ""}):
+            response=self.client.get("/capabilities")
+        self.assertEqual(response.status_code,503)
+
     def test_protected_routes_reject_missing_or_invalid_bearer_token(self):
         missing=self.client.get("/capabilities")
         invalid=self.client.get("/capabilities",headers={"Authorization":"Bearer wrong-token"})
