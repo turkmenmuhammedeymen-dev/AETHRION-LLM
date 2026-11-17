@@ -93,3 +93,24 @@ manifest validator fails, a hash differs, the runtime is out of storage, or a
 checkpoint cannot be verified. Never bypass the gate, lower the validation
 thresholds, or label a model trained without its actual checkpoint and
 evaluation evidence.
+
+
+## Hugging Face ZeroGPU architecture preflight
+
+The Space includes a **Run 11-model ZeroGPU preflight** button. It runs a
+short, synthetic forward/backward smoke test for BASE/CHAT and all ten
+specialists on the GPU allocated to that request. It reports the device,
+peak allocated VRAM, parameter counts, finite loss and gradient checks.
+
+This is an architecture/hardware test only:
+- It uses disposable synthetic tensors, not production or user data.
+- It does not call optimizer.step(), create checkpoints, or update the model
+  registry.
+- It does not train, fine-tune, or release any model.
+- All eleven models remain NOT_RELEASED after a successful preflight.
+
+The test is useful for catching import, model-construction, CUDA allocation,
+forward-pass, loss and backward-pass problems before an approved dataset is
+available. A successful result is not evidence of model quality or production
+training readiness. The ZeroGPU request is short-lived; it is not a persistent
+training worker.
