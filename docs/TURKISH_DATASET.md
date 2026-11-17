@@ -60,7 +60,8 @@ encoding, privacy, and license compatibility.
 ## Train and evaluate
 
 ~~~bash
-python -m aethrion.tokenizer --train data/processed/corpus.txt \
+python -m aethrion.tokenizer --train data/processed/corpus-train.txt \
+  --corpus data/processed/corpus.txt \
   --output artifacts/tokenizer.json --vocab-size 512 \
   --dataset-manifest data/processed/corpus_manifest.json \
   --source-manifest data/raw/cosmos/sources.json \
