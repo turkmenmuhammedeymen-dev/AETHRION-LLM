@@ -249,6 +249,7 @@ def main() -> int:
         "--dataset-manifest", str(DATASET_MANIFEST),
         "--source-manifest", str(SOURCE_MANIFEST),
         "--source-root", str(RAW_DIR),
+        "--corpus-report", str(REPORT),
         *review_arg,
     ])
 
