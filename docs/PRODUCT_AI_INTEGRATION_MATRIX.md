@@ -27,17 +27,16 @@ Existing entry points found in the current source:
 - `aethrionWorkforceRun`: bounded specialist workforce orchestration.
 - `kocChat`: Coach conversation.
 - `smartTranslate`: translation.
-- `generate3DWithHF`: legacy 3D generation entry point.
-- `createVideoClip`: video tooling entry point.
+- `generate3DWithHF`, `createVideoClip` and `smartTranslate` are named in the repository README's legacy function contract, but their active backend implementations were not located in the audited default-branch code search. The UI references `smartTranslate`; that reference alone does not prove a working server implementation. Treat these as compatibility targets requiring implementation-level verification, not confirmed live endpoints.
 
 Native mapping:
-- Chat, Coach, translation and worker reasoning -> AETHRION-BASE (`chat`).
+- Chat, Coach and worker reasoning -> AETHRION-BASE (`chat`). Translation can use BASE only after a dedicated multilingual translation benchmark passes; the legacy `smartTranslate` implementation is not verified.
 - Voice input/output -> AETHRION-ASR (`asr`) + BASE (`chat`) + AETHRION-TTS (`tts`) and separately released VOCODER.
 - Screen/camera understanding -> VISION + DOC + BASE. The current Vision model is only an image/text embedding similarity architecture; it is not visual question answering, OCR or temporal video understanding. Those tasks remain blocked until their architectures and evaluations support them.
 - Files -> DOC + BASE, with VISION/ASR/CODE selected only for compatible MIME types and trained adapters.
 - Workforce -> bounded orchestration over the same native specialists, not a claim that every registered role is a separate model.
-- 3D -> native 3D model. Current 3D output is a vertex-only point cloud, not a watertight textured mesh; image-to-3D conditioning is not implemented.
-- Video -> BASE may plan a script or edit decision list; deterministic media tooling may render supported edits. There is no first-party video-generation model in the current manifest, so generative video must remain unavailable.
+- 3D -> native 3D model. The documented `generate3DWithHF` name is not confirmed as an active backend implementation in the current default-branch audit. Current AETHRION-3D output is a vertex-only point cloud, not a watertight textured mesh; image-to-3D conditioning is not implemented.
+- Video -> BASE may plan a script or edit decision list; deterministic media tooling may render supported edits. The documented `createVideoClip` name is not confirmed as an active backend implementation in the current default-branch audit. There is no first-party video-generation model in the current manifest, so generative video must remain unavailable.
 
 ### SENTRIX
 
