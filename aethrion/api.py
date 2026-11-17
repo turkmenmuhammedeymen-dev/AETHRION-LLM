@@ -26,27 +26,11 @@ class FileRequest(BaseModel):
     question:str=Field(default="Summarize and analyze this file.",max_length=2000)
 
 def build_router(*, allow_remote_providers: bool = False, allow_local_model: bool = True)->tuple[CapabilityRouter,dict[str,Any]]:
-    router=CapabilityRouter(); providers={}
+    """Build a native-only router. Remote inference providers are forbidden."""
     if allow_remote_providers:
-        code_key=os.environ.get("AETHRION_CODE_API_KEY") or os.environ.get("OPENAI_API_KEY")
-        code_model=os.environ.get("AETHRION_CODE_MODEL")
-        code_base=os.environ.get("AETHRION_CODE_BASE_URL","https://api.openai.com/v1")
-        if code_key and code_model:
-            code=OpenAICompatibleChatProvider(code_key,code_model,code_base)
-            router.register(Capability.CODE,"openai-compatible-code",code)
-            router.register(Capability.FILE_ANALYSIS,"openai-compatible-file-agent",code)
-            providers["file_analysis"]=code
-        image_key=os.environ.get("AETHRION_IMAGE_API_KEY") or os.environ.get("OPENAI_API_KEY")
-        if image_key:
-            router.register(Capability.IMAGE,"openai-images",OpenAIImageProvider(
-                image_key,os.environ.get("AETHRION_IMAGE_MODEL","gpt-image-2"),
-                os.environ.get("AETHRION_IMAGE_BASE_URL","https://api.openai.com/v1")))
-        meshy_key=os.environ.get("MESHY_API_KEY")
-        if meshy_key:
-            meshy=MeshyTextTo3DProvider(meshy_key,os.environ.get("AETHRION_MESHY_BASE_URL","https://api.meshy.ai/openapi/v2"))
-            router.register(Capability.THREE_D,"meshy-text-to-3d",meshy); providers["3d"]=meshy
-        tavily_key=os.environ.get("TAVILY_API_KEY")
-        if tavily_key: router.register(Capability.RESEARCH,"tavily-search",TavilyResearchProvider(tavily_key))
+        raise ValueError("AETHRION native-only policy forbids external model and search APIs.")
+    router=CapabilityRouter()
+    providers={}
     checkpoint=Path(os.environ.get("AETHRION_CHECKPOINT","artifacts/checkpoint_last.pt"))
     tokenizer_path=Path(os.environ.get("AETHRION_TOKENIZER","artifacts/tokenizer.json"))
     if allow_local_model and checkpoint.is_file() and tokenizer_path.is_file():
@@ -55,23 +39,16 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
             from aethrion.chat import load_model
             from aethrion.tokenizer import ByteBPETokenizer
             device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            model=load_model(str(checkpoint),device); tokenizer=ByteBPETokenizer.load(tokenizer_path)
+            model=load_model(str(checkpoint),device)
+            tokenizer=ByteBPETokenizer.load(tokenizer_path)
             ids=tokenizer.encode(request.prompt)
-            if not ids: raise ValueError("Prompt produced no tokens.")
+            if not ids:
+                raise ValueError("Prompt produced no tokens.")
             context=torch.tensor([ids],dtype=torch.long,device=device)
-            with torch.no_grad(): result=model.generate(context,min(int(request.options.get("max_new_tokens",128)),512))
+            with torch.no_grad():
+                result=model.generate(context,min(int(request.options.get("max_new_tokens",128)),512))
             return {"text":tokenizer.decode(result[0,len(ids):].tolist()),"model":"AETHRIONLM"}
         router.register(Capability.CHAT,"local-aethrionlm",local_chat)
-    if allow_remote_providers:
-        audio_key=os.environ.get("AETHRION_AUDIO_API_KEY") or os.environ.get("OPENAI_API_KEY")
-        if audio_key:
-            from aethrion.audio import OpenAISpeechProvider
-            import base64
-            speech=OpenAISpeechProvider(api_key=audio_key)
-            def audio_handler(request:CapabilityRequest)->dict[str,Any]:
-                raw=speech.synthesize(request.prompt,voice=str(request.options.get("voice","marin")))
-                return {"format":"mp3","audio_base64":base64.b64encode(raw).decode("ascii")}
-            router.register(Capability.AUDIO,"openai-turn-based-speech",audio_handler)
     return router,providers
 
 app=FastAPI(title="AETHRION-LLM API",version="0.4.0")
@@ -100,7 +77,7 @@ def dispatch(request:DispatchRequest):
 @app.post("/files/analyze", dependencies=[Depends(require_api_token)])
 def analyze_file(request:FileRequest):
     provider=providers.get("file_analysis")
-    if provider is None: raise HTTPException(status_code=503,detail="Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL.")
+    if provider is None: raise HTTPException(status_code=503,detail="AETHRION-DOC is not trained or installed; no external model fallback is allowed.")
     try:
         result=FileAnalysisAgent(provider).analyze(request.filename,request.content_base64,request.question)
         return {"capability":"file_analysis","provider":"openai-compatible-file-agent","result":result}
@@ -110,7 +87,7 @@ def analyze_file(request:FileRequest):
 @app.get("/3d/tasks/{task_id}", dependencies=[Depends(require_api_token)])
 def get_3d_task(task_id:str):
     provider=providers.get("3d")
-    if provider is None: raise HTTPException(status_code=503,detail="MESHY_API_KEY is not configured.")
+    if provider is None: raise HTTPException(status_code=503,detail="AETHRION-3D is not trained or installed; no external model fallback is allowed.")
     try: return provider.get_task(task_id)
     except Exception as exc: raise HTTPException(status_code=502,detail=f"3D task lookup failed: {type(exc).__name__}") from exc
 
@@ -118,7 +95,7 @@ def get_3d_task(task_id:str):
 @app.post("/audio/transcriptions", dependencies=[Depends(require_api_token)])
 async def audio_transcriptions(file: UploadFile = File(...), language: str | None = Form(default=None)):
     if audio_provider is None:
-        raise HTTPException(status_code=503, detail="Configure AETHRION_AUDIO_API_KEY or OPENAI_API_KEY.")
+        raise HTTPException(status_code=503, detail="AETHRION-ASR is not trained or installed; no external speech API is used.")
     import tempfile
     suffix=Path(file.filename or "audio.bin").suffix[:12] or ".bin"
     raw=await file.read(OpenAISpeechProvider.MAX_AUDIO_BYTES+1)
@@ -133,7 +110,7 @@ async def audio_transcriptions(file: UploadFile = File(...), language: str | Non
 @app.post("/audio/speech", dependencies=[Depends(require_api_token)])
 def audio_speech(request: dict[str,Any]):
     if audio_provider is None:
-        raise HTTPException(status_code=503,detail="Configure AETHRION_AUDIO_API_KEY or OPENAI_API_KEY.")
+        raise HTTPException(status_code=503,detail="AETHRION-TTS is not trained or installed; no external speech API is used.")
     try:
         raw=audio_provider.synthesize(str(request.get("text","")),voice=str(request.get("voice","marin")))
         return Response(content=raw,media_type="audio/mpeg",headers={"Cache-Control":"no-store"})
@@ -162,7 +139,7 @@ def documents_create(request: dict[str,Any]):
 @app.post("/workspace/propose", dependencies=[Depends(require_api_token)])
 async def workspace_propose(file: UploadFile = File(...), task: str = Form(...)):
     if code_provider is None:
-        raise HTTPException(status_code=503,detail="Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL.")
+        raise HTTPException(status_code=503,detail="AETHRION-CODE is not trained or installed; no external code model is used.")
     raw=await file.read(8*1024*1024+1)
     if len(raw)>8*1024*1024: raise HTTPException(status_code=413,detail="Project ZIP exceeds 8 MiB.")
     try:
