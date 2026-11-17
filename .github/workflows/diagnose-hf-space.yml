@@ -44,6 +44,7 @@ jobs:
           stage = str(runtime.stage)
           print(f"SPACE_INITIAL_STAGE={stage}", flush=True)
           print(f"SPACE_HARDWARE={runtime.hardware}", flush=True)
+          print(f"SPACE_RUNTIME_RAW={runtime.raw!r}", flush=True)
 
           if stage in {"RUNTIME_ERROR", "PAUSED"}:
               print("SPACE_RESTART=REQUESTED", flush=True)
@@ -55,6 +56,7 @@ jobs:
               runtime = api.get_space_runtime(repo_id=repo_id)
               stage = str(runtime.stage)
               print(f"SPACE_STAGE_ATTEMPT_{attempt + 1}={stage}", flush=True)
+              print(f"SPACE_RUNTIME_RAW_ATTEMPT_{attempt + 1}={runtime.raw!r}", flush=True)
               if stage == "RUNNING":
                   break
               time.sleep(15)
