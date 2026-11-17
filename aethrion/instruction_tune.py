@@ -167,7 +167,7 @@ def tune_instructions(
                 "elapsed_seconds": time.perf_counter() - started,
             }
             with metrics_path.open("a", encoding="utf-8") as handle:
-                handle.write(json.dumps(record, ensure_ascii=False) + "\\n")
+                handle.write(json.dumps(record, ensure_ascii=False) + "\n")
                 handle.flush()
                 os.fsync(handle.fileno())
             print(json.dumps(record, ensure_ascii=False), flush=True)
