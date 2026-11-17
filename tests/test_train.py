@@ -3,11 +3,13 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import warnings
 from pathlib import Path
 import torch
 from aethrion.train import get_batch
 from aethrion.tokenizer import ByteBPETokenizer
 from aethrion.prepare_data import build_corpus
+from aethrion.checkpoint import load_checkpoint
 
 class TrainingUtilityTests(unittest.TestCase):
     def test_batch_shapes_and_shift(self):
@@ -116,9 +118,17 @@ class TrainingUtilityTests(unittest.TestCase):
             resumed = subprocess.run(command + ["--resume", str(checkpoint_path)],
                                      cwd=root, capture_output=True, text=True, timeout=120)
             self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
-            checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+            checkpoint = load_checkpoint(checkpoint_path, map_location="cpu")
             self.assertEqual(checkpoint["step"], 2)
-            self.assertEqual(checkpoint["format_version"], 2)
+            self.assertEqual(checkpoint["format_version"], 3)
+            self.assertTrue(Path(str(checkpoint_path) + ".sha256").is_file())
+
+            checkpoint_path.write_bytes(checkpoint_path.read_bytes() + b"tampered")
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                recovered = load_checkpoint(checkpoint_path, map_location="cpu")
+            self.assertEqual(recovered["step"], 1)
+            self.assertTrue(any("recovering from" in str(item.message) for item in caught))
 
             data_path.write_text(data_path.read_text(encoding="utf-8") + "tampered", encoding="utf-8")
             tampered = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=120)
