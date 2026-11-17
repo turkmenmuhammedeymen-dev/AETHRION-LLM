@@ -4,11 +4,13 @@ from pathlib import Path
 import random
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import torch
 
 from aethrion.checkpoint import save_checkpoint, load_checkpoint, sha256_file
+import aethrion.instruction_tune as instruction_tune
 from aethrion.instruction_tune import tune_instructions
 from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.tokenizer import ByteBPETokenizer
@@ -111,6 +113,34 @@ class InstructionTuningTests(unittest.TestCase):
             self.assertEqual(report["release_status"], "NOT_RELEASED")
             state = load_checkpoint(checkpoint)
             self.assertEqual(state["training_stage"], "instruction_tuning")
+
+    def test_instruction_tuning_signal_pause_saves_and_resumes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, config, base = self._fixture(root, approved=True)
+            config["max_steps"] = 2
+            instruction_tune._STOP_REQUESTED = False
+            original_step = torch.optim.AdamW.step
+
+            def step_then_request_stop(optimizer, *args, **kwargs):
+                result = original_step(optimizer, *args, **kwargs)
+                instruction_tune._STOP_REQUESTED = True
+                return result
+
+            try:
+                with patch.object(torch.optim.AdamW, "step", new=step_then_request_stop):
+                    paused = tune_instructions(config, manifest, base)
+                self.assertEqual(paused["status"], "instruction_tuning_interrupted_not_released")
+                self.assertEqual(paused["steps"], 1)
+                checkpoint = Path(config["output_dir"]) / "checkpoint_last.pt"
+                self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
+
+                instruction_tune._STOP_REQUESTED = False
+                resumed = tune_instructions(config, manifest, base, resume=checkpoint)
+                self.assertEqual(resumed["status"], "instruction_tuning_complete_not_released")
+                self.assertEqual(resumed["steps"], 2)
+            finally:
+                instruction_tune._STOP_REQUESTED = False
 
 
 if __name__ == "__main__":
