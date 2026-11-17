@@ -2,7 +2,7 @@ import os, base64, tempfile
 import spaces
 from pathlib import Path
 import gradio as gr
-from aethrion.api import build_router
+from aethrion.api import build_router, get_native_model_statuses
 from aethrion.document_tools import create_document, extract_document_text, replace_document_text
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
 
@@ -47,12 +47,15 @@ def _gpu_local_chat(prompt):
 
 
 def status():
-    available = router.available()
-    rows = [f"- **{c.value}**: {available.get(c.value, 'NOT CONFIGURED')}" for c in Capability]
+    try:
+        model_status = get_native_model_statuses()
+    except Exception as exc:
+        model_status = {"registry": "ERROR — " + type(exc).__name__}
+    rows = [f"- **AETHRION-{name.upper()}**: {state}" for name, state in model_status.items()]
     if not SPACE_AUTH_ENABLED:
         rows.append("- **Local model access**: DISABLED — Space authentication is not configured")
     rows.append("- **External model/API providers**: DISABLED — native-only policy")
-    return "### Capability status\n" + "\n".join(rows)
+    return "### Native model release status\\n" + "\\n".join(rows)
 
 def chat(message, history):
     if not SPACE_AUTH_ENABLED:
