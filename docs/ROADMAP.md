@@ -88,6 +88,17 @@ The test-only fixtures are not production training data.
 - [ ] Adversarial, multilingual and abstention benchmarks; independent safety review.
 - [ ] Enable only after documented acceptance criteria and explicit release approval.
 
+## Product integration
+
+- [x] Source-audit the AI entry points in Vizyon2026/AETHRION, SENTRIX and TdevKuantum.
+- [x] Add a machine-readable, local-only product route contract and validation tests.
+- [x] Record dataset candidates and source-specific rights blockers.
+- [ ] Implement authenticated native-model adapters in each product backend while preserving legacy endpoint contracts.
+- [ ] Run per-product account isolation, quotas, timeout, cancellation and live inference tests after native checkpoints are released.
+
+See [PRODUCT_AI_INTEGRATION_MATRIX.md](PRODUCT_AI_INTEGRATION_MATRIX.md) and
+[DATASET_SOURCE_REVIEW.md](DATASET_SOURCE_REVIEW.md).
+
 ## Integration and production
 - [x] Local-only model registry with strict artifact/release checks.
 - [x] Native-only API routing; no third-party model provider fallback.
