@@ -5,6 +5,8 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from aethrion.prepare_data import validate_training_approval
+
 class ByteBPETokenizer:
     def __init__(self, merges: list[tuple[int, int]] | None = None):
         self.merges = merges or []
@@ -115,7 +117,22 @@ def main() -> None:
     parser.add_argument("--output", required=True)
     parser.add_argument("--vocab-size", type=int, default=2048)
     parser.add_argument("--min-frequency", type=int, default=2)
+    parser.add_argument("--dataset-manifest", required=True,
+                        help="Dataset manifest; training_allowed must be explicitly true.")
+    parser.add_argument("--source-manifest", required=True,
+                        help="Manifest listing every approved training source.")
+    parser.add_argument("--source-root", required=True,
+                        help="Directory containing the files listed in the source manifest.")
+    parser.add_argument("--corpus-report", required=True,
+                        help="Audit report produced by prepare_data for the exact corpus.")
+    parser.add_argument("--source-review", default=None,
+                        help="Evidence-backed per-domain approval CSV for URL-attributed records.")
     args = parser.parse_args()
+    validate_training_approval(
+        Path(args.dataset_manifest), Path(args.source_manifest), Path(args.source_root),
+        Path(args.train), Path(args.corpus_report),
+        Path(args.source_review) if args.source_review else None,
+    )
     text = Path(args.train).read_text(encoding="utf-8")
     tokenizer = ByteBPETokenizer()
     tokenizer.train(text, args.vocab_size, args.min_frequency)
