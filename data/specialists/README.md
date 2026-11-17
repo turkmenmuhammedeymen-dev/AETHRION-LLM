@@ -57,6 +57,8 @@ copies the original source file for provenance, and writes SHA-256 hashes.
 
 Supported record shapes:
 
+- `chat`: `{"id":"...","group_id":"...","prompt":"...","response":"..."}`; only response tokens are supervised, while prompt and padding positions use the `-100` ignore index. The resulting `model_id: "chat"` manifest can be used by `aethrion.instruction_tune` after its source, privacy and tokenizer reviews are explicitly approved.
+
 - `code`: `{"id":"...","group_id":"...","text":"..."}`
 - `research`: `{"id":"...","group_id":"...","query":"...","passage":"..."}`
 - `document`: `{"id":"...","group_id":"...","text":"...","boxes":[[x0,y0,x1,y1],...],"layout_ids":[...],"tag_labels":[...]}`; layout arrays must align with byte-BPE token positions.
