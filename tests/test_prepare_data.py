@@ -137,7 +137,7 @@ class CorpusPreparationTests(unittest.TestCase):
                     },
                 ]
                 path.write_text(
-                    "".join(json.dumps(row, ensure_ascii=False) + "\\n" for row in rows),
+                    "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
                     encoding="utf-8",
                 )
                 entries.append({
