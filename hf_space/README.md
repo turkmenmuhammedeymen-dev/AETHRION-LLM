@@ -27,6 +27,6 @@ Remote provider adapters stay disabled unless both Space authentication variable
 are configured. This prevents an unauthenticated public Space from spending
 provider credits through its UI. The app still boots with provider features disabled.
 
-Chat remains unavailable until its matching checkpoint/tokenizer are supplied; no third-party model silently replaces it. 3D jobs are asynchronous. File-analysis inputs are bounded. Project changes are returned as review ZIPs and uploaded code is never executed. Audio is turn-based, not continuous realtime.
+Chat remains unavailable until its matching checkpoint/tokenizer are supplied; no third-party model silently replaces it. A trained checkpoint must be accompanied by its matching `checkpoint_last.pt.sha256` integrity file; only trusted project checkpoints should be uploaded. 3D jobs are asynchronous. File-analysis inputs are bounded. Project changes are returned as review ZIPs and uploaded code is never executed. Audio is turn-based, not continuous realtime.
 
 Training is not started in this Space. The repository manifest must remain training_allowed=false until the data-license and privacy approvals are complete.
