@@ -27,7 +27,7 @@ def _safe_name(name):
 def read_project_zip(raw):
     if not raw or len(raw)>MAX_ARCHIVE_BYTES:
         raise WorkspaceError("Project ZIP must be 1 byte–8 MiB.")
-    files={}; total=0
+    files={}; total=0; seen_names=set()
     try:
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
             entries=[i for i in archive.infolist() if not i.is_dir()]
@@ -40,12 +40,28 @@ def read_project_zip(raw):
                 if mode and (mode&0o170000)==0o120000:
                     raise WorkspaceError("Symbolic links are not accepted.")
                 name=_safe_name(info.filename)
+                if name in seen_names:
+                    raise WorkspaceError(f"Duplicate project path is not accepted: {name}.")
+                seen_names.add(name)
                 if info.file_size>MAX_FILE_BYTES:
                     raise WorkspaceError(f"{name} exceeds per-file size limit.")
-                content=archive.read(info); total+=len(content)
+                # Never call archive.read() on untrusted entries: it allocates the
+                # full decompressed payload before our text-budget check.
+                with archive.open(info, "r") as entry:
+                    content=entry.read(MAX_FILE_BYTES + 1)
+                    if len(content)>MAX_FILE_BYTES:
+                        raise WorkspaceError(f"{name} exceeds per-file size limit after decompression.")
+                    if entry.read(1):
+                        raise WorkspaceError(f"{name} exceeds per-file size limit after decompression.")
+                if len(content)!=info.file_size:
+                    raise WorkspaceError(f"{name} has inconsistent ZIP size metadata.")
+                total+=len(content)
                 if total>MAX_PROJECT_TEXT:
                     raise WorkspaceError("Project exceeds text budget.")
-                files[name]=content.decode("utf-8",errors="strict")
+                try:
+                    files[name]=content.decode("utf-8",errors="strict")
+                except UnicodeDecodeError as exc:
+                    raise WorkspaceError(f"{name} is not valid UTF-8.") from exc
     except zipfile.BadZipFile as exc:
         raise WorkspaceError("Upload is not a valid ZIP.") from exc
     return files
