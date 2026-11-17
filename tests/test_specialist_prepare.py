@@ -48,6 +48,39 @@ class SpecialistPreparationTests(unittest.TestCase):
                     evidence_uri="unit-test://source", max_length=16,
                 )
 
+    def test_safety_accepts_balanced_manual_labels_but_keeps_approval_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "safe.jsonl"
+            rows = []
+            index = 0
+            decisions = {"train": "ALLOW", "validation": "REVIEW", "test": "BLOCK"}
+            for split, decision in decisions.items():
+                for _ in range(25):
+                    while _split(f"safe-{index}", 1337) != split:
+                        index += 1
+                    rows.append({"id": f"safe-{index}", "text": "Benign policy example.",
+                                 "decision": decision, "reasons": [0]})
+                    index += 1
+            # Add the other two labels to every split so all three decisions are balanced.
+            for split in ("train", "validation", "test"):
+                for decision in ("ALLOW", "REVIEW", "BLOCK"):
+                    for _ in range(25):
+                        while _split(f"safe-{index}", 1337) != split:
+                            index += 1
+                        rows.append({"id": f"safe-{index}", "text": "Benign policy example.",
+                                     "decision": decision, "reasons": [0]})
+                        index += 1
+            self._write_jsonl(source, rows)
+            result = prepare_text_dataset(
+                source, model_id="safety", output_root=root / "prepared",
+                license_name="Unit test only", permitted_use="CI fixture only",
+                evidence_uri="unit-test://source", max_length=16,
+            )
+            manifest = json.loads(Path(result["manifest"]).read_text(encoding="utf-8"))
+            self.assertFalse(manifest["training_allowed"])
+            self.assertEqual(manifest["safety_min_per_class"], 25)
+
     def test_safety_requires_balanced_manual_labels_in_every_split(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
