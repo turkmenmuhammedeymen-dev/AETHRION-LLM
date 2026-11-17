@@ -241,7 +241,7 @@ class NativeModelRegistry:
             "training_complete_not_released", "instruction_tuning_complete_not_released"
         }:
             raise NativeModelUnavailable(f"{capability} training report is not a completed native training run.")
-        if training.get("checkpoint_sha256") and training["checkpoint_sha256"] != self._digest(checkpoint):
+        if training.get("checkpoint_sha256") != self._digest(checkpoint):
             raise NativeModelIntegrityError(f"{capability} checkpoint hash does not match the training report.")
         if evaluation.get("model_id") != capability or evaluation.get("dataset_sha256") != entry["dataset_sha256"]:
             raise NativeModelIntegrityError(f"{capability} evaluation report does not match its dataset.")
