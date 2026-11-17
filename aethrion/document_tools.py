@@ -110,7 +110,7 @@ def extract_document_text(path):
                     clipped = page_text[:remaining]
                     parts.append(clipped)
                     remaining -= len(clipped)
-            return "\\n".join(parts)[:MAX_TEXT_CHARS]
+            return "\n".join(parts)[:MAX_TEXT_CHARS]
         except Exception as exc:
             raise DocumentError("PDF could not be read.") from exc
     raise DocumentError("Supported formats: TXT, MD, LOG, JSON, CSV, DOCX and PDF.")
