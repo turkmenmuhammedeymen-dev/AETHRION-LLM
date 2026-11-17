@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -156,12 +157,18 @@ def build_local_research_index(
     processor_path = output / "processor.json"
     np.savez_compressed(index_path, passage_ids=token_array, passage_mask=mask_array)
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    repo_root = Path.cwd().resolve()
+    try:
+        index_relative = index_path.resolve().relative_to(repo_root).as_posix()
+        metadata_relative = metadata_path.resolve().relative_to(repo_root).as_posix()
+    except ValueError as exc:
+        raise ResearchIndexError("Research index output must be stored inside the repository root.") from exc
     processor = {
         "format": INDEX_FORMAT,
         "tokenizer_sha256": _sha256(tokenizer_file),
-        "index_path": str(index_path),
+        "index_path": index_relative,
         "index_sha256": _sha256(index_path),
-        "metadata_path": str(metadata_path),
+        "metadata_path": metadata_relative,
         "metadata_sha256": _sha256(metadata_path),
         "passage_count": len(chunks),
         "source_count": len(source_by_id),
