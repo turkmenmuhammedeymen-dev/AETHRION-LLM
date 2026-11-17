@@ -59,7 +59,7 @@ class NativeModelRuntimeTests(unittest.TestCase):
             "approval_evidence_sha256": digest(review),
             "benchmarks": {
                 "unit_test_pass_rate": {"metric": "pass_rate", "direction": "max", "value": 1.0, "threshold": 0.95, "passed": True, "evidence": "Synthetic test fixture"},
-                "security_regression": {"metric": "pass_rate", "direction": "max", "value": 1.0, "threshold": 1.0, "passed": True, "evidence": "Synthetic test fixture"}
+                "security_regression": {"metric": "regression_count", "direction": "min", "value": 0.0, "threshold": 0.0, "passed": True, "evidence": "No regression in synthetic test fixture"}
             }
         }), encoding="utf-8")
         card = folder / "MODEL_CARD.md"
