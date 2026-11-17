@@ -8,7 +8,7 @@ on:
   workflow_run:
     workflows: ["Deploy AETHRION-LLM to Hugging Face Space"]
     types: [completed]
-    branches: ["main"]
+    branches: ["main", "hardening/training-approval-gate"]
   workflow_dispatch:
 permissions:
   contents: read
