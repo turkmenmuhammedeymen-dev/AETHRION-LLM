@@ -45,7 +45,7 @@ class TokenizerTests(unittest.TestCase):
             output = work / "tokenizer.json"
             command = [
                 sys.executable, "-m", "aethrion.tokenizer",
-                "--train", str(corpus), "--output", str(output),
+                "--train", str(corpus), "--corpus", str(corpus), "--output", str(output),
                 "--dataset-manifest", str(dataset), "--source-manifest", str(sources),
                 "--source-root", str(raw), "--corpus-report", str(work / "missing-report.json"),
             ]
