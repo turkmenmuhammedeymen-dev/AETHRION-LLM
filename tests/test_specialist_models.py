@@ -48,6 +48,8 @@ class SpecialistModelTests(unittest.TestCase):
         self.assertEqual(tuple(predicted.shape), tuple(images.shape))
         loss = model.diffusion_loss(images, ids, timestep, noise)
         self.assertTrue(torch.isfinite(loss).item())
+        generated = model.generate(ids[:1], inference_steps=3)
+        self.assertEqual(tuple(generated.shape), (1, 3, 16, 16))
 
     def test_asr_ctc_objective_and_lengths(self):
         model = AETHRIONASR(ASRConfig(
@@ -91,6 +93,8 @@ class SpecialistModelTests(unittest.TestCase):
         timesteps = torch.tensor([2, 9])
         output = model(points, ids, timesteps)
         self.assertEqual(tuple(output.shape), tuple(points.shape))
+        generated = model.generate(ids[:1], inference_steps=3)
+        self.assertEqual(tuple(generated.shape), (1, 32, 3))
         self.assertTrue(torch.isfinite(model.diffusion_loss(points, ids, timesteps)).item())
         obj = point_cloud_to_obj(points[0])
         self.assertTrue(obj.startswith("# AETHRION point cloud"))
