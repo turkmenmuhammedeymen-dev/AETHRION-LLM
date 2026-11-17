@@ -9,16 +9,37 @@ from aethrion.file_agent import FileAnalysisAgent
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
 from aethrion.workspace_agent import ProjectWorkspaceAgent
 
-router, providers = build_router()
-audio = OpenAISpeechProvider() if (os.getenv("AETHRION_AUDIO_API_KEY") or os.getenv("OPENAI_API_KEY")) else None
+def _resolve_space_auth(environ=None):
+    env = os.environ if environ is None else environ
+    username = str(env.get("AETHRION_SPACE_USERNAME", "")).strip()
+    password = str(env.get("AETHRION_SPACE_PASSWORD", ""))
+    if bool(username) != bool(password):
+        raise RuntimeError("Set both AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD.")
+    return (username, password) if username and password else None
+
+
+SPACE_AUTH = _resolve_space_auth()
+REMOTE_PROVIDERS_ENABLED = SPACE_AUTH is not None
+router, providers = build_router(allow_remote_providers=REMOTE_PROVIDERS_ENABLED)
+audio = (
+    OpenAISpeechProvider()
+    if REMOTE_PROVIDERS_ENABLED and (os.getenv("AETHRION_AUDIO_API_KEY") or os.getenv("OPENAI_API_KEY"))
+    else None
+)
+
+
+def _remote_disabled_message():
+    return "Remote provider features are disabled. Configure AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD in Space Secrets to enable them safely."
 
 def dispatch(capability, prompt, options=None):
     return router.dispatch(capability, CapabilityRequest(prompt, options or {})).output
 
 def status():
-    available=router.available()
-    rows=[f"- **{c.value}**: {available.get(c.value, 'NOT CONFIGURED')}" for c in Capability]
-    return "### Capability status\n"+"\n".join(rows)
+    available = router.available()
+    rows = [f"- **{c.value}**: {available.get(c.value, 'NOT CONFIGURED')}" for c in Capability]
+    if not REMOTE_PROVIDERS_ENABLED:
+        rows.append("- **Remote providers**: DISABLED — Space authentication is not configured")
+    return "### Capability status\\n" + "\\n".join(rows)
 
 def chat(message, history):
     context=[]
@@ -36,7 +57,7 @@ def code(prompt):
         r=dispatch(Capability.CODE,prompt[:10000],{"max_tokens":4096,"temperature":0.1})
         return r.get("text",str(r)) if isinstance(r,dict) else str(r)
     except CapabilityUnavailable:
-        return "Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL."
+        return _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL."
 
 def image(prompt):
     try:
@@ -47,11 +68,12 @@ def image(prompt):
             p=Path(tempfile.gettempdir())/("aethrion-"+os.urandom(5).hex()+".png");p.write_bytes(raw);return str(p)
         return item.get("url")
     except CapabilityUnavailable as e:
-        raise gr.Error("Configure AETHRION_IMAGE_API_KEY or OPENAI_API_KEY.") from e
+        message = _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure AETHRION_IMAGE_API_KEY or OPENAI_API_KEY."
+        raise gr.Error(message) from e
 
 def three_d_text(prompt):
     provider=providers.get("3d")
-    if not provider:return "Configure MESHY_API_KEY.",""
+    if not provider:return (_remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure MESHY_API_KEY."),""
     try:
         r=provider(CapabilityRequest(prompt[:2000]))
         task_ref="text:"+r["task_id"]
@@ -70,7 +92,7 @@ def three_d_image(path,texture_prompt):
 
 def three_d_poll(task_ref):
     provider=providers.get("3d")
-    if not provider:return "Configure MESHY_API_KEY.",None
+    if not provider:return (_remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure MESHY_API_KEY."),None
     if not task_ref or ":" not in task_ref:return "Enter a task reference.",None
     kind,task_id=task_ref.split(":",1)
     try:
@@ -94,11 +116,11 @@ def three_d_poll(task_ref):
 
 def research(query):
     try:return str(dispatch(Capability.RESEARCH,query[:2000],{"max_results":6}))
-    except CapabilityUnavailable:return "Configure TAVILY_API_KEY."
+    except CapabilityUnavailable:return _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure TAVILY_API_KEY."
 
 def analyse(file_path,question):
     provider=providers.get("file_analysis")
-    if not provider:return "Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL."
+    if not provider:return _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure AETHRION_CODE_API_KEY and AETHRION_CODE_MODEL."
     if not file_path:return "Upload a file."
     p=Path(file_path)
     if p.stat().st_size>8*1024*1024:return "Maximum upload size: 8 MiB."
@@ -107,7 +129,7 @@ def analyse(file_path,question):
     return r.get("text",str(r)) if isinstance(r,dict) else str(r)
 
 def voice(path):
-    if audio is None:return "Configure AETHRION_AUDIO_API_KEY or OPENAI_API_KEY.",None
+    if audio is None:return (_remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure AETHRION_AUDIO_API_KEY or OPENAI_API_KEY."),None
     if not path:return "Record or upload audio.",None
     try:
         transcript=audio.transcribe(path,"tr")
@@ -136,7 +158,7 @@ def edit_doc(path,find_text,replacement,fmt):
 
 def edit_project(path,task):
     provider=providers.get("file_analysis")
-    if not provider:return "Configure code provider.",None
+    if not provider:return _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "Configure code provider.",None
     if not path:return "Upload a project ZIP.",None
     raw,summary=ProjectWorkspaceAgent(provider).propose(Path(path).read_bytes(),task)
     p=Path(tempfile.gettempdir())/("aethrion-review-"+os.urandom(5).hex()+".zip");p.write_bytes(raw)
@@ -199,5 +221,6 @@ if __name__ == "__main__":
         server_port=int(os.environ.get("PORT", "7860")),
         prevent_thread_lock=False,
         ssr_mode=False,
+        auth=SPACE_AUTH,
         show_error=True,
     )
