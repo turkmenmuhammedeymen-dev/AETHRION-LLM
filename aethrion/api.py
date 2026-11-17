@@ -24,7 +24,7 @@ class FileRequest(BaseModel):
     content_base64:str=Field(min_length=1,max_length=12_000_000)
     question:str=Field(default="Summarize and analyze this file.",max_length=2000)
 
-def build_router(*, allow_remote_providers: bool = True)->tuple[CapabilityRouter,dict[str,Any]]:
+def build_router(*, allow_remote_providers: bool = True, allow_local_model: bool = True)->tuple[CapabilityRouter,dict[str,Any]]:
     router=CapabilityRouter(); providers={}
     if allow_remote_providers:
         code_key=os.environ.get("AETHRION_CODE_API_KEY") or os.environ.get("OPENAI_API_KEY")
@@ -48,7 +48,7 @@ def build_router(*, allow_remote_providers: bool = True)->tuple[CapabilityRouter
         if tavily_key: router.register(Capability.RESEARCH,"tavily-search",TavilyResearchProvider(tavily_key))
     checkpoint=Path(os.environ.get("AETHRION_CHECKPOINT","artifacts/checkpoint_last.pt"))
     tokenizer_path=Path(os.environ.get("AETHRION_TOKENIZER","artifacts/tokenizer.json"))
-    if checkpoint.is_file() and tokenizer_path.is_file():
+    if allow_local_model and checkpoint.is_file() and tokenizer_path.is_file():
         def local_chat(request:CapabilityRequest)->dict[str,str]:
             import torch
             from aethrion.chat import load_model
