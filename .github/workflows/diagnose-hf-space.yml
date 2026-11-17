@@ -29,6 +29,8 @@ jobs:
       - name: Collect Space runtime, restart result, build logs and live HTTP checks
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          AETHRION_SPACE_USERNAME: ${{ secrets.AETHRION_SPACE_USERNAME }}
+          AETHRION_SPACE_PASSWORD: ${{ secrets.AETHRION_SPACE_PASSWORD }}
         run: |
           python - <<'PY'
           import os
@@ -45,24 +47,38 @@ jobs:
           api = HfApi(token=token)
           repo_id = "vizyon2027/AETHRION-LLM"
           url = "https://vizyon2027-aethrion-llm.hf.space"
+          space_username = os.environ.get("AETHRION_SPACE_USERNAME", "")
+          space_password = os.environ.get("AETHRION_SPACE_PASSWORD", "")
+          http_auth_configured = bool(space_username and space_password)
+
+          def redact(value):
+              value = str(value)
+              for secret in (token, space_username, space_password):
+                  if secret:
+                      value = value.replace(secret, "[REDACTED_SECRET]")
+              return value
 
           print(f"HUGGINGFACE_HUB_VERSION={huggingface_hub.__version__}", flush=True)
-          runtime = api.get_space_runtime(repo_id=repo_id)
-          stage = str(runtime.stage)
-          print(f"SPACE_INITIAL_STAGE={stage}", flush=True)
-          print(f"SPACE_HARDWARE={runtime.hardware}", flush=True)
-          print(f"SPACE_REQUESTED_HARDWARE={runtime.requested_hardware}", flush=True)
-          print(f"SPACE_RUNTIME_RAW={runtime.raw!r}", flush=True)
+          stage = "UNKNOWN"
+          runtime = None
+          try:
+              runtime = api.get_space_runtime(repo_id=repo_id)
+              stage = str(runtime.stage)
+              print(f"SPACE_INITIAL_STAGE={stage}", flush=True)
+              print(f"SPACE_HARDWARE={runtime.hardware}", flush=True)
+              print(f"SPACE_REQUESTED_HARDWARE={runtime.requested_hardware}", flush=True)
+              print(f"SPACE_RUNTIME_RAW={runtime.raw!r}", flush=True)
+          except Exception as exc:
+              print(f"SPACE_INITIAL_RUNTIME_ERROR={type(exc).__name__}: {redact(exc)[:2000]}", flush=True)
 
           # Avoid triggering paid upgraded hardware. A CPU-basic restart is safe to attempt.
-          if stage in {"RUNTIME_ERROR", "PAUSED"}:
+          if runtime is not None and stage in {"RUNTIME_ERROR", "PAUSED"}:
               if runtime.hardware == "cpu-basic":
                   try:
                       restarted = api.restart_space(repo_id=repo_id, token=token, factory_reboot=False)
                       print(f"SPACE_RESTART_REQUEST=ACCEPTED stage={getattr(restarted, 'stage', 'unknown')}", flush=True)
                   except Exception as exc:
-                      message = str(exc).replace(token, "[REDACTED_HF_TOKEN]")
-                      print(f"SPACE_RESTART_REQUEST=FAILED type={type(exc).__name__} message={message[:2000]}", flush=True)
+                      print(f"SPACE_RESTART_REQUEST=FAILED type={type(exc).__name__} message={redact(exc)[:2000]}", flush=True)
               else:
                   print("SPACE_RESTART_REQUEST=SKIPPED reason=hardware_may_be_billable", flush=True)
 
@@ -75,7 +91,7 @@ jobs:
                   if stage in {"RUNNING", "RUNTIME_ERROR", "BUILD_ERROR", "CONFIG_ERROR"}:
                       break
               except Exception as exc:
-                  print(f"SPACE_POLL_ERROR={type(exc).__name__}: {str(exc)[:1000]}", flush=True)
+                  print(f"SPACE_POLL_ERROR={type(exc).__name__}: {redact(exc)[:1000]}", flush=True)
               time.sleep(15)
 
           for label, build in (("BUILD_LOGS", True), ("RUNTIME_LOGS", False)):
@@ -92,32 +108,40 @@ jobs:
 
           print("\n===== HTTP HEALTH CHECK =====", flush=True)
           failed = False
-          headers = {"Authorization": f"Bearer {token}"}
-          for endpoint in ("/", "/config", "/gradio_api/info"):
-              try:
-                  response = requests.get(url + endpoint, headers=headers, timeout=30)
-                  print(f"SPACE_HTTP_{endpoint}={response.status_code}", flush=True)
-                  if response.status_code != 200:
+          if not http_auth_configured:
+              print("SPACE_HTTP_SMOKE=SKIPPED reason=GitHub Actions secrets AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD are required for Gradio Basic Auth.", flush=True)
+          else:
+              for endpoint in ("/", "/config", "/gradio_api/info"):
+                  try:
+                      response = requests.get(
+                          url + endpoint,
+                          auth=(space_username, space_password),
+                          timeout=30,
+                      )
+                      print(f"SPACE_HTTP_{endpoint}={response.status_code}", flush=True)
+                      if response.status_code != 200:
+                          failed = True
+                          print(redact(response.text[:3000]), flush=True)
+                          continue
+                      if endpoint == "/config":
+                          config = response.json()
+                          count = len(config.get("components", []))
+                          print(f"GRADIO_COMPONENT_COUNT={count}", flush=True)
+                          if count < 20:
+                              failed = True
+                      elif endpoint == "/gradio_api/info":
+                          if not isinstance(response.json(), dict):
+                              failed = True
+                          else:
+                              print("GRADIO_API_INFO=PASS", flush=True)
+                  except Exception as exc:
                       failed = True
-                      print(response.text[:3000].replace(token, "[REDACTED_HF_TOKEN]"), flush=True)
-                      continue
-                  if endpoint == "/config":
-                      config = response.json()
-                      count = len(config.get("components", []))
-                      print(f"GRADIO_COMPONENT_COUNT={count}", flush=True)
-                      if count < 20:
-                          failed = True
-                  elif endpoint == "/gradio_api/info":
-                      if not isinstance(response.json(), dict):
-                          failed = True
-                      else:
-                          print("GRADIO_API_INFO=PASS", flush=True)
-              except Exception as exc:
-                  failed = True
-                  print(f"SPACE_HTTP_ERROR_{endpoint}={type(exc).__name__}: {str(exc)[:1000]}", flush=True)
+                      print(f"SPACE_HTTP_ERROR_{endpoint}={type(exc).__name__}: {redact(exc)[:1000]}", flush=True)
 
           print(f"SPACE_RUNTIME_STAGE_AT_CHECK={stage}", flush=True)
           if failed or stage != "RUNNING":
               raise SystemExit("SPACE_DIAGNOSTICS_FAILED: inspect runtime/build logs above.")
+          if not http_auth_configured:
+              raise SystemExit("SPACE_HTTP_SMOKE_NOT_RUN: add AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD as GitHub Actions repository secrets; keep matching values in Hugging Face Space Secrets.")
           print("SPACE_RUNTIME_DIAGNOSTICS_OK", flush=True)
           PY
