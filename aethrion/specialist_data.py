@@ -77,6 +77,8 @@ def _validate_modality_shapes(model_id: str, arrays: Any, sample_count: int) -> 
             labels = arrays["labels"]
             if labels.shape != ids.shape or not np.issubdtype(labels.dtype, np.integer):
                 raise SpecialistDataError("Instruction labels must be an integer array matching input_ids.")
+            if np.any((labels < 0) & (labels != -100)):
+                raise SpecialistDataError("Instruction labels may only use token IDs or the -100 ignore index.")
             if np.any(np.all(labels == -100, axis=1)):
                 raise SpecialistDataError("Every instruction sample must contain supervised response tokens.")
     elif model_id in {"vision", "image"}:
@@ -337,6 +339,13 @@ def validate_specialist_dataset(
             if np.any(values < 0) or np.any(values >= tokenizer_vocab_size):
                 raise SpecialistDataError(
                     f"{key} contains token IDs outside the verified tokenizer vocabulary."
+                )
+        if model_id == "chat":
+            labels = np.asarray(arrays["labels"])
+            response_tokens = labels[labels != -100]
+            if not response_tokens.size or np.any(response_tokens < 0) or np.any(response_tokens >= tokenizer_vocab_size):
+                raise SpecialistDataError(
+                    "Instruction response labels contain IDs outside the verified tokenizer vocabulary."
                 )
 
     return {
