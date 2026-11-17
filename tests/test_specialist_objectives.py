@@ -41,9 +41,11 @@ class SpecialistObjectiveSmokeTests(unittest.TestCase):
         elif model_id == "tts":
             arrays = {
                 "token_ids": ids,
-                "frame_to_token": np.tile(np.arange(4, dtype=np.int64), (n, 1)),
+                "token_mask": np.asarray([[1, 1, 1, 0], [1, 1, 1, 1]], dtype=np.bool_),
+                "frame_to_token": np.asarray([[0, 1, 2, 0], [0, 1, 2, 3]], dtype=np.int64),
+                "frame_mask": np.asarray([[1, 1, 1, 0], [1, 1, 1, 1]], dtype=np.bool_),
                 "target_mels": rng.normal(size=(n, 4, 16)).astype(np.float32),
-                "durations": np.ones((n, 4), dtype=np.int64),
+                "durations": np.asarray([[1, 1, 1, 0], [1, 1, 1, 1]], dtype=np.int64),
             }
         elif model_id == "vocoder":
             arrays = {
