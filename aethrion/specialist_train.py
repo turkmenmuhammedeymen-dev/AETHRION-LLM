@@ -113,11 +113,11 @@ def _loss(model: nn.Module, model_id: str, batch: dict[str, torch.Tensor]) -> to
         acoustic = model.acoustic_loss(
             batch["token_ids"], batch["frame_to_token"], batch["target_mels"], batch.get("frame_mask")
         )
-        duration = model.duration_loss(batch["token_ids"], batch["durations"])
+        duration = model.duration_loss(batch["token_ids"], batch["durations"], batch.get("token_mask"))
         return acoustic + 0.1 * duration
     if model_id == "vocoder":
         predicted = model(batch["target_mels"].transpose(1, 2))
-        return model.waveform_loss(predicted, batch["target_waveforms"])
+        return model.waveform_loss(predicted, batch["target_waveforms"], batch.get("waveform_mask"))
     if model_id == "3d":
         return model.diffusion_loss(batch["points"], batch["token_ids"])
     if model_id == "research":
