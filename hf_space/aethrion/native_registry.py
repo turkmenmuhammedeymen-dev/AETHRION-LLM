@@ -19,7 +19,7 @@ CAPABILITIES = frozenset({
 PROCESSOR_REQUIRED = frozenset({"vision", "image", "asr", "tts", "3d", "research", "document", "safety"})
 REQUIRED_BENCHMARK_DIRECTIONS = {
     "chat": {"held_out_lm_loss": "min", "instruction_following": "max"},
-    "code": {"unit_test_pass_rate": "max", "security_regression": "max"},
+    "code": {"unit_test_pass_rate": "max", "security_regression": "min"},
     "vision": {"recall_at_1": "max", "image_text_alignment": "max"},
     "image": {"fid_or_equivalent": "min", "prompt_alignment": "max", "image_safety": "max"},
     "asr": {"wer": "min", "cer": "min"},

@@ -110,3 +110,16 @@ licensed dataset manifest, tokenizer/processor, training and resume pipeline,
 verified checkpoint, quality benchmark, safety evaluation, local inference
 handler, UI integration, and end-to-end tests all exist and pass. Until then,
 the UI must label it as research/in development or unavailable, not ready.
+
+
+## Benchmark threshold direction
+
+The release registry enforces numeric thresholds and the direction fixed for
+each required benchmark; a manually entered `passed: true` is not sufficient.
+Lower-is-better metrics include WER, CER, FID (or equivalent), spectral
+distortion, Chamfer distance, false-negative rate, calibration error, and
+security-regression counts. Higher-is-better metrics include pass rates,
+recall, precision, image/text alignment, MOS, intelligibility, point-cloud
+validity, field F1, and exact-match scores. Every result must include the
+measured value, threshold, direction, and evidence, and the evaluation report
+must bind to the exact checkpoint hash being considered for release.
