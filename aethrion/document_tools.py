@@ -28,10 +28,10 @@ def _validate_docx_archive(raw: bytes) -> None:
                 if info.is_dir():
                     continue
                 name = info.filename
-                normalized = name.replace("\\\\", "/")
+                normalized = name.replace("\\", "/")
                 parts = PurePosixPath(normalized).parts
                 if (
-                    not normalized or "\\x00" in normalized
+                    not normalized or "\x00" in normalized
                     or normalized.startswith("/")
                     or any(part in {"", ".", ".."} for part in parts)
                     or normalized in seen
@@ -41,8 +41,6 @@ def _validate_docx_archive(raw: bytes) -> None:
                 seen.add(name)
                 if info.flag_bits & 0x1:
                     raise DocumentError("Encrypted DOCX entries are not accepted.")
-                if info.file_size > max_entry_bytes:
-                    raise DocumentError("DOCX archive contains an oversized entry.")
                 if info.file_size > max_entry_bytes:
                     raise DocumentError("DOCX archive contains an oversized entry.")
                 mode = (info.external_attr >> 16) & 0xFFFF
