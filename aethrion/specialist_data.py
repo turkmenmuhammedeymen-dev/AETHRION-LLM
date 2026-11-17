@@ -117,6 +117,8 @@ def _validate_modality_shapes(model_id: str, arrays: Any, sample_count: int) -> 
             raise SpecialistDataError("TTS sequence lengths are outside their padded arrays.")
         expected_token_mask = np.arange(ids.shape[1])[None, :] < token_lengths[:, None]
         expected_frame_mask = np.arange(alignment.shape[1])[None, :] < frame_lengths[:, None]
+        if np.any((token_mask != 0) & (token_mask != 1)) or np.any((frame_mask != 0) & (frame_mask != 1)):
+            raise SpecialistDataError("TTS token and frame masks must be binary.")
         if not np.array_equal(token_mask.astype(bool), expected_token_mask) or not np.array_equal(frame_mask.astype(bool), expected_frame_mask):
             raise SpecialistDataError("TTS masks do not match the declared sequence lengths.")
         if np.any(durations[token_mask.astype(bool)] < 1) or np.any(durations[~token_mask.astype(bool)] != 0):
