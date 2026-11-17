@@ -16,8 +16,8 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install Hugging Face client
-        run: python -m pip install --upgrade huggingface_hub
-      - name: Read Space runtime and logs
+        run: python -m pip install --upgrade huggingface_hub requests
+      - name: Wait for runtime and collect logs
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
@@ -25,6 +25,7 @@ jobs:
           import os
           import sys
           import time
+          import requests
           from huggingface_hub import HfApi
 
           token = os.environ.get("HF_TOKEN", "")
@@ -32,34 +33,45 @@ jobs:
               raise SystemExit("HF_TOKEN repository secret is missing.")
           api = HfApi(token=token)
           repo_id = "vizyon2027/AETHRION-LLM"
-
           runtime = None
-          for attempt in range(2):
-              try:
-                  runtime = api.get_space_runtime(repo_id=repo_id)
-                  stage = str(runtime.stage)
-                  print(f"SPACE_STAGE={stage}")
-                  print(f"SPACE_HARDWARE={runtime.hardware}")
-                  if stage not in {"BUILDING", "STARTING"}:
-                      break
-              except Exception as exc:
-                  print(f"RUNTIME_QUERY_ERROR={type(exc).__name__}: {exc}")
+          stage = "UNKNOWN"
+
+          for attempt in range(40):
+              runtime = api.get_space_runtime(repo_id=repo_id)
+              stage = str(runtime.stage)
+              print(f"SPACE_STAGE={stage}", flush=True)
+              print(f"SPACE_HARDWARE={runtime.hardware}", flush=True)
+              if stage not in {"BUILDING", "STARTING", "APP_STARTING"}:
                   break
-              time.sleep(10)
+              time.sleep(15)
 
           for label, build in (("BUILD_LOGS", True), ("RUNTIME_LOGS", False)):
-              print(f"\\n===== {label} =====")
+              print(f"\n===== {label} =====", flush=True)
               try:
                   lines = list(api.fetch_space_logs(repo_id=repo_id, build=build))
                   if not lines:
-                      print("(No log lines returned.)")
-                  for line in lines[-250:]:
+                      print("(No log lines returned.)", flush=True)
+                  for line in lines[-300:]:
                       safe = str(line).replace(token, "[REDACTED_HF_TOKEN]")
-                      print(safe, end="" if safe.endswith("\\n") else "\\n")
+                      print(safe, end="" if safe.endswith("\n") else "\n", flush=True)
               except Exception as exc:
-                  print(f"{label}_ERROR={type(exc).__name__}: {exc}")
+                  print(f"{label}_ERROR={type(exc).__name__}: {exc}", flush=True)
 
-          if runtime is None:
-              sys.exit(2)
-          print("\\nDiagnostics completed.")
+          url = "https://vizyon2027-aethrion-llm.hf.space"
+          print("\n===== HTTP HEALTH CHECK =====", flush=True)
+          try:
+              response = requests.get(url + "/config", timeout=30)
+              print(f"SPACE_HTTP_STATUS={response.status_code}", flush=True)
+              print(f"SPACE_CONFIG_CONTENT_TYPE={response.headers.get('content-type')}", flush=True)
+              if response.status_code != 200:
+                  print(response.text[:3000], flush=True)
+                  sys.exit(4)
+          except Exception as exc:
+              print(f"SPACE_HTTP_ERROR={type(exc).__name__}: {exc}", flush=True)
+              sys.exit(4)
+
+          if stage != "RUNNING":
+              print(f"SPACE_NOT_RUNNING_FINAL_STAGE={stage}", flush=True)
+              sys.exit(3)
+          print("SPACE_RUNTIME_DIAGNOSTICS_OK", flush=True)
           PY
