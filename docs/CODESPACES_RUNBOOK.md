@@ -1,5 +1,10 @@
 # AETHRION-LLM in GitHub Codespaces
 
+> **Optional fallback only:** Codespaces is not the primary workflow. Start with
+> [HUGGINGFACE_WORKFLOW.md](HUGGINGFACE_WORKFLOW.md). Use this runbook only when
+> GitHub's web editor/CI and the Hugging Face Space cannot complete a specific
+> development or diagnostic task.
+
 ## Purpose and limits
 
 Codespaces is the supported remote development environment for this repository.
