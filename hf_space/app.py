@@ -81,6 +81,30 @@ def code(prompt):
         return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-CODE is not trained or installed. No external code model is used."
 
 @spaces.GPU(duration=60)
+def vision_compare(image_path, text):
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    if not image_path:
+        return "Upload an image to compare."
+    if not isinstance(text, str) or not text.strip():
+        return "Enter text to compare with the image."
+    try:
+        result = dispatch(
+            Capability.VISION, text[:4000], {"image_path": str(image_path)}
+        )
+        score = float(result.get("similarity"))
+        return (
+            f"**Image/text embedding similarity:** {score:.4f}\\n\\n"
+            "This score compares representations; it is not a natural-language "
+            "image description or visual question-answering result."
+        )
+    except CapabilityUnavailable:
+        return "AETHRION-VISION is not trained and released yet. No external vision model is used."
+    except Exception as exc:
+        return "Native vision comparison failed: " + type(exc).__name__
+
+
+@spaces.GPU(duration=60)
 def image(prompt):
     if not SPACE_AUTH_ENABLED:
         raise gr.Error(_auth_required_message())
@@ -252,6 +276,13 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
         with gr.Tab("Image"):
             p=gr.Textbox(lines=3,label="Image prompt");o=gr.Image(type="filepath")
             gr.Button("Generate image").click(image,inputs=p,outputs=o)
+        with gr.Tab("Vision"):
+            vision_image=gr.Image(type="filepath",sources=["upload"],label="Upload image")
+            vision_text=gr.Textbox(lines=2,label="Text to compare with the image")
+            vision_result=gr.Markdown()
+            gr.Button("Compare image and text").click(
+                vision_compare,inputs=[vision_image,vision_text],outputs=vision_result
+            )
         with gr.Tab("3D Studio"):
             p=gr.Textbox(lines=3,label="Text-to-3D prompt");task_msg=gr.Markdown()
             task_ref=gr.Textbox(label="Local OBJ file path")
