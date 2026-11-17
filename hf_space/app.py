@@ -5,6 +5,7 @@ import gradio as gr
 from aethrion.api import build_router, get_native_model_statuses
 from aethrion.document_tools import create_document, extract_document_text, replace_document_text
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
+from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError
 
 def _resolve_space_auth(environ=None):
     env = os.environ if environ is None else environ
@@ -79,59 +80,106 @@ def code(prompt):
         return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-CODE is not trained or installed. No external code model is used."
 
 def image(prompt):
+    if not SPACE_AUTH_ENABLED:
+        raise gr.Error(_auth_required_message())
     try:
-        r=dispatch(Capability.IMAGE,prompt[:4000]); item=r.get("image",{})
-        if item.get("b64_json"):
-            raw=base64.b64decode(item["b64_json"],validate=True)
-            if len(raw)>20*1024*1024: raise gr.Error("Image too large.")
-            p=Path(tempfile.gettempdir())/("aethrion-"+os.urandom(5).hex()+".png");p.write_bytes(raw);return str(p)
-        return item.get("url")
-    except CapabilityUnavailable as e:
-        message = _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-IMAGE is not trained or installed. No external image model is used."
-        raise gr.Error(message) from e
+        result = dispatch(Capability.IMAGE, prompt[:4000], {"inference_steps": 50})
+        path = result.get("image_path") if isinstance(result, dict) else None
+        if not path or not Path(path).is_file():
+            raise gr.Error("AETHRION-IMAGE returned no local PNG file.")
+        return path
+    except CapabilityUnavailable as exc:
+        raise gr.Error("AETHRION-IMAGE is not trained and released yet.") from exc
+    except Exception as exc:
+        raise gr.Error("Native image generation failed: " + type(exc).__name__) from exc
 
 def three_d_text(prompt):
-    provider=providers.get("3d")
-    if not provider:return (_auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-3D is not trained or installed. No external 3D model is used."),""
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message(), ""
     try:
-        r=provider(CapabilityRequest(prompt[:2000]))
-        task_ref="text:"+r["task_id"]
-        return "Text-to-3D task created; status PENDING.",task_ref
-    except Exception as e:return "3D task failed: "+type(e).__name__,""
+        result = dispatch(Capability.THREE_D, prompt[:2000], {"inference_steps": 50})
+        path = result.get("asset_path") if isinstance(result, dict) else None
+        if not path or not Path(path).is_file():
+            return "AETHRION-3D returned no local OBJ file.", ""
+        return "Native AETHRION point cloud generated. This is a vertex-only OBJ, not a watertight mesh.", str(path)
+    except CapabilityUnavailable:
+        return "AETHRION-3D is not trained and released yet. No external 3D service is used.", ""
+    except Exception as exc:
+        return "Native 3D generation failed: " + type(exc).__name__, ""
 
 def three_d_image(path,texture_prompt):
-    provider=providers.get("3d")
-    if not provider:return (_auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-3D is not trained or installed. No external 3D model is used."),""
-    if not path:return "Upload a JPG, PNG or WebP reference image.",""
-    try:
-        r=provider.image_to_3d(path,texture_prompt or "")
-        task_ref="image:"+r["task_id"]
-        return "Image-to-3D task created; status PENDING.",task_ref
-    except Exception as e:return "Image-to-3D failed: "+type(e).__name__,""
+    return "Current AETHRION-3D release architecture supports text-conditioned point clouds only; image-conditioned 3D is not implemented.", ""
 
-def three_d_poll(task_ref):
-    return "AETHRION-3D is not trained or installed. No external 3D model or API is used.", None
+def three_d_poll(asset_path):
+    if asset_path and Path(asset_path).is_file():
+        return "Local OBJ point cloud is ready. It contains vertices only; no faces or textures.", asset_path
+    return "No local OBJ asset found. Generate a text-conditioned point cloud first.", None
 
 def research(query):
-    try:return str(dispatch(Capability.RESEARCH,query[:2000],{"max_results":6}))
-    except CapabilityUnavailable:return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-RESEARCH is not trained or its local index is not built. No external search API is used."
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    try:
+        result = dispatch(Capability.RESEARCH, query[:4000], {"top_k": 5})
+        rows = result.get("results", []) if isinstance(result, dict) else []
+        if not rows:
+            return "No matching passages were found in the locally approved AETHRION research index."
+        lines = ["## Local AETHRION research results"]
+        for row in rows:
+            lines.append(
+                f"### {row.get('title', 'Untitled')}\\n"
+                f"{row.get('excerpt', '')}\\n"
+                f"Source: {row.get('source_uri', 'unknown')}\\n"
+                f"License: {row.get('license', 'unknown')}\\n"
+                f"Relevance: {row.get('score', 0):.4f}"
+            )
+        return "\\n\\n".join(lines)
+    except CapabilityUnavailable:
+        return "AETHRION-RESEARCH model or local approved index is not ready. No hosted search API is used."
+    except Exception as exc:
+        return "Local research failed: " + type(exc).__name__
 
 def analyse(file_path,question):
-    return "AETHRION-DOC is not trained or installed. Local deterministic text extraction remains available."
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    if not file_path:
+        return "Upload a PDF, DOCX or supported text file."
+    try:
+        result = dispatch(
+            Capability.DOCUMENT,
+            str(question or "Analyze the document and identify key information."),
+            {"document_path": str(file_path)}
+        )
+        return (
+            f"**AETHRION-DOC result**\\n\\n{result.get('extractive_span', '')}"
+            f"\\n\\n**Limitations:** {result.get('limitations', '')}"
+            f"\\n\\n**Extracted text:**\\n{result.get('text', '')[:12000]}"
+        )
+    except CapabilityUnavailable:
+        return "AETHRION-DOC is not trained and released yet."
+    except Exception as exc:
+        return "Native document analysis failed: " + type(exc).__name__
 
 def voice(path):
-    if audio is None:return (_auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-ASR and AETHRION-TTS are not trained or installed. No external speech API is used."),None
-    if not path:return "Record or upload audio.",None
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message(), None
+    if not path:
+        return "Record or upload PCM WAV audio.", None
     try:
-        transcript=audio.transcribe(path,"tr")
-        try:
-            r=dispatch(Capability.CHAT,transcript,{"max_new_tokens":192})
-            answer=r.get("text",str(r)) if isinstance(r,dict) else str(r)
-        except CapabilityUnavailable:answer="Speech recognized; AETHRION's own chat model is not loaded."
-        raw=audio.synthesize(answer)
-        p=Path(tempfile.gettempdir())/("aethrion-voice-"+os.urandom(5).hex()+".mp3");p.write_bytes(raw)
-        return "**Transcript:** "+transcript+"\n\n**Answer:** "+answer,str(p)
-    except Exception as e:return "Audio failed: "+type(e).__name__,None
+        recognized = dispatch(Capability.ASR, "Transcribe the provided WAV audio.", {"audio_path": str(path)})
+        transcript = recognized.get("text", "")
+        if not transcript:
+            return "AETHRION-ASR returned an empty transcript.", None
+        answer = dispatch(Capability.CHAT, transcript, {"max_new_tokens": 192}).get("text", "")
+        spoken = dispatch(Capability.TTS, answer, {})
+        audio_path = spoken.get("audio_path")
+        return (
+            f"**Transcript:** {transcript}\\n\\n**AETHRION-BASE:** {answer}",
+            audio_path
+        )
+    except CapabilityUnavailable:
+        return "AETHRION-ASR, AETHRION-BASE, AETHRION-TTS or AETHRION-VOCODER is not trained and released yet.", None
+    except Exception as exc:
+        return "Native speech conversation failed: " + type(exc).__name__, None
 
 def make_doc(title,content,fmt):
     raw,name,mime=create_document(title,content,fmt)
@@ -148,7 +196,30 @@ def edit_doc(path,find_text,replacement,fmt):
     return "Edited copy created. Original file was not modified.",str(p)
 
 def edit_project(path,task):
-    return "AETHRION-CODE is not trained or installed. No external code model is used.", None
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message(), None
+    if not path:
+        return "Upload a project ZIP.", None
+    if not task or not task.strip():
+        return "Enter a project change request.", None
+    def local_code_provider(request):
+        return dispatch(Capability.CODE, request.prompt, {"max_new_tokens": 4096, "temperature": 0.1})
+    try:
+        raw, summary = ProjectWorkspaceAgent(local_code_provider).propose(
+            Path(path).read_bytes(), task
+        )
+        output = Path(tempfile.gettempdir()) / (
+            "aethrion-review-" + os.urandom(5).hex() + ".zip"
+        )
+        output.write_bytes(raw)
+        return summary + "\\n\\nUploaded code was never executed; review the ZIP before applying it.", str(output)
+    except CapabilityUnavailable:
+        return "AETHRION-CODE is not trained and released yet.", None
+    except WorkspaceError as exc:
+        return "Project proposal rejected: " + str(exc), None
+    except Exception as exc:
+        return "Project editing failed: " + type(exc).__name__, None
+
 
 
 with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.themes.Soft()) as demo:
@@ -181,7 +252,7 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             image_ref=gr.Image(type="filepath",sources=["upload"],label="Image-to-3D reference")
             texture=gr.Textbox(label="Optional texture prompt")
             gr.Button("Create from image").click(three_d_image,inputs=[image_ref,texture],outputs=[task_msg,task_ref])
-            task_status=gr.Markdown();model_file=gr.File(label="Generated GLB")
+            task_status=gr.Markdown();model_file=gr.File(label="Generated OBJ point cloud (vertices only)")
             gr.Button("Check task / download GLB").click(three_d_poll,inputs=task_ref,outputs=[task_status,model_file])
         with gr.Tab("Research"):
             q=gr.Textbox(lines=3,label="Research question");o=gr.Markdown()
