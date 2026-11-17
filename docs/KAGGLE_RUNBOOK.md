@@ -8,8 +8,8 @@ In a fresh Kaggle notebook, enable a GPU accelerator if available, then run:
 from pathlib import Path
 import subprocess, sys
 
-REPO = "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM.git"
-BRANCH = "feature/turkish-corpus-pipeline-sync"
+REPO = "https://github.com/EMSYLLIS/AETHRION-LLM.git"
+BRANCH = "hardening/training-approval-gate"
 ROOT = Path("/kaggle/working/AETHRION-LLM")
 
 if not (ROOT / ".git").exists():
