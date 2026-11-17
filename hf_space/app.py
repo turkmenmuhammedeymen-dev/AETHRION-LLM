@@ -90,7 +90,7 @@ def gpu_model_preflight():
     try:
         report = run_zero_gpu_preflight()
     except Exception as exc:
-        return "### Native model GPU preflight failed\\n" + type(exc).__name__ + ": " + str(exc)[:300]
+        return "### Native model GPU preflight failed\n" + type(exc).__name__ + ": " + str(exc)[:300]
     lines = [
         "### AETHRION native-model ZeroGPU preflight",
         f"- **GPU:** {report['device']}",
@@ -103,7 +103,7 @@ def gpu_model_preflight():
     ]
     for row in report["results"]:
         lines.append(
-            f"| {row['model']} | {row['status']} | {row.get('parameters', '—'):,} | {row.get('synthetic_loss', '—')} |"
+            f"| {row['model']} | {row['status']} | {row.get('parameters', 0):,} | {row.get('synthetic_loss', '—')} |"
         )
     lines.extend([
         "",
