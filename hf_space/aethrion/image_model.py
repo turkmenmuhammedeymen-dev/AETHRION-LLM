@@ -95,7 +95,7 @@ class AETHRIONImageGenerator(nn.Module):
         cond = self._condition(token_ids, timesteps)
         x0 = self.input(noisy_images)
         x1 = self.down(F.silu(x0))
-        x1 = self.mid(self.down_block(x1), cond)
+        x1 = self.mid(self.down_block(x1, cond), cond)
         x1 = F.interpolate(x1, size=x0.shape[-2:], mode="nearest")
         x = self.up(torch.cat((x0, x1), dim=1))
         return self.output(self.up_block(x, cond))
