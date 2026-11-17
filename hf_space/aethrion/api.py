@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
+from aethrion.native_registry import NativeModelRegistry,NativeModelUnavailable
 from aethrion.document_tools import create_document,extract_document_text,DocumentError
 from aethrion.security import require_api_token
 from fastapi import UploadFile,File,Form,Response,Depends
@@ -22,29 +23,36 @@ class FileRequest(BaseModel):
     question:str=Field(default="Summarize and analyze this file.",max_length=2000)
 
 def build_router(*, allow_remote_providers: bool = False, allow_local_model: bool = True)->tuple[CapabilityRouter,dict[str,Any]]:
-    """Build a native-only router. Remote inference providers are forbidden."""
+    """Build a native-only router from hash-verified local first-party artifacts."""
     if allow_remote_providers:
         raise ValueError("AETHRION native-only policy forbids external model and search APIs.")
     router=CapabilityRouter()
     providers={}
-    checkpoint=Path(os.environ.get("AETHRION_CHECKPOINT","artifacts/checkpoint_last.pt"))
-    tokenizer_path=Path(os.environ.get("AETHRION_TOKENIZER","artifacts/tokenizer.json"))
-    if allow_local_model and checkpoint.is_file() and tokenizer_path.is_file():
-        def local_chat(request:CapabilityRequest)->dict[str,str]:
-            import torch
-            from aethrion.chat import load_model
-            from aethrion.tokenizer import ByteBPETokenizer
-            device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            model=load_model(str(checkpoint),device)
-            tokenizer=ByteBPETokenizer.load(tokenizer_path)
-            ids=tokenizer.encode(request.prompt)
-            if not ids:
-                raise ValueError("Prompt produced no tokens.")
-            context=torch.tensor([ids],dtype=torch.long,device=device)
-            with torch.no_grad():
-                result=model.generate(context,min(int(request.options.get("max_new_tokens",128)),512))
-            return {"text":tokenizer.decode(result[0,len(ids):].tolist()),"model":"AETHRIONLM"}
-        router.register(Capability.CHAT,"local-aethrionlm",local_chat)
+    if allow_local_model:
+        manifest=Path(os.environ.get("AETHRION_MODEL_MANIFEST","models/manifest.json"))
+        registry=NativeModelRegistry(Path.cwd(),manifest)
+        try:
+            artifacts=registry.resolve("chat")
+        except NativeModelUnavailable:
+            artifacts=None
+        if artifacts is not None:
+            def local_chat(request:CapabilityRequest)->dict[str,str]:
+                import torch
+                from aethrion.chat import load_model
+                from aethrion.tokenizer import ByteBPETokenizer
+                device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                model=load_model(str(artifacts.checkpoint),device)
+                if artifacts.tokenizer is None:
+                    raise RuntimeError("AETHRION-BASE tokenizer is not registered.")
+                tokenizer=ByteBPETokenizer.load(artifacts.tokenizer)
+                ids=tokenizer.encode(request.prompt)
+                if not ids:
+                    raise ValueError("Prompt produced no tokens.")
+                context=torch.tensor([ids],dtype=torch.long,device=device)
+                with torch.no_grad():
+                    result=model.generate(context,min(int(request.options.get("max_new_tokens",128)),512))
+                return {"text":tokenizer.decode(result[0,len(ids):].tolist()),"model":"AETHRION-BASE"}
+            router.register(Capability.CHAT,"local-aethrion-base",local_chat)
     return router,providers
 
 app=FastAPI(title="AETHRION-LLM API",version="0.4.0")
@@ -67,7 +75,7 @@ def dispatch(request:DispatchRequest):
         return {"capability":result.capability.value,"provider":result.provider,"result":result.output}
     except (ValueError,TypeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
     except CapabilityUnavailable as exc: raise HTTPException(status_code=503,detail=str(exc)) from exc
-    except Exception as exc: raise HTTPException(status_code=502,detail=f"Provider operation failed: {type(exc).__name__}") from exc
+    except Exception as exc: raise HTTPException(status_code=500,detail=f"Native capability operation failed: {type(exc).__name__}") from exc
 
 @app.post("/files/analyze", dependencies=[Depends(require_api_token)])
 def analyze_file(request:FileRequest):
