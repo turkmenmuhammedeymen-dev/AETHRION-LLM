@@ -32,6 +32,39 @@ class SpecialistPreparationTests(unittest.TestCase):
             with self.assertRaises(SpecialistDataError):
                 validate_specialist_dataset(result["manifest"])
 
+    def test_chat_instruction_preparation_masks_prompt_and_pads_response_only_labels(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "chat.jsonl"
+            rows = [
+                {
+                    "id": f"chat-{index}",
+                    "group_id": f"conversation-group-{index}",
+                    "prompt": f"Türkçe kullanıcı sorusu {index} nedir?",
+                    "response": f"Bu, doğrulanmış test yanıtı {index} örneğidir.",
+                }
+                for index in range(90)
+            ]
+            self._write_jsonl(source, rows)
+            result = prepare_text_dataset(
+                source, model_id="chat", output_root=root / "prepared",
+                license_name="Unit test only", permitted_use="CI fixture only",
+                evidence_uri="unit-test://source", source_uri="unit-test://dataset",
+                max_length=64,
+            )
+            with np.load(result["dataset"], allow_pickle=False) as arrays:
+                self.assertEqual(set(arrays.files), {"sample_id", "group_id", "split", "input_ids", "labels"})
+                for labels in arrays["labels"]:
+                    supervised = np.flatnonzero(labels != -100)
+                    self.assertGreater(len(supervised), 0)
+                    self.assertTrue(np.all(labels[:supervised[0]] == -100))
+                    self.assertTrue(np.all(labels[supervised[-1] + 1:] == -100))
+                manifest = json.loads(Path(result["manifest"]).read_text(encoding="utf-8"))
+                self.assertEqual(manifest["modality"], "text")
+                self.assertFalse(manifest["training_allowed"])
+                self.assertFalse(manifest["owner_approval"])
+                self.assertEqual(sum(result["split_counts"].values()), len(rows))
+
     def test_document_rejects_misaligned_boxes(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
