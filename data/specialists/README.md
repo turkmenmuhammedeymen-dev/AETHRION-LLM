@@ -119,6 +119,44 @@ hop length matches the current model config (256 samples); ASR/TTS default to
 must review the actual license and speaker-consent scope before any approval
 is changed. The tool does not download datasets or accept terms.
 
+## Raw image and point-cloud preparation (VISION, IMAGE, 3D)
+
+Install the optional image decoder once:
+
+```bash
+python -m pip install -e ".[visual]"
+```
+
+VISION and IMAGE JSONL records use `id`, `image_path` (relative to the JSONL
+folder), and `caption`. Images are decoded as RGB, bounded, resized to the
+exact native model input size (VISION 224px; IMAGE 64px), and stored as uint8
+NCHW arrays. The trainer performs the [-1,1] conversion.
+
+3D records use `id`, `point_path` (a local NPY file), and `text`. Point
+clouds must already be finite and normalized to [-1,1]; the tool deterministically
+samples or repeats points to the configured count (512 by default). This
+trains point-cloud generation only, not watertight mesh generation.
+
+Example:
+
+```bash
+python -m aethrion.specialist_prepare_visual \
+  --input data/incoming/vision-reviewed.jsonl \
+  --model vision \
+  --output-root data/specialists \
+  --license "record exact image rights" \
+  --permitted-use "record exact permitted use" \
+  --evidence-uri "https://source.example/terms" \
+  --source-uri "https://source.example/dataset-release"
+```
+
+Per-asset records may override `source_uri`, `license`, `permitted_use`
+and `evidence_uri`. This is important for collections such as 3D asset
+repositories where each object can carry a different license. The tool still
+sets all approval flags false. For DOCUMENT, this tool does not perform OCR:
+supply reviewed OCR text, token-aligned normalized boxes and label IDs to the
+text/document JSONL adapter. No OCR quality or image rights are inferred.
+
 ## Training
 
 Create a per-model manifest by copying `manifest.template.json`, filling the
