@@ -6,6 +6,7 @@ import numpy as np
 import torch
 from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.tokenizer import ByteBPETokenizer
+from aethrion.prepare_data import validate_training_approval
 
 def set_seed(seed: int) -> None:
     random.seed(seed); np.random.seed(seed); torch.manual_seed(seed)
@@ -61,6 +62,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/small.json")
     parser.add_argument("--resume", default=None)
+    parser.add_argument("--dataset-manifest", required=True,
+                        help="Dataset manifest; training_allowed must be explicitly true.")
+    parser.add_argument("--source-manifest", required=True,
+                        help="Manifest listing every approved training source.")
+    parser.add_argument("--source-root", required=True,
+                        help="Directory containing the files listed in the source manifest.")
+    parser.add_argument("--source-review", default=None,
+                        help="Evidence-backed per-domain approval CSV for URL-attributed records.")
     args = parser.parse_args()
     cfg = json.loads(Path(args.config).read_text(encoding="utf-8"))
     required = ("seed","data_path","tokenizer_path","output_dir","vocab_size","block_size","n_layer","n_head",
@@ -74,6 +83,13 @@ def main() -> None:
         if cfg[key] < 1: raise ValueError(f"{key} must be >= 1")
     if cfg["warmup_steps"] < 0 or cfg["learning_rate"] <= 0 or cfg["min_learning_rate"] < 0:
         raise ValueError("Invalid learning-rate or warmup configuration")
+    validate_training_approval(
+        Path(args.dataset_manifest),
+        Path(args.source_manifest),
+        Path(args.source_root),
+        Path(args.source_review) if args.source_review else None,
+    )
+    print("Training approval gate passed: dataset, source manifest, and URL reviews verified.")
     set_seed(cfg["seed"])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
