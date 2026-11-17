@@ -20,7 +20,7 @@ def _resolve_space_auth(environ=None):
 
 SPACE_AUTH = _resolve_space_auth()
 REMOTE_PROVIDERS_ENABLED = SPACE_AUTH is not None
-router, providers = build_router(allow_remote_providers=REMOTE_PROVIDERS_ENABLED)
+router, providers = build_router(allow_remote_providers=REMOTE_PROVIDERS_ENABLED, allow_local_model=REMOTE_PROVIDERS_ENABLED)
 audio = (
     OpenAISpeechProvider()
     if REMOTE_PROVIDERS_ENABLED and (os.getenv("AETHRION_AUDIO_API_KEY") or os.getenv("OPENAI_API_KEY"))
@@ -29,7 +29,7 @@ audio = (
 
 
 def _remote_disabled_message():
-    return "Remote provider features are disabled. Configure AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD in Space Secrets to enable them safely."
+    return "Model and provider features are disabled. Configure AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD in Space Secrets to enable authenticated access."
 
 def dispatch(capability, prompt, options=None):
     return router.dispatch(capability, CapabilityRequest(prompt, options or {})).output
@@ -38,7 +38,7 @@ def status():
     available = router.available()
     rows = [f"- **{c.value}**: {available.get(c.value, 'NOT CONFIGURED')}" for c in Capability]
     if not REMOTE_PROVIDERS_ENABLED:
-        rows.append("- **Remote providers**: DISABLED — Space authentication is not configured")
+        rows.append("- **Authenticated model/providers**: DISABLED — Space authentication is not configured")
     return "### Capability status\n" + "\n".join(rows)
 
 def chat(message, history):
@@ -50,7 +50,7 @@ def chat(message, history):
         result=dispatch(Capability.CHAT,"\n".join(context+["user: "+message[:4000],"assistant:"]),{"max_new_tokens":256})
         return result.get("text",str(result)) if isinstance(result,dict) else str(result)
     except CapabilityUnavailable:
-        return "AETHRION's own trained checkpoint/tokenizer is not loaded. No third-party model is silently substituted."
+        return _remote_disabled_message() if not REMOTE_PROVIDERS_ENABLED else "AETHRION's own trained checkpoint/tokenizer is not loaded. No third-party model is silently substituted."
 
 def code(prompt):
     try:
