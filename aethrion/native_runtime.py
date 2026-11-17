@@ -244,10 +244,13 @@ class NativeModelRuntime:
                     "Image exceeds safe dimensions (8192 per side; 40 megapixels total)."
                 )
             source.load()
-            source = source.convert("RGB").resize((224, 224))
+            model = self.model("vision")
+            tokenizer = self.tokenizer("vision")
+            target_size = int(model.config.image_size)
+            if not 16 <= target_size <= 1024:
+                raise NativeRuntimeError("Registered vision image_size is outside safe inference bounds.")
+            source = source.convert("RGB").resize((target_size, target_size))
             array = np.asarray(source, dtype=np.float32) / 127.5 - 1.0
-        model = self.model("vision")
-        tokenizer = self.tokenizer("vision")
         image = torch.from_numpy(array).permute(2, 0, 1).unsqueeze(0).to(self.device)
         context = self._text_context(tokenizer, model, text, self.device)
         visual = model.encode_image(image)
