@@ -68,7 +68,7 @@ python -m aethrion.specialist_prepare \
   --output-root data/specialists \
   --license "record the exact source license" \
   --permitted-use "record the exact permitted training use" \
-  --evidence-uri "https://source.example/license-or-terms"
+  --evidence-uri "https://source.example/license-or-terms" \\\n  --source-uri "https://source.example/dataset-release"
 ```
 
 The command always writes `training_allowed=false`, `owner_approval=false`,
