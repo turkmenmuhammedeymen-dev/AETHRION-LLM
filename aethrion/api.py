@@ -56,6 +56,15 @@ def build_router()->tuple[CapabilityRouter,dict[str,Any]]:
             with torch.no_grad(): result=model.generate(context,min(int(request.options.get("max_new_tokens",128)),512))
             return {"text":tokenizer.decode(result[0,len(ids):].tolist()),"model":"AETHRIONLM"}
         router.register(Capability.CHAT,"local-aethrionlm",local_chat)
+    audio_key=os.environ.get("AETHRION_AUDIO_API_KEY") or os.environ.get("OPENAI_API_KEY")
+    if audio_key:
+        from aethrion.audio import OpenAISpeechProvider
+        import base64
+        speech=OpenAISpeechProvider(api_key=audio_key)
+        def audio_handler(request:CapabilityRequest)->dict[str,Any]:
+            raw=speech.synthesize(request.prompt,voice=str(request.options.get("voice","marin")))
+            return {"format":"mp3","audio_base64":base64.b64encode(raw).decode("ascii")}
+        router.register(Capability.AUDIO,"openai-turn-based-speech",audio_handler)
     return router,providers
 
 app=FastAPI(title="AETHRION-LLM API",version="0.3.0")
@@ -125,7 +134,7 @@ def audio_speech(request: dict[str,Any]):
 async def documents_extract(file: UploadFile = File(...)):
     import tempfile
     suffix=Path(file.filename or "").suffix[:12]
-    raw=await file.read(MAX_INPUT_BYTES+1) if False else await file.read(8*1024*1024+1)
+    raw=await file.read(8*1024*1024+1)
     if len(raw)>8*1024*1024: raise HTTPException(status_code=413,detail="Document exceeds 8 MiB.")
     with tempfile.NamedTemporaryFile(suffix=suffix) as handle:
         handle.write(raw); handle.flush()
