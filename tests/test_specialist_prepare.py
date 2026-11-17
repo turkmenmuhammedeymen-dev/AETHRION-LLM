@@ -41,7 +41,7 @@ class SpecialistPreparationTests(unittest.TestCase):
             rows = [
                 {
                     "id": f"chat-{index}",
-                    "group_id": f"conversation-group-{index}",
+                    "group_id": f"conversation-group-{index // 2}",
                     "prompt": f"Türkçe kullanıcı sorusu {index} nedir?",
                     "response": f"Bu, doğrulanmış test yanıtı {index} örneğidir.",
                 }
@@ -66,6 +66,19 @@ class SpecialistPreparationTests(unittest.TestCase):
                 self.assertFalse(manifest["training_allowed"])
                 self.assertFalse(manifest["owner_approval"])
                 self.assertEqual(sum(result["split_counts"].values()), len(rows))
+                group_splits = {}
+                for group_id, split in zip(arrays["group_id"].tolist(), arrays["split"].tolist()):
+                    group_splits.setdefault(group_id, split)
+                    self.assertEqual(group_splits[group_id], split)
+                manifest["training_allowed"] = True
+                manifest["owner_approval"] = True
+                manifest["privacy_reviewed"] = True
+                manifest["sources"][0]["allow_training"] = True
+                manifest["sources"][0]["privacy_reviewed"] = True
+                Path(result["manifest"]).write_text(json.dumps(manifest), encoding="utf-8")
+                validated = validate_specialist_dataset(result["manifest"])
+                self.assertEqual(validated["model_id"], "chat")
+                self.assertGreater(validated["split_counts"]["train"], 0)
 
     def test_document_rejects_misaligned_boxes(self):
         with tempfile.TemporaryDirectory() as directory:
