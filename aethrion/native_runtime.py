@@ -169,6 +169,8 @@ class NativeModelRuntime:
         if limit is None:
             limit = getattr(config, "max_text_length", None)
         if limit is None:
+            limit = getattr(config, "text_length", None)
+        if limit is None:
             limit = getattr(config, "max_length", 512)
         ids = ids[-int(limit):]
         return torch.tensor([ids], dtype=torch.long, device=device)
@@ -293,6 +295,52 @@ class NativeModelRuntime:
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(obj_text, encoding="utf-8")
         return destination
+
+    def handle(self, capability: str, request: Any) -> dict[str, Any]:
+        """Adapt a validated local model call to the shared capability router."""
+        prompt = getattr(request, "prompt", "")
+        options = getattr(request, "options", {}) or {}
+        if capability in {"chat", "code"}:
+            return self.generate_text(
+                capability, prompt,
+                max_new_tokens=min(int(options.get("max_new_tokens", 256)), 1024),
+                temperature=float(options.get("temperature", 0.8)),
+                top_k=options.get("top_k", 50),
+                top_p=float(options.get("top_p", 0.95)),
+            )
+        if capability == "image":
+            path = self.generate_image(
+                prompt, inference_steps=min(int(options.get("inference_steps", 50)), 100)
+            )
+            return {"image_path": str(path), "format": "png", "model": "AETHRION-IMAGE"}
+        if capability == "vision":
+            image_path = options.get("image_path")
+            if not isinstance(image_path, str) or not image_path:
+                raise ValueError("vision inference requires a local image_path option.")
+            score = self.image_text_similarity(image_path, prompt)
+            return {"similarity": score, "model": "AETHRION-VISION",
+                    "meaning": "image/text embedding similarity, not a natural-language image description"}
+        if capability == "asr":
+            audio_path = options.get("audio_path")
+            if not isinstance(audio_path, str) or not audio_path:
+                raise ValueError("ASR inference requires a local audio_path option.")
+            return {"text": self.transcribe_wav(audio_path), "model": "AETHRION-ASR"}
+        if capability == "tts":
+            output = self.synthesize_wav(prompt, options.get("output_path"))
+            return {"audio_path": str(output), "format": "wav", "model": "AETHRION-TTS"}
+        if capability == "3d":
+            output = self.generate_point_cloud(
+                prompt, options.get("output_path"),
+                inference_steps=min(int(options.get("inference_steps", 50)), 100)
+            )
+            return {"asset_path": str(output), "format": "obj-point-cloud",
+                    "model": "AETHRION-3D",
+                    "note": "Vertex-only point cloud; not a watertight mesh or textured asset."}
+        if capability == "safety":
+            return self.classify_safety(prompt)
+        raise NativeRuntimeError(
+            f"Local inference adapter for '{capability}' is not yet implemented or released."
+        )
 
     @torch.no_grad()
     def classify_safety(self, text: str) -> dict[str, Any]:
