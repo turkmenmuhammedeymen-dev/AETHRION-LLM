@@ -225,7 +225,7 @@ def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
     if not isinstance(payload, dict) or payload.get("format") != "aethrion-specialist-checkpoint-v1":
         raise ValueError("Unsupported specialist checkpoint format.")
     required = {"model_id", "step", "model_config", "model_state", "optimizer_state",
-                "dataset_sha256", "rng_state"}
+                "dataset_sha256", "tokenizer_sha256", "manifest_sha256", "rng_state"}
     if required - set(payload):
         raise ValueError("Specialist checkpoint is missing required resume fields.")
     return payload
@@ -284,6 +284,7 @@ def train_specialist(
             raise ValueError("Model vocab_size must be at least the verified tokenizer vocabulary size.")
 
     manifest_file = Path(manifest_path).resolve()
+    manifest_hash = _sha256(manifest_file)
     with np.load(approval["dataset_path"], allow_pickle=False) as archive:
         arrays = {key: np.array(archive[key], copy=True) for key in archive.files}
     split_names = arrays["split"].astype(str)
@@ -315,6 +316,8 @@ def train_specialist(
             raise ValueError("Resume model configuration differs from checkpoint.")
         if state.get("tokenizer_sha256") != approval["tokenizer_sha256"]:
             raise ValueError("Resume tokenizer differs from the verified specialist tokenizer.")
+        if state.get("manifest_sha256") != manifest_hash:
+            raise ValueError("Specialist source/approval manifest changed; refusing unsafe resume.")
         model.load_state_dict(state["model_state"])
         optimizer.load_state_dict(state["optimizer_state"])
         _restore_rng_state(state["rng_state"])
@@ -369,6 +372,7 @@ def train_specialist(
                 "optimizer_state": optimizer.state_dict(),
                 "dataset_sha256": approval["dataset_sha256"],
                 "tokenizer_sha256": approval["tokenizer_sha256"],
+                "manifest_sha256": manifest_hash,
                 "rng_state": _capture_rng_state(),
             })
             write_json_atomic({
@@ -377,6 +381,7 @@ def train_specialist(
                 "model_id": model_id, "step": step,
                 "dataset_sha256": approval["dataset_sha256"],
                 "tokenizer_sha256": approval["tokenizer_sha256"],
+                "manifest_sha256": manifest_hash,
                 "checkpoint_sha256": checkpoint_hash,
                 "validation_loss": last_validation,
                 "note": "Training alone does not authorize registry status=trained; run independent quality and safety evaluation."
@@ -389,6 +394,8 @@ def train_specialist(
                 "model_id": model_id,
                 "steps": step + 1,
                 "dataset_sha256": approval["dataset_sha256"],
+                "tokenizer_sha256": approval["tokenizer_sha256"],
+                "manifest_sha256": manifest_hash,
                 "checkpoint_sha256": checkpoint_hash,
                 "validation_loss": last_validation,
                 "sample_counts": approval["split_counts"],
@@ -406,6 +413,7 @@ def train_specialist(
         "steps": config["max_steps"],
         "dataset_sha256": approval["dataset_sha256"],
         "tokenizer_sha256": approval["tokenizer_sha256"],
+        "manifest_sha256": manifest_hash,
         "checkpoint_sha256": _sha256(checkpoint_path),
         "validation_loss": last_validation,
         "held_out_test_loss": test_loss,
