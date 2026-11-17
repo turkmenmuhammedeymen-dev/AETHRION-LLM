@@ -21,7 +21,7 @@ def extract_document_text(path):
         if suffix == ".json":
             text = json.dumps(json.loads(text), ensure_ascii=False, indent=2)
         elif suffix == ".csv":
-            text = "\\n".join(" | ".join(row) for row in list(csv.reader(io.StringIO(text)))[:5000])
+            text = "\n".join(" | ".join(row) for row in list(csv.reader(io.StringIO(text)))[:5000])
         return text[:MAX_TEXT_CHARS]
     if suffix == ".docx":
         try:
@@ -31,14 +31,14 @@ def extract_document_text(path):
             for table in document.tables:
                 for row in table.rows:
                     parts.append(" | ".join(cell.text for cell in row.cells))
-            return "\\n".join(parts)[:MAX_TEXT_CHARS]
+            return "\n".join(parts)[:MAX_TEXT_CHARS]
         except Exception as exc:
             raise DocumentError("DOCX could not be read.") from exc
     if suffix == ".pdf":
         try:
             from pypdf import PdfReader
             reader = PdfReader(io.BytesIO(raw))
-            return "\\n".join(page.extract_text() or "" for page in reader.pages[:100])[:MAX_TEXT_CHARS]
+            return "\n".join(page.extract_text() or "" for page in reader.pages[:100])[:MAX_TEXT_CHARS]
         except Exception as exc:
             raise DocumentError("PDF could not be read.") from exc
     raise DocumentError("Supported formats: TXT, MD, LOG, JSON, CSV, DOCX and PDF.")
@@ -51,7 +51,7 @@ def create_document(title, content, output_format="docx"):
     fmt = output_format.lower().lstrip(".")
     safe_title = "".join(c for c in title if c.isalnum() or c in " -_").strip()[:80] or "document"
     if fmt in {"txt","md"}:
-        body = (f"# {title.strip()}\\n\\n" if fmt == "md" else f"{title.strip()}\\n\\n") + content
+        body = (f"# {title.strip()}\n\n" if fmt == "md" else f"{title.strip()}\n\n") + content
         return body.encode("utf-8"), f"{safe_title}.{fmt}", "text/markdown" if fmt == "md" else "text/plain"
     if fmt == "json":
         return json.dumps({"title":title.strip(),"content":content},ensure_ascii=False,indent=2).encode(),f"{safe_title}.json","application/json"
@@ -62,7 +62,7 @@ def create_document(title, content, output_format="docx"):
         try:
             from docx import Document
             doc=Document(); doc.add_heading(title.strip(),level=0)
-            for block in content.split("\\n\\n"): doc.add_paragraph(block.strip())
+            for block in content.split("\n\n"): doc.add_paragraph(block.strip())
             out=io.BytesIO(); doc.save(out)
             return out.getvalue(),f"{safe_title}.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         except Exception as exc:
@@ -75,8 +75,8 @@ def create_document(title, content, output_format="docx"):
             from xml.sax.saxutils import escape
             out=io.BytesIO(); pdf=SimpleDocTemplate(out,pagesize=A4,rightMargin=48,leftMargin=48,topMargin=48,bottomMargin=48)
             styles=getSampleStyleSheet(); story=[Paragraph(escape(title.strip()),styles["Title"]),Spacer(1,16)]
-            for block in content.split("\\n\\n"):
-                story.extend([Paragraph(escape(block).replace("\\n","<br/>"),styles["BodyText"]),Spacer(1,10)])
+            for block in content.split("\n\n"):
+                story.extend([Paragraph(escape(block).replace("\n","<br/>"),styles["BodyText"]),Spacer(1,10)])
             pdf.build(story)
             return out.getvalue(),f"{safe_title}.pdf","application/pdf"
         except Exception as exc:

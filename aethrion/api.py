@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
 from aethrion.providers import MeshyTextTo3DProvider,OpenAICompatibleChatProvider,OpenAIImageProvider,TavilyResearchProvider
-from aethrion.file_agent import FileAnalysisAgent,FileAnalysisError\nfrom aethrion.audio import OpenAISpeechProvider,AudioProviderError\nfrom aethrion.document_tools import create_document,extract_document_text,DocumentError\nfrom aethrion.workspace_agent import ProjectWorkspaceAgent,WorkspaceError\nfrom fastapi import UploadFile,File,Form,Response
+from aethrion.file_agent import FileAnalysisAgent,FileAnalysisError
+from aethrion.audio import OpenAISpeechProvider,AudioProviderError\nfrom aethrion.document_tools import create_document,extract_document_text,DocumentError\nfrom aethrion.workspace_agent import ProjectWorkspaceAgent,WorkspaceError\nfrom fastapi import UploadFile,File,Form,Response
 try:
     from fastapi import FastAPI,HTTPException
     from pydantic import BaseModel,Field
@@ -67,8 +68,11 @@ def build_router()->tuple[CapabilityRouter,dict[str,Any]]:
         router.register(Capability.AUDIO,"openai-turn-based-speech",audio_handler)
     return router,providers
 
-app=FastAPI(title="AETHRION-LLM API",version="0.3.0")
+app=FastAPI(title="AETHRION-LLM API",version="0.4.0")
 router,providers=build_router()
+audio_key=os.environ.get("AETHRION_AUDIO_API_KEY") or os.environ.get("OPENAI_API_KEY")
+audio_provider=OpenAISpeechProvider(api_key=audio_key) if audio_key else None
+code_provider=providers.get("file_analysis")
 
 @app.get("/health")
 def health(): return {"status":"ok","service":"AETHRION-LLM","version":"0.3.0"}
