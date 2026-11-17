@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import json
 import tempfile
 import unittest
@@ -9,6 +10,7 @@ from aethrion.prepare_data import (
     load_sources_manifest,
     normalize_text,
     require_training_enabled,
+    validate_training_approval,
 )
 
 
@@ -69,6 +71,54 @@ class CorpusPreparationTests(unittest.TestCase):
             self.assertEqual(set(report["splits"]), {"train", "validation", "test"})
             self.assertTrue(all(Path(item["path"]).is_file() for item in report["splits"].values()))
             self.assertTrue(report_path.exists())
+
+    def test_tampered_split_is_rejected_even_when_report_hashes_are_rewritten(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            manifest = root / "sources.json"
+            sources = []
+            for index in range(3):
+                path = root / f"source-{index}.txt"
+                path.write_text(
+                    (f"Independent reviewed source group {index} contains this training sentence.\\n") * 40,
+                    encoding="utf-8",
+                )
+                sources.append({
+                    "source_id": f"source-{index}",
+                    "path": path.name,
+                    "license": "Synthetic unit-test fixture",
+                    "permitted_uses": "training permitted for unit-test fixture only",
+                    "allow_training": True,
+                })
+            manifest.write_text(json.dumps({"sources": sources}), encoding="utf-8")
+            dataset_manifest = self._write_dataset_manifest(root)
+            corpus = root / "out" / "corpus.txt"
+            report_path = root / "out" / "report.json"
+            report = build_corpus(
+                root, manifest, corpus, report_path, min_chars=10, min_records=1,
+                dataset_manifest_path=dataset_manifest,
+            )
+            train_path = Path(report["splits"]["train"]["path"])
+            lines = train_path.read_text(encoding="utf-8").splitlines()
+            lines[0] = "Tampered replacement text not present in the reviewed raw source."
+            train_path.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+            for split_name in ("train", "validation", "test"):
+                split_path = Path(report["splits"][split_name]["path"])
+                raw = split_path.read_bytes()
+                report["splits"][split_name]["sha256"] = hashlib.sha256(raw).hexdigest()
+                report["splits"][split_name]["bytes"] = len(raw)
+            combined = b"".join(
+                Path(report["splits"][name]["path"]).read_bytes()
+                for name in ("train", "validation", "test")
+            )
+            corpus.write_bytes(combined)
+            report["output"]["sha256"] = hashlib.sha256(combined).hexdigest()
+            report["output"]["bytes"] = len(combined)
+            report_path.write_text(json.dumps(report), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "does not reproduce from reviewed source records"):
+                validate_training_approval(
+                    dataset_manifest, manifest, root, corpus, report_path
+                )
 
     def test_rejects_unapproved_source(self):
         with tempfile.TemporaryDirectory() as folder:
