@@ -178,6 +178,20 @@ class SafeRuntimeGateTests(unittest.TestCase):
             "Passage\nTitle",
         )
 
+    def test_document_creation_fails_closed_when_safe_is_not_released(self):
+        runtime = _FakeSafetyRuntime({"safety": "not_trained"})
+        with patch.object(api, "providers", {"runtime": runtime}):
+            with self.assertRaises(api.HTTPException) as caught:
+                api.documents_create({"title": "Test", "content": "Safe sample."})
+        self.assertEqual(caught.exception.status_code, 503)
+
+    def test_document_creation_rejects_non_string_fields(self):
+        runtime = _FakeSafetyRuntime({"safety": "ready"})
+        with patch.object(api, "providers", {"runtime": runtime}):
+            with self.assertRaises(api.HTTPException) as caught:
+                api.documents_create({"title": ["not", "text"], "content": "Content"})
+        self.assertEqual(caught.exception.status_code, 400)
+
     def test_safe_classifier_route_does_not_gate_itself(self):
         router, _, runtime = self._build(
             {"safety": "ready"},
