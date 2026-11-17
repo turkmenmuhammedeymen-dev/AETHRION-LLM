@@ -7,6 +7,7 @@
   "owner_approval": false,
   "privacy_reviewed": false,
   "speaker_consent_reviewed": false,
+  "safety_min_per_class": 25,
   "dataset_path": "prepared/dataset.npz",
   "dataset_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
   "sources": []

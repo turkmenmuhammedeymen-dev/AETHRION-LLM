@@ -39,6 +39,8 @@ only at positions the model is expected to learn. The manifest must include
 Do not include private chats or personal messages without documented consent
 and legal permission.
 
+SAFE manifests must declare `safety_min_per_class` (minimum 25) and provide at least that many ALLOW, REVIEW and BLOCK examples in each of train, validation and test. `reason_labels` are binary multi-hot vectors. This is only a minimum data-quality gate; it does not establish classifier accuracy, calibration, robustness or policy coverage. Do not manufacture harmful operational examples; use reviewed taxonomy labels and benign, prevention-oriented examples.
+
 The TTS model learns transcript-to-mel alignment and durations. The separately
 trained Vocoder learns mel-to-waveform conversion; both datasets require
 documented speaker consent. TTS cannot be released unless its companion

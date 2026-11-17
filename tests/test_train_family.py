@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from aethrion.train_family import MODEL_IDS, preflight_model, run_family
+from aethrion.train_family import MODEL_IDS, FamilyTrainingError, _resolve_output_dir, preflight_model, run_family
 
 
 class FamilyTrainingOrchestratorTests(unittest.TestCase):
@@ -64,6 +64,50 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 run_family(tmp, selected=["chat", "chat"])
             with self.assertRaises(ValueError):
                 run_family(tmp, selected=["external-model"])
+
+    def test_output_directory_must_be_explicit_and_non_root(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            for invalid in ("", ".", "..", "../outside", str(root / "absolute")):
+                with self.subTest(invalid=invalid):
+                    with self.assertRaises(FamilyTrainingError):
+                        _resolve_output_dir(root, invalid)
+
+    def test_output_directory_rejects_symlink_escape(self):
+        with tempfile.TemporaryDirectory() as folder, tempfile.TemporaryDirectory() as outside:
+            root = Path(folder).resolve()
+            (root / "artifacts").symlink_to(Path(outside), target_is_directory=True)
+            with self.assertRaisesRegex(FamilyTrainingError, "escapes"):
+                _resolve_output_dir(root, "artifacts")
+
+    def test_valid_output_directory_is_resolved_inside_repo(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            self.assertEqual(_resolve_output_dir(root, "artifacts/models/code"), root / "artifacts/models/code")
+
+    def test_specialist_preflight_rejects_missing_output_dir_before_data_gate(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            config_dir = root / "configs" / "specialists"
+            config_dir.mkdir(parents=True)
+            (config_dir / "code.json").write_text(
+                '{"model_id":"code","model_config":{"vocab_size":256},"output_dir":""}',
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(FamilyTrainingError, "output_dir"):
+                preflight_model(root, "code")
+
+    def test_specialist_preflight_rejects_mismatched_model_id(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            config_dir = root / "configs" / "specialists"
+            config_dir.mkdir(parents=True)
+            (config_dir / "code.json").write_text(
+                '{"model_id":"vision","model_config":{"vocab_size":256},"output_dir":"artifacts/models/code"}',
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(FamilyTrainingError, "model_id"):
+                preflight_model(root, "code")
 
 
 if __name__ == "__main__":

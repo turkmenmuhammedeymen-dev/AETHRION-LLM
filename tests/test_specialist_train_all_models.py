@@ -44,10 +44,15 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
 
     def _arrays(self, model_id):
         rng = np.random.default_rng(20261117)
-        n = 6
+        n = 225 if model_id == "safety" else 6
+        splits = (
+            ["train"] * 75 + ["validation"] * 75 + ["test"] * 75
+            if model_id == "safety"
+            else ["train", "train", "validation", "validation", "test", "test"]
+        )
         arrays = {
             "sample_id": np.asarray([f"{model_id}-{i}" for i in range(n)]),
-            "split": np.asarray(["train","train","validation","validation","test","test"]),
+            "split": np.asarray(splits),
         }
         ids = rng.integers(1, 255, size=(n, 8), dtype=np.int64)
         if model_id == "code":
@@ -94,7 +99,7 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
         elif model_id == "safety":
             arrays.update({
                 "token_ids": ids[:, :4],
-                "decision_labels": rng.integers(0, 3, size=n, dtype=np.int64),
+                "decision_labels": np.tile(np.asarray([0, 1, 2] * 25, dtype=np.int64), 3),
                 "reason_labels": rng.integers(0, 2, size=(n, 4), dtype=np.int64),
             })
         return arrays
@@ -134,6 +139,7 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
                     "owner_approval":True,
                     "privacy_reviewed":True,
                     "speaker_consent_reviewed":audio,
+                    "safety_min_per_class":25 if model_id == "safety" else None,
                     "dataset_path":dataset.name,
                     "dataset_sha256":hashlib.sha256(dataset.read_bytes()).hexdigest(),
                     "sources":[source_record],

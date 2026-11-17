@@ -378,6 +378,33 @@
         "evidence_urls": [],
         "next_gate": "Author and independently review the dataset before setting any approval flag."
       }
+    },
+    {
+      "id": "ljspeech-cc0-mcd",
+      "model_ids": [
+        "tts",
+        "vocoder"
+      ],
+      "uri": "https://mozilladatacollective.com/datasets/cmonjhxee01ako007kohpbg34",
+      "declared_license": "CC0-1.0 (Mozilla Data Collective catalogue)",
+      "review_status": "speaker_synthesis_consent_and_release_hash_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Public catalogue describes a single speaker and public-domain audio/text, but the source record does not independently document the narrator's consent scope for synthetic voice generation",
+        "Verify the exact release, file inventory, audio/text provenance and SHA-256 before preparation",
+        "Confirm that the public-domain text status applies to every selected passage and retain attribution/provenance",
+        "Do not train TTS or Vocoder until speaker-synthesis permission is explicitly documented and reviewed"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Mozilla Data Collective lists The LJSpeech Dataset as CC0-1.0, WAV/TSV, 3.00 GB, 13,100 clips from a single speaker reading seven non-fiction books; the catalogue says the text and audio are public domain. This is a candidate, not approval of the narrator's consent for voice synthesis.",
+        "evidence_urls": [
+          "https://mozilladatacollective.com/datasets/cmonjhxee01ako007kohpbg34"
+        ],
+        "next_gate": "No download or training until the exact release is pinned and a documented review confirms the rights and consent scope for TTS/Vocoder use."
+      }
     }
   ],
   "owner_approval": {

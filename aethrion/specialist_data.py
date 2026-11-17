@@ -143,8 +143,12 @@ def _validate_modality_shapes(model_id: str, arrays: Any, sample_count: int) -> 
             raise SpecialistDataError("Safety token, decision and reason arrays have inconsistent shapes.")
         if not np.issubdtype(decisions.dtype, np.integer):
             raise SpecialistDataError("Safety decision labels must be integer values.")
+        if not np.issubdtype(reasons.dtype, np.integer):
+            raise SpecialistDataError("Safety reason labels must be integer multi-hot values.")
         if np.any(decisions < 0) or np.any(decisions > 2):
             raise SpecialistDataError("Safety decision labels must be ALLOW=0, REVIEW=1 or BLOCK=2.")
+        if np.any(reasons < 0) or np.any(reasons > 1):
+            raise SpecialistDataError("Safety reason labels must be binary multi-hot values.")
 
 
 def validate_specialist_dataset(
@@ -235,6 +239,21 @@ def validate_specialist_dataset(
                 raise SpecialistDataError("Dataset requires non-empty train, validation and test splits.")
             sample_count = len(ids)
             _validate_modality_shapes(model_id, arrays, sample_count)
+            if model_id == "safety":
+                minimum = payload.get("safety_min_per_class")
+                if type(minimum) is not int or minimum < 25:
+                    raise SpecialistDataError(
+                        "Safety datasets must declare safety_min_per_class >= 25 for every decision in every split."
+                    )
+                decisions = np.asarray(arrays["decision_labels"])
+                split_array = np.asarray(split_names)
+                for split_name in ("train", "validation", "test"):
+                    split_decisions = decisions[split_array == split_name]
+                    class_counts = np.bincount(split_decisions.astype(np.int64), minlength=3)
+                    if np.any(class_counts < minimum):
+                        raise SpecialistDataError(
+                            f"Safety {split_name} split must contain at least {minimum} samples for ALLOW, REVIEW and BLOCK."
+                        )
             for key in keys - {"sample_id", "split"}:
                 value = arrays[key]
                 if value.dtype.hasobject:

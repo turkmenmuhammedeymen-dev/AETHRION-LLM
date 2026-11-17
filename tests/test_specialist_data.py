@@ -81,6 +81,70 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             with self.assertRaisesRegex(SpecialistDataError, "dataset SHA-256 mismatch"):
                 validate_specialist_dataset(manifest)
 
+    def _safety_fixture(self, root: Path, per_class: int):
+        source = root / "safety-source.txt"
+        source.write_text("Synthetic taxonomy-only safety fixture.", encoding="utf-8")
+        sample_ids = []
+        splits = []
+        decisions = []
+        for split in ("train", "validation", "test"):
+            for label in range(3):
+                for index in range(per_class):
+                    sample_ids.append(f"{split}-{label}-{index}")
+                    splits.append(split)
+                    decisions.append(label)
+        count = len(sample_ids)
+        dataset = root / "safety.npz"
+        reasons = np.zeros((count, 16), dtype=np.int64)
+        reasons[:, 0] = 1
+        np.savez(
+            dataset,
+            sample_id=np.asarray(sample_ids),
+            split=np.asarray(splits),
+            token_ids=np.random.default_rng(7).integers(0, 256, size=(count, 12), dtype=np.int64),
+            decision_labels=np.asarray(decisions, dtype=np.int64),
+            reason_labels=reasons,
+        )
+        payload = {
+            "format": "aethrion-specialist-dataset-v1",
+            "dataset_id": "synthetic-safety-taxonomy-test-only",
+            "model_id": "safety",
+            "modality": "text",
+            "training_allowed": True,
+            "owner_approval": True,
+            "privacy_reviewed": True,
+            "safety_min_per_class": 25,
+            "dataset_path": "safety.npz",
+            "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+            "sources": [{
+                "source_id": "synthetic-taxonomy-fixture",
+                "source_uri": "unit-test://safety-taxonomy",
+                "source_path": "safety-source.txt",
+                "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+                "license": "Synthetic unit-test fixture",
+                "permitted_use": "Unit tests only; not production training data",
+                "evidence_uri": "unit-test://safety-fixture",
+                "allow_training": True,
+                "privacy_reviewed": True,
+            }],
+        }
+        manifest = root / "safety-manifest.json"
+        manifest.write_text(json.dumps(payload), encoding="utf-8")
+        return manifest
+
+    def test_safety_dataset_requires_minimum_per_decision_in_each_split(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest = self._safety_fixture(Path(directory), per_class=25)
+            result = validate_specialist_dataset(manifest)
+            self.assertEqual(result["model_id"], "safety")
+            self.assertEqual(result["split_counts"], {"train": 75, "validation": 75, "test": 75})
+
+    def test_safety_dataset_blocks_underrepresented_decision_class(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest = self._safety_fixture(Path(directory), per_class=24)
+            with self.assertRaisesRegex(SpecialistDataError, "at least 25"):
+                validate_specialist_dataset(manifest)
+
     def test_missing_held_out_split_blocks_training(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
