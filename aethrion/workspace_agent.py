@@ -30,7 +30,10 @@ def read_project_zip(raw):
     files={}; total=0; seen_names=set()
     try:
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
-            entries=[i for i in archive.infolist() if not i.is_dir()]
+            all_entries = archive.infolist()
+            if len(all_entries) > MAX_FILES * 4:
+                raise WorkspaceError("Project ZIP contains too many directory or file entries.")
+            entries=[i for i in all_entries if not i.is_dir()]
             if not entries or len(entries)>MAX_FILES:
                 raise WorkspaceError(f"Project must contain 1–{MAX_FILES} files.")
             for info in entries:
@@ -39,6 +42,8 @@ def read_project_zip(raw):
                 mode=(info.external_attr>>16)&0xFFFF
                 if mode and (mode&0o170000)==0o120000:
                     raise WorkspaceError("Symbolic links are not accepted.")
+                if "\x00" in info.filename:
+                    raise WorkspaceError("NUL bytes in archive paths are not accepted.")
                 name=_safe_name(info.filename)
                 if name in seen_names:
                     raise WorkspaceError(f"Duplicate project path is not accepted: {name}.")
