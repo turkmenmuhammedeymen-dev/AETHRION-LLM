@@ -6,7 +6,10 @@ from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
 from aethrion.providers import MeshyTextTo3DProvider,OpenAICompatibleChatProvider,OpenAIImageProvider,TavilyResearchProvider
 from aethrion.file_agent import FileAnalysisAgent,FileAnalysisError
-from aethrion.audio import OpenAISpeechProvider,AudioProviderError\nfrom aethrion.document_tools import create_document,extract_document_text,DocumentError\nfrom aethrion.workspace_agent import ProjectWorkspaceAgent,WorkspaceError\nfrom fastapi import UploadFile,File,Form,Response
+from aethrion.audio import OpenAISpeechProvider,AudioProviderError
+from aethrion.document_tools import create_document,extract_document_text,DocumentError
+from aethrion.workspace_agent import ProjectWorkspaceAgent,WorkspaceError
+from fastapi import UploadFile,File,Form,Response
 try:
     from fastapi import FastAPI,HTTPException
     from pydantic import BaseModel,Field
