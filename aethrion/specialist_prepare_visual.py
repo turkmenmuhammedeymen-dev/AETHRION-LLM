@@ -15,7 +15,7 @@ from typing import Any
 
 import numpy as np
 
-from aethrion.specialist_prepare import _split
+from aethrion.specialist_prepare import _group_id, _split
 from aethrion.tokenizer import ByteBPETokenizer
 
 
@@ -110,6 +110,8 @@ def prepare_visual_dataset(
     root = source.parent.resolve()
     texts = []
     assets = []
+    group_ids = [_group_id(row) for row in rows]
+    split_names = [_split(group_id, seed) for group_id in group_ids]
     for row in rows:
         row_id = str(row["id"])
         field = "point_path" if model_id == "3d" else "image_path"
@@ -133,8 +135,11 @@ def prepare_visual_dataset(
         texts.append(caption.strip())
         assets.append((row, asset))
 
+    training_texts = [text for text, split_name in zip(texts, split_names) if split_name == "train"]
+    if not training_texts:
+        raise VisualPreparationError("No train-split captions or text conditions are available to train the tokenizer.")
     tokenizer = ByteBPETokenizer()
-    tokenizer.train("\n".join(texts), vocab_size=vocab_size)
+    tokenizer.train("\n".join(training_texts), vocab_size=vocab_size)
     token_rows = [tokenizer.encode(text)[:max_text_length] for text in texts]
     if any(not item for item in token_rows):
         raise VisualPreparationError("Text conditions must produce at least one token.")
@@ -185,10 +190,8 @@ def prepare_visual_dataset(
         arrays = {"images": images, "token_ids": token_ids}
 
     arrays["sample_id"] = np.asarray([str(row["id"]) for row in rows], dtype=np.str_)
-    arrays["split"] = np.asarray(
-        [_split(str(row.get("group_id", row["id"])), seed) for row in rows], dtype=np.str_
-    )
-    split_names = arrays["split"].tolist()
+    arrays["group_id"] = np.asarray(group_ids, dtype=np.str_)
+    arrays["split"] = np.asarray(split_names, dtype=np.str_)
     if any(name not in split_names for name in ("train", "validation", "test")):
         raise VisualPreparationError("Split has an empty partition; add samples or choose a different seed.")
 
