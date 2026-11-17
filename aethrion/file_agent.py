@@ -25,7 +25,14 @@ def extract_text(filename:str,content_base64:str)->str:
         try: from pypdf import PdfReader
         except ImportError as exc: raise FileAnalysisError("PDF support requires pypdf.") from exc
         reader=PdfReader(io.BytesIO(raw))
-        return "\n".join(page.extract_text() or "" for page in reader.pages[:100])[:200_000]
+        parts=[]; remaining=200_000
+        for page in reader.pages[:100]:
+            if remaining<=0: break
+            page_text=page.extract_text() or ""
+            if page_text:
+                clipped=page_text[:remaining]
+                parts.append(clipped); remaining-=len(clipped)
+        return "\\n".join(parts)[:200_000]
     try:
         _validate_docx_archive(raw)
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
