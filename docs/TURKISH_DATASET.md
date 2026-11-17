@@ -33,6 +33,7 @@ python -m aethrion.import_hf_dataset --max-records 5000
 # The dataset-level manifest gate and every exact-host review must be approved.
 python -m aethrion.prepare_data --input data/raw/cosmos \
   --manifest data/raw/cosmos/sources.json \
+  --dataset-manifest data/processed/corpus_manifest.json \
   --source-review data/processed/privacy_review/source_review_template.csv \
   --output data/processed/corpus.txt \
   --report data/processed/corpus-report.json
