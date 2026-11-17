@@ -157,7 +157,7 @@ def build_local_research_index(
     metadata_path = output / "metadata.json"
     processor_path = output / "processor.json"
     np.savez_compressed(index_path, passage_ids=token_array, passage_mask=mask_array)
-    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     repo_root = Path(project_root or Path.cwd()).resolve()
     try:
         index_relative = index_path.resolve().relative_to(repo_root).as_posix()
@@ -177,7 +177,7 @@ def build_local_research_index(
         "overlap_tokens": overlap_tokens,
         "execution_policy": "local_only",
     }
-    processor_path.write_text(json.dumps(processor, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    processor_path.write_text(json.dumps(processor, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return processor
 
 
