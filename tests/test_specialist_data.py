@@ -87,6 +87,43 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             with self.assertRaisesRegex(SpecialistDataError, "dataset SHA-256 mismatch"):
                 validate_specialist_dataset(manifest)
 
+    def test_group_id_cannot_cross_data_splits(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            dataset = root / "dataset.npz"
+            with np.load(dataset, allow_pickle=False) as archive:
+                arrays = {key: np.array(archive[key], copy=True) for key in archive.files}
+            arrays["group_id"][0] = "shared-provenance-group"
+            arrays["group_id"][2] = "shared-provenance-group"
+            np.savez(dataset, **arrays)
+            payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "crosses"):
+                validate_specialist_dataset(manifest)
+
+    def test_tokenizer_hash_mismatch_blocks_specialist_data(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, _ = self._fixture(root, approved=True)
+            (root / "tokenizer.json").write_text('{"tampered":true}', encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "tokenizer SHA-256 mismatch"):
+                validate_specialist_dataset(manifest)
+
+    def test_token_ids_outside_verified_tokenizer_vocabulary_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            dataset = root / "dataset.npz"
+            with np.load(dataset, allow_pickle=False) as archive:
+                arrays = {key: np.array(archive[key], copy=True) for key in archive.files}
+            arrays["token_ids"][0, 0] = 256
+            np.savez(dataset, **arrays)
+            payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "outside the verified tokenizer vocabulary"):
+                validate_specialist_dataset(manifest)
+
     def _safety_fixture(self, root: Path, per_class: int):
         source = root / "safety-source.txt"
         source.write_text("Synthetic taxonomy-only safety fixture.", encoding="utf-8")
