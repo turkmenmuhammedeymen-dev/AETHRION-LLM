@@ -1,131 +1,101 @@
 # AETHRION-LLM
 
-**AETHRION-0.2 — from-scratch language-model research project**
+**Intelligence Without Limits.** AETHRION-LLM is a from-scratch model research
+and engineering project. Its production inference policy is local-only:
+AETHRION models must be initialized and trained by this project. It does not
+load third-party pretrained weights, call Ollama, or silently fall back to
+hosted model APIs.
 
-This repository builds a decoder-only Transformer from random initialization. It does not download or load pretrained model weights, call Ollama, or depend on third-party inference APIs.
+> **Current status:** this repository contains model architectures, data
+> governance, training/evaluation scaffolding, checkpoint integrity, and a
+> native-only Hugging Face Space. It does not yet contain production training
+> corpora or trained model checkpoints. All 11 model entries remain
+> `not_trained`; the base corpus manifest remains `training_allowed: false`.
+> Passing software tests is not evidence of model capability.
 
-> This is an engineering foundation, not a claim that a capable model has already been trained. The repository starts with a small, reproducible research configuration. Language ability will depend on the quality, licensing, scale, and diversity of the training corpus and on available compute.
+## Model family
 
-## What is included
+AETHRION-BASE, CODE, VISION, IMAGE, ASR, TTS, VOCODER, 3D, RESEARCH, DOC and
+SAFE are separate model programs with independent artifacts and release gates.
+A feature is unavailable until its own checkpoint, tokenizer/processor,
+training report, held-out evaluation, safety review, integrity hashes and
+human release approval are present.
 
-- Byte-level BPE tokenizer trained from your own corpus.
-- Corpus validation and plain-text / JSONL ingestion.
-- Decoder-only causal Transformer with tied token embeddings.
-- Mixed-precision training where supported, gradient accumulation, clipping, validation, checkpoint/resume.
-- Sampling controls: temperature, top-k, top-p, repetition penalty.
-- Interactive terminal chat and a small optional HTTP API.
-- Unit tests and a tiny synthetic smoke-test path.
-- No pretrained weights or hidden model downloads.
+See [the native-only model-family specification](docs/NATIVE_ONLY_MODEL_FAMILY.md)
+and [the roadmap](docs/ROADMAP.md) for verified implementation status and
+remaining work.
 
-## Requirements
+## Development environment: GitHub Codespaces
 
-Python 3.10+ and PyTorch 2.2+. A CUDA GPU is strongly recommended for meaningful training. Windows 7 is not a supported training environment for current PyTorch releases; use a supported Linux/Windows machine or a temporary cloud GPU runtime. Checkpointing lets training resume after a temporary runtime ends.
+Use the repository's `.devcontainer` configuration for remote development,
+CPU unit tests, bounded preprocessing and local Space preview. Start with
+[the Codespaces runbook](docs/CODESPACES_RUNBOOK.md).
 
-Install:
+Codespaces is not a GPU training service. The current Hugging Face Space
+ZeroGPU runtime is also not a persistent, long-running training environment.
+With only those environments, full-scale training of all specialist models is
+not currently feasible. Do not represent a smoke test or synthetic fixture as
+a trained model.
 
-~~~bash
+## Install locally
+
+Python 3.10+ and PyTorch 2.2+ are required.
+
+```bash
 python -m venv .venv
-# Windows: .venv\Scripts\activate
+# Windows: .venv\\Scripts\\activate
 # Linux/macOS: source .venv/bin/activate
 python -m pip install --upgrade pip
-pip install -e ".[dev]"
-~~~
+python -m pip install -e ".[dev,data,space]"
+```
 
-## Prepare data
+For a CPU-only development environment, CUDA is not required. A compatible
+GPU is required for practical large-scale training.
 
-Only use text you own, public-domain text, or data whose license explicitly permits machine-learning training. Do not scrape private accounts, personal messages, copyrighted books, or restricted datasets. Keep raw corpora outside Git.
+## Data governance and training
 
-For a bounded pilot import from the public Cosmos Turkish corpus, the dataset card declares CC BY 4.0 at dataset level. That label does not automatically establish rights for every original webpage. The importer preserves each record's URL, and the preparation pipeline requires a separate evidence-backed approval for every exact hostname:
+Only use material you own, public-domain material, or sources whose terms and
+rights explicitly permit the intended machine-learning training use. Preserve
+source URLs, licenses, attribution, provenance and SHA-256 hashes. Review
+privacy and consent; speech datasets require speaker-consent evidence.
+Dataset-level license labels do not automatically clear embedded third-party
+web pages, recordings, images, code repositories, or 3D assets.
 
-~~~bash
-pip install -e ".[data]"
-python -m aethrion.import_hf_dataset --max-records 5000
-# Review the dataset card, source rights, privacy, and attribution.
-# Keep allow_training=false until dataset-level review is complete.
-# Complete a per-host review CSV with license evidence and explicit AI-training permission.
-python -m aethrion.prepare_data --input data/raw/cosmos \
-  --manifest data/raw/cosmos/sources.json \
-  --dataset-manifest data/processed/corpus_manifest.json \
-  --source-review data/processed/privacy_review/source_review_template.csv \
-  --output data/processed/corpus.txt \
-  --report data/processed/corpus-report.json
-python -m aethrion.tokenizer --train data/processed/corpus.txt --output artifacts/tokenizer.json --vocab-size 512
-~~~
+Keep raw data, prepared corpora, NPZ datasets, tokenizers, checkpoints and
+private evaluation material outside Git. The training gate must remain closed
+until each dataset and every required source review has been genuinely approved.
+Automated checks validate recorded evidence; they do not make legal decisions.
 
-This imports at most 5,000 records as a pilot, not the full upstream corpus. The dataset-level manifest gate and every exact-host review must be approved before URL-attributed data can enter the corpus. Review source attribution, privacy, license compatibility, and sample quality. The current tokenizer is a research implementation; large-scale BPE training needs further optimization before processing multi-billion-token corpora.
-
-For your own approved files, put UTF-8 .txt or JSONL files (with a string text field) in data/raw/, create a source manifest from data/sources.example.json, and run the preparation command with that manifest. The email-pattern filter is not a comprehensive PII detector; human review is required.
-
-The included small config is for smoke tests and experimentation, not ChatGPT-scale quality. Increase model dimensions only after confirming GPU memory and dataset size. Keep data/ and artifacts/*.pt out of Git.
-
-See the Turkish dataset protocol in docs/TURKISH_DATASET.md.
-
-## Chat
-
-After training has produced a checkpoint:
-
-~~~bash
-python -m aethrion.chat --checkpoint artifacts/checkpoint_last.pt --tokenizer artifacts/tokenizer.json
-~~~
-
-Optional local API:
-
-~~~bash
-pip install -e ".[api]"
-AETHRION_CHECKPOINT=artifacts/checkpoint_last.pt AETHRION_TOKENIZER=artifacts/tokenizer.json uvicorn aethrion.api:app --host 127.0.0.1 --port 8000
-~~~
-
-The API binds to localhost by default in the example. Do not expose it publicly without authentication, rate limits, request-size limits, monitoring, and a safety review.
+BASE pretraining, instruction tuning, and each specialist training stage have
+separate data and evaluation requirements. Follow
+[data/specialists/README.md](data/specialists/README.md) for the NPZ schema and
+the release gate. Training reports are not releases.
 
 ## Tests
 
-~~~bash
+```bash
+python -m compileall -q aethrion tests hf_space
 python -m unittest discover -s tests -v
-~~~
+```
 
-## Project status
+The synthetic smoke-test path is exclusively for software validation. It must
+not be used as production training data or as evidence that a model is trained.
 
-Version 0.2 is the training/inference foundation. It is not instruction-tuned, safety-aligned, or production-hardened. A raw next-token model can produce unreliable, biased, or unsafe text. Do not treat its output as factual or professional advice. Before real users: build evaluation sets, measure hallucination and harmful-output rates, add policy training and robust serving controls, and get independent review.
+## Hugging Face Space
 
-## Roadmap
+The Space source of truth is tracked in [`hf_space/`](hf_space/). Changes to
+that directory are deployed to
+[`vizyon2027/AETHRION-LLM`](https://huggingface.co/spaces/vizyon2027/AETHRION-LLM)
+by the GitHub Actions deployment workflow after merge to `main`. The workflow
+does not change Space hardware and does not upload private training data or
+model checkpoints. Keep Space credentials in Space Secrets and GitHub Actions
+secrets only; never commit them.
 
-1. Verify tokenizer, data pipeline, model forward pass, and checkpoint resume.
-2. Train a small baseline on a licensed Turkish corpus.
-3. Build held-out language-model evaluation and contamination checks.
-4. Add instruction tuning with curated, licensed examples.
-5. Evaluate safety, factuality, Turkish quality, and robustness before deployment.
-6. Optimize inference and integrate with AETHRION only through a separately reviewed adapter.
+The Space reports a capability as unavailable until the corresponding
+first-party model is trained, evaluated, released and installed with verified
+artifacts. Deterministic document utilities are not a trained DOC model.
 
-## License
+## License and data rights
 
-No license is granted to third-party training data by this repository. Add an explicit project license before redistributing code or model weights.
-
-## One-command Kaggle workflow
-
-See [docs/KAGGLE_RUNBOOK.md](docs/KAGGLE_RUNBOOK.md) for the single-cell Kaggle setup and fail-closed pipeline. The first run performs environment checks, tests, and optional bounded data import, then stops at the approval gate while training permission remains false.
-
-See [docs/NATIVE_ONLY_MODEL_FAMILY.md](docs/NATIVE_ONLY_MODEL_FAMILY.md) for the native-only model family and release gates. Distinct randomly initialized PyTorch architectures and configs now exist for AETHRION-BASE, CODE, VISION, IMAGE, ASR, TTS, VOCODER, 3D, RESEARCH, DOC and SAFE. The specialist training runner, dataset approval gate, BASE instruction-tuning command, and local SHA-256 model registry are implemented. No specialist weights are considered trained or production-ready yet. The local research-index builder now binds the exact prepared-record SHA-256 and per-source approvals; it is still not a trained retriever or complete cited-search service.
-
-Prepare an NPZ dataset using the schema in [data/specialists/README.md](data/specialists/README.md). Only after each source license, privacy review and (for audio) speaker consent have been documented and approved may a human set the manifest approvals to true. Example CODE training:
-
-~~~bash
-python -m aethrion.specialist_train \\
-  --config configs/specialists/code.json \\
-  --manifest data/specialists/code/manifest.json
-~~~
-
-BASE instruction tuning is a separate stage after pretraining has produced a verified checkpoint. Its labels use `-100` to mask prompt tokens so the loss is calculated only on supervised response tokens:
-
-~~~bash
-python -m aethrion.instruction_tune \\
-  --config configs/instruction_tuning.json \\
-  --manifest data/specialists/chat-instructions/manifest.json \\
-  --base-checkpoint artifacts/checkpoint_last.pt
-~~~
-
-Both trainers save checkpoints, integrity hashes, metrics and a report marked `NOT_RELEASED`. Neither automatically marks a model `trained`. The registry requires matching dataset provenance, training and held-out evaluation reports, a model card, verified local artifacts, quality and safety gates, and explicit release approval. External inference and hosted-search APIs are disabled in production.
-
-
-### Standalone API security
-
-Set `AETHRION_API_TOKEN` as a server-side environment secret before exposing the FastAPI service. All API routes except `/health` require an `Authorization: Bearer <token>` header. If the token is not configured, protected routes fail closed with HTTP 503. Never commit the token or place it in browser-side code.
+This repository does not grant rights to third-party training data. Verify
+source-specific terms before acquisition, redistribution, or model training.
