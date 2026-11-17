@@ -40,16 +40,36 @@ class NativeModelRuntimeTests(unittest.TestCase):
         tokenizer.save(tokenizer_path)
         training = folder / "training_report.json"
         training.write_text(json.dumps({
+            "status": "training_complete_not_released",
             "model_id": "code", "dataset_sha256": "a" * 64,
+            "checkpoint_sha256": digest(checkpoint),
             "release_status": "NOT_RELEASED"
         }), encoding="utf-8")
+        review = folder / "release_review.txt"
+        review.write_text("Synthetic runtime unit test review evidence.", encoding="utf-8")
         evaluation = folder / "evaluation_report.json"
         evaluation.write_text(json.dumps({
             "model_id": "code", "dataset_sha256": "a" * 64,
-            "status": "approved_for_release"
+            "status": "approved_for_release",
+            "quality_gate_passed": True, "safety_gate_passed": True,
+            "human_reviewed": True, "reviewer": "unit-test-reviewer",
+            "reviewed_at": "2026-11-17T16:00:00Z",
+            "approval_evidence_path": "models/release_review.txt",
+            "approval_evidence_sha256": digest(review),
+            "benchmarks": {
+                "unit_test_pass_rate": {"metric": "pass_rate", "value": 1.0, "passed": True},
+                "security_regression": {"metric": "pass_rate", "value": 1.0, "passed": True}
+            }
         }), encoding="utf-8")
         card = folder / "MODEL_CARD.md"
-        card.write_text("# AETHRION-CODE test fixture", encoding="utf-8")
+        card.write_text(
+            "# AETHRION-CODE test fixture\\n\\n"
+            "## Intended use\\nSynthetic tests\\n"
+            "## Training data\\nSynthetic fixture\\n"
+            "## Evaluation\\nUnit tests only\\n"
+            "## Limitations\\nNo real code quality is claimed\\n",
+            encoding="utf-8"
+        )
         return {
             "architecture": "aethrion.code_model:AETHRIONCodeLM",
             "model_config": asdict(config),
