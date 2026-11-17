@@ -22,6 +22,7 @@ RAW_DIR = ROOT / "data/raw/cosmos"
 SOURCE_MANIFEST = RAW_DIR / "sources.json"
 SOURCE_REVIEW = ROOT / "data/processed/privacy_review/source_review_template.csv"
 CORPUS = ROOT / "data/processed/corpus.txt"
+CORPUS_TRAIN = ROOT / "data/processed/corpus-train.txt"
 REPORT = ROOT / "data/processed/corpus-report.json"
 TOKENIZER = ROOT / "artifacts/tokenizer.json"
 CONFIG = ROOT / "configs/turkish_pilot.json"
@@ -239,7 +240,8 @@ def main() -> int:
         raise RuntimeError("Training config data_path must point to the approved prepared corpus.")
     run([
         sys.executable, "-m", "aethrion.tokenizer",
-        "--train", str(CORPUS),
+        "--train", str(CORPUS_TRAIN),
+        "--corpus", str(CORPUS),
         "--output", str(TOKENIZER),
         "--vocab-size", str(config["vocab_size"]),
         "--dataset-manifest", str(DATASET_MANIFEST),
