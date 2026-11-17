@@ -3,6 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
+from aethrion.native_registry import REQUIRED_BENCHMARKS, REQUIRED_BENCHMARK_DIRECTIONS
 from aethrion.release_review import ReleaseReviewError, create_release_evaluation_template
 
 
@@ -25,6 +26,14 @@ class ReleaseReviewTemplateTests(unittest.TestCase):
             self.assertFalse(report["human_reviewed"])
             self.assertEqual(set(report["benchmarks"]), {"wer", "cer"})
             self.assertTrue(output.is_file())
+
+    def test_every_required_benchmark_has_a_valid_direction(self):
+        self.assertEqual(set(REQUIRED_BENCHMARK_DIRECTIONS), set(REQUIRED_BENCHMARKS))
+        for model_id, required in REQUIRED_BENCHMARKS.items():
+            directions = REQUIRED_BENCHMARK_DIRECTIONS[model_id]
+            self.assertEqual(set(directions), required)
+            self.assertTrue(set(directions.values()).issubset({"min", "max"}))
+        self.assertEqual(REQUIRED_BENCHMARK_DIRECTIONS["code"]["security_regression"], "min")
 
     def test_refuses_in_progress_training_report(self):
         with tempfile.TemporaryDirectory() as directory:
