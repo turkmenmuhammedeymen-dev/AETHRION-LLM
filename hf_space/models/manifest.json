@@ -1,0 +1,66 @@
+{
+  "format": "aethrion-native-model-family-v1",
+  "execution_policy": "local_only",
+  "models": {
+    "chat": {
+      "architecture": "aethrion.model:AETHRIONLM",
+      "checkpoint": "artifacts/models/chat/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/chat/tokenizer.json",
+      "status": "not_trained"
+    },
+    "code": {
+      "architecture": "aethrion.code_model:AETHRIONCodeLM",
+      "checkpoint": "artifacts/models/code/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/code/tokenizer.json",
+      "status": "not_trained"
+    },
+    "vision": {
+      "architecture": "aethrion.vision_model:AETHRIONVision",
+      "checkpoint": "artifacts/models/vision/checkpoint_last.pt",
+      "processor": "artifacts/models/vision/processor.json",
+      "status": "not_trained"
+    },
+    "image": {
+      "architecture": "aethrion.image_model:AETHRIONImageGenerator",
+      "checkpoint": "artifacts/models/image/checkpoint_last.pt",
+      "processor": "artifacts/models/image/processor.json",
+      "status": "not_trained"
+    },
+    "asr": {
+      "architecture": "aethrion.asr_model:AETHRIONASR",
+      "checkpoint": "artifacts/models/asr/checkpoint_last.pt",
+      "processor": "artifacts/models/asr/processor.json",
+      "status": "not_trained"
+    },
+    "tts": {
+      "architecture": "aethrion.tts_model:AETHRIONTTS",
+      "checkpoint": "artifacts/models/tts/checkpoint_last.pt",
+      "processor": "artifacts/models/tts/processor.json",
+      "status": "not_trained"
+    },
+    "3d": {
+      "architecture": "aethrion.model_3d:AETHRION3D",
+      "checkpoint": "artifacts/models/3d/checkpoint_last.pt",
+      "processor": "artifacts/models/3d/processor.json",
+      "status": "not_trained"
+    },
+    "research": {
+      "architecture": "aethrion.research_model:AETHRIONResearch",
+      "checkpoint": "artifacts/models/research/checkpoint_last.pt",
+      "processor": "artifacts/models/research/processor.json",
+      "status": "not_trained"
+    },
+    "document": {
+      "architecture": "aethrion.document_model:AETHRIONDocument",
+      "checkpoint": "artifacts/models/document/checkpoint_last.pt",
+      "processor": "artifacts/models/document/processor.json",
+      "status": "not_trained"
+    },
+    "safety": {
+      "architecture": "aethrion.safety_model:AETHRIONSafe",
+      "checkpoint": "artifacts/models/safety/checkpoint_last.pt",
+      "processor": "artifacts/models/safety/processor.json",
+      "status": "not_trained"
+    }
+  }
+}
