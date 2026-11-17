@@ -62,7 +62,7 @@ jobs:
           headers = {"Authorization": f"Bearer {token}"}
           print("\n===== HTTP HEALTH CHECK =====", flush=True)
           try:
-              for endpoint in ("/", "/config", "/info"):
+              for endpoint in ("/", "/config", "/gradio_api/info"):
                   response = requests.get(url + endpoint, headers=headers, timeout=30)
                   print(f"SPACE_HTTP_{endpoint.replace('/', 'ROOT') or 'ROOT'}={response.status_code}", flush=True)
                   if response.status_code != 200:
@@ -74,7 +74,7 @@ jobs:
                       print(f"GRADIO_COMPONENT_COUNT={len(components)}", flush=True)
                       if len(components) < 20:
                           raise RuntimeError("Live Gradio config is missing expected UI components.")
-                  if endpoint == "/info":
+                  if endpoint == "/gradio_api/info":
                       api_info = response.json()
                       if not isinstance(api_info, dict):
                           raise RuntimeError("Live Gradio API info response is not a JSON object.")
