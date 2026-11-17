@@ -2,10 +2,11 @@ import os, base64, tempfile
 import spaces
 from pathlib import Path
 import gradio as gr
-from aethrion.api import build_router, get_native_model_statuses
+from fastapi import HTTPException
+from aethrion.api import build_router, get_native_model_statuses, _require_safety_allow_http, _require_safety_allow_chunks
 from aethrion.document_tools import create_document, extract_document_text, replace_document_text
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
-from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError
+from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError, read_project_zip
 
 def _resolve_space_auth(environ=None):
     env = os.environ if environ is None else environ
@@ -268,17 +269,24 @@ def edit_project(path,task):
         return "Upload a project ZIP.", None
     if not task or not task.strip():
         return "Enter a project change request.", None
-    def local_code_provider(request):
-        return dispatch(Capability.CODE, request.prompt, {"max_new_tokens": 4096, "temperature": 0.1})
+    runtime = providers.get("runtime")
     try:
+        _require_safety_allow_http(runtime, task)
+        project_bytes = Path(path).read_bytes()
+        for filename, source_text in read_project_zip(project_bytes).items():
+            _require_safety_allow_chunks(runtime, source_text)
+        def local_code_provider(request):
+            return dispatch(Capability.CODE, request.prompt, {"max_new_tokens": 4096, "temperature": 0.1})
         raw, summary = ProjectWorkspaceAgent(local_code_provider).propose(
-            Path(path).read_bytes(), task
+            project_bytes, task
         )
         output = Path(tempfile.gettempdir()) / (
             "aethrion-review-" + os.urandom(5).hex() + ".zip"
         )
         output.write_bytes(raw)
         return summary + "\n\nUploaded code was never executed; review the ZIP before applying it.", str(output)
+    except HTTPException as exc:
+        return "Project rejected by AETHRION-SAFE: " + str(exc.detail), None
     except CapabilityUnavailable:
         return "AETHRION-CODE is not trained and released yet.", None
     except WorkspaceError as exc:
