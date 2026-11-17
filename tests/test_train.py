@@ -7,6 +7,7 @@ from pathlib import Path
 import torch
 from aethrion.train import get_batch
 from aethrion.tokenizer import ByteBPETokenizer
+from aethrion.prepare_data import build_corpus
 
 class TrainingUtilityTests(unittest.TestCase):
     def test_batch_shapes_and_shift(self):
@@ -42,6 +43,7 @@ class TrainingUtilityTests(unittest.TestCase):
                 "--dataset-manifest", str(dataset_manifest),
                 "--source-manifest", str(source_manifest),
                 "--source-root", str(raw_dir),
+                "--corpus-report", str(work / "not-created-report.json"),
             ]
             result = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=120)
             self.assertNotEqual(result.returncode, 0)
@@ -55,13 +57,13 @@ class TrainingUtilityTests(unittest.TestCase):
             tokenizer_path = work / "tokenizer.json"
             config_path = work / "config.json"
             output = work / "artifacts"
-            data_path.write_text(("Türkçe AETHRION dil modeli eğitim denemesi. " * 120), encoding="utf-8")
             raw_dir = work / "raw"
             raw_dir.mkdir()
-            (raw_dir / "approved_fixture.txt").write_text(
-                "Synthetic unit-test fixture; not a real training corpus. " * 120,
-                encoding="utf-8",
+            source_text = "\\n".join(
+                f"Synthetic AETHRION unit-test record number {index} with Turkish sample text."
+                for index in range(120)
             )
+            (raw_dir / "approved_fixture.txt").write_text(source_text, encoding="utf-8")
             dataset_manifest = work / "dataset_manifest.json"
             dataset_manifest.write_text(json.dumps({
                 "project": "AETHRION-LLM-test",
@@ -75,6 +77,14 @@ class TrainingUtilityTests(unittest.TestCase):
                 "permitted_uses": "unit tests only",
                 "allow_training": True
             }]}), encoding="utf-8")
+            corpus_report = work / "corpus-report.json"
+            build_corpus(
+                input_dir=raw_dir,
+                manifest_path=source_manifest,
+                output_path=data_path,
+                report_path=corpus_report,
+                dataset_manifest_path=dataset_manifest,
+            )
             tokenizer = ByteBPETokenizer()
             tokenizer.train(data_path.read_text(encoding="utf-8"), vocab_size=256)
             tokenizer.save(tokenizer_path)
@@ -95,6 +105,7 @@ class TrainingUtilityTests(unittest.TestCase):
                 "--dataset-manifest", str(dataset_manifest),
                 "--source-manifest", str(source_manifest),
                 "--source-root", str(raw_dir),
+                "--corpus-report", str(corpus_report),
             ]
             first = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=120)
             self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
