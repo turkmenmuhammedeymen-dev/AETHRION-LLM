@@ -25,17 +25,17 @@ MODEL_MODALITIES = {
 }
 AUDIO_MODELS = frozenset({"asr", "tts", "vocoder"})
 REQUIRED_ARRAYS = {
-    "chat": {"sample_id", "split", "input_ids", "labels"},
-    "code": {"sample_id", "split", "token_ids"},
-    "vision": {"sample_id", "split", "images", "token_ids"},
-    "image": {"sample_id", "split", "images", "token_ids"},
-    "asr": {"sample_id", "split", "features", "input_lengths", "targets", "target_lengths"},
-    "tts": {"sample_id", "split", "token_ids", "token_mask", "token_lengths", "frame_to_token", "frame_mask", "frame_lengths", "target_mels", "durations"},
-    "vocoder": {"sample_id", "split", "target_mels", "target_waveforms", "frame_lengths", "waveform_mask"},
-    "3d": {"sample_id", "split", "points", "token_ids"},
-    "research": {"sample_id", "split", "query_ids", "passage_ids"},
-    "document": {"sample_id", "split", "token_ids", "boxes", "layout_ids", "tag_labels"},
-    "safety": {"sample_id", "split", "token_ids", "decision_labels", "reason_labels"},
+    "chat": {"sample_id", "group_id", "split", "input_ids", "labels"},
+    "code": {"sample_id", "group_id", "split", "token_ids"},
+    "vision": {"sample_id", "group_id", "split", "images", "token_ids"},
+    "image": {"sample_id", "group_id", "split", "images", "token_ids"},
+    "asr": {"sample_id", "group_id", "split", "features", "input_lengths", "targets", "target_lengths"},
+    "tts": {"sample_id", "group_id", "split", "token_ids", "token_mask", "token_lengths", "frame_to_token", "frame_mask", "frame_lengths", "target_mels", "durations"},
+    "vocoder": {"sample_id", "group_id", "split", "target_mels", "target_waveforms", "frame_lengths", "waveform_mask"},
+    "3d": {"sample_id", "group_id", "split", "points", "token_ids"},
+    "research": {"sample_id", "group_id", "split", "query_ids", "passage_ids"},
+    "document": {"sample_id", "group_id", "split", "token_ids", "boxes", "layout_ids", "tag_labels"},
+    "safety": {"sample_id", "group_id", "split", "token_ids", "decision_labels", "reason_labels"},
 }
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
@@ -252,13 +252,28 @@ def validate_specialist_dataset(
             if missing:
                 raise SpecialistDataError("Dataset is missing arrays: " + ", ".join(sorted(missing)))
             sample_ids = arrays["sample_id"]
+            group_ids = arrays["group_id"]
             splits = arrays["split"]
-            if sample_ids.ndim != 1 or splits.ndim != 1 or len(sample_ids) == 0 or len(sample_ids) != len(splits):
-                raise SpecialistDataError("sample_id and split arrays must be non-empty 1D arrays of equal length.")
+            if (
+                sample_ids.ndim != 1 or group_ids.ndim != 1 or splits.ndim != 1
+                or len(sample_ids) == 0
+                or len(sample_ids) != len(group_ids) or len(sample_ids) != len(splits)
+            ):
+                raise SpecialistDataError("sample_id, group_id and split arrays must be non-empty 1D arrays of equal length.")
             ids = [str(item) for item in sample_ids.tolist()]
+            group_names = [str(item) for item in group_ids.tolist()]
             split_names = [str(item) for item in splits.tolist()]
             if len(set(ids)) != len(ids) or any(not item for item in ids):
                 raise SpecialistDataError("sample_id values must be unique and non-empty.")
+            if any(not item for item in group_names):
+                raise SpecialistDataError("Every sample requires a non-empty provenance group_id.")
+            group_split = {}
+            for group_name, split_name in zip(group_names, split_names):
+                previous = group_split.setdefault(group_name, split_name)
+                if previous != split_name:
+                    raise SpecialistDataError(
+                        f"Provenance group {group_name!r} crosses {previous} and {split_name} splits."
+                    )
             if set(split_names) - {"train", "validation", "test"}:
                 raise SpecialistDataError("split values must be train, validation or test.")
             counts = {name: split_names.count(name) for name in ("train", "validation", "test")}
@@ -294,6 +309,36 @@ def validate_specialist_dataset(
     except (OSError, ValueError, KeyError, EOFError) as exc:
         raise SpecialistDataError("Prepared dataset is not a valid safe NPZ archive.") from exc
 
+    tokenizer_path = None
+    tokenizer_hash = None
+    tokenizer_vocab_size = None
+    if model_id != "vocoder":
+        raw_tokenizer_path = payload.get("tokenizer_path")
+        tokenizer_hash = payload.get("tokenizer_sha256")
+        if not isinstance(raw_tokenizer_path, str) or not raw_tokenizer_path.strip():
+            raise SpecialistDataError("Tokenizer path is required for this specialist model.")
+        if not isinstance(tokenizer_hash, str) or not SHA256.fullmatch(tokenizer_hash.lower()):
+            raise SpecialistDataError("Tokenizer SHA-256 is required for this specialist model.")
+        tokenizer_path = _safe_local_path(root, raw_tokenizer_path)
+        if not tokenizer_path.is_file() or tokenizer_path.stat().st_size == 0:
+            raise SpecialistDataError("Specialist tokenizer file is missing or empty.")
+        if sha256_file(tokenizer_path) != tokenizer_hash.lower():
+            raise SpecialistDataError("Specialist tokenizer SHA-256 mismatch.")
+        try:
+            from aethrion.tokenizer import ByteBPETokenizer
+            tokenizer_vocab_size = ByteBPETokenizer.load(tokenizer_path).vocab_size
+        except (OSError, UnicodeError, ValueError, KeyError) as exc:
+            raise SpecialistDataError("Specialist tokenizer is invalid or unreadable.") from exc
+        token_arrays = {"input_ids", "token_ids", "query_ids", "passage_ids", "targets"} & set(keys)
+        for key in token_arrays:
+            values = np.asarray(arrays[key])
+            if not np.issubdtype(values.dtype, np.integer):
+                raise SpecialistDataError(f"{key} must use an integer tokenizer-ID dtype.")
+            if np.any(values < 0) or np.any(values >= tokenizer_vocab_size):
+                raise SpecialistDataError(
+                    f"{key} contains token IDs outside the verified tokenizer vocabulary."
+                )
+
     return {
         "model_id": model_id,
         "modality": payload["modality"],
@@ -302,4 +347,7 @@ def validate_specialist_dataset(
         "sample_count": sample_count,
         "split_counts": counts,
         "source_count": len(sources),
+        "tokenizer_path": str(tokenizer_path) if tokenizer_path is not None else None,
+        "tokenizer_sha256": tokenizer_hash,
+        "tokenizer_vocab_size": tokenizer_vocab_size,
     }
