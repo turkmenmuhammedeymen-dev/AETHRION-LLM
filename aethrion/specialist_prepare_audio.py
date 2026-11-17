@@ -17,7 +17,7 @@ import numpy as np
 import torch
 
 from aethrion.audio_features import log_mel_spectrogram, read_wav
-from aethrion.specialist_prepare import _split
+from aethrion.specialist_prepare import _group_id, _split
 from aethrion.specialist_data import AUDIO_MODELS
 from aethrion.tokenizer import ByteBPETokenizer
 
@@ -105,6 +105,8 @@ def prepare_audio_dataset(
     transcripts = []
     decoded = []
     copied_sources = []
+    group_ids = [_group_id(row, fallback="speaker_id") for row in rows]
+    split_names = [_split(group_id, seed) for group_id in group_ids]
     for row in rows:
         row_id = str(row["id"])
         wav_path = _local_audio(root, row.get("wav_path"), row_id)
@@ -120,11 +122,14 @@ def prepare_audio_dataset(
         if model_id in {"asr", "tts"}:
             if not isinstance(transcript, str) or not transcript.strip():
                 raise AudioPreparationError(f"Record {row_id!r} requires a non-empty transcript.")
-            transcripts.append(transcript.strip())
+            if split_names[len(decoded)] == "train":
+                transcripts.append(transcript.strip())
         decoded.append((row, wav_path, waveform, mel))
 
     tokenizer = None
     if model_id in {"asr", "tts"}:
+        if not transcripts:
+            raise AudioPreparationError("No train-split transcripts are available to train the tokenizer.")
         tokenizer = ByteBPETokenizer()
         tokenizer.train("\n".join(transcripts), vocab_size=vocab_size)
 
@@ -165,9 +170,9 @@ def prepare_audio_dataset(
 
     arrays: dict[str, np.ndarray] = {
         "sample_id": np.asarray([str(row["id"]) for row in rows], dtype=np.str_),
-        "split": np.asarray([_split(str(row.get("group_id", row["id"])), seed) for row in rows], dtype=np.str_),
+        "group_id": np.asarray(group_ids, dtype=np.str_),
+        "split": np.asarray(split_names, dtype=np.str_),
     }
-    split_names = arrays["split"].tolist()
     if any(name not in split_names for name in ("train", "validation", "test")):
         raise AudioPreparationError("Split has an empty partition; add samples or choose a different seed.")
     arrays["target_mels"] = padded_mels
