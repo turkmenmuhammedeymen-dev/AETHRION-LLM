@@ -22,9 +22,10 @@ fall back to pretrained third-party models or hosted inference/search APIs.
 - **AETHRION-3D:** text-conditioned point-cloud diffusion. The present
   implementation exports vertex-only OBJ point clouds; it does not yet create
   complete watertight meshes, topology or textures.
-- **AETHRION-RESEARCH:** query/passage dual encoder for local retrieval. A
-  production local corpus index, provenance and evidence citation pipeline
-  remain to be completed.
+- **AETHRION-RESEARCH:** query/passage dual encoder for local retrieval. An
+  approval-gated local index builder now binds prepared records to an exact
+  SHA-256 and source provenance. A trained retriever, semantic deduplication,
+  reranking, citation validation and freshness policy remain incomplete.
 - **AETHRION-DOC:** document text/layout encoder with token tagging and
   extractive-QA heads. OCR/layout extraction and complete page understanding
   are not yet complete.
@@ -73,5 +74,5 @@ retrieval, document or safety quality.
 Major remaining work includes large-scale lawful datasets, robust high-capacity
 architectures, distributed/mixed-precision training validation, model-specific
 held-out benchmarks, calibration, OCR/layout tooling, mesh topology and
-texturing, research indexing/citations, complete local modality inference
-adapters and a production end-to-end release review.
+texturing, trained research retrieval/reranking and citation validation,
+complete local modality inference adapters and a production end-to-end release review.

@@ -69,8 +69,8 @@ The test-only fixtures are not production training data.
 
 ### AETHRION-RESEARCH
 - [x] Local query/passage dual encoder and contrastive objective.
-- [ ] Local source ingestion, provenance-preserving index, chunking and deduplication.
-- [ ] Reranking, citation grounding, freshness policy and evidence coverage benchmarks.
+- [x] Approval-gated local source ingestion, chunking, provenance metadata and exact prepared-record SHA-256 binding.
+- [ ] Cross-source semantic deduplication, trained retrieval/reranking, citation validation, freshness policy and end-to-end evidence benchmarks.
 - [ ] Offline-only search UI and end-to-end citation checks.
 
 ### AETHRION-DOC

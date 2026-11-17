@@ -94,10 +94,10 @@ tuning command, example configurations, and forward/loss tests. The audio
 preprocessor supports bounded uncompressed PCM WAV and native log-mel features.
 
 Still not complete: high-capacity production architectures, robust document
-OCR/layout extraction, a full mesh topology/texture generator, full local
-research indexing and evidence citation, an end-to-end trained TTS vocoder
-release, inference adapters for every modality, large-scale quality/safety
-benchmarks, and all trained checkpoints.
+OCR/layout extraction, a full mesh topology/texture generator, trained local
+research retrieval, semantic deduplication, reranking, citation validation and
+freshness, an end-to-end trained TTS vocoder release, inference adapters for
+every modality, large-scale quality/safety benchmarks, and all trained checkpoints.
 
 The tracked corpus and every specialist data manifest remain fail-closed.
 No production checkpoint or trained specialist release is claimed. Document
