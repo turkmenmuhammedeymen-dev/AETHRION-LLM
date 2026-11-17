@@ -100,7 +100,7 @@ def _build_arrays(model_id: str, rows: list[dict[str, Any]], tokenizer: ByteBPET
         for row_id, row in zip(ids, rows):
             prompt = _required_text(row, "prompt", row_id)
             response = _required_text(row, "response", row_id)
-            prompt_ids = tokenizer.encode(prompt + "\\n")
+            prompt_ids = tokenizer.encode(prompt + "\n")
             response_ids = tokenizer.encode(response)
             if not response_ids:
                 raise PreparationError(f"Record {row_id!r} has no response tokens.")
