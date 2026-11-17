@@ -91,5 +91,14 @@
         "Preserve provenance and remove disallowed files"
       ]
     }
-  ]
+  ],
+  "owner_approval": {
+    "recorded_at": "2026-11-17",
+    "record_path": "docs/OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md",
+    "scope": "public-source review, evidence recording, non-destructive validation and preparation planning",
+    "permits_training": false,
+    "permits_restricted_download": false,
+    "permits_accepting_provider_legal_terms": false,
+    "note": "Project-owner authorization to proceed with review is recorded. It does not grant third-party rights or satisfy per-source, per-item, privacy, consent, provenance, or license checks."
+  }
 }
