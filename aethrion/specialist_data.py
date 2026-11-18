@@ -92,7 +92,6 @@ def _input_fingerprint_rows(model_id: str, arrays: dict[str, np.ndarray], index:
             yield "prompt_ids", prompt_ids
     elif model_id in {"vision", "image"}:
         yield "images", arrays["images"][index]
-        yield "token_ids", arrays["token_ids"][index]
     elif model_id == "asr":
         length = int(arrays["input_lengths"][index])
         yield "features", arrays["features"][index, :length]
@@ -106,9 +105,9 @@ def _input_fingerprint_rows(model_id: str, arrays: dict[str, np.ndarray], index:
         yield "query_ids", arrays["query_ids"][index]
         yield "passage_ids", arrays["passage_ids"][index]
     elif model_id == "document":
-        yield "token_ids", arrays["token_ids"][index]
-        yield "boxes", arrays["boxes"][index]
-        yield "layout_ids", arrays["layout_ids"][index]
+        yield "document_input", (
+            arrays["token_ids"][index], arrays["boxes"][index], arrays["layout_ids"][index]
+        )
     else:
         for field in INPUT_FINGERPRINT_FIELDS[model_id]:
             yield field, arrays[field][index]
@@ -123,11 +122,13 @@ def _validate_input_split_uniqueness(
     seen: dict[tuple[str, str], str] = {}
     for index, split_name in enumerate(split_names):
         for field, value in _input_fingerprint_rows(model_id, arrays, index):
-            row = np.ascontiguousarray(value)
             digest = hashlib.sha256()
-            digest.update(row.dtype.str.encode("ascii"))
-            digest.update(json.dumps(row.shape, separators=(",", ":")).encode("ascii"))
-            digest.update(row.tobytes(order="C"))
+            values = value if isinstance(value, tuple) else (value,)
+            for part in values:
+                row = np.ascontiguousarray(part)
+                digest.update(row.dtype.str.encode("ascii"))
+                digest.update(json.dumps(row.shape, separators=(",", ":")).encode("ascii"))
+                digest.update(row.tobytes(order="C"))
             fingerprint = (field, digest.hexdigest())
             previous = seen.get(fingerprint)
             if previous is not None and previous != split_name:
