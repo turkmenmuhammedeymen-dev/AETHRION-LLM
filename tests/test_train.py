@@ -280,7 +280,7 @@ class TrainingUtilityTests(unittest.TestCase):
             malformed = {**payload, "step": 2, "rng_state": {}}
             torch.save(malformed, checkpoint)
             digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
-            Path(str(checkpoint) + ".sha256").write_text(digest + "\\n", encoding="ascii")
+            Path(str(checkpoint) + ".sha256").write_text(digest + "\n", encoding="ascii")
             with warnings.catch_warnings(record=True) as caught:
                 warnings.simplefilter("always")
                 recovered = load_checkpoint(checkpoint, map_location="cpu")
