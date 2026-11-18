@@ -245,6 +245,10 @@ def _verify_attempt_checkpoint_binding(
         return {"verified": False, "reason": "report_missing_or_invalid"}
     if not isinstance(report, dict):
         return {"verified": False, "reason": "report_not_object"}
+    if report.get("release_status") != "NOT_RELEASED" or report.get("status") not in {
+        "training_complete_not_released", "training_interrupted_not_released"
+    }:
+        return {"verified": False, "reason": "report_status_or_release_state_invalid"}
     if (report.get("model_id") != model_id or report.get("session_id") != session_id
             or report.get("attempt_id") != attempt_id):
         return {"verified": False, "reason": "report_lineage_mismatch"}
@@ -291,9 +295,14 @@ def _verify_attempt_checkpoint_binding(
     except Exception:
         return {"verified": False, "reason": "checkpoint_semantic_validation_failed"}
     if journal_attempt is not None and journal_attempt.get("state") == "terminal_recorded":
+        expected_report_status = {
+            "training_completed_not_released": "training_complete_not_released",
+            "training_interrupted_not_released": "training_interrupted_not_released",
+        }.get(journal_attempt.get("terminal_status"))
         if (journal_attempt.get("checkpoint_generation") != generation
                 or journal_attempt.get("checkpoint_sha256") != digest
-                or journal_attempt.get("report_created_at_ns") != created_at):
+                or journal_attempt.get("report_created_at_ns") != created_at
+                or report.get("status") != expected_report_status):
             return {"verified": False, "reason": "journal_report_checkpoint_mismatch"}
     return {
         "verified": True,
