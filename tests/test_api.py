@@ -513,4 +513,18 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         response=self.client.post("/dispatch",json={"capability":"research","prompt":"summarize"},headers=self.auth)
         self.assertEqual(response.status_code,503)
 
+    def test_document_upload_validator_rejects_extension_and_content_spoofing(self):
+        self.assertEqual(api._validate_document_upload("notes.txt", b"plain UTF-8 text"), ".txt")
+        self.assertEqual(api._validate_document_upload("report.pdf", b"%PDF-1.7"), ".pdf")
+        with self.assertRaises(api.HTTPException) as bad_extension:
+            api._validate_document_upload("payload.exe", b"MZ")
+        self.assertEqual(bad_extension.exception.status_code, 400)
+        with self.assertRaises(api.HTTPException) as spoofed_pdf:
+            api._validate_document_upload("report.pdf", b"not a PDF")
+        self.assertEqual(spoofed_pdf.exception.status_code, 400)
+        with self.assertRaises(api.HTTPException) as invalid_json:
+            api._validate_document_upload("data.json", b"{broken")
+        self.assertEqual(invalid_json.exception.status_code, 400)
+
+
 if __name__=="__main__": unittest.main()
