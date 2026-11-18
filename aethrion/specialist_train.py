@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import random
@@ -333,6 +334,44 @@ def _resume_training_config(config: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _validate_specialist_rng_state(state: Any) -> None:
+    """Validate every RNG component before treating a checkpoint generation as recoverable."""
+    if not isinstance(state, dict) or not {"python", "numpy", "torch"} <= set(state):
+        raise ValueError("Specialist checkpoint RNG state is incomplete.")
+    py = state["python"]
+    if not isinstance(py, dict) or not {"version", "state", "gauss"} <= set(py):
+        raise ValueError("Specialist Python RNG state is invalid.")
+    values = py["state"]
+    if (
+        type(py["version"]) is not int or py["version"] != 3
+        or not isinstance(values, list) or len(values) != 625
+        or any(type(value) is not int or value < 0 or value > 0xFFFFFFFF for value in values)
+        or (py["gauss"] is not None and (type(py["gauss"]) not in (int, float) or not math.isfinite(float(py["gauss"]))))
+    ):
+        raise ValueError("Specialist Python RNG state is invalid.")
+    ns = state["numpy"]
+    if not isinstance(ns, dict) or not {"algorithm", "keys", "position", "has_gauss", "cached_gaussian"} <= set(ns):
+        raise ValueError("Specialist NumPy RNG state is invalid.")
+    if (
+        ns["algorithm"] != "MT19937" or not isinstance(ns["keys"], list) or len(ns["keys"]) != 624
+        or any(type(value) is not int or value < 0 or value > 0xFFFFFFFF for value in ns["keys"])
+        or type(ns["position"]) is not int or not 0 <= ns["position"] <= 624
+        or type(ns["has_gauss"]) is not int or ns["has_gauss"] not in (0, 1)
+        or type(ns["cached_gaussian"]) not in (int, float)
+        or not math.isfinite(float(ns["cached_gaussian"]))
+    ):
+        raise ValueError("Specialist NumPy RNG state is invalid.")
+    torch_state = state["torch"]
+    if not isinstance(torch_state, torch.Tensor) or torch_state.dtype != torch.uint8 or torch_state.ndim != 1:
+        raise ValueError("Specialist Torch RNG state is invalid.")
+    cuda_states = state.get("cuda", [])
+    if not isinstance(cuda_states, list) or any(
+        not isinstance(item, torch.Tensor) or item.dtype != torch.uint8 or item.ndim != 1
+        for item in cuda_states
+    ):
+        raise ValueError("Specialist CUDA RNG state is invalid.")
+
+
 def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
     """Verify and safely load the newest generation, recovering from the previous one."""
     required = {"model_id", "step", "model_config", "model_state", "optimizer_state",
@@ -364,6 +403,15 @@ def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
             raise ValueError("Specialist checkpoint training_config must be a non-empty object.")
         if type(payload.get("step")) is not int or payload["step"] < 0:
             raise ValueError("Specialist checkpoint step is invalid.")
+        for key in ("dataset_sha256", "tokenizer_sha256", "manifest_sha256"):
+            value = payload[key]
+            if not isinstance(value, str) or len(value) != 64 or any(ch not in "0123456789abcdef" for ch in value.lower()):
+                raise ValueError(f"Specialist checkpoint {key} is invalid.")
+        if not isinstance(payload["model_state"], dict) or not isinstance(payload["optimizer_state"], dict):
+            raise ValueError("Specialist checkpoint model or optimizer state is invalid.")
+        if not isinstance(payload["model_config"], dict):
+            raise ValueError("Specialist checkpoint model configuration is invalid.")
+        _validate_specialist_rng_state(payload["rng_state"])
         return payload
 
     try:
