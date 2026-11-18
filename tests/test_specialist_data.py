@@ -176,7 +176,6 @@ class SpecialistDataApprovalTests(unittest.TestCase):
 
     def test_asr_duplicate_inputs_ignore_different_padding_tails(self):
         from aethrion.specialist_data import _validate_input_split_uniqueness
-        valid_audio = np.asarray([[0.1, 0.2], [0.3, 0.4]], dtype=np.float32)
         arrays = {
             "features": np.asarray([
                 [[0.1, 0.2], [0.3, 0.4], [0.0, 0.0]],
@@ -184,9 +183,22 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             ], dtype=np.float32),
             "input_lengths": np.asarray([2, 2], dtype=np.int64),
         }
-        self.assertEqual(valid_audio.shape, (2, 2))
         with self.assertRaisesRegex(SpecialistDataError, "duplicate features input"):
             _validate_input_split_uniqueness("asr", arrays, ["train", "validation"])
+
+    def test_shared_vision_prompt_is_not_mistaken_for_duplicate_image(self):
+        from aethrion.specialist_data import _validate_input_split_uniqueness
+        arrays = {
+            "images": np.asarray([
+                np.zeros((3, 16, 16), dtype=np.uint8),
+                np.ones((3, 16, 16), dtype=np.uint8),
+            ]),
+            "token_ids": np.asarray([[1, 2, 3], [1, 2, 3]], dtype=np.int64),
+        }
+        _validate_input_split_uniqueness("vision", arrays, ["train", "test"])
+        arrays["images"][1] = arrays["images"][0]
+        with self.assertRaisesRegex(SpecialistDataError, "duplicate images input"):
+            _validate_input_split_uniqueness("vision", arrays, ["train", "test"])
 
     def test_tokenizer_hash_mismatch_blocks_specialist_data(self):
         with tempfile.TemporaryDirectory() as directory:
