@@ -58,6 +58,43 @@ class TrainingUtilityTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "SHA-256 verification failed"):
                 verify_checkpoint(checkpoint)
 
+    def test_checkpoint_sidecar_replace_crash_recovers_durable_previous_generation(self):
+        from unittest.mock import patch
+        import aethrion.checkpoint as checkpoint_module
+        from aethrion.checkpoint import load_checkpoint, save_checkpoint
+        from aethrion.train import capture_rng_state
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            base = {
+                "format_version": 4, "step": 0, "model": {}, "optimizer": {},
+                "scaler": {}, "model_config": {}, "data_sha256": "0" * 64,
+                "tokenizer_sha256": "1" * 64, "rng_state": capture_rng_state(),
+                "training_config": {"seed": 7},
+            }
+            save_checkpoint(base, checkpoint)
+            original_replace = checkpoint_module.os.replace
+            sidecar = Path(str(checkpoint) + ".sha256")
+
+            def fail_live_sidecar(source, destination):
+                if Path(destination) == sidecar:
+                    raise OSError("simulated interruption before live sidecar promotion")
+                return original_replace(source, destination)
+
+            with patch("aethrion.checkpoint.os.replace", side_effect=fail_live_sidecar):
+                with self.assertRaisesRegex(OSError, "simulated interruption"):
+                    save_checkpoint({**base, "step": 1}, checkpoint)
+
+            # The live checkpoint/sidecar pair is split, but the previous pair
+            # was made durable before either live file was replaced.
+            recovered = load_checkpoint(checkpoint, map_location="cpu")
+            self.assertEqual(recovered["step"], 0)
+            previous = Path(str(checkpoint) + ".previous")
+            self.assertEqual(
+                checkpoint_module.verify_checkpoint(previous),
+                checkpoint_module.sha256_file(previous),
+            )
+
     def test_checkpoint_rejects_unsafe_pickle_objects(self):
         import hashlib
 
