@@ -99,6 +99,39 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             self.assertEqual(result["sample_count"], 6)
             self.assertEqual(result["split_counts"], {"train": 2, "validation": 2, "test": 2})
 
+    def test_explicit_synthetic_jsonl_records_cannot_be_promoted_by_manifest_edits(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            source = root / "source.jsonl"
+            source.write_text(
+                json.dumps({
+                    "id": "fixture-1",
+                    "text": "synthetic placeholder",
+                    "synthetic_fixture": True,
+                    "production_training_approved": False,
+                }) + "\\n",
+                encoding="utf-8",
+            )
+            payload["sources"][0]["source_path"] = "source.jsonl"
+            payload["sources"][0]["sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
+            payload["sources"][0]["source_uri"] = "unit-test://synthetic-fixture"
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "synthetic/non-production fixture"):
+                validate_specialist_dataset(manifest)
+
+    def test_malformed_jsonl_source_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            source = root / "source.jsonl"
+            source.write_text("not-json\\n", encoding="utf-8")
+            payload["sources"][0]["source_path"] = "source.jsonl"
+            payload["sources"][0]["sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "invalid JSON"):
+                validate_specialist_dataset(manifest)
+
     def test_duplicate_specialist_source_ids_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
