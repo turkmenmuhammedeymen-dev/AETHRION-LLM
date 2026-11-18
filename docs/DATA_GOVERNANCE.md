@@ -20,6 +20,7 @@ The dataset manifest must contain a `governance` object using schema `aethrion-h
 
 - the model ID and explicit `approval_status: approved`;
 - author and rights-holder roles, with authorship and rights attestations;
+- an explicit `first_party_origin_attested: true` declaration covering every source in the dataset; the reviewer must reject any third-party, unclear-origin, or undocumented contribution;
 - source-rights, privacy, and quality review;
 - a reviewer role, timezone-aware ISO-8601 review timestamp, and retained evidence reference;
 - speaker-consent review for ASR/TTS/VOCODER;
