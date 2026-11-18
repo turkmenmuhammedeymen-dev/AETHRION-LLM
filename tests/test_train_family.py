@@ -170,5 +170,70 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 preflight_model(root, "code")
 
 
+    def test_execute_writes_durable_session_snapshot_and_event_journal(self):
+        import json
+        from unittest.mock import patch
+        from types import SimpleNamespace
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            plan = {
+                "model_id": "chat", "ready": True,
+                "command": ["python", "-m", "aethrion.train"],
+                "checkpoint": "artifacts/chat/checkpoint_last.pt",
+                "output_dir": "artifacts/chat",
+            }
+            with patch("aethrion.train_family.preflight_model", return_value=plan), \
+                 patch("aethrion.train_family.subprocess.run", return_value=SimpleNamespace(returncode=0)), \
+                 patch("aethrion.train_family._training_outcome", return_value="training_completed_not_released"):
+                report = run_family(root, selected=["chat"], execute=True)
+
+            self.assertTrue(report["training_started"])
+            self.assertEqual(report["models"][0]["status"], "training_completed_not_released")
+            session_dir = root / "artifacts" / "training_sessions"
+            snapshots = list(session_dir.glob("*.json"))
+            journals = list(session_dir.glob("*.jsonl"))
+            self.assertEqual(len(snapshots), 1)
+            self.assertEqual(len(journals), 1)
+            snapshot = json.loads(snapshots[0].read_text(encoding="utf-8"))
+            events = [json.loads(line) for line in journals[0].read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(snapshot["status"], "completed")
+            self.assertEqual(snapshot["released_count"], 0)
+            self.assertEqual(
+                [event["event"] for event in events],
+                ["session_started", "model_started", "model_finished", "session_completed"],
+            )
+
+    def test_keyboard_interrupt_persists_interrupted_family_session(self):
+        import json
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            plan = {
+                "model_id": "chat", "ready": True,
+                "command": ["python", "-m", "aethrion.train"],
+                "checkpoint": "artifacts/chat/checkpoint_last.pt",
+                "output_dir": "artifacts/chat",
+            }
+            with patch("aethrion.train_family.preflight_model", return_value=plan), \
+                 patch("aethrion.train_family.subprocess.run", side_effect=KeyboardInterrupt):
+                report = run_family(root, selected=["chat"], execute=True)
+
+            self.assertTrue(report["interrupted"])
+            self.assertEqual(report["models"][0]["status"], "training_interrupted_not_released")
+            snapshot = next((root / "artifacts" / "training_sessions").glob("*.json"))
+            state = json.loads(snapshot.read_text(encoding="utf-8"))
+            self.assertEqual(state["status"], "interrupted")
+            self.assertEqual(state["released_count"], 0)
+
+    def test_preflight_only_does_not_create_training_session_artifacts(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            self._empty_repo(root)
+            report = run_family(root, execute=False)
+            self.assertFalse(report["training_started"])
+            self.assertFalse((root / "artifacts" / "training_sessions").exists())
+
 if __name__ == "__main__":
     unittest.main()
