@@ -277,6 +277,9 @@ class ApiHttpIntegrationTests(unittest.TestCase):
             ("document", {"document_path": "/etc/passwd"}),
             ("vision", {"image_path": "/etc/passwd"}),
             ("asr", {"audio_path": "/etc/passwd"}),
+            ("image", {"output_path": "/etc/passwd"}),
+            ("3d", {"output_path": "/etc/passwd"}),
+            ("tts", {"output_path": "/etc/passwd"}),
         ]
         for capability, options in cases:
             with self.subTest(capability=capability):
@@ -286,7 +289,7 @@ class ApiHttpIntegrationTests(unittest.TestCase):
                     json={"capability":capability,"prompt":"inspect file","options":options},
                 )
                 self.assertEqual(response.status_code,400)
-                self.assertIn("dedicated file-upload endpoint",response.json()["detail"])
+                self.assertIn("dedicated",response.json()["detail"])
 
     def test_capabilities_endpoint_reports_registered_handlers(self):
         response=self.client.get("/capabilities",headers=self.auth)
