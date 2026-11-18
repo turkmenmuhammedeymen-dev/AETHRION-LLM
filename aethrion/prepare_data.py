@@ -305,6 +305,11 @@ def build_corpus(
 
             key = hashlib.sha256(value.casefold().encode("utf-8")).hexdigest()
             if key in unique:
+                if unique[key]["group_id"] != group_id:
+                    raise ValueError(
+                        "Corpus blocked: identical normalized content appears in "
+                        "independent provenance groups; human review is required."
+                    )
                 totals["duplicates"] += 1
                 counts["duplicates"] += 1
                 continue
@@ -324,6 +329,19 @@ def build_corpus(
         })
 
     records = list(unique.values())
+    from aethrion.near_duplicate import find_cross_group_near_duplicates
+
+    near_duplicates = find_cross_group_near_duplicates(records)
+    if near_duplicates:
+        examples = ", ".join(
+            f"{item['left_index']}~{item['right_index']} ({item['similarity']:.3f})"
+            for item in near_duplicates[:10]
+        )
+        raise ValueError(
+            "Corpus blocked: near-duplicate text crosses independent provenance groups; "
+            "human review is required. Candidate pairs (record indexes, Jaccard): "
+            + examples
+        )
     if len(records) < min_records:
         raise ValueError(
             f"Only {len(records)} unique records remain; minimum required is {min_records}."
@@ -377,10 +395,17 @@ def build_corpus(
         })
 
     report = {
-        "format": "aethrion-corpus-report-v2",
+        "format": "aethrion-corpus-report-v3",
         "seed": seed,
         "normalization": "Unicode NFC + whitespace collapse",
-        "deduplication": "SHA-256 of casefolded normalized record",
+        "deduplication": "SHA-256 of casefolded normalized record; cross-group near-duplicate gate",
+        "near_duplicate_audit": {
+            "algorithm": "5-token-shingle Jaccard candidate index",
+            "minimum_tokens": 12,
+            "minimum_similarity": 0.85,
+            "cross_group_matches": 0,
+            "action": "fail-closed; human review required",
+        },
         "filters": {
             "min_chars": min_chars,
             "max_chars": max_chars,
@@ -470,8 +495,18 @@ def validate_training_approval(
     if not corpus_report_path.is_file():
         raise ValueError(f"Training blocked: corpus audit report does not exist: {corpus_report_path}")
     report = json.loads(corpus_report_path.read_text(encoding="utf-8"))
-    if not isinstance(report, dict) or report.get("format") != "aethrion-corpus-report-v2":
+    if not isinstance(report, dict) or report.get("format") != "aethrion-corpus-report-v3":
         raise ValueError("Training blocked: unsupported or invalid corpus audit report.")
+    near_duplicate_audit = report.get("near_duplicate_audit")
+    if (
+        not isinstance(near_duplicate_audit, dict)
+        or near_duplicate_audit.get("algorithm") != "5-token-shingle Jaccard candidate index"
+        or near_duplicate_audit.get("minimum_tokens") != 12
+        or near_duplicate_audit.get("minimum_similarity") != 0.85
+        or near_duplicate_audit.get("cross_group_matches") != 0
+        or near_duplicate_audit.get("action") != "fail-closed; human review required"
+    ):
+        raise ValueError("Training blocked: corpus near-duplicate audit metadata is missing or invalid.")
 
     output = report.get("output")
     if not isinstance(output, dict):
@@ -549,6 +584,14 @@ def validate_training_approval(
             reconstructed.setdefault(record_hash, {"text": value, "group_id": group_id})
 
     rebuilt_records = list(reconstructed.values())
+    from aethrion.near_duplicate import find_cross_group_near_duplicates
+
+    near_duplicates = find_cross_group_near_duplicates(rebuilt_records)
+    if near_duplicates:
+        raise ValueError(
+            "Training blocked: reviewed raw sources contain cross-group near-duplicate records; "
+            "human review is required before BASE training."
+        )
     if len(rebuilt_records) != report.get("totals", {}).get("records_kept"):
         raise ValueError("Training blocked: raw source records do not reproduce the audited corpus count.")
     rebuilt_assignments = _assign_group_splits(rebuilt_records, seed)
