@@ -351,8 +351,11 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             sm=gr.Markdown();d=gr.File(label="Review ZIP")
             gr.Button("Propose project changes").click(edit_project,inputs=[z,t],outputs=[sm,d])
         with gr.Tab("Image"):
-            p=gr.Textbox(lines=3,label="Image prompt");o=gr.Image(type="filepath")
-            gr.Button("Generate image").click(image,inputs=p,outputs=o)
+            gr.Markdown(
+                "Image generation is disabled until a local visual-output safety verifier "
+                "is implemented, tested and released."
+            )
+            gr.Button("Generate image — unavailable", interactive=False)
         with gr.Tab("Vision"):
             vision_image=gr.Image(type="filepath",sources=["upload"],label="Upload image")
             vision_text=gr.Textbox(lines=2,label="Text to compare with the image")
@@ -361,9 +364,13 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
                 vision_compare,inputs=[vision_image,vision_text],outputs=vision_result
             )
         with gr.Tab("3D Studio"):
-            p=gr.Textbox(lines=3,label="Text-to-3D prompt");task_msg=gr.Markdown()
+            gr.Markdown(
+                "3D generation is disabled until local geometry-output safety screening "
+                "is implemented, tested and released."
+            )
+            task_msg=gr.Markdown()
             task_ref=gr.Textbox(label="Local OBJ file path")
-            gr.Button("Create from text").click(three_d_text,inputs=p,outputs=[task_msg,task_ref])
+            gr.Button("Create from text — unavailable", interactive=False)
             image_ref=gr.Image(type="filepath",sources=["upload"],label="Image-to-3D reference")
             texture=gr.Textbox(label="Optional texture prompt")
             gr.Button("Image-to-3D unavailable — not implemented", interactive=False)
