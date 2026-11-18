@@ -227,6 +227,35 @@ class CorpusPreparationTests(unittest.TestCase):
                 dataset_manifest, manifest, root, corpus, report_path, review
             )
 
+    def test_source_manifest_rejects_duplicate_source_ids(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for name in ("one.txt", "two.txt"):
+                (root / name).write_text("A source file for identity validation.", encoding="utf-8")
+            manifest = root / "sources.json"
+            manifest.write_text(json.dumps({"sources": [
+                {"source_id": "same-id", "path": "one.txt", "license": "Unit test",
+                 "permitted_uses": "training", "allow_training": True},
+                {"source_id": "same-id", "path": "two.txt", "license": "Unit test",
+                 "permitted_uses": "training", "allow_training": True},
+            ]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "Duplicate source_id"):
+                load_sources_manifest(manifest, root)
+
+    def test_source_manifest_rejects_non_string_identity_and_unsafe_path(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "source.txt").write_text("A source file for identity validation.", encoding="utf-8")
+            for source_id, path in ((7, "source.txt"), ("valid-id", "../outside.txt"), ("valid-id", "https://example.org/data.txt")):
+                manifest = root / "sources.json"
+                manifest.write_text(json.dumps({"sources": [{
+                    "source_id": source_id, "path": path, "license": "Unit test",
+                    "permitted_uses": "training", "allow_training": True,
+                }]}), encoding="utf-8")
+                with self.subTest(source_id=source_id, path=path):
+                    with self.assertRaises(ValueError):
+                        load_sources_manifest(manifest, root)
+
     def test_rejects_unapproved_source(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
