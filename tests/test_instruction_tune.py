@@ -108,6 +108,8 @@ class InstructionTuningTests(unittest.TestCase):
                 ("grad_clip", float("nan")),
                 ("seed", True),
                 ("model_config", {**config["model_config"], "dropout": float("nan")}),
+                ("seed", 2**32),
+                ("model_config", {**config["model_config"], "width": 10**1000}),
             ]
             missing_manifest = root / "missing-manifest.json"
             for key, value in invalid_cases:
