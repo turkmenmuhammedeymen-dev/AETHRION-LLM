@@ -189,7 +189,7 @@ class SpecialistTrainingTests(unittest.TestCase):
             unsafe = {**base, "step": 2, "extra": UnsafePayload()}
             torch.save(unsafe, checkpoint)
             digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
-            Path(str(checkpoint) + ".sha256").write_text(digest + "\\n", encoding="ascii")
+            Path(str(checkpoint) + ".sha256").write_text(digest + "\n", encoding="ascii")
 
             with warnings.catch_warnings(record=True) as caught:
                 warnings.simplefilter("always")
