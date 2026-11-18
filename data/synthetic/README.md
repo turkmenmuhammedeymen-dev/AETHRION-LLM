@@ -4,8 +4,9 @@ Generate deterministic, local-only software fixtures for all 11 AETHRION model
 pipelines:
 
 ```bash
-pip install -e '.[visual]'
+pip install -e ".[visual]"
 python tools/generate_synthetic_family_fixtures.py --output data/synthetic/fixtures
+python -m unittest tests.test_synthetic_family_fixtures -v
 ```
 
 The generator creates:
@@ -13,23 +14,27 @@ The generator creates:
 - VISION and IMAGE geometric PNG assets and JSONL metadata;
 - 3D normalized random point-cloud NPY assets and JSONL metadata;
 - ASR, TTS and VOCODER 16 kHz non-speech WAV tone fixtures and JSONL metadata;
-- a family manifest that records counts, seed and explicit non-production status.
+- a family manifest recording counts, seed and explicit non-production status.
 
-SAFE emits 225 placeholder-labelled records so the current preparer's per-split
-class-count shape can be exercised. These labels are **not** safety annotations.
+The integration test runs all eleven fixture families through the repository's
+native text, visual and audio preparation adapters. CHAT uses a temporary
+byte-BPE tokenizer artifact to exercise its tokenizer-reuse contract. The
+resulting specialist manifests remain unapproved and cannot pass training
+preflight.
 
 ## Non-negotiable boundary
 
-Every record is marked `synthetic_fixture=true` and
+Every record is tagged `synthetic_fixture=true` and
 `production_training_approved=false`. The family manifest sets
-`not_for_training=true`, `training_allowed=false`, and every review/consent
-flag to false. The generated audio contains tones, not speech or speaker
-recordings. The images and point clouds are simple synthetic geometry.
+`not_for_training=true`, `training_allowed=false`, and all review/consent
+flags to false. The generated audio contains tones, not speech or speaker
+recordings. Images and point clouds are simple synthetic geometry.
 
-These assets are useful for parser, file-path, tensor-shape, provenance and
-integration tests only. They are not representative capability data and must
-never be used to train or claim readiness for a production model. Do not edit
-the manifest to make these fixtures eligible for training.
+These assets are useful for parser, file-path, tensor-shape, feature extraction,
+tokenizer, provenance and integration tests only. They are not representative
+capability data and must never be used to train or claim readiness for a
+production model. Do not edit the manifest to make these fixtures eligible for
+training.
 
 Production data still requires separately documented first-party authorship,
 rights-holder authority, permitted training use, privacy/quality review,
