@@ -98,6 +98,25 @@ class InstructionTuningTests(unittest.TestCase):
         }
         return manifest, config, base_checkpoint
 
+    def test_invalid_numeric_instruction_config_fails_before_manifest_access(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, config, base = self._fixture(root, approved=False)
+            invalid_cases = [
+                ("learning_rate", float("nan")),
+                ("weight_decay", float("inf")),
+                ("grad_clip", float("nan")),
+                ("seed", True),
+                ("model_config", {**config["model_config"], "dropout": float("nan")}),
+            ]
+            missing_manifest = root / "missing-manifest.json"
+            for key, value in invalid_cases:
+                candidate = dict(config)
+                candidate[key] = value
+                with self.subTest(key=key, value=value):
+                    with self.assertRaises(ValueError):
+                        tune_instructions(candidate, missing_manifest, base)
+
     def test_unapproved_instruction_data_is_blocked(self):
         with tempfile.TemporaryDirectory() as directory:
             manifest, config, base = self._fixture(Path(directory), approved=False)
