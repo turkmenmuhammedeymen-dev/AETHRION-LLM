@@ -90,6 +90,10 @@ class PipelineApprovalTests(unittest.TestCase):
                 "review_status": status,
             })
 
+    def test_external_dataset_import_is_disabled(self):
+        with self.assertRaisesRegex(RuntimeError, "first-party-only"):
+            pipeline.import_if_missing(True, 10)
+
     def test_missing_dataset_manifest_blocks(self):
         ok, reason = pipeline.approval_status()
         self.assertFalse(ok)
