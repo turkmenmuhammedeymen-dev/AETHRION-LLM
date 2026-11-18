@@ -346,8 +346,13 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         response=self.client.post("/dispatch",json={"capability":"code","prompt":"write a function"},headers=self.auth)
         self.assertEqual(response.status_code,200)
         self.assertEqual(response.json()["result"]["text"],"generated code")
-    def test_dispatch_unconfigured_capability_returns_503(self):
+    def test_dispatch_rejects_file_output_capability(self):
         response=self.client.post("/dispatch",json={"capability":"3d","prompt":"create a model"},headers=self.auth)
+        self.assertEqual(response.status_code,400)
+        self.assertIn("dedicated",response.json()["detail"])
+
+    def test_dispatch_unconfigured_text_capability_returns_503(self):
+        response=self.client.post("/dispatch",json={"capability":"research","prompt":"summarize"},headers=self.auth)
         self.assertEqual(response.status_code,503)
 
 if __name__=="__main__": unittest.main()
