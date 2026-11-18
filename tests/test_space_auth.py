@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from aethrion.space_auth import space_auth_required
 
