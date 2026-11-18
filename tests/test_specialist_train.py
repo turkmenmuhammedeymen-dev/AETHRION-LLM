@@ -333,7 +333,7 @@ class SpecialistTrainingTests(unittest.TestCase):
                 },
             }
             _save_checkpoint(checkpoint, payload)
-            Path(str(checkpoint) + ".sha256").write_text("f" * 64 + "\\n", encoding="ascii")
+            Path(str(checkpoint) + ".sha256").write_text("f" * 64 + "\n", encoding="ascii")
 
             with self.assertRaisesRegex(ValueError, "integrity verification failed"):
                 _load_checkpoint(checkpoint, torch.device("cpu"))
