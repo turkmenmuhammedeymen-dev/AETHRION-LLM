@@ -80,6 +80,30 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             with self.assertRaisesRegex(FamilyTrainingError, "escapes"):
                 _resolve_output_dir(root, "artifacts")
 
+    def test_base_training_input_paths_reject_absolute_and_parent_paths(self):
+        from aethrion.train_family import _resolve_repo_input
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            for field in ("data_path", "tokenizer_path"):
+                for invalid in ("", "../outside.txt", str(root / "outside.txt")):
+                    with self.subTest(field=field, invalid=invalid):
+                        with self.assertRaises(FamilyTrainingError):
+                            _resolve_repo_input(root, invalid, field)
+
+    def test_base_training_input_paths_reject_symlink_escape(self):
+        from aethrion.train_family import _resolve_repo_input
+        with tempfile.TemporaryDirectory() as folder, tempfile.TemporaryDirectory() as outside:
+            root = Path(folder).resolve()
+            (root / "external-data").symlink_to(Path(outside), target_is_directory=True)
+            with self.assertRaisesRegex(FamilyTrainingError, "escapes"):
+                _resolve_repo_input(root, "external-data/corpus.txt", "data_path")
+
+    def test_base_training_input_paths_allow_repository_relative_files(self):
+        from aethrion.train_family import _resolve_repo_input
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            self.assertEqual(_resolve_repo_input(root, "data/processed/corpus.txt", "data_path"), root / "data/processed/corpus.txt")
+
     def test_valid_output_directory_is_resolved_inside_repo(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder).resolve()

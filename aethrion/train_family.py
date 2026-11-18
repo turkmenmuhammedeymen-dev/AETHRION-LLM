@@ -34,6 +34,20 @@ def _read_config(path: Path) -> dict[str, Any]:
     return value
 
 
+def _resolve_repo_input(repo: Path, raw_value: Any, field_name: str) -> Path:
+    """Resolve a configured input only when it stays inside the repository."""
+    if not isinstance(raw_value, str) or not raw_value.strip():
+        raise FamilyTrainingError(f"A non-empty relative {field_name} is required.")
+    configured = Path(raw_value)
+    if configured.is_absolute() or any(part == ".." for part in configured.parts):
+        raise FamilyTrainingError(f"{field_name} must be a safe relative path.")
+    resolved = (repo / configured).resolve()
+    try:
+        resolved.relative_to(repo)
+    except ValueError as exc:
+        raise FamilyTrainingError(f"Configured {field_name} escapes the repository root.") from exc
+    return resolved
+
 def _resolve_output_dir(repo: Path, raw_value: Any) -> Path:
     """Require an explicit, non-root output folder contained inside the repository."""
     if not isinstance(raw_value, str) or not raw_value.strip():
@@ -63,8 +77,8 @@ def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
         dataset_manifest = repo / "data" / "processed" / "corpus_manifest.json"
         source_manifest = repo / "data" / "raw" / "cosmos" / "sources.json"
         source_root = repo / "data" / "raw" / "cosmos"
-        corpus = (repo / str(config.get("data_path", ""))).resolve()
-        tokenizer = (repo / str(config.get("tokenizer_path", ""))).resolve()
+        corpus = _resolve_repo_input(repo, config.get("data_path"), "data_path")
+        tokenizer = _resolve_repo_input(repo, config.get("tokenizer_path"), "tokenizer_path")
         report = repo / "data" / "processed" / "corpus-report.json"
         source_review = repo / "data" / "processed" / "privacy_review" / "source_review.csv"
         from aethrion.tokenizer import validate_tokenizer_provenance
