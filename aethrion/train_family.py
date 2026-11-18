@@ -226,7 +226,15 @@ def run_family(
         # Phase 2: only a fully preflighted selection reaches this loop.
         for model_id in model_ids:
             plan = plans[model_id]
-            completed = subprocess.run(plan["command"], cwd=repo, check=False)
+            try:
+                completed = subprocess.run(plan["command"], cwd=repo, check=False)
+            except OSError as exc:
+                rows.append({
+                    **plan,
+                    "status": "trainer_launch_failed_not_started",
+                    "launch_error": f"{type(exc).__name__}: {exc}",
+                })
+                continue
             rows.append({
                 **plan,
                 "status": _training_outcome(
