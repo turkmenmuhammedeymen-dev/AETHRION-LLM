@@ -256,7 +256,20 @@ def run_family(
     for index, model_id in enumerate(model_ids):
         plan = plans[index]
         assert plan is not None
-        completed = subprocess.run(plan["command"], cwd=repo, check=False)
+        try:
+            completed = subprocess.run(plan["command"], cwd=repo, check=False)
+        except OSError as exc:
+            # A missing interpreter/entrypoint or OS-level launch failure must
+            # become a structured blocked row, not abort the family report.
+            rows[index] = {
+                **plan,
+                "ready": False,
+                "status": "blocked",
+                "failure_stage": "trainer_launch",
+                "reason": f"{type(exc).__name__}: {exc}",
+                "training_started": False,
+            }
+            continue
         rows[index] = {
             **plan,
             "status": _training_outcome(
