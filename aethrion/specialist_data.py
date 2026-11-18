@@ -350,7 +350,7 @@ def validate_specialist_dataset(
                 )
                 or re.search(
                     r"\b(?:training|train|machine learning|model development)\b"
-                    r".{0,48}\b(?:not allowed|not permitted|prohibited|forbidden|disallowed|excluded)\b",
+                    r".{0,48}\b(?:not allowed|not permitted|not authorized|unauthorized|prohibited|forbidden|disallowed|excluded)\b",
                     permitted_use,
                 )
                 or re.search(r"\b(?:evaluation|testing|unit tests)\s+only\b", permitted_use)
