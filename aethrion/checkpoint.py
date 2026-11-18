@@ -45,7 +45,7 @@ def _fsync_directory(path: Path) -> None:
 
 
 def _write_text_fsync(path: Path, content: str, encoding: str) -> None:
-    with path.open("w", encoding=encoding, newline="\\n") as handle:
+    with path.open("w", encoding=encoding, newline="\n") as handle:
         handle.write(content)
         handle.flush()
         os.fsync(handle.fileno())
@@ -93,7 +93,7 @@ def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
             handle.flush()
             os.fsync(handle.fileno())
         checksum = sha256_file(temporary)
-        sidecar_temporary.write_text(checksum + "\n", encoding="ascii")
+        _write_text_fsync(sidecar_temporary, checksum + "\n", "ascii")
 
         # Preserve the last known-good generation before replacing either file.
         if target.is_file() and sidecar.is_file():
