@@ -36,6 +36,7 @@ class DatasetCandidateCoverageTests(unittest.TestCase):
         payload = json.loads((root / "data" / "dataset_candidates.json").read_text(encoding="utf-8"))
         approval = payload["owner_approval"]
         self.assertIs(approval["permits_training"], True)
+        self.assertIs(approval["permits_third_party_dataset_training"], False)
         self.assertIs(approval["permits_accepting_provider_legal_terms"], False)
         self.assertIs(approval["permits_paid_acquisition"], False)
         self.assertIs(approval["permits_paid_compute"], False)
