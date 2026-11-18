@@ -84,7 +84,7 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
         from aethrion.train_family import _resolve_input_file
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder).resolve()
-            for invalid in ("", "../outside.txt", str(root / "outside.txt")):
+            for invalid in ("", "../outside.txt", str(root / "outside.txt"), r"C:\\outside.txt", r"..\\outside.txt"):
                 with self.subTest(invalid=invalid):
                     with self.assertRaises(FamilyTrainingError):
                         _resolve_input_file(root, invalid, "data_path")
