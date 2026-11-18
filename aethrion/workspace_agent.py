@@ -15,7 +15,7 @@ MAX_FILE_BYTES=512*1024
 MAX_PROJECT_TEXT=180_000
 
 def _safe_name(name):
-    if not isinstance(name, str) or not name or "\\x00" in name:
+    if not isinstance(name, str) or not name or "\x00" in name:
         raise WorkspaceError("Archive paths must be non-empty UTF-8 strings without NUL bytes.")
     path=PurePosixPath(name.replace("\\", "/"))
     if path.is_absolute() or not path.parts or any(p in {"",".",".."} for p in path.parts):
