@@ -296,9 +296,9 @@ def validate_specialist_dataset(
             validate_governance_record(payload.get("governance"), model_id=model_id)
         except GovernanceError as exc:
             raise SpecialistDataError(str(exc)) from exc
-    if payload.get("privacy_reviewed") is not True:
+    if require_training_approval and payload.get("privacy_reviewed") is not True:
         raise SpecialistDataError("Training blocked: privacy review is not approved.")
-    if model_id in AUDIO_MODELS and payload.get("speaker_consent_reviewed") is not True:
+    if require_training_approval and model_id in AUDIO_MODELS and payload.get("speaker_consent_reviewed") is not True:
         raise SpecialistDataError("Training blocked: speaker consent review is not approved.")
 
     sources = payload.get("sources")
@@ -360,9 +360,9 @@ def validate_specialist_dataset(
             evidence = urlsplit(source["evidence_uri"].strip())
             if evidence.scheme != "https" or not evidence.hostname or evidence.username or evidence.password:
                 raise SpecialistDataError("Training blocked: source rights evidence must be an HTTPS URL.")
-        if source.get("privacy_reviewed") is not True:
+        if require_training_approval and source.get("privacy_reviewed") is not True:
             raise SpecialistDataError("Training blocked: one or more sources lack privacy approval.")
-        if model_id in AUDIO_MODELS and source.get("speaker_consent_verified") is not True:
+        if require_training_approval and model_id in AUDIO_MODELS and source.get("speaker_consent_verified") is not True:
             raise SpecialistDataError("Training blocked: audio source lacks verified speaker consent.")
 
     dataset_path = payload.get("dataset_path")
