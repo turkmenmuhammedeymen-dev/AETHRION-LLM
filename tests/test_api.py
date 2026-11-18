@@ -83,6 +83,17 @@ class _FakeSafetyRuntime:
         self.decisions = decisions or {}
         self.output_text = output_text
         self.reviewed = []
+        self.research_index_valid = True
+        self.audio_path = None
+        self.spoken_text = "safe spoken output"
+
+    def validate_research_index(self):
+        if not self.research_index_valid:
+            raise api.NativeModelError("Research index is not verified.")
+        return True
+
+    def transcribe_wav(self, path):
+        return self.spoken_text
 
     def classify_safety(self, text):
         self.reviewed.append(text)
@@ -91,6 +102,8 @@ class _FakeSafetyRuntime:
     def handle(self, capability, request):
         if capability == "safety":
             return {"decision": self.decisions.get(request.prompt, "ALLOW")}
+        if capability == "tts":
+            return {"audio_path": self.audio_path}
         return {"text": self.output_text}
 
 
@@ -105,6 +118,39 @@ class SafeRuntimeGateTests(unittest.TestCase):
         router, _, _ = self._build({"chat": "ready", "safety": "not_trained"})
         self.assertNotIn("chat", router.available())
         self.assertNotIn("safety", router.available())
+
+    def test_tts_requires_both_vocoder_and_asr(self):
+        cases = [
+            {"tts": "ready", "safety": "ready", "vocoder": "ready"},
+            {"tts": "ready", "safety": "ready", "asr": "ready"},
+        ]
+        for statuses in cases:
+            with self.subTest(statuses=statuses):
+                router, _, _ = self._build(statuses)
+                self.assertNotIn("tts", router.available())
+
+    def test_tts_reviews_transcribed_audio_and_deletes_blocked_output(self):
+        runtime = _FakeSafetyRuntime({
+            "tts": "ready", "vocoder": "ready", "asr": "ready", "safety": "ready",
+        }, decisions={"unsafe spoken output": "BLOCK"})
+        with tempfile.TemporaryDirectory() as folder:
+            audio = Path(folder) / "tts.wav"
+            audio.write_bytes(b"synthetic-audio")
+            runtime.audio_path = str(audio)
+            runtime.spoken_text = "unsafe spoken output"
+            with patch.object(api, "NativeModelRuntime", return_value=runtime):
+                router, _ = build_router(allow_remote_providers=False)
+            self.assertIn("tts", router.available())
+            with self.assertRaises(CapabilityUnavailable):
+                router.dispatch("tts", CapabilityRequest("hello", {}))
+            self.assertFalse(audio.exists())
+
+    def test_research_is_not_registered_without_verified_local_index(self):
+        runtime = _FakeSafetyRuntime({"research": "ready", "safety": "ready"})
+        runtime.research_index_valid = False
+        with patch.object(api, "NativeModelRuntime", return_value=runtime):
+            router, _ = build_router(allow_remote_providers=False)
+        self.assertNotIn("research", router.available())
 
     def test_image_and_3d_output_models_stay_unavailable_without_visual_output_safety(self):
         router, _, _ = self._build({
