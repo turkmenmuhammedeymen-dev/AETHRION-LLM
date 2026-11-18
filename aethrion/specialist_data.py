@@ -319,12 +319,21 @@ def validate_specialist_dataset(
         license_name = source["license"].strip()
         permitted_use = source["permitted_use"].strip().casefold()
         source_uri_scheme = urlparse(source["source_uri"].strip()).scheme.casefold()
-        if license_name.upper() in UNVERIFIED_LICENSE_LABELS:
+        normalized_license = re.sub(r"[^A-Z0-9]+", "_", license_name.upper()).strip("_")
+        if normalized_license in UNVERIFIED_LICENSE_LABELS or any(
+            normalized_license.startswith(label + "_") for label in UNVERIFIED_LICENSE_LABELS
+        ):
             raise SpecialistDataError("Training blocked: specialist source license is unknown or pending human review.")
+        if not source_uri_scheme:
+            raise SpecialistDataError("Training blocked: specialist source_uri must be a documented provenance URI.")
         if "train" not in permitted_use or any(
             phrase in permitted_use
-            for phrase in ("not for training", "no training", "training prohibited",
-                           "training not permitted", "training not allowed", "evaluation only")
+            for phrase in (
+                "not for training", "no training", "training prohibited",
+                "training not permitted", "training not allowed",
+                "not approved for training", "no permission to train",
+                "not permitted to train", "not allowed to train", "evaluation only",
+            )
         ):
             raise SpecialistDataError("Training blocked: specialist source permitted_use must explicitly allow training.")
         if source_uri_scheme in REMOTE_SOURCE_SCHEMES:
