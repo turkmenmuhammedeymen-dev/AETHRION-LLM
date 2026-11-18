@@ -2,9 +2,11 @@
   "project": "AETHRION-LLM",
   "dataset_status": "awaiting_owner_authored_sources_and_human_review",
   "training_allowed": false,
+  "first_party_origin_attested": false,
   "requirements": [
     "UTF-8 owner-authored records",
     "documented authorship and rights-holder role",
+    "explicit first-party origin attestation for the complete dataset",
     "timestamped human rights and source review",
     "human privacy and quality review",
     "deduplication",
