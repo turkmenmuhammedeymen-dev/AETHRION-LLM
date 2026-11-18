@@ -218,5 +218,48 @@ def audit_session_artifacts(session_dir: str | Path, session_id: str) -> dict[st
     if snapshot_count is None or snapshot_hash is None:
         return {**journal_result, "valid": False, "reason": "legacy_snapshot_unverifiable",
                 "recovery": "manual_review_required"}
-    return {**journal_result, "snapshot_status": snapshot.get("status"),
-            "snapshot_verified": True}
+    reconstructed_rows = []
+    snapshot_rows = snapshot.get("models", [])
+    if not isinstance(snapshot_rows, list):
+        return {**journal_result, "valid": False, "reason": "snapshot_models_invalid",
+                "recovery": "manual_review_required"}
+    attempts_by_model = {}
+    for attempt_id, attempt in journal_result.get("attempts", {}).items():
+        attempts_by_model.setdefault(attempt.get("model_id"), []).append((attempt_id, attempt))
+    for row in snapshot_rows:
+        if not isinstance(row, dict) or not isinstance(row.get("model_id"), str):
+            return {**journal_result, "valid": False, "reason": "snapshot_model_row_invalid",
+                    "recovery": "manual_review_required"}
+        rebuilt = dict(row)
+        model_attempts = attempts_by_model.get(row["model_id"], [])
+        if len(model_attempts) > 1:
+            return {**journal_result, "valid": False, "reason": "multiple_attempts_for_model",
+                    "recovery": "manual_review_required"}
+        if model_attempts:
+            attempt_id, attempt = model_attempts[0]
+            if row.get("attempt_id") not in (None, attempt_id):
+                return {**journal_result, "valid": False, "reason": "snapshot_attempt_mismatch",
+                        "recovery": "manual_review_required"}
+            rebuilt["attempt_id"] = attempt_id
+            if attempt["state"] == "process_running":
+                rebuilt["recovery_action"] = "checkpoint_verification_required"
+            elif attempt["state"] == "attempt_prepared":
+                rebuilt["recovery_action"] = "safe_to_requeue_after_preflight"
+            else:
+                rebuilt["recovery_action"] = "terminal_event_recorded"
+                rebuilt["journal_terminal_status"] = attempt.get("terminal_status")
+        reconstructed_rows.append(rebuilt)
+    return {
+        **journal_result,
+        "snapshot_status": snapshot.get("status"),
+        "snapshot_verified": True,
+        "reconstructed_session": {
+            "session_id": session_id,
+            "status": snapshot.get("status"),
+            "current_model": snapshot.get("current_model"),
+            "models": reconstructed_rows,
+            "execute_requested": snapshot.get("execute_requested") is True,
+            "released_count": 0,
+            "automatic_resume": False,
+        },
+    }
