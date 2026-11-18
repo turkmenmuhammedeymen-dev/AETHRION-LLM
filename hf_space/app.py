@@ -233,6 +233,9 @@ def analyse(file_path,question):
         return _auth_required_message()
     if not file_path:
         return "Upload a PDF, DOCX or supported text file."
+    source=Path(file_path)
+    if not source.is_file() or source.is_symlink() or source.stat().st_size>8*1024*1024:
+        return "Document upload must be a regular file no larger than 8 MiB."
     try:
         result = dispatch(
             Capability.DOCUMENT,
