@@ -8,6 +8,7 @@ import torch
 from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.tokenizer import ByteBPETokenizer, validate_tokenizer_provenance
 from aethrion.checkpoint import load_checkpoint, save_checkpoint, sha256_file, write_json_atomic
+from aethrion.training_config import require_finite_number, require_int
 
 _STOP_REQUESTED = False
 
@@ -82,16 +83,17 @@ def main() -> None:
                         help="Evidence-backed per-domain approval CSV for URL-attributed records.")
     args = parser.parse_args()
     cfg = json.loads(Path(args.config).read_text(encoding="utf-8"))
-    required = ("seed","data_path","tokenizer_path","output_dir","vocab_size","block_size","n_layer","n_head",
-                "n_embd","dropout","batch_size","gradient_accumulation_steps","learning_rate",
-                "min_learning_rate","weight_decay","max_steps","warmup_steps","eval_interval",
-                "eval_batches","save_interval","grad_clip","amp")
+    required = (
+        "seed", "data_path", "tokenizer_path", "output_dir", "vocab_size",
+        "block_size", "n_layer", "n_head", "n_embd", "dropout", "batch_size",
+        "gradient_accumulation_steps", "learning_rate", "min_learning_rate",
+        "weight_decay", "max_steps", "warmup_steps", "eval_interval",
+        "eval_batches", "save_interval", "grad_clip", "amp",
+    )
     missing = [key for key in required if key not in cfg]
-    if missing: raise ValueError(f"Missing training config keys: {', '.join(missing)}")
-    for key in ("batch_size","gradient_accumulation_steps","max_steps","eval_interval","eval_batches","save_interval"):
-        if cfg[key] < 1: raise ValueError(f"{key} must be >= 1")
-    if cfg["warmup_steps"] < 0 or cfg["learning_rate"] <= 0 or cfg["min_learning_rate"] < 0:
-        raise ValueError("Invalid learning-rate or warmup configuration")
+    if missing:
+        raise ValueError(f"Missing training config keys: {', '.join(missing)}")
+    validate_base_training_config(cfg)
     tokenizer_path, data_path = Path(cfg["tokenizer_path"]), Path(cfg["data_path"])
     split_info, tokenizer_provenance_hash = validate_tokenizer_provenance(
         tokenizer_path,
@@ -269,5 +271,33 @@ def main() -> None:
             "note": "Independent instruction-following, factuality, multilingual and safety benchmarks are mandatory before release."
         }, output / "training_report.json")
         print("Training finished. Evaluate instruction-following and safety on independent held-out datasets before release.")
+
+def validate_base_training_config(cfg: dict) -> None:
+    """Reject malformed or non-finite BASE training settings before data/model work."""
+    if not isinstance(cfg, dict):
+        raise ValueError("BASE training config must be a JSON object.")
+    integer_fields = {
+        "seed": 0, "vocab_size": 256, "block_size": 8, "n_layer": 1,
+        "n_head": 1, "n_embd": 8, "batch_size": 1,
+        "gradient_accumulation_steps": 1, "max_steps": 1, "warmup_steps": 0,
+        "eval_interval": 1, "eval_batches": 1, "save_interval": 1,
+    }
+    for name, minimum in integer_fields.items():
+        require_int(cfg.get(name), name, minimum=minimum)
+    require_finite_number(cfg.get("learning_rate"), "learning_rate", minimum=0, minimum_inclusive=False)
+    require_finite_number(cfg.get("min_learning_rate"), "min_learning_rate", minimum=0)
+    require_finite_number(cfg.get("weight_decay"), "weight_decay", minimum=0)
+    require_finite_number(cfg.get("grad_clip"), "grad_clip", minimum=0, minimum_inclusive=False)
+    require_finite_number(cfg.get("dropout"), "dropout", minimum=0, maximum=1, maximum_inclusive=False)
+    if cfg["min_learning_rate"] > cfg["learning_rate"]:
+        raise ValueError("min_learning_rate must not exceed learning_rate.")
+    if cfg["warmup_steps"] > cfg["max_steps"]:
+        raise ValueError("warmup_steps must not exceed max_steps.")
+    if type(cfg.get("amp")) is not bool:
+        raise ValueError("amp must be a JSON boolean.")
+    for name in ("data_path", "tokenizer_path", "output_dir"):
+        if not isinstance(cfg.get(name), str) or not cfg[name].strip():
+            raise ValueError(f"{name} must be a non-empty path string.")
+
 
 if __name__ == "__main__": main()
