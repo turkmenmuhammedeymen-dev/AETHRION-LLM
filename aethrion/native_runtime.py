@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import tempfile
+import zipfile
 from typing import Any
 
 import numpy as np
@@ -367,6 +368,79 @@ class NativeModelRuntime:
         raise NativeRuntimeError(
             f"Local inference adapter for '{capability}' is not yet implemented or released."
         )
+
+    def validate_research_index(self) -> bool:
+        """Validate local research index artifacts before registering RESEARCH as ready."""
+        processor = self.processor("research")
+        if processor.get("format") != "aethrion-local-research-index-v1":
+            raise NativeRuntimeError("Research processor does not describe a supported local index.")
+        artifacts = self.registry.resolve("research")
+
+        def verified_file(path_key: str, hash_key: str, max_bytes: int) -> Path:
+            relative = processor.get(path_key)
+            expected = processor.get(hash_key)
+            if not isinstance(relative, str) or not relative.strip() or not isinstance(expected, str):
+                raise NativeRuntimeError(f"Research processor is missing {path_key}/{hash_key}.")
+            candidate = Path(relative)
+            if (
+                candidate.is_absolute() or chr(92) in relative
+                or any(part in {"", ".", ".."} for part in relative.split("/"))
+            ):
+                raise NativeRuntimeError("Research index paths must be safe repository-relative paths.")
+            resolved = (self.root / candidate).resolve()
+            try:
+                resolved.relative_to(self.root)
+            except ValueError as exc:
+                raise NativeRuntimeError("Research index path escapes repository root.") from exc
+            if not resolved.is_file() or resolved.is_symlink() or resolved.stat().st_size < 1:
+                raise NativeRuntimeError(f"Research index artifact is missing: {path_key}.")
+            if resolved.stat().st_size > max_bytes or self._digest(resolved) != expected.lower():
+                raise NativeRuntimeError(f"Research index size or SHA-256 check failed: {path_key}.")
+            return resolved
+
+        index_path = verified_file("index_path", "index_sha256", 512 * 1024 * 1024)
+        metadata_path = verified_file("metadata_path", "metadata_sha256", 64 * 1024 * 1024)
+        if processor.get("tokenizer_sha256") != self._digest(artifacts.tokenizer):
+            raise NativeRuntimeError("Research index tokenizer hash does not match the released model tokenizer.")
+        from aethrion.tokenizer import ByteBPETokenizer
+        tokenizer = ByteBPETokenizer.load(artifacts.tokenizer)
+        try:
+            with zipfile.ZipFile(index_path) as archive:
+                entries = [info for info in archive.infolist() if not info.is_dir()]
+                if not entries or len(entries) > 32 or sum(info.file_size for info in entries) > 512 * 1024 * 1024:
+                    raise NativeRuntimeError("Research NPZ archive exceeds safe entry or expanded-size limits.")
+            with np.load(index_path, allow_pickle=False) as arrays:
+                passage_ids = np.array(arrays["passage_ids"], copy=True)
+                passage_mask = np.array(arrays["passage_mask"], copy=True)
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except NativeRuntimeError:
+            raise
+        except (OSError, ValueError, KeyError, EOFError, UnicodeError, json.JSONDecodeError, zipfile.BadZipFile) as exc:
+            raise NativeRuntimeError("Research index artifacts are invalid or unreadable.") from exc
+        if (
+            passage_ids.ndim != 2 or passage_ids.shape[0] < 1 or passage_ids.shape[1] < 2
+            or passage_mask.shape != passage_ids.shape
+            or not np.issubdtype(passage_ids.dtype, np.integer)
+            or not np.issubdtype(passage_mask.dtype, np.number)
+            or not np.isfinite(passage_ids).all()
+            or not np.isfinite(passage_mask).all()
+            or np.any(passage_ids < 0)
+            or np.any(passage_ids >= tokenizer.vocab_size)
+            or np.any((passage_mask != 0) & (passage_mask != 1))
+        ):
+            raise NativeRuntimeError("Research index token or mask arrays have invalid shapes or values.")
+        required_metadata = ("title", "source_uri", "license", "evidence_uri", "excerpt", "doc_id")
+        if not isinstance(metadata, list) or len(metadata) != passage_ids.shape[0]:
+            raise NativeRuntimeError("Research metadata count does not match index rows.")
+        for row in metadata:
+            if not isinstance(row, dict) or any(
+                not isinstance(row.get(key), str) or not row[key].strip()
+                for key in required_metadata
+            ):
+                raise NativeRuntimeError("Research metadata has missing or invalid evidence fields.")
+            if len(row["excerpt"]) > 12000:
+                raise NativeRuntimeError("Research metadata excerpt exceeds its text limit.")
+        return True
 
     @torch.no_grad()
     def search_research(self, query: str, top_k: int = 5) -> dict[str, Any]:
