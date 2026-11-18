@@ -13,7 +13,7 @@ review and model card pass the registry gates.
 - [x] Resumable pretraining, atomic checkpoint and SHA-256 integrity checks.
 - [x] Evaluation metric reporting and synthetic training smoke test.
 - [x] Response-only instruction-tuning entrypoint and ignored-prompt loss.
-- [ ] Human-reviewed lawful multilingual corpus with adequate scale.
+- [ ] Human-reviewed first-party owner-authored multilingual corpus with adequate scale.
 - [ ] Full pretraining run on approved data and documented hardware budget.
 - [ ] Instruction dataset and tuning run with independent held-out evaluation.
 - [ ] Turkish/multilingual factuality, reasoning, hallucination, robustness and safety benchmarks.
@@ -28,14 +28,14 @@ The test-only fixtures are not production training data.
 - [x] Separate randomly initialized causal LM architecture and config.
 - [x] Specialist training runner and dataset schema.
 - [x] Forward/loss test.
-- [ ] Permissively licensed code corpus with provenance and repository deduplication.
+- [ ] Owner-authored code corpus with documented provenance and deduplication.
 - [ ] Code training, unit-test generation, repair benchmark and security review.
 - [ ] Instruction/fix evaluation on held-out repositories.
 
 ### AETHRION-VISION
 - [x] Image/text dual encoder and contrastive objective.
 - [x] Dataset schema and shape/loss smoke test.
-- [ ] Licensed image-caption and visual-QA dataset.
+- [ ] Owner-authored image-caption and visual-QA data.
 - [ ] Larger visual encoder, data pipeline, training, retrieval and calibration benchmarks.
 - [ ] Visual chat/grounding integration if separately designed and evaluated.
 
@@ -49,21 +49,21 @@ The test-only fixtures are not production training data.
 ### AETHRION-ASR
 - [x] Acoustic encoder and CTC objective.
 - [x] Native WAV decoding/resampling and log-mel feature extraction.
-- [ ] Consented, licensed multilingual speech corpus and transcript normalization.
+- [ ] Owner-authored and speaker-consented multilingual speech corpus and transcript normalization.
 - [ ] Training, greedy/beam decoding, WER/CER, dialect/noise/accent evaluation.
 
 ### AETHRION-TTS and AETHRION-VOCODER
 - [x] Transcript-to-mel predictor and duration objective.
 - [x] Separate vocoder architecture and training profile.
 - [x] Audio consent gate and WAV output utility.
-- [ ] Speaker-consented recordings, validated alignments and multilingual text normalization.
+- [ ] Owner-authored, speaker-consented recordings, validated alignments and multilingual text normalization.
 - [ ] Train acoustic model and vocoder independently; verify both hashes and compatibility.
 - [ ] Naturalness, intelligibility, pronunciation, speaker-consistency and latency benchmarks.
 
 ### AETHRION-3D
 - [x] Text-conditioned point-cloud diffusion and vertex-only OBJ export.
 - [x] Separate dataset schema and training objective.
-- [ ] Licensed text/image/3D pairs with topology/texture metadata.
+- [ ] Owner-authored text/image/3D pairs with topology/texture metadata.
 - [ ] Mesh topology generation, texture/material model, geometry repair and export pipeline.
 - [ ] Geometric fidelity, topology, prompt adherence and CAD/game-engine validation.
 
@@ -76,14 +76,14 @@ The test-only fixtures are not production training data.
 ### AETHRION-DOC
 - [x] Document text/layout encoder, tagging and extractive-QA heads.
 - [ ] Local OCR and layout extraction, including tables, reading order and page geometry.
-- [ ] Licensed document understanding dataset and separate training/held-out tests.
+- [ ] Owner-authored document understanding data and separate training/held-out tests.
 - [ ] DOCX/PDF semantic and formatting-preserving edit pipeline.
 - [ ] Document question-answering, table, layout and OCR benchmarks.
 
 ### AETHRION-SAFE
 - [x] Separate ALLOW/REVIEW/BLOCK classifier and reason scores.
 - [x] Separate manifest/data gate and evaluation requirements documented.
-- [ ] Qualified human-reviewed, lawful, privacy-preserving labelled safety dataset.
+- [ ] Qualified human-reviewed, first-party owner-authored, privacy-preserving labelled safety data.
 - [ ] Train, calibrate and independently evaluate category-level false positives/negatives.
 - [ ] Adversarial, multilingual and abstention benchmarks; independent safety review.
 - [ ] Enable only after documented acceptance criteria and explicit release approval.
@@ -112,8 +112,6 @@ See [PRODUCT_AI_INTEGRATION_MATRIX.md](PRODUCT_AI_INTEGRATION_MATRIX.md) and
 
 ## Compute reality
 
-Current model classes are research-scale scaffolds. The existing two-T4 Kaggle
-runtime and modest pilot configs are not sufficient evidence of parity with
-frontier chat, code, image, speech or 3D systems. Before increasing model size,
+Current model classes are research-scale scaffolds. GitHub Actions provides CPU CI only; Hugging Face ZeroGPU is request-scoped and not suitable for long-running model-family training. No approved training compute environment is currently configured. These resources are not evidence of parity with frontier chat, code, image, speech or 3D systems. Before increasing model size,
 measure actual GPU memory, storage, step time and projected cost. No paid
 hardware or training job should be started implicitly.
