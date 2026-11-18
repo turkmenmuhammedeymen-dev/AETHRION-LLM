@@ -132,7 +132,10 @@ def _validate_specialist_config(model_id: str, config: dict[str, Any]) -> None:
             "Specialist model_config is missing: " + ", ".join(sorted(missing_model))
         )
     for key in SPECIALIST_INTEGER_CONFIG_KEYS & set(model_config):
-        require_int(model_config[key], f"model_config.{key}", minimum=1)
+        require_int(
+            model_config[key], f"model_config.{key}",
+            minimum=0 if key == "blank_id" else 1,
+        )
 
 
 def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
