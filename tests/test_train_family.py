@@ -327,6 +327,7 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
     def _write_verified_report_fixture(self, root: Path, *, model_id="code", status="training_complete_not_released"):
         import hashlib
         import json
+        import time
 
         output = root / "artifacts" / "models" / model_id
         output.mkdir(parents=True)
