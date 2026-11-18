@@ -150,7 +150,7 @@ class CorpusPreparationTests(unittest.TestCase):
                 path.write_text(json.dumps({
                     "group_id": f"reviewed-group-{index}",
                     "text": f"Unique independent source {index} provides enough text for this fixture.",
-                }) + "\\n", encoding="utf-8")
+                }) + "\n", encoding="utf-8")
                 source_paths.append(path)
                 entries.append({
                     "source_id": f"source-{index}",
@@ -175,11 +175,11 @@ class CorpusPreparationTests(unittest.TestCase):
             # source digest to match the changed raw source, while lacking the HMAC key.
             payload = json.loads(source_paths[0].read_text(encoding="utf-8"))
             payload["group_id"] = "attacker-invented-independent-group"
-            source_paths[0].write_text(json.dumps(payload) + "\\n", encoding="utf-8")
+            source_paths[0].write_text(json.dumps(payload) + "\n", encoding="utf-8")
             report["sources"][0]["sha256"] = hashlib.sha256(
                 source_paths[0].read_bytes()
             ).hexdigest()
-            report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n",
+            report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n",
                                    encoding="utf-8")
 
             with self.assertRaisesRegex(ValueError, "signature verification failed"):
@@ -194,7 +194,7 @@ class CorpusPreparationTests(unittest.TestCase):
             for index in range(3):
                 path = root / f"source-{index}.txt"
                 path.write_text(
-                    f"Independent source {index} contains a unique reviewed sentence.\\n",
+                    f"Independent source {index} contains a unique reviewed sentence.\n",
                     encoding="utf-8",
                 )
                 entries.append({
