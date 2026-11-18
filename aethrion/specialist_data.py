@@ -68,6 +68,20 @@ def _safe_local_path(root: Path, relative: str) -> Path:
     return resolved
 
 
+def _validate_array_integrity(arrays: dict[str, np.ndarray], sample_count: int) -> None:
+    """Reject malformed, non-numeric, misaligned or non-finite training arrays."""
+    metadata = {"sample_id", "group_id", "split"}
+    for key, value in arrays.items():
+        if key in metadata:
+            continue
+        array = np.asarray(value)
+        if array.ndim == 0 or array.shape[0] != sample_count:
+            raise SpecialistDataError(f"Training array {key!r} must have {sample_count} samples on axis 0.")
+        if array.dtype.kind not in {"b", "i", "u", "f"}:
+            raise SpecialistDataError(f"Training array {key!r} must use a real numeric or boolean dtype.")
+        if array.dtype.kind == "f" and not np.isfinite(array).all():
+            raise SpecialistDataError(f"Training array {key!r} contains NaN or infinite values.")
+
 def _validate_modality_shapes(model_id: str, arrays: Any, sample_count: int) -> None:
     """Validate tensor shapes, integer labels and alignment before model creation."""
     if model_id in {"chat", "code"}:
@@ -304,6 +318,7 @@ def validate_specialist_dataset(
             if any(counts[name] == 0 for name in counts):
                 raise SpecialistDataError("Dataset requires non-empty train, validation and test splits.")
             sample_count = len(ids)
+            _validate_array_integrity(arrays, sample_count)
             _validate_modality_shapes(model_id, arrays, sample_count)
             if model_id == "safety":
                 minimum = payload.get("safety_min_per_class")
