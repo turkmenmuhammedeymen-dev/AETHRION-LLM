@@ -95,6 +95,45 @@ class TrainingUtilityTests(unittest.TestCase):
                 checkpoint_module.sha256_file(previous),
             )
 
+    def test_checkpoint_preserves_live_generation_at_each_precommit_crash_boundary(self):
+        from unittest.mock import patch
+        import aethrion.checkpoint as checkpoint_module
+        from aethrion.checkpoint import load_checkpoint, save_checkpoint
+
+        failure_targets = ("checkpoint.pt.previous", "checkpoint.pt.previous.sha256", "checkpoint.pt")
+        for target_name in failure_targets:
+            with self.subTest(target=target_name), tempfile.TemporaryDirectory() as directory:
+                checkpoint = Path(directory) / "checkpoint.pt"
+                base = {
+                    "format_version": 4, "step": 0, "model": {}, "optimizer": {},
+                    "scaler": {}, "model_config": {}, "data_sha256": "0" * 64,
+                    "tokenizer_sha256": "1" * 64, "rng_state": capture_rng_state(),
+                    "training_config": {"seed": 7},
+                }
+                save_checkpoint(base, checkpoint)
+                original_replace = checkpoint_module.os.replace
+                target = Path(directory) / target_name
+
+                def fail_at_boundary(source, destination):
+                    if Path(destination) == target:
+                        raise OSError("simulated checkpoint promotion interruption")
+                    return original_replace(source, destination)
+
+                with patch("aethrion.checkpoint.os.replace", side_effect=fail_at_boundary):
+                    with self.assertRaisesRegex(OSError, "simulated checkpoint promotion"):
+                        save_checkpoint({**base, "step": 1}, checkpoint)
+
+                # Until the new live pair is committed, the old live generation
+                # must remain readable. If backup promotion completed, it too
+                # must be independently checksum-verifiable.
+                self.assertEqual(load_checkpoint(checkpoint, map_location="cpu")["step"], 0)
+                previous = Path(str(checkpoint) + ".previous")
+                if previous.is_file():
+                    self.assertEqual(
+                        checkpoint_module.verify_checkpoint(previous),
+                        checkpoint_module.sha256_file(previous),
+                    )
+
     def test_checkpoint_rejects_unsafe_pickle_objects(self):
         import hashlib
 
