@@ -13,6 +13,7 @@ def approved_record(model_id="base"):
         "approval_status": "approved",
         "author_role": "project contributor",
         "authorship_attested": True,
+        "first_party_origin_attested": True,
         "rights_holder_role": "project contributor",
         "rights_attested": True,
         "source_rights_reviewed": True,
@@ -30,6 +31,7 @@ class DatasetGovernanceTests(unittest.TestCase):
         template = review_template("base")
         self.assertEqual(template["approval_status"], "pending")
         self.assertFalse(template["authorship_attested"])
+        self.assertFalse(template["first_party_origin_attested"])
         with self.assertRaisesRegex(GovernanceError, "not approved"):
             validate_governance_record(template, model_id="base")
 
@@ -45,6 +47,12 @@ class DatasetGovernanceTests(unittest.TestCase):
         record = approved_record()
         record["authorship_attested"] = False
         with self.assertRaisesRegex(GovernanceError, "authorship_attested"):
+            validate_governance_record(record, model_id="base")
+
+    def test_missing_first_party_origin_attestation_blocks(self):
+        record = approved_record()
+        record["first_party_origin_attested"] = False
+        with self.assertRaisesRegex(GovernanceError, "first_party_origin_attested"):
             validate_governance_record(record, model_id="base")
 
     def test_timezone_is_required(self):
