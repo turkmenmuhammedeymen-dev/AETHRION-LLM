@@ -147,7 +147,7 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
             continue
         def handler(request: CapabilityRequest, selected=capability.value):
             if selected != Capability.SAFETY.value:
-                _require_safety_allow(runtime, request.prompt)
+                _require_safety_allow_chunks(runtime, request.prompt)
             if selected == Capability.DOCUMENT.value:
                 document_path = request.options.get("document_path")
                 if isinstance(document_path, str) and document_path:
@@ -156,7 +156,7 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
             if selected != Capability.SAFETY.value:
                 output_text = _text_for_safety(result)
                 if output_text:
-                    _require_safety_allow(runtime, output_text)
+                    _require_safety_allow_chunks(runtime, output_text)
             return result
         router.register(capability,runtime.registry.resolve(capability.value).architecture,handler)
     return router,providers
@@ -198,7 +198,7 @@ def analyze_file(request:FileRequest):
     runtime=providers.get("runtime")
     if runtime is None or Capability.DOCUMENT.value not in router.available():
         raise HTTPException(status_code=503,detail="AETHRION-DOC is not trained and released.")
-    _require_safety_allow_http(runtime, request.question)
+    _require_safety_allow_chunks_http(runtime, request.question)
     try:
         raw=base64.b64decode(request.content_base64,validate=True)
     except (ValueError,TypeError) as exc:
@@ -246,7 +246,7 @@ def generate_3d(request:dict[str,Any]):
         if path is not None: path.unlink(missing_ok=True)
 
 @app.post("/vision/compare", dependencies=[Depends(require_api_token)])
-async def vision_compare(file:UploadFile=File(...),text:str=Form(...)):
+async def vision_compare(file:UploadFile=File(...),text:str=Form(...,max_length=4000)):
     runtime=providers.get("runtime")
     if runtime is None or Capability.VISION.value not in router.available():
         raise HTTPException(status_code=503,detail="AETHRION-VISION is not trained and released.")
@@ -256,7 +256,7 @@ async def vision_compare(file:UploadFile=File(...),text:str=Form(...)):
     suffix=Path(file.filename or "image.png").suffix.lower()
     if suffix not in {".png",".jpg",".jpeg",".webp"}:
         raise HTTPException(status_code=400,detail="Supported image formats are PNG, JPG and WebP.")
-    _require_safety_allow_http(runtime, text)
+    _require_safety_allow_chunks_http(runtime, text)
     with tempfile.NamedTemporaryFile(suffix=suffix) as handle:
         handle.write(raw); handle.flush()
         try: score=runtime.image_text_similarity(handle.name,text)
@@ -279,7 +279,7 @@ async def audio_transcriptions(file:UploadFile=File(...)):
         handle.write(raw); handle.flush()
         try:
             transcript=runtime.transcribe_wav(handle.name)
-            _require_safety_allow_http(runtime, transcript)
+            _require_safety_allow_chunks_http(runtime, transcript)
         except HTTPException:
             raise
         except CapabilityUnavailable:
@@ -295,7 +295,7 @@ def audio_speech(request:dict[str,Any]):
     text=request.get("text")
     if not isinstance(text,str) or not text.strip() or len(text)>4096:
         raise HTTPException(status_code=400,detail="text must contain 1–4096 characters.")
-    _require_safety_allow_http(runtime, text)
+    _require_safety_allow_chunks_http(runtime, text)
     path=None
     try:
         path=runtime.synthesize_wav(text)
@@ -319,7 +319,7 @@ async def documents_extract(file: UploadFile = File(...)):
         handle.write(raw); handle.flush()
         try:
             content=extract_document_text(handle.name)
-            _require_safety_allow_http(runtime, content)
+            _require_safety_allow_chunks_http(runtime, content)
         except CapabilityUnavailable:
             raise HTTPException(status_code=503,detail="AETHRION-SAFE did not allow this extracted document.")
         except (DocumentError,UnicodeError,ValueError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
@@ -344,14 +344,14 @@ def documents_create(request: dict[str,Any]):
     except DocumentError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
 
 @app.post("/workspace/propose", dependencies=[Depends(require_api_token)])
-async def workspace_propose(file:UploadFile=File(...),task:str=Form(...)):
+async def workspace_propose(file:UploadFile=File(...),task:str=Form(...,max_length=4000)):
     runtime=providers.get("runtime")
     if runtime is None or Capability.CODE.value not in router.available():
         raise HTTPException(status_code=503,detail="AETHRION-CODE is not trained and released.")
     raw=await file.read(8*1024*1024+1)
     if not raw or len(raw)>8*1024*1024:
         raise HTTPException(status_code=413,detail="Project ZIP must be between 1 byte and 8 MiB.")
-    _require_safety_allow_http(runtime, task)
+    _require_safety_allow_chunks_http(runtime, task)
     try:
         uploaded_files = read_project_zip(raw)
         for filename, source_text in uploaded_files.items():
@@ -361,12 +361,15 @@ async def workspace_propose(file:UploadFile=File(...),task:str=Form(...)):
     except WorkspaceError as exc:
         raise HTTPException(status_code=400,detail=str(exc)) from exc
     def local_code_provider(request):
-        _require_safety_allow_http(runtime, request.prompt)
+        _require_safety_allow_chunks_http(runtime, request.prompt)
         generated = runtime.generate_text("code",request.prompt,max_new_tokens=1024,temperature=0.1)
-        _require_safety_allow_http(runtime, _text_for_safety(generated))
+        _require_safety_allow_chunks_http(runtime, _text_for_safety(generated))
         return generated
     try:
         output,summary=ProjectWorkspaceAgent(local_code_provider).propose(raw,task)
+        for filename, output_text in read_project_zip(output).items():
+            _require_safety_allow_chunks_http(runtime, output_text)
+        _require_safety_allow_chunks_http(runtime, summary)
         return Response(content=output,media_type="application/zip",
             headers={"Content-Disposition":'attachment; filename="aethrion-review.zip"',
                      "X-Aethrion-Summary":summary[:500],"Cache-Control":"no-store"})
