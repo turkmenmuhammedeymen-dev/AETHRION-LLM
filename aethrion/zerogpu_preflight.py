@@ -41,7 +41,7 @@ def _synthetic_batch(model_id: str, device: torch.device) -> dict[str, torch.Ten
         return {"images": torch.randn(1, 3, 64, 64, device=device), "token_ids": ids((1, 8))}
     if model_id == "asr":
         return {"features": torch.randn(1, 16, 80, device=device), "input_lengths": torch.tensor([16], device=device),
-                "targets": torch.randint(1, 2048, (2,), device=device, dtype=torch.long), "target_lengths": torch.tensor([2], device=device)}
+                "targets": torch.randint(1, 2048, (1, 2), device=device, dtype=torch.long), "target_lengths": torch.tensor([2], device=device)}
     if model_id == "tts":
         return {"token_ids": ids((1, 4)), "frame_to_token": torch.tensor([[0, 0, 1, 1, 2, 2, 3, 3]], device=device),
                 "target_mels": torch.randn(1, 8, 80, device=device), "durations": torch.tensor([[2, 2, 2, 2]], device=device),
@@ -67,7 +67,7 @@ def _synthetic_batch(model_id: str, device: torch.device) -> dict[str, torch.Ten
 def _build_preflight_model(model_id: str, device: torch.device) -> torch.nn.Module:
     """Construct each native architecture directly on the allocated test device."""
     if model_id == "chat":
-        model = AETHRIONLM(ModelConfig(vocab_size=2048, block_size=128, n_layer=4, n_head=4, n_embd=256, dropout=0.0))
+        model = AETHRIONLM(ModelConfig(vocab_size=2048, block_size=256, n_layer=4, n_head=4, n_embd=256, dropout=0.1))
     else:
         model = _build_model(model_id, SPECIALIST_CONFIGS[model_id])
     return model.to(device)
