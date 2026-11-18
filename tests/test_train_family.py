@@ -417,6 +417,34 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 "training_completed_not_released",
             )
 
+
+    def test_attempt_checkpoint_binding_finds_reported_previous_generation(self):
+        import hashlib
+        import shutil
+        from aethrion.train_family import _verify_attempt_checkpoint_binding
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(
+                Path(folder), session_id="session-prev", attempt_id="attempt-prev"
+            )
+            previous = Path(str(checkpoint) + ".previous")
+            shutil.copy2(checkpoint, previous)
+            previous_hash = hashlib.sha256(previous.read_bytes()).hexdigest()
+            Path(str(previous) + ".sha256").write_text(previous_hash + "\\n", encoding="ascii")
+            checkpoint.write_bytes(b"damaged-new-generation")
+            result = _verify_attempt_checkpoint_binding(
+                output, "code", "session-prev", "attempt-prev",
+                {
+                    "state": "terminal_recorded",
+                    "checkpoint_generation": report["checkpoint_generation"],
+                    "checkpoint_sha256": report["checkpoint_sha256"],
+                    "report_created_at_ns": report["report_created_at_ns"],
+                    "terminal_status": "training_completed_not_released",
+                },
+            )
+            self.assertTrue(result["verified"])
+            self.assertEqual(result["checkpoint_source"], "previous")
+
     def test_attempt_checkpoint_binding_rejects_journal_generation_mismatch(self):
         from aethrion.train_family import _verify_attempt_checkpoint_binding
 
