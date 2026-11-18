@@ -8,6 +8,7 @@ from aethrion.document_tools import create_document, extract_document_text, repl
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
 from aethrion.workspace_agent import MAX_ARCHIVE_BYTES, ProjectWorkspaceAgent, WorkspaceError, read_project_zip
 from aethrion.zerogpu_preflight import run_zero_gpu_preflight
+from aethrion.space_auth import space_auth_required
 
 def _resolve_space_auth(environ=None):
     env = os.environ if environ is None else environ
@@ -140,7 +141,7 @@ def chat(message, history):
         return "AETHRION's own trained checkpoint/tokenizer is not available. No third-party model is silently substituted."
 @spaces.GPU(duration=60)
 def code(prompt):
-    if not SPACE_AUTH_ENABLED:
+    if space_auth_required(SPACE_AUTH_ENABLED):
         return _auth_required_message()
     try:
         r=dispatch(Capability.CODE,prompt[:10000],{"max_tokens":4096,"temperature":0.1})
