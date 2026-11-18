@@ -167,6 +167,46 @@ class SpecialistTrainingTests(unittest.TestCase):
             self.assertTrue((root / "artifacts" / "training_report.json").is_file())
 
 
+    def test_specialist_checkpoint_recovers_when_checksum_valid_latest_is_unsafe(self):
+        import warnings
+        from aethrion.specialist_train import _load_checkpoint, _save_checkpoint
+
+        class UnsafePayload:
+            def __reduce__(self):
+                return (eval, ("1 + 1",))
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            base = {
+                "format": "aethrion-specialist-checkpoint-v1",
+                "model_id": "code", "step": 0, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": {},
+            }
+            _save_checkpoint(checkpoint, base)
+            _save_checkpoint(checkpoint, {**base, "step": 1})
+            unsafe = {**base, "step": 2, "extra": UnsafePayload()}
+            torch.save(unsafe, checkpoint)
+            digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+            Path(str(checkpoint) + ".sha256").write_text(digest + "\n", encoding="ascii")
+
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
+
+            self.assertEqual(recovered["step"], 0)
+            self.assertTrue(any("safely loaded" in str(item.message) for item in caught))
+
+    def test_direct_training_call_clears_stale_stop_request(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            specialist_train._STOP_REQUESTED = True
+            report = train_specialist(self._config(root), manifest)
+            self.assertEqual(report["status"], "training_complete_not_released")
+            self.assertFalse(specialist_train._STOP_REQUESTED)
+
     def test_training_resumes_and_preserves_verified_previous_checkpoint(self):
         from aethrion.specialist_train import _load_checkpoint
         with tempfile.TemporaryDirectory() as directory:
