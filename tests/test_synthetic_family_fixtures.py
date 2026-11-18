@@ -93,7 +93,7 @@ class SyntheticFamilyFixtureTests(unittest.TestCase):
             for model in ("vision", "image", "3d"):
                 result = prepare_visual_dataset(
                     root / model / "source.jsonl", model_id=model, output_root=prepared,
-                    seed=20261118, point_count=64, **SOURCE_ARGS,
+                    seed=20261118, **SOURCE_ARGS,
                 )
                 self._assert_manifest_closed(result["manifest"])
                 with np.load(result["dataset"], allow_pickle=False) as arrays:
