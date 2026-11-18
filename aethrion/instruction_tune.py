@@ -29,6 +29,21 @@ def _request_stop(signum, frame):
     print(f"Stop requested (signal {signum}); instruction tuning will checkpoint after this step.", flush=True)
 
 
+def _instruction_resume_training_config(config: dict[str, Any]) -> dict[str, Any]:
+    """Persist instruction-tuning settings that must remain stable across resume."""
+    return {
+        "stage": "instruction_tuning",
+        "seed": int(config["seed"]),
+        "batch_size": int(config["batch_size"]),
+        "learning_rate": float(config["learning_rate"]),
+        "weight_decay": float(config["weight_decay"]),
+        "grad_clip": float(config["grad_clip"]),
+        "eval_interval": int(config["eval_interval"]),
+        "save_interval": int(config["save_interval"]),
+        "max_steps": int(config["max_steps"]),
+    }
+
+
 def _batch(arrays, indices, device):
     return (
         torch.as_tensor(np.asarray(arrays["input_ids"][indices]), dtype=torch.long, device=device),
@@ -155,6 +170,21 @@ def tune_instructions(
             raise ValueError("Instruction source/approval manifest changed; refusing unsafe resume.")
         if state.get("base_checkpoint_sha256") != base_checkpoint_hash:
             raise ValueError("Base checkpoint changed; refusing unsafe instruction-tuning resume.")
+        saved_training_config = state.get("training_config")
+        current_training_config = _instruction_resume_training_config(config)
+        if (
+            not isinstance(saved_training_config, dict)
+            or set(saved_training_config) != set(current_training_config)
+            or any(type(saved_training_config[key]) is not type(value)
+                   for key, value in current_training_config.items())
+        ):
+            raise ValueError("Instruction resume checkpoint is missing or has an invalid training configuration.")
+        saved_fixed = {key: value for key, value in saved_training_config.items() if key != "max_steps"}
+        current_fixed = {key: value for key, value in current_training_config.items() if key != "max_steps"}
+        if saved_fixed != current_fixed:
+            raise ValueError("Instruction-tuning settings changed; refusing a non-reproducible resume.")
+        if current_training_config["max_steps"] < saved_training_config["max_steps"]:
+            raise ValueError("Instruction resume max_steps cannot be lower than the checkpoint training horizon.")
         model.load_state_dict(state["model"])
         optimizer.load_state_dict(state["optimizer"])
         if state.get("rng_state"):
@@ -199,7 +229,7 @@ def tune_instructions(
 
         if step % config["save_interval"] == 0 or step == config["max_steps"] - 1:
             payload = {
-                "format_version": 3,
+                "format_version": 4,
                 "step": step,
                 "model": model.state_dict(),
                 "optimizer": optimizer.state_dict(),
@@ -213,6 +243,7 @@ def tune_instructions(
                 "rng_state": capture_rng_state(),
                 "training_stage": "instruction_tuning",
                 "base_checkpoint_sha256": base_checkpoint_hash,
+                "training_config": _instruction_resume_training_config(config),
             }
             checkpoint_hash = save_checkpoint(payload, checkpoint_path)
             write_json_atomic({
