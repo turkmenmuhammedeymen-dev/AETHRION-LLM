@@ -232,6 +232,39 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertEqual(state["status"], "interrupted")
             self.assertEqual(state["released_count"], 0)
 
+    def test_specialist_config_preflight_checks_architecture_and_training_fields(self):
+        from aethrion.train_family import _validate_specialist_config
+
+        valid = {
+            "seed": 42, "max_steps": 10, "batch_size": 2,
+            "learning_rate": 0.001, "weight_decay": 0.01,
+            "grad_clip": 1.0, "eval_interval": 2, "save_interval": 2,
+            "model_config": {
+                "vocab_size": 2048, "n_mels": 80, "width": 128,
+                "layers": 4, "heads": 4, "blank_id": 0,
+            },
+        }
+        _validate_specialist_config("asr", valid)
+        invalid = {**valid, "model_config": {**valid["model_config"]}}
+        invalid["model_config"].pop("n_mels")
+        with self.assertRaisesRegex(FamilyTrainingError, "n_mels"):
+            _validate_specialist_config("asr", invalid)
+
+    def test_specialist_config_preflight_rejects_invalid_optimizer_settings(self):
+        from aethrion.train_family import _validate_specialist_config
+
+        config = {
+            "seed": 42, "max_steps": 10, "batch_size": 2,
+            "learning_rate": 0, "weight_decay": 0.01,
+            "grad_clip": 1.0, "eval_interval": 2, "save_interval": 2,
+            "model_config": {
+                "vocab_size": 2048, "block_size": 512, "n_layer": 4,
+                "n_head": 4, "n_embd": 128,
+            },
+        }
+        with self.assertRaisesRegex(ValueError, "learning_rate"):
+            _validate_specialist_config("code", config)
+
     def test_preflight_only_does_not_create_training_session_artifacts(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
