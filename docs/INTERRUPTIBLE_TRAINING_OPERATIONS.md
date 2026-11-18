@@ -102,3 +102,11 @@ Missing, stale, malformed, wrong-model, incomplete-metric, missing-checkpoint
 and checksum-mismatched reports are recorded as non-success outcomes. A valid
 training completion is still `training_completed_not_released`, never a
 release. A non-zero trainer exit is a failure even if an old report exists.
+
+For a graceful CHAT interruption, the base trainer writes a separate
+`training_interrupted_not_released` report only after its checkpoint save. The
+family supervisor verifies that report's freshness, model identity, release
+state and checkpoint digest before recording the pause. Specialist interruption
+reports follow the same checkpoint-digest requirement. If the report or
+checkpoint cannot be verified, the family outcome remains an error state; a
+stop signal alone is not proof that a safe checkpoint was written.
