@@ -23,6 +23,7 @@ import torch.nn as nn
 
 from aethrion.specialist_data import validate_specialist_dataset
 from aethrion.checkpoint import write_json_atomic
+from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
 
 
 _STOP_REQUESTED = False
@@ -264,13 +265,14 @@ def train_specialist(
     missing = required - set(config)
     if missing:
         raise ValueError("Missing specialist training keys: " + ", ".join(sorted(missing)))
-    for key in ("max_steps", "batch_size", "eval_interval", "save_interval"):
-        if type(config[key]) is not int or config[key] < 1:
-            raise ValueError(f"{key} must be a positive integer.")
-    if config["learning_rate"] <= 0 or config["weight_decay"] < 0 or config["grad_clip"] <= 0:
-        raise ValueError("Invalid optimizer configuration.")
-    if type(config["seed"]) is not int:
-        raise ValueError("seed must be an integer.")
+    for key in ("max_steps", "batch_size", "eval_interval", "save_interval", "seed"):
+        require_int(config[key], key, minimum=1 if key != "seed" else 0)
+    require_finite_number(config["learning_rate"], "learning_rate", minimum=0, minimum_inclusive=False)
+    require_finite_number(config["weight_decay"], "weight_decay", minimum=0)
+    require_finite_number(config["grad_clip"], "grad_clip", minimum=0, minimum_inclusive=False)
+    validate_numeric_tree(config["model_config"])
+    if not isinstance(config["output_dir"], str) or not config["output_dir"].strip():
+        raise ValueError("output_dir must be a non-empty path string.")
     approval = validate_specialist_dataset(manifest_path, require_training_approval=True)
     model_id = config["model_id"]
     if approval["model_id"] != model_id:
