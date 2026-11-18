@@ -51,6 +51,8 @@ def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
     """Write a checkpoint atomically; retain one verified previous generation."""
     if not isinstance(payload, dict) or payload.get("format_version") != 4:
         raise ValueError("Checkpoint payload must use format_version=4.")
+    if not isinstance(payload.get("training_config"), dict) or not payload["training_config"]:
+        raise ValueError("Checkpoint payload requires a non-empty training_config object.")
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(str(target) + ".tmp")
