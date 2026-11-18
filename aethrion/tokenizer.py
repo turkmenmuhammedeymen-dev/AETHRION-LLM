@@ -7,6 +7,38 @@ from pathlib import Path
 
 from aethrion.prepare_data import sha256_file, validate_training_approval
 
+MAX_VOCAB_SIZE = 262144
+MAX_TOKEN_BYTES = 1024 * 1024
+MAX_TOTAL_VOCAB_BYTES = 64 * 1024 * 1024
+MAX_TOKENIZER_FILE_BYTES = 16 * 1024 * 1024
+
+
+def _validate_merge_graph(merges: list[tuple[int, int]]) -> None:
+    """Validate merge references and bound expanded vocabulary memory without materializing tokens."""
+    if len(merges) > MAX_VOCAB_SIZE - 256:
+        raise ValueError("Tokenizer merge count exceeds the supported vocabulary limit.")
+    lengths = [1] * 256
+    seen: set[tuple[int, int]] = set()
+    total_bytes = 256
+    for index, pair in enumerate(merges):
+        if not isinstance(pair, (tuple, list)) or len(pair) != 2 or any(type(value) is not int for value in pair):
+            raise ValueError("Each tokenizer merge must contain exactly two integer token IDs")
+        left, right = pair
+        current_vocab_size = 256 + index
+        if left < 0 or right < 0 or left >= current_vocab_size or right >= current_vocab_size:
+            raise ValueError("Tokenizer merge references an unknown or forward token")
+        normalized = (left, right)
+        if normalized in seen:
+            raise ValueError("Tokenizer merge graph contains a duplicate pair")
+        seen.add(normalized)
+        token_bytes = lengths[left] + lengths[right]
+        if token_bytes > MAX_TOKEN_BYTES:
+            raise ValueError("Tokenizer merge expands a token beyond the supported byte limit")
+        total_bytes += token_bytes
+        if total_bytes > MAX_TOTAL_VOCAB_BYTES:
+            raise ValueError("Tokenizer expanded vocabulary exceeds the supported memory limit")
+        lengths.append(token_bytes)
+
 class ByteBPETokenizer:
     def __init__(self, merges: list[tuple[int, int]] | None = None):
         self.merges = merges or []
@@ -18,10 +50,10 @@ class ByteBPETokenizer:
         return list(text.encode("utf-8", errors="replace"))
 
     def train(self, text: str, vocab_size: int = 2048, min_frequency: int = 2) -> None:
-        if vocab_size < 256:
-            raise ValueError("vocab_size must be at least 256 for byte-level tokenization")
-        if min_frequency < 1:
-            raise ValueError("min_frequency must be >= 1")
+        if type(vocab_size) is not int or not 256 <= vocab_size <= MAX_VOCAB_SIZE:
+            raise ValueError(f"vocab_size must be an integer between 256 and {MAX_VOCAB_SIZE}")
+        if type(min_frequency) is not int or min_frequency < 1:
+            raise ValueError("min_frequency must be a positive integer")
         sequences = [self._bytes(line) for line in text.splitlines() if line.strip()]
         merges: list[tuple[int, int]] = []
         while 256 + len(merges) < vocab_size:
@@ -77,12 +109,13 @@ class ByteBPETokenizer:
         return seq
 
     def decode(self, ids: list[int]) -> str:
+        _validate_merge_graph(self.merges)
         vocab: list[bytes] = [bytes([i]) for i in range(256)]
         for left, right in self.merges:
             if left < 0 or right < 0 or left >= len(vocab) or right >= len(vocab):
                 raise ValueError("Tokenizer merge references an unknown token")
             vocab.append(vocab[left] + vocab[right])
-        if any(not isinstance(token_id, int) or token_id < 0 or token_id >= len(vocab) for token_id in ids):
+        if any(type(token_id) is not int or token_id < 0 or token_id >= len(vocab) for token_id in ids):
             raise ValueError("Token id is outside this tokenizer vocabulary")
         raw = b"".join(vocab[token_id] for token_id in ids)
         return raw.decode("utf-8", errors="replace")
@@ -95,7 +128,10 @@ class ByteBPETokenizer:
 
     @classmethod
     def load(cls, path: str | Path) -> "ByteBPETokenizer":
-        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+        source = Path(path)
+        if not source.is_file() or source.stat().st_size > MAX_TOKENIZER_FILE_BYTES:
+            raise ValueError("Tokenizer file is missing or exceeds the supported size limit")
+        payload = json.loads(source.read_text(encoding="utf-8"))
         if not isinstance(payload, dict) or payload.get("format") != "aethrion-byte-bpe-v1":
             raise ValueError("Unsupported tokenizer format")
         merges = payload.get("merges")
@@ -106,10 +142,8 @@ class ByteBPETokenizer:
             if not isinstance(pair, list) or len(pair) != 2 or any(type(v) is not int for v in pair):
                 raise ValueError("Each tokenizer merge must contain exactly two integer token IDs")
             normalized.append(tuple(pair))
-        tokenizer = cls(normalized)
-        # Validate the complete merge graph at load time.
-        tokenizer.decode([])
-        return tokenizer
+        _validate_merge_graph(normalized)
+        return cls(normalized)
 
 def validate_tokenizer_provenance(
     tokenizer_path: str | Path,
