@@ -16,6 +16,8 @@ import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
+from aethrion.data_governance import GovernanceError, validate_governance_record
+
 ROOT = Path(__file__).resolve().parents[1]
 DATASET_MANIFEST = ROOT / "data/processed/corpus_manifest.json"
 RAW_DIR = ROOT / "data/raw/cosmos"
@@ -154,6 +156,10 @@ def approval_status() -> tuple[bool, str]:
     dataset = json.loads(DATASET_MANIFEST.read_text(encoding="utf-8"))
     if not isinstance(dataset, dict) or dataset.get("training_allowed") is not True:
         return False, "Dataset-level training approval is not explicitly Boolean true."
+    try:
+        validate_governance_record(dataset.get("governance"), model_id="base")
+    except GovernanceError as exc:
+        return False, str(exc)
     if not SOURCE_MANIFEST.is_file():
         return False, "Source manifest is missing."
     sources = json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8")).get("sources", [])
