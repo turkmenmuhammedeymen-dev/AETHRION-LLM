@@ -189,6 +189,8 @@ class NativeModelRuntime:
     ) -> dict[str, Any]:
         if capability not in {"chat", "code"}:
             raise ValueError("Text generation is available only for BASE or CODE.")
+        if not isinstance(prompt, str) or not prompt.strip():
+            raise ValueError("Input text must not be empty.")
         if isinstance(max_new_tokens, bool) or not isinstance(max_new_tokens, int):
             raise ValueError("max_new_tokens must be an integer.")
         if not 1 <= max_new_tokens <= 1024:
