@@ -217,7 +217,8 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 "output_dir": "artifacts/chat",
             }
             with patch("aethrion.train_family.preflight_model", return_value=plan), \
-                 patch("aethrion.train_family.subprocess.Popen") as popen:
+                 patch("aethrion.train_family.subprocess.Popen") as popen, \
+                 patch("aethrion.train_family._training_outcome", return_value="training_interrupted_not_released"):
                 popen.return_value.wait.side_effect = [KeyboardInterrupt, -2]
                 popen.return_value.poll.return_value = None
                 report = run_family(root, selected=["chat"], execute=True)
@@ -473,6 +474,31 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 _training_outcome(output, "chat", 0, checkpoint_path=checkpoint),
                 "training_report_metrics_invalid_not_released",
             )
+
+
+    def test_interrupted_report_still_requires_matching_checkpoint_hash(self):
+        from aethrion.train_family import _training_outcome
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, _ = self._write_verified_report_fixture(
+                Path(folder), status="training_interrupted_not_released"
+            )
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", -2, checkpoint_path=checkpoint,
+                    allow_interrupted=True,
+                ),
+                "training_interrupted_not_released",
+            )
+            checkpoint.write_bytes(b"tampered-after-report")
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", -2, checkpoint_path=checkpoint,
+                    allow_interrupted=True,
+                ),
+                "training_checkpoint_hash_mismatch_not_released",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
