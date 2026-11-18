@@ -343,6 +343,9 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.assertEqual(response.status_code,200)
         self.assertEqual(response.json()["available"],{"code":"test-code","chat":"test-chat"})
         self.assertIn("image",response.json()["unavailable"])
+        self.assertEqual(response.json()["assistant_entrypoint"], "/assistant")
+        self.assertEqual(response.json()["default_model"], "chat")
+        self.assertEqual(response.json()["internal_dependencies"]["tts"], ["vocoder", "asr"])
     def test_dispatch_endpoint_routes_selected_capability(self):
         response=self.client.post("/dispatch",json={"capability":"code","prompt":"write a function"},headers=self.auth)
         self.assertEqual(response.status_code,200)
