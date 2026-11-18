@@ -180,11 +180,18 @@ def _training_outcome(output_dir: Path, model_id: str, returncode: int) -> str:
 
 
 _STOP_REQUESTED = False
+_ACTIVE_CHILD: subprocess.Popen | None = None
 
 
 def _request_family_stop(signum, frame):
     global _STOP_REQUESTED
     _STOP_REQUESTED = True
+    child = _ACTIVE_CHILD
+    if child is not None and child.poll() is None:
+        try:
+            child.send_signal(signum)
+        except (OSError, ProcessLookupError):
+            pass
 
 
 def _append_session_event(path: Path, event: dict[str, Any]) -> None:
@@ -204,7 +211,7 @@ def run_family(
     python_executable: str | None = None,
 ) -> dict[str, Any]:
     """Preflight or sequentially execute approved models with durable session journaling."""
-    global _STOP_REQUESTED
+    global _STOP_REQUESTED, _ACTIVE_CHILD
     repo = Path(root).resolve()
     model_ids = list(MODEL_IDS) if selected is None else list(selected)
     if not model_ids:
@@ -275,11 +282,18 @@ def run_family(
                     "checkpoint": plan["checkpoint"],
                 })
                 try:
-                    completed = subprocess.run(command, cwd=repo, check=False)
-                    returncode = int(completed.returncode)
+                    _ACTIVE_CHILD = subprocess.Popen(command, cwd=repo)
+                    returncode = int(_ACTIVE_CHILD.wait())
                 except KeyboardInterrupt:
                     _STOP_REQUESTED = True
-                    returncode = 130
+                    if _ACTIVE_CHILD is not None and _ACTIVE_CHILD.poll() is None:
+                        try:
+                            _ACTIVE_CHILD.send_signal(signal.SIGINT)
+                        except (OSError, ProcessLookupError):
+                            pass
+                    returncode = int(_ACTIVE_CHILD.wait()) if _ACTIVE_CHILD is not None else 130
+                finally:
+                    _ACTIVE_CHILD = None
                 row = rows[-1]
                 row["returncode"] = returncode
                 row["status"] = (
