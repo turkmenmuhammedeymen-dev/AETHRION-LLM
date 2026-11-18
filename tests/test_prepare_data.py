@@ -311,7 +311,7 @@ class CorpusPreparationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             self._write_url_source(root)
-            dataset_manifest = self._write_dataset_manifest(root, allowed=False)
+            dataset_manifest = self._write_dataset_manifest(root)
             corpus = root / "out/corpus.txt"
             report_path = root / "out/report.json"
             report = build_corpus(
@@ -323,7 +323,7 @@ class CorpusPreparationTests(unittest.TestCase):
                 {item["review_status"] for item in report["domain_review"]},
                 {"PENDING"},
             )
-            with self.assertRaisesRegex(ValueError, "training_allowed to true"):
+            with self.assertRaisesRegex(ValueError, "--source-review"):
                 validate_training_approval(
                     dataset_manifest, root / "sources.json", root, corpus, report_path
                 )
