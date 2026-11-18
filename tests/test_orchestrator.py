@@ -66,6 +66,25 @@ class AssistantOrchestratorTests(unittest.TestCase):
                     self.orchestrator.dispatch(prompt)
                 self.assertIn(required, str(error.exception))
 
+    def test_each_specialist_task_has_a_deterministic_route(self):
+        cases = [
+            ("Create an image of a mountain", Capability.IMAGE, {}),
+            ("Create a 3D model of a chair", Capability.THREE_D, {}),
+            ("Read this aloud", Capability.TTS, {}),
+            ("Transcribe audio", Capability.ASR, {"audio_path": "/tmp/voice.wav"}),
+            ("Analyze this document", Capability.DOCUMENT, {"document_path": "/tmp/file.pdf"}),
+            ("Describe this image", Capability.VISION, {"image_path": "/tmp/photo.png"}),
+            ("Research this topic and find sources", Capability.RESEARCH, {}),
+            ("Write code to sort records", Capability.CODE, {}),
+        ]
+        for prompt, expected, options in cases:
+            with self.subTest(prompt=prompt):
+                intent = classify_intent(prompt)
+                self.assertEqual(intent.capability, expected)
+                if options:
+                    response = self.orchestrator.dispatch(prompt, options)
+                    self.assertEqual(response.capability, expected)
+
     def test_attachment_is_forwarded_to_matching_specialist(self):
         response = self.orchestrator.dispatch(
             "Describe this image", {"image_path": "/tmp/input.png"}
