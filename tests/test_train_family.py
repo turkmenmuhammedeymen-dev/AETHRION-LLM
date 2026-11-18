@@ -251,6 +251,35 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertFalse(report["training_started"])
             self.assertEqual(len(report["models"]), 1)
             self.assertEqual(report["models"][0]["status"], "blocked")
+            journal = next((root / "artifacts" / "training_sessions").glob("*.jsonl"))
+            events = [json.loads(line)["event"] for line in journal.read_text(encoding="utf-8").splitlines()]
+            self.assertNotIn("model_started", events)
+            self.assertIn("model_blocked", events)
+
+    def test_family_passes_resume_when_only_previous_checkpoint_exists(self):
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            previous = root / "artifacts" / "chat" / "checkpoint_last.pt.previous"
+            previous.parent.mkdir(parents=True)
+            previous.write_bytes(b"previous-generation")
+            plan = {
+                "model_id": "chat", "ready": True,
+                "command": ["python", "-m", "aethrion.train"],
+                "checkpoint": "artifacts/chat/checkpoint_last.pt",
+                "output_dir": "artifacts/chat",
+            }
+            with patch("aethrion.train_family.preflight_model", return_value=plan), \\
+                 patch("aethrion.train_family.subprocess.Popen") as popen, \\
+                 patch("aethrion.train_family._training_outcome", return_value="training_interrupted_not_released"):
+                popen.return_value.wait.return_value = 0
+                popen.return_value.poll.return_value = 0
+                run_family(root, selected=["chat"], execute=True)
+
+            command = popen.call_args.args[0]
+            self.assertIn("--resume", command)
+            self.assertEqual(command[command.index("--resume") + 1], "artifacts/chat/checkpoint_last.pt")
 
     def test_specialist_config_preflight_checks_architecture_and_training_fields(self):
         from aethrion.train_family import _validate_specialist_config
