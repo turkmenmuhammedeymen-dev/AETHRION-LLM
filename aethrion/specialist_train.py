@@ -468,8 +468,13 @@ def train_specialist(
             raise ValueError("Specialist source/approval manifest changed; refusing unsafe resume.")
         saved_training_config = state.get("training_config")
         current_training_config = _resume_training_config(config)
-        if not isinstance(saved_training_config, dict):
-            raise ValueError("Resume checkpoint is missing its verified training configuration.")
+        if (
+            not isinstance(saved_training_config, dict)
+            or set(saved_training_config) != set(current_training_config)
+            or any(type(saved_training_config[key]) is not type(value)
+                   for key, value in current_training_config.items())
+        ):
+            raise ValueError("Resume checkpoint is missing or has an invalid training configuration.")
         saved_fixed = {key: value for key, value in saved_training_config.items() if key != "max_steps"}
         current_fixed = {key: value for key, value in current_training_config.items() if key != "max_steps"}
         if saved_fixed != current_fixed:
