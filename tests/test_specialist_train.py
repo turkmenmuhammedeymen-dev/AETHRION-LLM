@@ -204,7 +204,7 @@ class SpecialistTrainingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             checkpoint = Path(directory) / "checkpoint_last.pt"
             base = {
-                "format": "aethrion-specialist-checkpoint-v1",
+                "format": "aethrion-specialist-checkpoint-v2",
                 "model_id": "code", "step": 0, "model_config": {},
                 "model_state": {}, "optimizer_state": {},
                 "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
