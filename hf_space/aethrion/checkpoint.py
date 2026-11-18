@@ -126,6 +126,8 @@ def load_checkpoint(
     missing = sorted(required - set(state))
     if missing:
         raise ValueError("Checkpoint is missing required fields: " + ", ".join(missing))
+    if not isinstance(state["training_config"], dict) or not state["training_config"]:
+        raise ValueError("Checkpoint training_config must be a non-empty object.")
     return state
 
 
