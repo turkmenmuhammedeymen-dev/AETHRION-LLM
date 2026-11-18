@@ -13,7 +13,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="External Hugging Face dataset imports are disabled."
     )
-    parser.add_argument("--output-dir", default="data/raw/cosmos")
+    parser.add_argument("--output-dir", default="data/raw/owner_authored")
     parser.add_argument("--max-records", type=int, default=5_000)
     parser.add_argument("--split", default="train")
     parser.parse_args()
