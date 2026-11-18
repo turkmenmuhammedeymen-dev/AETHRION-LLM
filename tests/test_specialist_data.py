@@ -20,7 +20,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(["a", "b", "c", "d", "e", "f"]),
-            group_id=np.asarray(["ga", "gb", "gc", "gd", "ge", "gf"]),
+            group_id=np.asarray([hashlib.sha256(x.encode()).hexdigest() for x in ("ga", "gb", "gc", "gd", "ge", "gf")]),
             split=np.asarray(["train", "train", "validation", "validation", "test", "test"]),
             token_ids=np.random.default_rng(1).integers(0, 256, size=(6, 12), dtype=np.int64),
         )
@@ -94,8 +94,9 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             dataset = root / "dataset.npz"
             with np.load(dataset, allow_pickle=False) as archive:
                 arrays = {key: np.array(archive[key], copy=True) for key in archive.files}
-            arrays["group_id"][0] = "shared-provenance-group"
-            arrays["group_id"][2] = "shared-provenance-group"
+            shared_group = hashlib.sha256(b"shared-provenance-group").hexdigest()
+            arrays["group_id"][0] = shared_group
+            arrays["group_id"][2] = shared_group
             np.savez(dataset, **arrays)
             payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
             manifest.write_text(json.dumps(payload), encoding="utf-8")
@@ -143,7 +144,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(sample_ids),
-            group_id=np.asarray(sample_ids),
+            group_id=np.asarray([hashlib.sha256(value.encode()).hexdigest() for value in sample_ids]),
             split=np.asarray(splits),
             token_ids=np.random.default_rng(7).integers(0, 256, size=(count, 12), dtype=np.int64),
             decision_labels=np.asarray(decisions, dtype=np.int64),
