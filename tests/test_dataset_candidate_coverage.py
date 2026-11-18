@@ -31,6 +31,17 @@ class DatasetCandidateCoverageTests(unittest.TestCase):
             self.assertIs(candidate["training_allowed"], False)
             self.assertIs(candidate["downloaded"], False)
 
+    def test_third_party_candidates_are_explicitly_prohibited(self):
+        root = Path(__file__).resolve().parents[1]
+        payload = json.loads((root / "data" / "dataset_candidates.json").read_text(encoding="utf-8"))
+        for candidate in payload["candidates"]:
+            if candidate["id"] == "aethrion-safe-original-curated-v1":
+                continue
+            self.assertEqual(candidate["review_status"], "prohibited_by_first_party_only_policy")
+            self.assertIs(candidate["owner_review_authorized"], False)
+            self.assertIs(candidate["downloaded"], False)
+            self.assertIs(candidate["training_allowed"], False)
+
     def test_project_training_authorization_does_not_accept_provider_terms(self):
         root = Path(__file__).resolve().parents[1]
         payload = json.loads((root / "data" / "dataset_candidates.json").read_text(encoding="utf-8"))
