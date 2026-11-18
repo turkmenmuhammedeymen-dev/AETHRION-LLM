@@ -7,7 +7,7 @@ import math
 from pathlib import Path
 from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
-from aethrion.orchestrator import AssistantOrchestrator, AssistantInputRequired
+from aethrion.orchestrator import AssistantOrchestrator, AssistantInputRequired, classify_intent
 from aethrion.native_registry import NativeModelRegistry,NativeModelUnavailable,NativeModelError
 from aethrion.native_runtime import NativeModelRuntime
 from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError, read_project_zip
@@ -244,7 +244,6 @@ async def assistant_upload(
 ):
     """Route one bounded uploaded file through CHAT's specialist intent path."""
     try:
-        from aethrion.orchestrator import classify_intent
         selected = classify_intent(
             prompt,
             {"capability": capability} if capability else None,
