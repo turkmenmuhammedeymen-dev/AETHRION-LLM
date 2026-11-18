@@ -351,6 +351,46 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                     with self.assertRaisesRegex(SpecialistDataError, "must explicitly allow training"):
                         validate_specialist_dataset(manifest)
 
+    def test_jsonl_synthetic_fixture_is_rejected_even_when_manifest_approvals_are_true(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            source = root / "synthetic.jsonl"
+            source.write_text(
+                json.dumps({
+                    "id": "fixture-1",
+                    "text": "synthetic integration test",
+                    "synthetic_fixture": True,
+                    "production_training_approved": False,
+                }) + "\n",
+                encoding="utf-8",
+            )
+            payload["sources"][0]["source_path"] = source.name
+            payload["sources"][0]["sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "synthetic fixture records"):
+                validate_specialist_dataset(manifest)
+
+    def test_jsonl_explicit_nonproduction_flag_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            source = root / "nonproduction.jsonl"
+            source.write_text(
+                json.dumps({
+                    "id": "fixture-2",
+                    "text": "test-only row",
+                    "synthetic_fixture": False,
+                    "production_training_approved": False,
+                }) + "\n",
+                encoding="utf-8",
+            )
+            payload["sources"][0]["source_path"] = source.name
+            payload["sources"][0]["sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "synthetic fixture records"):
+                validate_specialist_dataset(manifest)
+
     def test_specialist_sources_reject_test_only_license_labels(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
