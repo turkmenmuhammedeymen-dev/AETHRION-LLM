@@ -159,6 +159,21 @@ class SafeRuntimeGateTests(unittest.TestCase):
         with self.assertRaises(CapabilityUnavailable):
             api._require_safety_allow(runtime, "invalid score")
 
+    def test_router_screens_long_prompt_and_generated_output_in_chunks(self):
+        router, _, runtime = self._build({"chat": "ready", "safety": "ready"}, output_text="O" * 1001)
+        router.dispatch("chat", CapabilityRequest("P" * 1001, {}))
+        self.assertEqual([len(x) for x in runtime.reviewed], [400, 400, 201, 400, 400, 201])
+
+    def test_generic_dispatch_cannot_use_document_filesystem_paths(self):
+        client=TestClient(api.app)
+        with patch.dict("os.environ", {"AETHRION_API_TOKEN":"test-api-token"}):
+            response=client.post(
+                "/dispatch",
+                headers={"Authorization":"Bearer test-api-token"},
+                json={"capability":"document","prompt":"read file","options":{"document_path":"/etc/passwd"}},
+            )
+        self.assertEqual(response.status_code,400)
+
     def test_safe_chunk_gate_checks_every_segment(self):
         runtime = _FakeSafetyRuntime({"safety": "ready"})
         api._require_safety_allow_chunks(runtime, "x" * 1001, chunk_chars=400)
