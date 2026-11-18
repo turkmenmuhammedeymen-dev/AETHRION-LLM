@@ -19,7 +19,45 @@ from urllib.parse import urlparse
 from aethrion.data_governance import GovernanceError, validate_governance_record
 
 EMAIL_RE = re.compile(r"(?i)\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b")
-REVIEW_COLUMNS = {
+UNVERIFIED_LICENSE_LABELS = frozenset({"UNKNOWN", "PENDING", "PENDING_HUMAN_REVIEW", "UNVERIFIED", "TBD"})
+
+
+def _normalized_review_label(value: str) -> str:
+    return re.sub(r"[^A-Z0-9]+", "_", value.upper()).strip("_")
+
+
+def _label_is_unverified(value: str) -> bool:
+    normalized = _normalized_review_label(value)
+    return (
+        normalized in UNVERIFIED_LICENSE_LABELS
+        or any(normalized.startswith(label + "_") for label in UNVERIFIED_LICENSE_LABELS)
+    )
+
+
+def _license_is_verified(value: str) -> bool:
+    return not _label_is_unverified(value)
+
+
+def _training_use_is_explicitly_allowed(value: str) -> bool:
+    normalized = " ".join(value.casefold().split())
+    explicitly_permitted = bool(re.search(
+        r"\b(training|train|machine learning|machine-learning|model development)\b",
+        normalized,
+    ))
+    explicitly_denied = (
+        re.search(
+            r"\b(?:not|no|never|prohibited|forbidden|disallow(?:ed)?|excluded|without)\b"
+            r".{0,48}\b(?:training|train|machine learning|machine-learning|model development)\b",
+            normalized,
+        )
+        or re.search(
+            r"\b(?:training|train|machine learning|machine-learning|model development)\b"
+            r".{0,48}\b(?:not allowed|not permitted|not authorized|unauthorized|prohibited|forbidden|disallowed|excluded)\b",
+            normalized,
+        )
+        or re.search(r"\b(?:evaluation|testing|unit tests)\s+only\b", normalized)
+    )
+    return explicitly_permitted and not explicitly_deniedREVIEW_COLUMNS = {
     "domain",
     "license_name",
     "license_evidence_url",
@@ -241,11 +279,9 @@ def load_sources_manifest(
             raise ValueError(f"Source allow_training must be an exact JSON boolean: {entry['source_id']}")
         if require_training_approval and entry["allow_training"] is not True:
             raise ValueError(f"Source is not approved for training: {entry['source_id']}")
-        if require_training_approval and entry["license"].strip().upper() in {
-            "UNKNOWN", "PENDING", "PENDING_HUMAN_REVIEW", "UNVERIFIED", "TBD"
-        }:
+        if require_training_approval and not _license_is_verified(entry["license"].strip()):
             raise ValueError(f"Source license is not verified: {entry['source_id']}")
-        if require_training_approval and "train" not in entry["permitted_uses"].lower():
+        if require_training_approval and not _training_use_is_explicitly_allowed(entry["permitted_uses"]):
             raise ValueError(f"Source permitted_uses must explicitly include training: {entry['source_id']}")
 
         source = (root / entry["path"]).resolve()
@@ -289,13 +325,18 @@ def load_domain_review(path: Path) -> dict[str, dict]:
             status = (row.get("review_status") or "").strip().upper()
 
             parsed_evidence = urlparse(evidence)
-            evidence_is_url = parsed_evidence.scheme == "https" and bool(parsed_evidence.netloc)
+            evidence_is_url = (
+                parsed_evidence.scheme == "https"
+                and bool(parsed_evidence.hostname)
+                and parsed_evidence.username is None
+                and parsed_evidence.password is None
+            )
             approved = (
                 status == "APPROVED"
                 and training in {"YES", "TRUE"}
-                and bool(license_name) and license_name.upper() != "UNKNOWN"
+                and bool(license_name) and _license_is_verified(license_name)
                 and evidence_is_url
-                and bool(rights_holder) and rights_holder.upper() != "UNKNOWN"
+                and bool(rights_holder) and not _label_is_unverified(rights_holder)
                 and attribution in {"YES", "NO"}
             )
             reviews[domain] = {
