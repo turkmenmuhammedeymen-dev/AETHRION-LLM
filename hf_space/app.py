@@ -372,6 +372,10 @@ def edit_project(path,task):
         raw, summary = ProjectWorkspaceAgent(local_code_provider).propose(
             project_bytes, task
         )
+        # Review every generated file, not only the agent's natural-language summary.
+        for filename, output_text in read_project_zip(raw).items():
+            _require_safety_allow_chunks_http(runtime, output_text)
+        _require_safety_allow_chunks_http(runtime, summary)
         output = Path(tempfile.gettempdir()) / (
             "aethrion-review-" + os.urandom(5).hex() + ".zip"
         )
