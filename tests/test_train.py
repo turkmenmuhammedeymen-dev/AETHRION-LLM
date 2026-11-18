@@ -38,6 +38,8 @@ class TrainingUtilityTests(unittest.TestCase):
             ("amp", "false"),
             ("warmup_steps", 11),
             ("min_learning_rate", 0.002),
+            ("seed", 2**32),
+            ("n_embd", 10**1000),
         ]
         for key, value in invalid_cases:
             candidate = dict(valid)
