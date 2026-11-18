@@ -45,14 +45,14 @@ SHA256 = re.compile(r"^[0-9a-f]{64}$")
 INPUT_FINGERPRINT_FIELDS = {
     "chat": ("prompt_ids",),
     "code": ("token_ids",),
-    "vision": ("images", "token_ids"),
-    "image": ("images", "token_ids"),
+    "vision": ("images",),
+    "image": ("images",),
     "asr": ("features",),
     "tts": ("token_ids",),
     "vocoder": ("target_mels",),
-    "3d": ("points", "token_ids"),
+    "3d": ("points",),
     "research": ("query_ids", "passage_ids"),
-    "document": ("token_ids", "boxes", "layout_ids"),
+    "document": ("document_input",),
     "safety": ("token_ids",),
 }
 
