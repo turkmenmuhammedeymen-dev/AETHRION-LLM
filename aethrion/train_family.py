@@ -480,7 +480,6 @@ def run_family(
                 command.extend(["--session-id", session_id, "--attempt-id", attempt_id])
                 rows.append({**plan, "status": "running", "process_started": False,
                              "attempt_id": attempt_id, "session_id": session_id})
-                persist("running", model_id)
                 try:
                     report_started_at_ns = time.time_ns()
                     _append_session_event(events_path, {
@@ -488,6 +487,7 @@ def run_family(
                         "attempt_id": attempt_id, "model_id": model_id,
                         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
                     })
+                    persist("running", model_id)
                     _ACTIVE_CHILD = subprocess.Popen(command, cwd=repo)
                     rows[-1]["process_started"] = True
                     _append_session_event(events_path, {
@@ -496,6 +496,7 @@ def run_family(
                         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
                         "checkpoint": plan["checkpoint"],
                     })
+                    persist("running", model_id)
                     returncode = int(_ACTIVE_CHILD.wait())
                 except KeyboardInterrupt:
                     _STOP_REQUESTED = True
