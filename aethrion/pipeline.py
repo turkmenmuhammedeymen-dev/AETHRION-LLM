@@ -1,7 +1,8 @@
-"""One-command, fail-closed Kaggle pipeline for AETHRION-LLM.
+"""One-command, fail-closed BASE pipeline for a future approved compute environment.
 
-Default behavior: environment checks, unit tests, optional bounded import,
-review-template generation, and approval-gate validation. Training only runs
+Default behavior: environment checks, unit tests, owner-authored source checks,
+review-template generation, and approval-gate validation. External dataset imports
+are disabled. Training only runs
 when every explicit dataset/source approval is present.
 """
 from __future__ import annotations
@@ -20,7 +21,7 @@ from aethrion.data_governance import GovernanceError, validate_governance_record
 
 ROOT = Path(__file__).resolve().parents[1]
 DATASET_MANIFEST = ROOT / "data/processed/corpus_manifest.json"
-RAW_DIR = ROOT / "data/raw/cosmos"
+RAW_DIR = ROOT / "data/raw/owner_authored"
 SOURCE_MANIFEST = RAW_DIR / "sources.json"
 SOURCE_REVIEW = ROOT / "data/processed/privacy_review/source_review_template.csv"
 CORPUS = ROOT / "data/processed/corpus.txt"
@@ -73,7 +74,7 @@ def import_if_missing(enabled: bool, max_records: int) -> None:
     if enabled:
         raise RuntimeError(
             "External dataset import is disabled by the first-party-only data policy. "
-            "Create data/raw/cosmos/sources.json from owner-authored records and reviewed local assets."
+            "Create data/raw/owner_authored/sources.json from owner-authored records and reviewed local assets."
         )
     print("No owner-authored source manifest found. Add first-party records; external imports are disabled.")
 
