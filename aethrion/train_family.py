@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from aethrion.checkpoint import write_json_atomic
+from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
 
 MODEL_IDS = (
     "chat", "code", "vision", "image", "asr", "tts", "3d",
@@ -83,6 +84,57 @@ def _resolve_output_dir(repo: Path, raw_value: Any) -> Path:
     return resolved
 
 
+SPECIALIST_MODEL_CONFIG_KEYS = {
+    "code": ("vocab_size", "block_size", "n_layer", "n_head", "n_embd"),
+    "vision": ("image_size", "patch_size", "vocab_size", "max_text_length", "width", "layers", "heads", "projection_dim"),
+    "image": ("vocab_size", "image_size", "text_length", "width", "time_dim", "diffusion_steps"),
+    "asr": ("vocab_size", "n_mels", "width", "layers", "heads", "blank_id"),
+    "tts": ("vocab_size", "mel_bins", "width", "layers", "heads"),
+    "vocoder": ("mel_bins", "channels", "hop_length"),
+    "3d": ("vocab_size", "width", "points", "layers", "heads", "diffusion_steps"),
+    "research": ("vocab_size", "max_length", "width", "layers", "heads", "embedding_dim"),
+    "document": ("vocab_size", "layout_vocab_size", "max_length", "width", "layers", "tag_classes"),
+    "safety": ("vocab_size", "max_length", "width", "layers", "reason_classes", "decisions"),
+}
+SPECIALIST_INTEGER_CONFIG_KEYS = {
+    "vocab_size", "block_size", "n_layer", "n_head", "n_embd", "image_size",
+    "patch_size", "max_text_length", "width", "layers", "heads",
+    "projection_dim", "text_length", "time_dim", "diffusion_steps",
+    "n_mels", "blank_id", "mel_bins", "points", "max_length",
+    "embedding_dim", "layout_vocab_size", "tag_classes", "channels",
+    "hop_length", "reason_classes", "decisions",
+}
+
+
+def _validate_specialist_config(model_id: str, config: dict[str, Any]) -> None:
+    """Catch malformed training and architecture settings before a model is queued."""
+    required_training = {
+        "seed", "max_steps", "batch_size", "learning_rate", "weight_decay",
+        "grad_clip", "eval_interval", "save_interval",
+    }
+    missing_training = required_training - set(config)
+    if missing_training:
+        raise FamilyTrainingError(
+            "Specialist training config is missing: " + ", ".join(sorted(missing_training))
+        )
+    for key in ("seed", "max_steps", "batch_size", "eval_interval", "save_interval"):
+        require_int(config[key], key, minimum=0 if key == "seed" else 1)
+    require_finite_number(config["learning_rate"], "learning_rate", minimum=0, minimum_inclusive=False)
+    require_finite_number(config["weight_decay"], "weight_decay", minimum=0)
+    require_finite_number(config["grad_clip"], "grad_clip", minimum=0, minimum_inclusive=False)
+    model_config = config.get("model_config")
+    if not isinstance(model_config, dict) or not model_config:
+        raise FamilyTrainingError("A non-empty model_config object is required.")
+    validate_numeric_tree(model_config)
+    missing_model = set(SPECIALIST_MODEL_CONFIG_KEYS[model_id]) - set(model_config)
+    if missing_model:
+        raise FamilyTrainingError(
+            "Specialist model_config is missing: " + ", ".join(sorted(missing_model))
+        )
+    for key in SPECIALIST_INTEGER_CONFIG_KEYS & set(model_config):
+        require_int(model_config[key], f"model_config.{key}", minimum=1)
+
+
 def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
     """Validate the real data gate without initializing a model or optimizer."""
     repo = Path(root).resolve()
@@ -121,12 +173,19 @@ def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
         config = _read_config(config_path)
         if config.get("model_id") != model_id:
             raise FamilyTrainingError("Training config model_id does not match the selected specialist.")
-        if not isinstance(config.get("model_config"), dict) or not config["model_config"]:
-            raise FamilyTrainingError("A non-empty model_config object is required.")
+        _validate_specialist_config(model_id, config)
         output_dir = _resolve_output_dir(repo, config.get("output_dir"))
         manifest_path = repo / "data" / "specialists" / "manifests" / f"{model_id}.json"
         from aethrion.specialist_data import validate_specialist_dataset
         approval = validate_specialist_dataset(manifest_path, require_training_approval=True)
+        tokenizer_vocab_size = approval.get("tokenizer_vocab_size")
+        configured_vocab_size = config["model_config"].get("vocab_size")
+        if tokenizer_vocab_size is not None and (
+            type(configured_vocab_size) is not int or configured_vocab_size < tokenizer_vocab_size
+        ):
+            raise FamilyTrainingError(
+                "Model vocab_size is smaller than the verified dataset tokenizer vocabulary."
+            )
         if approval.get("model_id") != model_id:
             raise FamilyTrainingError("Approved dataset manifest targets a different model.")
         command = [
