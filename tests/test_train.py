@@ -269,5 +269,6 @@ class TrainingUtilityTests(unittest.TestCase):
 
             self.assertEqual(recovered["step"], 0)
             self.assertTrue(any("safely loaded" in str(item.message) for item in caught))
-\n\nif __name__ == "__main__":
+
+if __name__ == "__main__":
     unittest.main()
