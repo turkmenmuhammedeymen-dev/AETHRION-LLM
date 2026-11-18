@@ -145,7 +145,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             payload["sources"][0]["evidence_uri"] = "http://example.invalid/license"
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "evidence must be an HTTPS URL"):
-                validate_specialist_dataset(manifest, require_training_approval=False)
+                validate_specialist_dataset(manifest)
 
     def test_duplicate_specialist_source_ids_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -372,7 +372,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "train, validation and test"):
-                validate_specialist_dataset(manifest)
+                validate_specialist_dataset(manifest, require_training_approval=False)
 
 
 if __name__ == "__main__":
