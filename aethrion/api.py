@@ -12,6 +12,7 @@ from aethrion.native_runtime import NativeModelRuntime
 from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError, read_project_zip
 from aethrion.document_tools import create_document,extract_document_text,DocumentError
 from aethrion.security import require_api_token
+from aethrion.visual_safety import require_visual_output_allow, VisualSafetyError
 from fastapi import UploadFile,File,Form,Response,Depends
 try:
     from fastapi import FastAPI,HTTPException
@@ -245,6 +246,39 @@ def analyze_file(request:FileRequest):
     result["question"]=request.question
     return {"capability":"document","result":result}
 
+@app.post("/image/generate", dependencies=[Depends(require_api_token)])
+def generate_image(request:dict[str,Any]):
+    runtime=providers.get("runtime")
+    if runtime is None or runtime.registry.status(Capability.IMAGE.value) != "ready":
+        raise HTTPException(status_code=503,detail="AETHRION-IMAGE is not trained and released.")
+    prompt=request.get("prompt")
+    if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>4000:
+        raise HTTPException(status_code=400,detail="prompt must contain 1–4000 characters.")
+    try:
+        steps=int(request.get("inference_steps",30))
+    except (TypeError,ValueError) as exc:
+        raise HTTPException(status_code=400,detail="inference_steps must be an integer.") from exc
+    if not 2 <= steps <= 100:
+        raise HTTPException(status_code=400,detail="inference_steps must be between 2 and 100.")
+    _require_safety_allow_http(runtime,prompt)
+    path=None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".png",delete=False) as handle:
+            path=Path(handle.name)
+        runtime.generate_image(prompt,output_path=path,inference_steps=steps)
+        require_visual_output_allow(runtime,path,"image")
+        return Response(content=path.read_bytes(),media_type="image/png",
+                        headers={"Content-Disposition":'attachment; filename="aethrion-image.png"',
+                                 "Cache-Control":"no-store"})
+    except VisualSafetyError as exc:
+        raise HTTPException(status_code=503,detail="AETHRION visual safety verifier blocked or could not approve this image.") from exc
+    except Exception as exc:
+        raise HTTPException(status_code=422,detail=f"Native image generation failed: {type(exc).__name__}") from exc
+    finally:
+        if path is not None:
+            path.unlink(missing_ok=True)
+
+
 @app.get("/3d/tasks/{task_id}", dependencies=[Depends(require_api_token)])
 def get_3d_task(task_id:str):
     raise HTTPException(status_code=410,detail="Native 3D generation is synchronous. Use POST /3d/generate; no hosted task service is used.")
@@ -260,10 +294,18 @@ def generate_3d(request:dict[str,Any]):
     _require_safety_allow_http(runtime, prompt)
     path=None
     try:
-        path=runtime.generate_point_cloud(prompt,inference_steps=min(int(request.get("inference_steps",50)),100))
+        steps=int(request.get("inference_steps",50))
+        if not 2 <= steps <= 100:
+            raise HTTPException(status_code=400,detail="inference_steps must be between 2 and 100.")
+        path=runtime.generate_point_cloud(prompt,inference_steps=steps)
+        require_visual_output_allow(runtime,path,"3d")
         return Response(content=path.read_bytes(),media_type="text/plain",
             headers={"Content-Disposition":'attachment; filename="aethrion-point-cloud.obj"',
                      "X-Aethrion-3D-Format":"vertex-only-obj"})
+    except VisualSafetyError as exc:
+        raise HTTPException(status_code=503,detail="AETHRION visual safety verifier blocked or could not approve this 3D artifact.") from exc
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=422,detail=f"Native point-cloud generation failed: {type(exc).__name__}") from exc
     finally:
