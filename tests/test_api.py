@@ -404,12 +404,12 @@ class ApiHttpIntegrationTests(unittest.TestCase):
             "/assistant/upload",
             headers=self.auth,
             data={"prompt": "Describe this image"},
-            files={"file": ("scene.png", b"PNG-test-data", "image/png")},
+            files={"file": ("scene.png", b"\\x89PNG\\r\\n\\x1a\\nPNG-test-data", "image/png")},
         )
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(response.json()["capability"], "vision")
         self.assertTrue(response.json()["delegated"])
-        self.assertEqual(observed["bytes"], b"PNG-test-data")
+        self.assertEqual(observed["bytes"], b"\\x89PNG\\r\\n\\x1a\\nPNG-test-data")
         self.assertTrue(observed["exists_during_dispatch"])
         self.assertFalse(Path(observed["temporary_path"]).exists())
         self.assertEqual(observed["prompt"], "Describe this image")
@@ -433,7 +433,7 @@ class ApiHttpIntegrationTests(unittest.TestCase):
             "/assistant/upload",
             headers=self.auth,
             data={"prompt": "Transcribe this audio"},
-            files={"file": ("voice.wav", b"RIFF-test-audio", "audio/wav")},
+            files={"file": ("voice.wav", b"RIFF\\x00\\x00\\x00\\x00WAVEdata", "audio/wav")},
         )
         document_response = self.client.post(
             "/assistant/upload",
@@ -445,10 +445,30 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.assertEqual(audio_response.json()["capability"], "asr")
         self.assertEqual(document_response.status_code, 200, document_response.text)
         self.assertEqual(document_response.json()["capability"], "document")
-        self.assertEqual(observed["audio"], b"RIFF-test-audio")
+        self.assertEqual(observed["audio"], b"RIFF\\x00\\x00\\x00\\x00WAVEdata")
         self.assertEqual(observed["document"], b"document-body")
         self.assertFalse(Path(observed["audio_cleaned_path"]).exists())
         self.assertFalse(Path(observed["document_cleaned_path"]).exists())
+
+    def test_assistant_upload_rejects_filename_only_image_spoofing(self):
+        response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Describe this image"},
+            files={"file": ("scene.png", b"not an image", "image/png")},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("content does not match", response.json()["detail"])
+
+    def test_upload_payload_validator_checks_modality_signatures_and_text_encoding(self):
+        api._validate_upload_payload(".png", b"\\x89PNG\\r\\n\\x1a\\nbody")
+        api._validate_upload_payload(".wav", b"RIFF\\x00\\x00\\x00\\x00WAVEdata")
+        api._validate_upload_payload(".pdf", b"%PDF-1.7")
+        api._validate_upload_payload(".txt", "Merhaba".encode("utf-8"))
+        with self.assertRaises(api.HTTPException):
+            api._validate_upload_payload(".png", b"plain text")
+        with self.assertRaises(api.HTTPException):
+            api._validate_upload_payload(".json", b"{invalid")
 
     def test_assistant_upload_rejects_extension_capability_mismatch(self):
         response = self.client.post(
@@ -472,7 +492,7 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         response = self.client.post(
             "/assistant/upload",
             data={"prompt": "Describe this image"},
-            files={"file": ("scene.png", b"PNG-test-data", "image/png")},
+            files={"file": ("scene.png", b"\\x89PNG\\r\\n\\x1a\\nPNG-test-data", "image/png")},
         )
         self.assertEqual(response.status_code, 401)
 
