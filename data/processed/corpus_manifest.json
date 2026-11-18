@@ -1,12 +1,18 @@
 {
   "project": "AETHRION-LLM",
-  "dataset_status": "awaiting_licensed_sources",
+  "dataset_status": "awaiting_owner_authored_sources_and_human_review",
   "training_allowed": false,
   "requirements": [
-    "UTF-8 text",
-    "documented source",
-    "verified training license",
+    "UTF-8 owner-authored records",
+    "documented authorship and rights-holder role",
+    "timestamped human rights and source review",
+    "human privacy and quality review",
     "deduplication",
-    "train-validation separation"
-  ]
+    "group-disjoint train-validation-test separation",
+    "speaker consent for audio models",
+    "separate human safety-data review for SAFE"
+  ],
+  "data_origin_policy": "first_party_owner_authored_only",
+  "pretrained_models_allowed": false,
+  "external_datasets_allowed": false
 }
