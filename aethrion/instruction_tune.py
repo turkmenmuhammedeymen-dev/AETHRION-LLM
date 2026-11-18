@@ -16,6 +16,7 @@ import torch
 from aethrion.checkpoint import load_checkpoint, save_checkpoint, sha256_file, write_json_atomic
 from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.specialist_data import validate_specialist_dataset
+from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
 
 
 _STOP_REQUESTED = False
@@ -79,10 +80,16 @@ def tune_instructions(
     if missing:
         raise ValueError("Missing instruction-tuning config keys: " + ", ".join(sorted(missing)))
     for key in ("max_steps", "batch_size", "eval_interval", "save_interval"):
-        if type(config[key]) is not int or config[key] < 1:
-            raise ValueError(f"{key} must be a positive integer.")
-    if config["learning_rate"] <= 0 or config["weight_decay"] < 0 or config["grad_clip"] <= 0:
-        raise ValueError("Invalid instruction-tuning optimizer configuration.")
+        require_int(config[key], key, minimum=1)
+    require_int(config["seed"], "seed", minimum=0)
+    require_finite_number(config["learning_rate"], "learning_rate", minimum=0, minimum_inclusive=False)
+    require_finite_number(config["weight_decay"], "weight_decay", minimum=0)
+    require_finite_number(config["grad_clip"], "grad_clip", minimum=0, minimum_inclusive=False)
+    validate_numeric_tree(config["model_config"])
+    if not isinstance(config["tokenizer_path"], str) or not config["tokenizer_path"].strip():
+        raise ValueError("tokenizer_path must be a non-empty path string.")
+    if not isinstance(config["output_dir"], str) or not config["output_dir"].strip():
+        raise ValueError("output_dir must be a non-empty path string.")
 
     approval = validate_specialist_dataset(manifest_path, require_training_approval=True)
     if approval["model_id"] != "chat":
