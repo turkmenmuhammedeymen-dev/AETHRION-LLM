@@ -91,7 +91,7 @@ class InstructionTuningTests(unittest.TestCase):
                 "source_path": "source.txt",
                 "sha256": hashlib.sha256(raw.read_bytes()).hexdigest(),
                 "license": "Synthetic unit-test content",
-                "permitted_use": "Unit tests only",
+                "permitted_use": "Unit-test training fixture only",
                 "evidence_uri": "unit-test://evidence",
                 "allow_training": approved,
                 "privacy_reviewed": approved,
