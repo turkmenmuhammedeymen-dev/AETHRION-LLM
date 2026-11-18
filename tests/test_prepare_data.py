@@ -403,12 +403,37 @@ class CorpusPreparationTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         require_training_enabled(path)
 
+    def test_dataset_manifest_rejects_true_without_human_review(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "unreviewed.json"
+            path.write_text(json.dumps({
+                "project": "AETHRION-LLM-tests",
+                "training_allowed": True,
+            }), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "human-review-v1"):
+                require_training_enabled(path)
+
     def test_dataset_manifest_accepts_exact_boolean_true(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "approved.json"
             payload = {
                 "project": "AETHRION-LLM-tests",
                 "training_allowed": True,
+                "governance": {
+                    "schema": "aethrion-human-review-v1",
+                    "model_id": "base",
+                    "approval_status": "approved",
+                    "author_role": "unit-test author",
+                    "authorship_attested": True,
+                    "rights_holder_role": "unit-test rights holder",
+                    "rights_attested": True,
+                    "source_rights_reviewed": True,
+                    "privacy_reviewed": True,
+                    "quality_reviewed": True,
+                    "reviewer_role": "unit-test reviewer",
+                    "reviewed_at": "2026-01-01T00:00:00Z",
+                    "evidence_uri": "unit-test://human-review",
+                },
             }
             path.write_text(json.dumps(payload), encoding="utf-8")
 
