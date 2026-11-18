@@ -5,7 +5,7 @@ import sys
 import tempfile
 import unittest
 
-from scripts.generate_dev_fixtures import MODEL_IDS, main as _unused_main  # noqa: F401
+MODEL_IDS = ("chat","code","vision","image","asr","tts","3d","research","document","safety","vocoder")
 
 
 class DevFixtureGeneratorTests(unittest.TestCase):
