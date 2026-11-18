@@ -236,6 +236,35 @@ def assistant(request: DispatchRequest):
         raise HTTPException(status_code=500, detail=f"Assistant orchestration failed: {type(exc).__name__}") from exc
 
 
+def _validate_upload_payload(suffix: str, raw: bytes) -> None:
+    """Reject filename-only modality spoofing before a specialist reads bytes."""
+    if not raw:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    signatures = {
+        ".png": raw.startswith(b"\\x89PNG\\r\\n\\x1a\\n"),
+        ".jpg": raw.startswith(b"\\xff\\xd8\\xff"),
+        ".jpeg": raw.startswith(b"\\xff\\xd8\\xff"),
+        ".webp": len(raw) >= 12 and raw[:4] == b"RIFF" and raw[8:12] == b"WEBP",
+        ".wav": len(raw) >= 12 and raw[:4] == b"RIFF" and raw[8:12] == b"WAVE",
+        ".pdf": raw.startswith(b"%PDF-"),
+        ".docx": raw.startswith(b"PK\\x03\\x04"),
+    }
+    if suffix in signatures:
+        if not signatures[suffix]:
+            raise HTTPException(status_code=400, detail="File content does not match its declared extension.")
+        return
+    if suffix in {".txt", ".md", ".json", ".csv", ".log"}:
+        try:
+            decoded = raw.decode("utf-8-sig")
+            if suffix == ".json":
+                import json
+                json.loads(decoded)
+        except (UnicodeDecodeError, ValueError) as exc:
+            raise HTTPException(status_code=400, detail="Text upload is not valid UTF-8 or JSON.") from exc
+        return
+    raise HTTPException(status_code=400, detail="Unsupported uploaded file type.")
+
+
 @app.post("/assistant/upload", dependencies=[Depends(require_api_token)])
 async def assistant_upload(
     file: UploadFile = File(...),
@@ -243,42 +272,40 @@ async def assistant_upload(
     capability: str | None = Form(default=None),
 ):
     """Route one bounded uploaded file through CHAT's specialist intent path."""
-    try:
-        selected = classify_intent(
-            prompt,
-            {"capability": capability} if capability else None,
-        ).capability
-    except (ValueError, TypeError) as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    file_contracts = {
-        Capability.VISION: ({".png", ".jpg", ".jpeg", ".webp"}, 20 * 1024 * 1024, "image_path"),
-        Capability.ASR: ({".wav"}, 25 * 1024 * 1024, "audio_path"),
-        Capability.DOCUMENT: (
-            {".pdf", ".docx", ".txt", ".md", ".json", ".csv", ".log"},
-            8 * 1024 * 1024,
-            "document_path",
-        ),
-    }
-    contract = file_contracts.get(selected)
-    if contract is None:
-        raise HTTPException(
-            status_code=400,
-            detail="Uploaded files are supported only for VISION, ASR or DOCUMENT tasks.",
-        )
-    allowed_suffixes, max_bytes, option_key = contract
-    suffix = Path(file.filename or "").suffix.lower()
-    if suffix not in allowed_suffixes:
-        raise HTTPException(status_code=400, detail=f"Unsupported file type for {selected.value}.")
-    raw = await file.read(max_bytes + 1)
-    await file.close()
-    if not raw:
-        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
-    if len(raw) > max_bytes:
-        raise HTTPException(status_code=413, detail=f"Uploaded file exceeds {max_bytes // (1024 * 1024)} MiB.")
-
     path = None
     try:
+        try:
+            selected = classify_intent(
+                prompt,
+                {"capability": capability} if capability else None,
+            ).capability
+        except (ValueError, TypeError) as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+        file_contracts = {
+            Capability.VISION: ({".png", ".jpg", ".jpeg", ".webp"}, 20 * 1024 * 1024, "image_path"),
+            Capability.ASR: ({".wav"}, 25 * 1024 * 1024, "audio_path"),
+            Capability.DOCUMENT: (
+                {".pdf", ".docx", ".txt", ".md", ".json", ".csv", ".log"},
+                8 * 1024 * 1024,
+                "document_path",
+            ),
+        }
+        contract = file_contracts.get(selected)
+        if contract is None:
+            raise HTTPException(
+                status_code=400,
+                detail="Uploaded files are supported only for VISION, ASR or DOCUMENT tasks.",
+            )
+        allowed_suffixes, max_bytes, option_key = contract
+        suffix = Path(file.filename or "").suffix.lower()
+        if suffix not in allowed_suffixes:
+            raise HTTPException(status_code=400, detail=f"Unsupported file type for {selected.value}.")
+        raw = await file.read(max_bytes + 1)
+        if len(raw) > max_bytes:
+            raise HTTPException(status_code=413, detail=f"Uploaded file exceeds {max_bytes // (1024 * 1024)} MiB.")
+        _validate_upload_payload(suffix, raw)
+
         with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as handle:
             handle.write(raw)
             path = Path(handle.name)
@@ -300,6 +327,7 @@ async def assistant_upload(
     except (ValueError, TypeError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     finally:
+        await file.close()
         if path is not None:
             path.unlink(missing_ok=True)
 
