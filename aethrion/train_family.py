@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from aethrion.checkpoint import write_json_atomic
+from aethrion.session_journal import append_session_event, audit_session_journal
 from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
 
 MODEL_IDS = (
@@ -380,12 +381,8 @@ def _request_family_stop(signum, frame):
 
 
 def _append_session_event(path: Path, event: dict[str, Any]) -> None:
-    """Append one durable, newline-delimited family-training event."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
-        handle.flush()
-        os.fsync(handle.fileno())
+    """Append one durable, hash-chained family-training event."""
+    append_session_event(path, event)
 
 
 def run_family(
@@ -422,8 +419,16 @@ def run_family(
     def persist(status: str, current_model: str | None = None) -> None:
         if not execute:
             return
+        journal_audit = audit_session_journal(events_path, session_id)
+        if not journal_audit.get("valid"):
+            raise FamilyTrainingError(
+                "Session journal integrity failure: " + str(journal_audit.get("reason"))
+            )
         snapshot = {
-            "format": "aethrion-family-training-session-v1",
+            "format": "aethrion-family-training-session-v2",
+            "journal_integrity": "sha256_chain_verified",
+            "journal_event_count": journal_audit["event_count"],
+            "journal_last_event_sha256": journal_audit["last_event_sha256"],
             "session_id": session_id,
             "status": status,
             "current_model": current_model,
