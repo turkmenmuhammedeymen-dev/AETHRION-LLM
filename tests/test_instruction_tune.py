@@ -32,7 +32,7 @@ class InstructionTuningTests(unittest.TestCase):
         optimizer = torch.optim.AdamW(base.parameters(), lr=0.001)
         base_checkpoint = root / "base.pt"
         payload = {
-            "format_version": 3,
+            "format_version": 4,
             "step": 0,
             "model": base.state_dict(),
             "optimizer": optimizer.state_dict(),
@@ -41,6 +41,7 @@ class InstructionTuningTests(unittest.TestCase):
             "data_sha256": "d" * 64,
             "tokenizer_sha256": sha256_file(tokenizer_path),
             "rng_state": capture_rng_state(),
+            "training_config": {"stage": "base_pretraining_fixture"},
         }
         save_checkpoint(payload, base_checkpoint)
         dataset = root / "instructions.npz"
@@ -172,6 +173,10 @@ class InstructionTuningTests(unittest.TestCase):
                 self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
 
                 instruction_tune._STOP_REQUESTED = False
+                changed = dict(config)
+                changed["learning_rate"] = config["learning_rate"] * 2
+                with self.assertRaisesRegex(ValueError, "settings changed"):
+                    tune_instructions(changed, manifest, base, resume=checkpoint)
                 resumed = tune_instructions(config, manifest, base, resume=checkpoint)
                 self.assertEqual(resumed["status"], "instruction_tuning_complete_not_released")
                 self.assertEqual(resumed["steps"], 2)
