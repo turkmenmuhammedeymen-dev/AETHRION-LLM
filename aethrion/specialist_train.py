@@ -270,16 +270,18 @@ def train_specialist(
     require_finite_number(config["learning_rate"], "learning_rate", minimum=0, minimum_inclusive=False)
     require_finite_number(config["weight_decay"], "weight_decay", minimum=0)
     require_finite_number(config["grad_clip"], "grad_clip", minimum=0, minimum_inclusive=False)
-    validate_numeric_tree(config["model_config"])
-    if not isinstance(config["output_dir"], str) or not config["output_dir"].strip():
-        raise ValueError("output_dir must be a non-empty path string.")
-    approval = validate_specialist_dataset(manifest_path, require_training_approval=True)
     model_id = config["model_id"]
-    if approval["model_id"] != model_id:
-        raise ValueError("Training config model_id differs from approved dataset manifest.")
+    if not isinstance(model_id, str) or not model_id.strip():
+        raise ValueError("model_id must be a non-empty string.")
     model_config = config.get("model_config")
     if not isinstance(model_config, dict) or not model_config:
         raise ValueError("model_config must be a non-empty object.")
+    validate_numeric_tree(model_config)
+    if not isinstance(config["output_dir"], str) or not config["output_dir"].strip():
+        raise ValueError("output_dir must be a non-empty path string.")
+    approval = validate_specialist_dataset(manifest_path, require_training_approval=True)
+    if approval["model_id"] != model_id:
+        raise ValueError("Training config model_id differs from approved dataset manifest.")
     if approval["tokenizer_vocab_size"] is not None:
         model_vocab_size = model_config.get("vocab_size")
         if type(model_vocab_size) is not int or model_vocab_size < approval["tokenizer_vocab_size"]:
