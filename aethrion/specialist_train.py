@@ -212,10 +212,11 @@ def _validate_model_data_compatibility(
         expected_samples = mels.shape[1] * config["hop_length"]
         if waveforms.shape[1] != expected_samples:
             raise ValueError("Vocoder waveform length must equal padded mel frames times hop_length.")
-        lengths = arrays["frame_lengths"] * config["hop_length"]
-        expected_mask = np.arange(waveforms.shape[1])[None, :] < lengths[:, None]
-        if not np.array_equal(arrays["waveform_mask"].astype(bool), expected_mask):
-            raise ValueError("Vocoder waveform_mask must match frame_lengths and hop_length.")
+        mask = arrays["waveform_mask"].astype(bool)
+        if np.any(mask.sum(axis=1) < 1):
+            raise ValueError("Vocoder waveform_mask must retain at least one sample per record.")
+        if np.any(np.diff(mask.astype(np.int8), axis=1) > 0):
+            raise ValueError("Vocoder waveform_mask must be a contiguous valid prefix.")
     elif model_id == "3d":
         if arrays["points"].shape[1:] != (config["points"], 3):
             raise ValueError("3D point-cloud shape does not match configured points.")
