@@ -4,9 +4,10 @@ All specialist datasets are prepared locally as a NumPy NPZ archive loaded with
 `allow_pickle=False`. The archive must contain `sample_id`, `group_id` and
 `split` arrays. Every record must be assigned exactly one of `train`,
 `validation` or `test`; all three splits must be non-empty, sample IDs must be
-unique, and each provenance group must occur in only one split. Text-conditioned
-specialist tokenizers are learned from the training partition only and their exact
-SHA-256 values are recorded in their dataset manifests.
+unique, and each provenance group must occur in only one split. Prepared archives
+store only SHA-256 pseudonyms of the supplied group IDs, not the raw author or
+speaker identifiers. Text-conditioned specialist tokenizers are learned from the
+training partition only and their exact SHA-256 values are recorded in their manifests.
 
 | Model | Required NPZ arrays |
 |---|---|
