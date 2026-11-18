@@ -65,17 +65,17 @@ def run_tests() -> None:
 
 
 def import_if_missing(enabled: bool, max_records: int) -> None:
+    """Never import third-party datasets; AETHRION uses first-party authored records only."""
+    del max_records  # Retained only for CLI compatibility with older runbooks.
     if SOURCE_MANIFEST.is_file():
-        print("Source import skipped: existing source manifest found.")
+        print("External source import skipped: existing owner-authored source manifest found.")
         return
-    if not enabled:
-        print("No imported source found. Re-run with --import-if-missing to stream a bounded review sample.")
-        return
-    run([
-        sys.executable, "-m", "aethrion.import_hf_dataset",
-        "--output-dir", str(RAW_DIR.relative_to(ROOT)),
-        "--max-records", str(max_records),
-    ])
+    if enabled:
+        raise RuntimeError(
+            "External dataset import is disabled by the first-party-only data policy. "
+            "Create data/raw/cosmos/sources.json from owner-authored records and reviewed local assets."
+        )
+    print("No owner-authored source manifest found. Add first-party records; external imports are disabled.")
 
 
 def create_pending_domain_template() -> None:
@@ -203,7 +203,7 @@ def approval_status() -> tuple[bool, str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="AETHRION one-command Kaggle pipeline")
     parser.add_argument("--import-if-missing", action="store_true",
-                        help="Stream at most --max-records rows for manual rights/privacy review.")
+                        help="Deprecated compatibility flag; external dataset imports are disabled.")
     parser.add_argument("--max-records", type=int, default=5000)
     parser.add_argument("--skip-tests", action="store_true")
     parser.add_argument("--config", default="configs/turkish_pilot.json")
