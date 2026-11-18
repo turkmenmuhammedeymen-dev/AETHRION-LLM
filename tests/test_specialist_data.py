@@ -337,13 +337,19 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                 validate_specialist_dataset(manifest)
 
     def test_specialist_sources_require_explicit_training_permission(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            manifest, payload = self._fixture(root, approved=True)
-            payload["sources"][0]["permitted_use"] = "Evaluation only; no training"
-            manifest.write_text(json.dumps(payload), encoding="utf-8")
-            with self.assertRaisesRegex(SpecialistDataError, "must explicitly allow training"):
-                validate_specialist_dataset(manifest)
+        for permitted_use in (
+            "Evaluation only; no training",
+            "Not a production training corpus",
+            "Not permitted for training",
+        ):
+            with self.subTest(permitted_use=permitted_use):
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    manifest, payload = self._fixture(root, approved=True)
+                    payload["sources"][0]["permitted_use"] = permitted_use
+                    manifest.write_text(json.dumps(payload), encoding="utf-8")
+                    with self.assertRaisesRegex(SpecialistDataError, "must explicitly allow training"):
+                        validate_specialist_dataset(manifest)
 
     def test_specialist_sources_reject_remote_third_party_source_uris(self):
         with tempfile.TemporaryDirectory() as directory:
