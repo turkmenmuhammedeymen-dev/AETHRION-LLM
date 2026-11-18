@@ -152,6 +152,10 @@ def append_session_event(path: str | Path, event: dict[str, Any]) -> dict[str, A
     if not current["valid"]:
         raise ValueError(f"Refusing to append to invalid session journal: {current['reason']}")
     kind = event.get("event")
+    if current["event_count"] == 0 and kind != "session_started":
+        raise ValueError("session_started must be the first journal event.")
+    if current.get("last_event") in {"session_interrupted", "session_completed"}:
+        raise ValueError("Cannot append after a terminal session event.")
     attempt_id = event.get("attempt_id")
     record = current.get("attempts", {}).get(attempt_id)
     if kind == "session_started":
