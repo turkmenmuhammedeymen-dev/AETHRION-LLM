@@ -387,7 +387,10 @@ class NativeModelRuntime:
                 or any(part in {"", ".", ".."} for part in relative.split("/"))
             ):
                 raise NativeRuntimeError("Research index paths must be safe repository-relative paths.")
-            resolved = (self.root / candidate).resolve()
+            unresolved = self.root / candidate
+            if unresolved.is_symlink():
+                raise NativeRuntimeError("Research index artifacts cannot be symbolic links.")
+            resolved = unresolved.resolve()
             try:
                 resolved.relative_to(self.root)
             except ValueError as exc:
