@@ -35,7 +35,24 @@ class PipelineApprovalTests(unittest.TestCase):
 
     def write_dataset(self, allowed=True):
         self.dataset.write_text(
-            json.dumps({"training_allowed": allowed}), encoding="utf-8"
+            json.dumps({
+                "training_allowed": allowed,
+                "governance": {
+                    "schema": "aethrion-human-review-v1",
+                    "model_id": "base",
+                    "approval_status": "approved",
+                    "author_role": "unit-test author",
+                    "authorship_attested": True,
+                    "rights_holder_role": "unit-test rights holder",
+                    "rights_attested": True,
+                    "source_rights_reviewed": True,
+                    "privacy_reviewed": True,
+                    "quality_reviewed": True,
+                    "reviewer_role": "unit-test reviewer",
+                    "reviewed_at": "2026-01-01T00:00:00Z",
+                    "evidence_uri": "unit-test://human-review",
+                },
+            }), encoding="utf-8"
         )
 
     def write_sources(self, *, allowed=True, with_url=False):
