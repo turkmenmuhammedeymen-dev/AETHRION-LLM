@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
+from aethrion.orchestrator import AssistantOrchestrator, AssistantInputRequired
 from aethrion.native_registry import NativeModelRegistry,NativeModelUnavailable,NativeModelError
 from aethrion.native_runtime import NativeModelRuntime
 from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError, read_project_zip
@@ -201,6 +202,36 @@ def capabilities():
         model_status = {"registry": f"error:{type(exc).__name__}"}
     return {"available":available,"unavailable":[n for n in all_names if n not in available],
             "model_status":model_status,"execution_policy":"local_only","credentials_exposed":False}
+
+@app.post("/assistant", dependencies=[Depends(require_api_token)])
+def assistant(request: DispatchRequest):
+    """Main text entry point: delegate clear tasks, otherwise use native CHAT."""
+    # Never accept caller-controlled server paths through this general text route.
+    forbidden = {"image_path", "audio_path", "document_path", "file_path"}
+    if forbidden.intersection(request.options):
+        raise HTTPException(status_code=400, detail="Use the dedicated bounded upload endpoint for file inputs.")
+    allowed_options = {"max_new_tokens", "temperature", "top_k", "top_p", "capability"}
+    unknown = set(request.options) - allowed_options
+    if unknown:
+        raise HTTPException(status_code=400, detail="Unsupported assistant options: " + ", ".join(sorted(unknown)))
+    try:
+        result = AssistantOrchestrator(router).dispatch(request.prompt, request.options)
+        return {
+            "capability": result.capability.value,
+            "delegated": result.delegated,
+            "reason": result.reason,
+            "provider": result.provider,
+            "result": result.output,
+        }
+    except AssistantInputRequired as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except CapabilityUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Assistant orchestration failed: {type(exc).__name__}") from exc
+
 
 @app.post("/dispatch", dependencies=[Depends(require_api_token)])
 def dispatch(request:DispatchRequest):
