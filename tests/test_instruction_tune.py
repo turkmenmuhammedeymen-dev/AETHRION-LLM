@@ -53,7 +53,7 @@ class InstructionTuningTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(["a", "b", "c", "d", "e", "f"]),
-            group_id=np.asarray(["ga", "gb", "gc", "gd", "ge", "gf"]),
+            group_id=np.asarray([hashlib.sha256(x.encode()).hexdigest() for x in ("ga", "gb", "gc", "gd", "ge", "gf")]),
             split=np.asarray(["train", "train", "validation", "validation", "test", "test"]),
             input_ids=inputs,
             labels=labels,
