@@ -229,6 +229,82 @@ def _file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+
+def _verify_attempt_checkpoint_binding(
+    output_dir: Path,
+    model_id: str,
+    session_id: str,
+    attempt_id: str,
+    journal_attempt: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Cross-check report, exact checkpoint generation and journal attempt lineage."""
+    report_path = output_dir / "training_report.json"
+    try:
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return {"verified": False, "reason": "report_missing_or_invalid"}
+    if not isinstance(report, dict):
+        return {"verified": False, "reason": "report_not_object"}
+    if (report.get("model_id") != model_id or report.get("session_id") != session_id
+            or report.get("attempt_id") != attempt_id):
+        return {"verified": False, "reason": "report_lineage_mismatch"}
+    generation = report.get("checkpoint_generation")
+    created_at = report.get("report_created_at_ns")
+    digest = report.get("checkpoint_sha256")
+    if type(generation) is not int or generation < 1 or type(created_at) is not int:
+        return {"verified": False, "reason": "report_generation_or_timestamp_invalid"}
+    if not isinstance(digest, str) or len(digest) != 64:
+        return {"verified": False, "reason": "report_checkpoint_hash_invalid"}
+    checkpoint = output_dir / "checkpoint_last.pt"
+    candidates = [checkpoint, Path(str(checkpoint) + ".previous")]
+    selected = next((candidate for candidate in candidates if candidate.is_file()
+                     and hmac.compare_digest(digest.lower(), _file_sha256(candidate))), None)
+    if selected is None:
+        return {"verified": False, "reason": "no_checkpoint_generation_matches_report_hash"}
+    try:
+        if model_id == "chat":
+            from aethrion.checkpoint import _load_verified_checkpoint
+            state = _load_verified_checkpoint(selected, "cpu")
+            checkpoint_step = state.get("step")
+            report_step = report.get("step")
+            if type(checkpoint_step) is not int or checkpoint_step != report_step:
+                return {"verified": False, "reason": "checkpoint_report_step_mismatch"}
+        else:
+            from aethrion.specialist_train import _load_checkpoint
+            state = _load_checkpoint(selected, torch.device("cpu"))
+            checkpoint_step = state.get("step")
+            report_steps = report.get("steps")
+            if type(checkpoint_step) is not int or checkpoint_step + 1 != report_steps:
+                return {"verified": False, "reason": "checkpoint_report_step_mismatch"}
+            if state.get("model_id") != model_id:
+                return {"verified": False, "reason": "checkpoint_model_mismatch"}
+            for key in ("dataset_sha256", "tokenizer_sha256", "manifest_sha256"):
+                if state.get(key) != report.get(key):
+                    return {"verified": False, "reason": "checkpoint_report_provenance_mismatch"}
+        if (state.get("session_id") != session_id or state.get("attempt_id") != attempt_id
+                or state.get("checkpoint_generation") != generation):
+            return {"verified": False, "reason": "checkpoint_lineage_or_generation_mismatch"}
+        if model_id == "chat":
+            if (state.get("data_sha256") != report.get("dataset_sha256")
+                    or state.get("tokenizer_sha256") != report.get("tokenizer_sha256")):
+                return {"verified": False, "reason": "checkpoint_report_provenance_mismatch"}
+    except Exception:
+        return {"verified": False, "reason": "checkpoint_semantic_validation_failed"}
+    if journal_attempt is not None and journal_attempt.get("state") == "terminal_recorded":
+        if (journal_attempt.get("checkpoint_generation") != generation
+                or journal_attempt.get("checkpoint_sha256") != digest
+                or journal_attempt.get("report_created_at_ns") != created_at):
+            return {"verified": False, "reason": "journal_report_checkpoint_mismatch"}
+    return {
+        "verified": True,
+        "checkpoint_generation": generation,
+        "checkpoint_sha256": digest,
+        "report_created_at_ns": created_at,
+        "checkpoint_source": "latest" if selected == checkpoint else "previous",
+        "checkpoint_step": checkpoint_step,
+    }
+
+
 def _finite_metric(value: Any) -> bool:
     return type(value) in (int, float) and math.isfinite(float(value))
 
@@ -626,10 +702,32 @@ def main() -> int:
     )
     args = parser.parse_args()
     if args.audit_session:
+        repo_root = Path(args.root).resolve()
         result = audit_session_artifacts(
-            Path(args.root).resolve() / "artifacts" / "training_sessions",
+            repo_root / "artifacts" / "training_sessions",
             args.audit_session,
         )
+        if result.get("valid"):
+            attempts = result.get("attempts", {})
+            reconstructed = result.get("reconstructed_session", {})
+            for row in reconstructed.get("models", []):
+                attempt_id = row.get("attempt_id")
+                if not attempt_id:
+                    continue
+                attempt = attempts.get(attempt_id, {})
+                output_dir = repo_root / row.get("output_dir", "")
+                row["checkpoint_report_binding"] = _verify_attempt_checkpoint_binding(
+                    output_dir, row["model_id"], args.audit_session, attempt_id, attempt,
+                )
+            reconstructed["automatic_resume"] = False
+            result["checkpoint_cross_validation"] = "complete"
+            result["valid"] = all(
+                row.get("checkpoint_report_binding", {}).get("verified", False)
+                for row in reconstructed.get("models", [])
+                if row.get("attempt_id")
+            )
+            if not result["valid"]:
+                result["recovery"] = "manual_review_required"
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result.get("valid") else 3
     report = run_family(
