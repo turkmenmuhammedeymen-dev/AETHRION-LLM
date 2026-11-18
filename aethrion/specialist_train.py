@@ -304,13 +304,32 @@ def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
         _write_text_fsync(checksum_tmp, digest + "\n", "ascii")
         if path.is_file() and checksum_path.is_file():
             expected = checksum_path.read_text(encoding="ascii").strip().split()
-            if expected and _sha256(path) == expected[0]:
-                shutil.copy2(path, previous_tmp)
-                shutil.copy2(checksum_path, previous_checksum_tmp)
-                _fsync_file(previous_tmp)
-                _fsync_file(previous_checksum_tmp)
-                os.replace(previous_tmp, previous)
-                os.replace(previous_checksum_tmp, previous_checksum)
+            if expected and len(expected[0]) == 64 and _sha256(path) == expected[0].lower():
+                try:
+                    existing = torch.load(path, map_location="cpu", weights_only=True)
+                    if (
+                        not isinstance(existing, dict)
+                        or existing.get("format") != "aethrion-specialist-checkpoint-v2"
+                        or not isinstance(existing.get("training_config"), dict)
+                        or type(existing.get("step")) is not int
+                        or existing["step"] < 0
+                    ):
+                        raise ValueError("Existing specialist checkpoint structure is invalid.")
+                    _validate_specialist_rng_state(existing.get("rng_state"))
+                    for key in ("dataset_sha256", "tokenizer_sha256", "manifest_sha256"):
+                        value = existing.get(key)
+                        if not isinstance(value, str) or len(value) != 64:
+                            raise ValueError(f"Existing specialist checkpoint {key} is invalid.")
+                except Exception:
+                    # Never promote a checksum-valid but semantically invalid generation.
+                    pass
+                else:
+                    shutil.copy2(path, previous_tmp)
+                    shutil.copy2(checksum_path, previous_checksum_tmp)
+                    _fsync_file(previous_tmp)
+                    _fsync_file(previous_checksum_tmp)
+                    os.replace(previous_tmp, previous)
+                    os.replace(previous_checksum_tmp, previous_checksum)
         os.replace(tmp, path)
         os.replace(checksum_tmp, checksum_path)
         _fsync_directory(path.parent)
