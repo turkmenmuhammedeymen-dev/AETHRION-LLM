@@ -13,20 +13,20 @@ booleans were changed and no training process was started.
 
 | Model | Configuration | Data / approval gate | Result |
 |---|---|---|---|
-| CHAT | \`configs/small.json\` | Corpus manifest has \`training_allowed: false\`; owner/source attestation and human review are pending; corpus/source evidence and tokenizer provenance are not approved | BLOCKED |
-| CODE | \`configs/specialists/code.json\` | Specialist manifest has no sources; training, owner, privacy and human review approvals are false/pending | BLOCKED |
-| VISION | \`configs/specialists/vision.json\` | No approved image/text sources or prepared dataset; owner, privacy and independent review pending | BLOCKED |
-| IMAGE | \`configs/specialists/image.json\` | No approved image/text sources or prepared dataset; owner, privacy and independent review pending | BLOCKED |
-| ASR | \`configs/specialists/asr.json\` | No approved audio sources; speaker-consent and privacy reviews absent | BLOCKED |
-| TTS | \`configs/specialists/tts.json\` | No approved speech sources; speaker-consent and privacy reviews absent | BLOCKED |
-| VOCODER | \`configs/specialists/vocoder.json\` | No approved audio/mel-waveform sources; speaker-consent and privacy reviews absent | BLOCKED |
-| 3D | \`configs/specialists/3d.json\` | No approved point-cloud/conditioning sources or prepared dataset; reviews pending | BLOCKED |
-| RESEARCH | \`configs/specialists/research.json\` | No approved first-party research pairs or prepared dataset; reviews pending | BLOCKED |
-| DOCUMENT | \`configs/specialists/document.json\` | No approved document/layout sources or prepared dataset; reviews pending | BLOCKED |
-| SAFE | \`configs/specialists/safety.json\` | No approved labeled safety dataset; independent safety-label review is absent | BLOCKED |
+| CHAT | `configs/small.json` | Corpus manifest has `training_allowed: false`; owner/source attestation and human review are pending; corpus/source evidence and tokenizer provenance are not approved | BLOCKED |
+| CODE | `configs/specialists/code.json` | Specialist manifest has no sources; training, owner, privacy and human review approvals are false/pending | BLOCKED |
+| VISION | `configs/specialists/vision.json` | No approved image/text sources or prepared dataset; owner, privacy and independent review pending | BLOCKED |
+| IMAGE | `configs/specialists/image.json` | No approved image/text sources or prepared dataset; owner, privacy and independent review pending | BLOCKED |
+| ASR | `configs/specialists/asr.json` | No approved audio sources; speaker-consent and privacy reviews absent | BLOCKED |
+| TTS | `configs/specialists/tts.json` | No approved speech sources; speaker-consent and privacy reviews absent | BLOCKED |
+| VOCODER | `configs/specialists/vocoder.json` | No approved audio/mel-waveform sources; speaker-consent and privacy reviews absent | BLOCKED |
+| 3D | `configs/specialists/3d.json` | No approved point-cloud/conditioning sources or prepared dataset; reviews pending | BLOCKED |
+| RESEARCH | `configs/specialists/research.json` | No approved first-party research pairs or prepared dataset; reviews pending | BLOCKED |
+| DOCUMENT | `configs/specialists/document.json` | No approved document/layout sources or prepared dataset; reviews pending | BLOCKED |
+| SAFE | `configs/specialists/safety.json` | No approved labeled safety dataset; independent safety-label review is absent | BLOCKED |
 
-All specialist manifests currently declare an empty \`sources\` list and
-\`training_allowed: false\`. Audio manifests additionally require verified
+All specialist manifests currently declare an empty `sources` list and
+`training_allowed: false`. Audio manifests additionally require verified
 speaker consent. SAFE requires independently reviewed safety labels. The
 vision/image output paths have separate runtime safety gates; dataset approval
 alone would not release those capabilities.
