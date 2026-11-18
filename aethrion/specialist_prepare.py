@@ -91,9 +91,10 @@ def _build_arrays(model_id: str, rows: list[dict[str, Any]], tokenizer: ByteBPET
     ids = [str(row["id"]) for row in rows]
     group_ids = [_group_id(row) for row in rows]
     splits = [_split(group_id, seed) for group_id in group_ids]
+    group_hashes = [_group_hash(group_id) for group_id in group_ids]
     arrays: dict[str, np.ndarray] = {
         "sample_id": np.asarray(ids, dtype=np.str_),
-        "group_id": np.asarray(group_ids, dtype=np.str_),
+        "group_id": np.asarray(group_hashes, dtype=np.str_),
         "split": np.asarray(splits, dtype=np.str_),
     }
     if model_id == "chat":
