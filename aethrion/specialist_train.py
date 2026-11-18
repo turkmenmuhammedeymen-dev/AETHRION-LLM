@@ -22,7 +22,7 @@ import torch
 import torch.nn as nn
 
 from aethrion.specialist_data import validate_specialist_dataset
-from aethrion.checkpoint import _fsync_directory, _write_text_fsync, write_json_atomic
+from aethrion.checkpoint import _fsync_directory, _fsync_file, _write_text_fsync, write_json_atomic
 from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
 
 
@@ -306,6 +306,8 @@ def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
             if expected and _sha256(path) == expected[0]:
                 shutil.copy2(path, previous_tmp)
                 shutil.copy2(checksum_path, previous_checksum_tmp)
+                _fsync_file(previous_tmp)
+                _fsync_file(previous_checksum_tmp)
                 os.replace(previous_tmp, previous)
                 os.replace(previous_checksum_tmp, previous_checksum)
         os.replace(tmp, path)
