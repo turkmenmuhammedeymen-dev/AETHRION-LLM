@@ -614,20 +614,26 @@ class CorpusPreparationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "license is not verified"):
                 load_sources_manifest(manifest, root, require_training_approval=True)
 
-    def test_source_manifest_rejects_negative_training_permission(self):
-        with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
-            (root / "source.txt").write_text("Owner-authored test source.", encoding="utf-8")
-            manifest = root / "sources.json"
-            manifest.write_text(json.dumps({"sources": [{
-                "source_id": "owner-source",
-                "path": "source.txt",
-                "license": "AETHRION owner-authored",
-                "permitted_uses": "Not for training; evaluation only",
-                "allow_training": True,
-            }]}), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "must explicitly include training"):
-                load_sources_manifest(manifest, root, require_training_approval=True)
+    def test_source_manifest_rejects_negative_or_ambiguous_training_permission(self):
+        for permitted_uses in (
+            "Not for training; evaluation only",
+            "Not a production training corpus",
+            "Not permitted for training",
+        ):
+            with self.subTest(permitted_uses=permitted_uses):
+                with tempfile.TemporaryDirectory() as folder:
+                    root = Path(folder)
+                    (root / "source.txt").write_text("Owner-authored test source.", encoding="utf-8")
+                    manifest = root / "sources.json"
+                    manifest.write_text(json.dumps({"sources": [{
+                        "source_id": "owner-source",
+                        "path": "source.txt",
+                        "license": "AETHRION owner-authored",
+                        "permitted_uses": permitted_uses,
+                        "allow_training": True,
+                    }]}), encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "must explicitly include training"):
+                        load_sources_manifest(manifest, root, require_training_approval=True)
 
     def test_domain_review_rejects_disguised_unknown_license_and_rights_holder(self):
         with tempfile.TemporaryDirectory() as folder:
