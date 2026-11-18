@@ -44,18 +44,20 @@ def inspect_visual_artifact(path: str | Path, modality: str) -> dict[str, Any]:
         try:
             with artifact.open("r", encoding="utf-8", errors="strict") as stream:
                 for line in stream:
-                    if line.startswith("v "):
-                        fields = line.split()
-                        if len(fields) != 4:
-                            raise VisualSafetyError("3D vertex must contain exactly three coordinates.")
-                        coords = [float(value) for value in fields[1:]]
-                        if not all(math.isfinite(value) and abs(value) <= 1_000_000 for value in coords):
-                            raise VisualSafetyError("3D vertex contains non-finite or out-of-range coordinates.")
-                        vertices += 1
-                        if vertices > 1_000_000:
-                            raise VisualSafetyError("3D artifact exceeds the vertex limit.")
-                    elif line.startswith(("f ", "l ", "p ")):
-                        raise VisualSafetyError("Only vertex-only point clouds are supported; topology is not accepted.")
+                    record = line.strip()
+                    if not record or record.startswith("#"):
+                        continue
+                    fields = record.split()
+                    if fields[0] != "v":
+                        raise VisualSafetyError("Only vertex records and comments are supported in point-cloud OBJ files.")
+                    if len(fields) != 4:
+                        raise VisualSafetyError("3D vertex must contain exactly three coordinates.")
+                    coords = [float(value) for value in fields[1:]]
+                    if not all(math.isfinite(value) and abs(value) <= 1_000_000 for value in coords):
+                        raise VisualSafetyError("3D vertex contains non-finite or out-of-range coordinates.")
+                    vertices += 1
+                    if vertices > 1_000_000:
+                        raise VisualSafetyError("3D artifact exceeds the vertex limit.")
         except VisualSafetyError:
             raise
         except (OSError, UnicodeError, ValueError) as exc:
