@@ -297,5 +297,47 @@ class SpecialistTrainingTests(unittest.TestCase):
             self.assertEqual(second["release_status"], "NOT_RELEASED")
 
 
+    def test_resume_rejects_changed_source_and_approval_manifest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            config["max_steps"] = 2
+            train_specialist(config, manifest)
+            checkpoint = root / "artifacts" / "checkpoint_last.pt"
+
+            payload = json.loads(manifest.read_text(encoding="utf-8"))
+            payload["sources"][0]["permitted_use"] = (
+                "Changed after checkpoint creation; resume must be rejected."
+            )
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "manifest changed"):
+                train_specialist(config, manifest, resume=checkpoint)
+
+    def test_checkpoint_with_invalid_checksum_and_no_backup_fails_closed(self):
+        from aethrion.specialist_train import _load_checkpoint, _save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            payload = {
+                "format": "aethrion-specialist-checkpoint-v2",
+                "model_id": "code", "step": 0, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": {},
+                "training_config": {
+                    "seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                    "weight_decay": 0.0, "grad_clip": 1.0,
+                    "eval_interval": 1, "save_interval": 1, "max_steps": 2,
+                },
+            }
+            _save_checkpoint(checkpoint, payload)
+            Path(str(checkpoint) + ".sha256").write_text("f" * 64 + "\\n", encoding="ascii")
+
+            with self.assertRaisesRegex(ValueError, "integrity verification failed"):
+                _load_checkpoint(checkpoint, torch.device("cpu"))
+
+
 if __name__ == "__main__":
     unittest.main()
