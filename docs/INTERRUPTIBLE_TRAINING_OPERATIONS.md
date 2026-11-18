@@ -45,8 +45,13 @@ contains model/optimizer/scaler state where applicable, RNG state, data hashes,
 tokenizer/provenance hashes and the training configuration.
 
 Run the same family command again after the environment is available. Each
-model preflight detects its existing `checkpoint_last.pt` and passes
-`--resume` to the relevant trainer. Resume is refused if the approved dataset,
+model preflight detects either `checkpoint_last.pt` or the retained
+`checkpoint_last.pt.previous` generation and passes the canonical latest path
+to the trainer. The trainer verifies the latest generation and falls back to
+the previous generation when the latest file, checksum or safe deserialization
+fails. If only the previous generation exists, the family supervisor still
+passes the resume argument; it must not silently start from scratch and
+overwrite the recovery point. Resume is refused if the approved dataset,
 tokenizer, source/approval manifest, model configuration or fixed optimizer
 settings have changed. Increasing the configured step horizon is supported;
 shortening it is not.
