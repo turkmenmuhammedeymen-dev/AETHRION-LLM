@@ -51,6 +51,23 @@ def _resolve_output_dir(repo: Path, raw_value: Any) -> Path:
     return resolved
 
 
+def _resolve_input_file(repo: Path, raw_value: Any, label: str) -> Path:
+    """Require a non-empty relative input file contained inside the repository."""
+    if not isinstance(raw_value, str) or not raw_value.strip():
+        raise FamilyTrainingError(f"A non-empty relative {label} is required.")
+    configured = Path(raw_value)
+    if configured.is_absolute() or any(part == ".." for part in configured.parts):
+        raise FamilyTrainingError(f"{label} must be a safe relative path.")
+    resolved = (repo / configured).resolve()
+    try:
+        resolved.relative_to(repo)
+    except ValueError as exc:
+        raise FamilyTrainingError(f"Configured {label} escapes the repository root.") from exc
+    if not resolved.is_file():
+        raise FamilyTrainingError(f"Configured {label} does not exist as a regular file: {raw_value}")
+    return resolved
+
+
 def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
     """Validate the real data gate without initializing a model or optimizer."""
     repo = Path(root).resolve()
@@ -63,8 +80,8 @@ def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
         dataset_manifest = repo / "data" / "processed" / "corpus_manifest.json"
         source_manifest = repo / "data" / "raw" / "cosmos" / "sources.json"
         source_root = repo / "data" / "raw" / "cosmos"
-        corpus = (repo / str(config.get("data_path", ""))).resolve()
-        tokenizer = (repo / str(config.get("tokenizer_path", ""))).resolve()
+        corpus = _resolve_input_file(repo, config.get("data_path"), "data_path")
+        tokenizer = _resolve_input_file(repo, config.get("tokenizer_path"), "tokenizer_path")
         report = repo / "data" / "processed" / "corpus-report.json"
         source_review = repo / "data" / "processed" / "privacy_review" / "source_review.csv"
         from aethrion.tokenizer import validate_tokenizer_provenance
