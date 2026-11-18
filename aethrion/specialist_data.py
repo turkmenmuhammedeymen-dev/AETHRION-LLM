@@ -386,6 +386,31 @@ def validate_specialist_dataset(
         if model_id in AUDIO_MODELS and source.get("speaker_consent_verified") is not True:
             raise SpecialistDataError("Training blocked: audio source lacks verified speaker consent.")
 
+        # Synthetic software fixtures remain ineligible even if manifest approvals
+        # are accidentally or maliciously changed.
+        if source_file.suffix.casefold() == ".jsonl":
+            try:
+                with source_file.open("r", encoding="utf-8") as stream:
+                    for line_number, line in enumerate(stream, 1):
+                        if not line.strip():
+                            continue
+                        record = json.loads(line)
+                        if not isinstance(record, dict):
+                            raise SpecialistDataError(
+                                f"Training blocked: JSONL source record {line_number} is not an object."
+                            )
+                        if (
+                            record.get("synthetic_fixture") is True
+                            or record.get("production_training_approved") is False
+                        ):
+                            raise SpecialistDataError(
+                                "Training blocked: synthetic fixture records are never eligible for production training."
+                            )
+            except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                raise SpecialistDataError(
+                    "Training blocked: reviewed JSONL source is unreadable or malformed."
+                ) from exc
+
     dataset_path = payload.get("dataset_path")
     dataset_hash = payload.get("dataset_sha256")
     if not isinstance(dataset_path, str) or not dataset_path:
