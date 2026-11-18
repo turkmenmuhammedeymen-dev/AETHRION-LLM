@@ -133,6 +133,9 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
             with self.subTest(model_id=model_id):
                 arrays = self._arrays(model_id)
                 _validate_model_data_compatibility(model_id, arrays, model_config)
+                if model_id == "vocoder":
+                    arrays["waveform_mask"][0, 12:] = False
+                    _validate_model_data_compatibility(model_id, arrays, model_config)
                 invalid = dict(model_config)
                 invalid.update(mismatches[model_id])
                 with self.assertRaises(ValueError):
