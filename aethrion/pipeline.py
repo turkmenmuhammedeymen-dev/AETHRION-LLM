@@ -1,7 +1,8 @@
-"""One-command, fail-closed Kaggle pipeline for AETHRION-LLM.
+"""One-command, fail-closed BASE pipeline for a future approved compute environment.
 
-Default behavior: environment checks, unit tests, optional bounded import,
-review-template generation, and approval-gate validation. Training only runs
+Default behavior: environment checks, unit tests, owner-authored source checks,
+review-template generation, and approval-gate validation. External dataset imports
+are disabled. Training only runs
 when every explicit dataset/source approval is present.
 """
 from __future__ import annotations
