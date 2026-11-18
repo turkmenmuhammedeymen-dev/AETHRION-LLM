@@ -346,11 +346,11 @@ class NativeModelRuntime:
                 raise ValueError("ASR inference requires a local audio_path option.")
             return {"text": self.transcribe_wav(audio_path), "model": "AETHRION-ASR"}
         if capability == "tts":
-            output = self.synthesize_wav(prompt, options.get("output_path"))
+            output = self.synthesize_wav(prompt)
             return {"audio_path": str(output), "format": "wav", "model": "AETHRION-TTS"}
         if capability == "3d":
             output = self.generate_point_cloud(
-                prompt, options.get("output_path"),
+                prompt,
                 inference_steps=min(int(options.get("inference_steps", 50)), 100)
             )
             return {"asset_path": str(output), "format": "obj-point-cloud",
