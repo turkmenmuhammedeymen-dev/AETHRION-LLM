@@ -152,6 +152,18 @@ class SafeRuntimeGateTests(unittest.TestCase):
             router, _ = build_router(allow_remote_providers=False)
         self.assertNotIn("research", router.available())
 
+    def test_vision_stays_unavailable_without_semantic_visual_input_safety(self):
+        router, _, _ = self._build({"vision": "ready", "safety": "ready"})
+        self.assertNotIn("vision", router.available())
+
+    def test_visual_input_gate_fails_closed_without_dedicated_verifier(self):
+        runtime = _FakeSafetyRuntime({"vision": "ready", "safety": "ready"})
+        with tempfile.TemporaryDirectory() as folder:
+            image_path = Path(folder) / "input.png"
+            image_path.write_bytes(b"placeholder")
+            with self.assertRaises(CapabilityUnavailable):
+                api._require_visual_input_allow(runtime, image_path)
+
     def test_image_and_3d_output_models_stay_unavailable_without_visual_output_safety(self):
         router, _, _ = self._build({
             "safety": "ready", "image": "ready", "3d": "ready",
