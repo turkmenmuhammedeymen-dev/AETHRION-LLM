@@ -96,6 +96,32 @@ class SessionJournalIntegrityTests(unittest.TestCase):
             self.assertFalse(result["valid"])
             self.assertEqual(result["reason"], "hash_chain_mismatch")
 
+    def test_recovery_reconstructs_running_model_without_auto_resuming(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            journal = root / "session-2.jsonl"
+            append_session_event(journal, {"event": "session_started", "session_id": "session-2"})
+            append_session_event(journal, {"event": "model_attempt_started", "session_id": "session-2",
+                                           "attempt_id": "attempt-2", "model_id": "code"})
+            append_session_event(journal, {"event": "model_started", "session_id": "session-2",
+                                           "attempt_id": "attempt-2", "model_id": "code"})
+            audit = audit_session_journal(journal, "session-2")
+            snapshot = {
+                "session_id": "session-2", "status": "running", "current_model": "code",
+                "execute_requested": True,
+                "journal_event_count": audit["event_count"],
+                "journal_last_event_sha256": audit["last_event_sha256"],
+                "models": [{"model_id": "code", "status": "running",
+                            "attempt_id": "attempt-2", "process_started": True}],
+            }
+            (root / "session-2.json").write_text(json.dumps(snapshot), encoding="utf-8")
+            result = audit_session_artifacts(root, "session-2")
+            self.assertTrue(result["valid"])
+            rebuilt = result["reconstructed_session"]
+            self.assertFalse(rebuilt["automatic_resume"])
+            self.assertEqual(rebuilt["models"][0]["recovery_action"],
+                             "checkpoint_verification_required")
+
 
 if __name__ == "__main__":
     unittest.main()
