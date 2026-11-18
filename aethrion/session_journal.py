@@ -174,3 +174,33 @@ def append_session_event(path: str | Path, event: dict[str, Any]) -> dict[str, A
         os.fsync(stream.fileno())
     return {"event_count": current["event_count"] + 1,
             "last_event_sha256": chained["event_sha256"]}
+
+
+def audit_session_artifacts(session_dir: str | Path, session_id: str) -> dict[str, Any]:
+    """Cross-check the session snapshot against its journal before recovery."""
+    directory = Path(session_dir)
+    journal_result = audit_session_journal(directory / f"{session_id}.jsonl", session_id)
+    if not journal_result.get("valid"):
+        return journal_result
+    snapshot_path = directory / f"{session_id}.json"
+    try:
+        snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return {**journal_result, "valid": False, "reason": "snapshot_missing_or_invalid",
+                "recovery": "manual_review_required"}
+    if not isinstance(snapshot, dict) or snapshot.get("session_id") != session_id:
+        return {**journal_result, "valid": False, "reason": "snapshot_session_mismatch",
+                "recovery": "manual_review_required"}
+    snapshot_count = snapshot.get("journal_event_count")
+    snapshot_hash = snapshot.get("journal_last_event_sha256")
+    if snapshot_count is not None and snapshot_count != journal_result["event_count"]:
+        return {**journal_result, "valid": False, "reason": "snapshot_event_count_mismatch",
+                "recovery": "manual_review_required"}
+    if snapshot_hash is not None and snapshot_hash != journal_result["last_event_sha256"]:
+        return {**journal_result, "valid": False, "reason": "snapshot_journal_hash_mismatch",
+                "recovery": "manual_review_required"}
+    if snapshot_count is None or snapshot_hash is None:
+        return {**journal_result, "valid": False, "reason": "legacy_snapshot_unverifiable",
+                "recovery": "manual_review_required"}
+    return {**journal_result, "snapshot_status": snapshot.get("status"),
+            "snapshot_verified": True}
