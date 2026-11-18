@@ -324,7 +324,7 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertFalse((root / "artifacts" / "training_sessions").exists())
 
 
-    def _write_verified_report_fixture(self, root: Path, *, model_id="code", status="training_complete_not_released"):
+    def _write_verified_report_fixture(self, root: Path, *, model_id="code", status="training_complete_not_released", session_id=None, attempt_id=None):
         import hashlib
         import json
         import time
@@ -336,7 +336,7 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
         _save_checkpoint(checkpoint, {
             "format": "aethrion-specialist-checkpoint-v2",
             "model_id": model_id, "step": 9, "checkpoint_generation": 1,
-            "session_id": None, "attempt_id": None, "model_config": {},
+            "session_id": session_id, "attempt_id": attempt_id, "model_config": {},
             "training_config": {"seed": 1, "max_steps": 10},
             "model_state": {}, "optimizer_state": {},
             "dataset_sha256": "a" * 64, "tokenizer_sha256": "b" * 64,
@@ -347,7 +347,7 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             "status": status, "release_status": "NOT_RELEASED", "model_id": model_id,
             "steps": 10, "dataset_sha256": "a" * 64, "tokenizer_sha256": "b" * 64,
             "manifest_sha256": "c" * 64, "checkpoint_sha256": digest,
-            "checkpoint_generation": 1, "session_id": None, "attempt_id": None,
+            "checkpoint_generation": 1, "session_id": session_id, "attempt_id": attempt_id,
             "report_created_at_ns": time.time_ns(),
             "validation_loss": 1.25, "held_out_test_loss": 1.5,
         }
@@ -431,6 +431,46 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertEqual(
                 _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
                 "training_report_checkpoint_provenance_mismatch_not_released",
+            )
+
+    def test_training_outcome_requires_matching_session_and_attempt(self):
+        from aethrion.train_family import _training_outcome
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, _ = self._write_verified_report_fixture(
+                Path(folder), session_id="session-a", attempt_id="attempt-a"
+            )
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    session_id="session-b", attempt_id="attempt-a",
+                ),
+                "training_report_session_mismatch_not_released",
+            )
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    session_id="session-a", attempt_id="attempt-b",
+                ),
+                "training_report_attempt_mismatch_not_released",
+            )
+
+    def test_training_outcome_rejects_checkpoint_generation_mismatch(self):
+        from aethrion.train_family import _training_outcome
+        import json
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(
+                Path(folder), session_id="session-a", attempt_id="attempt-a"
+            )
+            report["checkpoint_generation"] = 2
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    session_id="session-a", attempt_id="attempt-a",
+                ),
+                "training_checkpoint_session_generation_mismatch_not_released",
             )
 
     def test_training_outcome_rejects_stale_report(self):
