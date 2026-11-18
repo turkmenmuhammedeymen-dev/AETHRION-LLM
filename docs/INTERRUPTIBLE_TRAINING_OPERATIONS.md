@@ -65,11 +65,18 @@ journal may remain marked `running`; inspect it together with each model's
 ## Artifact integrity and portability
 
 Checkpoint payloads are loaded with PyTorch `weights_only=True`; SHA-256
-sidecars are checked before deserialization. Checkpoint and JSON snapshots are
-written through temporary files, fsynced, then atomically replaced. Directory
-entries are fsynced where the operating system/filesystem supports it. The
-specialist and base trainers retain their own previous verified checkpoint
-generation.
+sidecars are checked before deserialization. Both trainer families validate the
+checkpoint step, model/optimizer structures, provenance hashes and the full
+Python, NumPy, CPU Torch and optional CUDA RNG snapshot before accepting a
+generation. A checksum-valid but structurally invalid latest generation is
+rejected so the loader can recover from the previous verified generation.
+When saving, a previous generation is promoted only if the current checkpoint
+passes semantic validation as well as its checksum.
+
+Checkpoint and JSON snapshots are written through temporary files, fsynced,
+then atomically replaced. Directory entries are fsynced where the operating
+system/filesystem supports it. The specialist and base trainers retain their
+own previous verified checkpoint generation.
 
 Keep the entire `artifacts/` directory on persistent storage. A temporary
 Kaggle/Colab runtime disk is not a backup: copy artifacts to durable storage
