@@ -1,7 +1,6 @@
 """Atomic checkpoint persistence with SHA-256 verification and recovery fallback.
 
-Only load checkpoints produced by this project or another trusted source:
-PyTorch optimizer/RNG checkpoints use pickle-backed serialization.
+Checkpoint deserialization is restricted to PyTorch's weights-only loader.
 """
 from __future__ import annotations
 
@@ -89,30 +88,14 @@ def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
         sidecar_temporary.unlink(missing_ok=True)
 
 
-def load_checkpoint(
-    path: str | Path,
-    map_location: str | torch.device = "cpu",
+def _load_verified_checkpoint(
+    path: Path,
+    map_location: str | torch.device,
 ) -> dict[str, Any]:
-    """Load only after checksum validation; recover from one corrupt latest save."""
-    target = Path(path)
-    load_path = target
+    """Verify, safely deserialize and validate one checkpoint generation."""
+    verify_checkpoint(path)
     try:
-        verify_checkpoint(target)
-    except ValueError as primary_error:
-        previous = Path(str(target) + ".previous")
-        try:
-            verify_checkpoint(previous)
-        except ValueError:
-            raise primary_error
-        warnings.warn(
-            f"Latest checkpoint failed integrity verification; recovering from {previous}.",
-            RuntimeWarning,
-            stacklevel=2,
-        )
-        load_path = previous
-
-    try:
-        state = torch.load(load_path, map_location=map_location, weights_only=True)
+        state = torch.load(path, map_location=map_location, weights_only=True)
     except Exception as exc:
         raise ValueError(
             "Checkpoint could not be safely deserialized; unsafe pickle objects are not accepted."
@@ -127,6 +110,28 @@ def load_checkpoint(
     if missing:
         raise ValueError("Checkpoint is missing required fields: " + ", ".join(missing))
     return state
+
+
+def load_checkpoint(
+    path: str | Path,
+    map_location: str | torch.device = "cpu",
+) -> dict[str, Any]:
+    """Load the latest safe generation, falling back if integrity or loading fails."""
+    target = Path(path)
+    previous = Path(str(target) + ".previous")
+    try:
+        return _load_verified_checkpoint(target, map_location)
+    except Exception as primary_error:
+        try:
+            recovered = _load_verified_checkpoint(previous, map_location)
+        except Exception:
+            raise primary_error
+        warnings.warn(
+            f"Latest checkpoint could not be verified and safely loaded; recovering from {previous}.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return recovered
 
 
 def write_json_atomic(payload: dict[str, Any], path: str | Path) -> None:

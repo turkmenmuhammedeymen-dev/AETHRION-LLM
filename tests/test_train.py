@@ -231,5 +231,44 @@ class TrainingUtilityTests(unittest.TestCase):
             self.assertNotEqual(tampered.returncode, 0)
             self.assertIn("prepared corpus SHA-256", tampered.stdout + tampered.stderr)
 
+
+    def test_checkpoint_recovers_previous_generation_when_latest_safe_load_fails(self):
+        import hashlib
+        from aethrion.checkpoint import save_checkpoint
+
+        class UnsafePayload:
+            def __reduce__(self):
+                return (eval, ("1 + 1",))
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            base = {
+                "format_version": 3,
+                "step": 0,
+                "model": {},
+                "optimizer": {},
+                "scaler": {},
+                "model_config": {},
+                "data_sha256": "0" * 64,
+                "tokenizer_sha256": "1" * 64,
+                "rng_state": {},
+            }
+            save_checkpoint(base, checkpoint)
+            save_checkpoint({**base, "step": 1}, checkpoint)
+
+            # The newest file has a matching checksum, but contains a pickle
+            # global rejected by weights_only=True. Recovery must stay safe.
+            unsafe = {**base, "step": 2, "extra": UnsafePayload()}
+            torch.save(unsafe, checkpoint)
+            digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+            Path(str(checkpoint) + ".sha256").write_text(digest + "\n", encoding="ascii")
+
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                recovered = load_checkpoint(checkpoint, map_location="cpu")
+
+            self.assertEqual(recovered["step"], 0)
+            self.assertTrue(any("safely loaded" in str(item.message) for item in caught))
+
 if __name__ == "__main__":
     unittest.main()
