@@ -68,6 +68,7 @@ class VisualPreparationTests(unittest.TestCase):
                     self.assertEqual(arrays["images"].dtype, np.uint8)
                     self.assertEqual(arrays["token_ids"].shape, (30, 128))
                 manifest = json.loads(Path(result["manifest"]).read_text(encoding="utf-8"))
+            self.assertEqual(manifest["governance"]["approval_status"], "pending")
                 self.assertFalse(manifest["training_allowed"])
                 self.assertTrue(all(not item["allow_training"] for item in manifest["sources"]))
 
