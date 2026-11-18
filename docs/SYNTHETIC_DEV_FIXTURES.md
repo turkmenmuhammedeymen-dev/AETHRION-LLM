@@ -4,7 +4,7 @@ Run from the repository root:
 
 ```bash
 python scripts/generate_dev_fixtures.py
-python -m unittest tests.test_dev_fixture_generator -v
+python -m unittest discover -s tests -p 'test_dev_fixture_generator.py' -v
 ```
 
 The generator creates a tiny deterministic fixture tree under
