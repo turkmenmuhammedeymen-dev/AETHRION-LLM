@@ -404,3 +404,52 @@ class TrainingUtilityTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+    def test_first_checkpoint_save_split_write_fails_closed_without_previous_generation(self):
+        import aethrion.checkpoint as checkpoint_module
+        from aethrion.checkpoint import load_checkpoint, save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            payload = {
+                "format_version": 4, "step": 0, "model": {}, "optimizer": {},
+                "scaler": {}, "model_config": {}, "data_sha256": "0" * 64,
+                "tokenizer_sha256": "1" * 64, "rng_state": capture_rng_state(),
+                "training_config": {"seed": 7},
+            }
+            sidecar = Path(str(checkpoint) + ".sha256")
+            original_replace = checkpoint_module.os.replace
+
+            def fail_first_live_sidecar(source, destination):
+                if Path(destination) == sidecar:
+                    raise OSError("simulated first-generation sidecar interruption")
+                return original_replace(source, destination)
+
+            with patch("aethrion.checkpoint.os.replace", side_effect=fail_first_live_sidecar):
+                with self.assertRaisesRegex(OSError, "first-generation sidecar interruption"):
+                    save_checkpoint(payload, checkpoint)
+
+            self.assertTrue(checkpoint.is_file())
+            self.assertFalse(sidecar.exists())
+            self.assertFalse(Path(str(checkpoint) + ".previous").exists())
+            with self.assertRaisesRegex(ValueError, "integrity file is missing"):
+                load_checkpoint(checkpoint, map_location="cpu")
+
+    def test_checkpoint_loader_never_promotes_orphaned_temp_files_after_crash(self):
+        from aethrion.checkpoint import load_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            temporary = Path(str(checkpoint) + ".tmp")
+            sidecar_temporary = Path(str(checkpoint) + ".sha256.tmp")
+            temporary.write_bytes(b"partial checkpoint from terminated writer")
+            sidecar_temporary.write_text("0" * 64 + "\n", encoding="ascii")
+
+            with self.assertRaisesRegex(ValueError, "Checkpoint does not exist"):
+                load_checkpoint(checkpoint, map_location="cpu")
+
+            self.assertTrue(temporary.is_file())
+            self.assertTrue(sidecar_temporary.is_file())
+            self.assertFalse(checkpoint.exists())
+            self.assertFalse(Path(str(checkpoint) + ".previous").exists())
