@@ -156,5 +156,62 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 preflight_model(root, "code")
 
 
+    def test_one_failed_preflight_prevents_every_selected_trainer_from_starting(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            good_plan = {
+                "model_id": "code", "ready": True,
+                "command": ["python", "-m", "aethrion.specialist_train"],
+                "checkpoint": "artifacts/models/code/checkpoint_last.pt",
+                "output_dir": "artifacts/models/code",
+            }
+            with patch("aethrion.train_family.preflight_model") as preflight, \
+                 patch("aethrion.train_family.subprocess.run") as run:
+                preflight.side_effect = [
+                    good_plan,
+                    FamilyTrainingError("synthetic blocked preflight"),
+                ]
+                report = run_family(root, selected=["code", "vision"], execute=True)
+            run.assert_not_called()
+            self.assertEqual(preflight.call_count, 2)
+            self.assertEqual(report["ready_count"], 1)
+            self.assertEqual(report["blocked_count"], 1)
+            self.assertFalse(report["training_started"])
+            self.assertEqual(
+                report["models"][0]["status"],
+                "not_started_family_preflight_failed",
+            )
+            self.assertEqual(report["models"][1]["status"], "blocked")
+
+    def test_all_selected_preflights_finish_before_first_trainer_launch(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            plans = {
+                model: {
+                    "model_id": model, "ready": True,
+                    "command": ["python", "-m", "aethrion.specialist_train"],
+                    "checkpoint": f"artifacts/{model}/checkpoint_last.pt",
+                    "output_dir": f"artifacts/{model}",
+                }
+                for model in ("code", "vision")
+            }
+            events = []
+            def preflight(_root, model):
+                events.append(f"preflight:{model}")
+                return plans[model]
+            def run(command, cwd, check):
+                events.append(f"run:{command[-1]}")
+                return type("Completed", (), {"returncode": 1})()
+            with patch("aethrion.train_family.preflight_model", side_effect=preflight), \
+                 patch("aethrion.train_family.subprocess.run", side_effect=run):
+                report = run_family(root, selected=["code", "vision"], execute=True)
+            self.assertEqual(events[:2], ["preflight:code", "preflight:vision"])
+            self.assertEqual(events[2:], [
+                "run:aethrion.specialist_train", "run:aethrion.specialist_train"
+            ])
+            self.assertTrue(report["training_started"])
+            self.assertEqual(report["ready_count"], 2)
+
+
 if __name__ == "__main__":
     unittest.main()
