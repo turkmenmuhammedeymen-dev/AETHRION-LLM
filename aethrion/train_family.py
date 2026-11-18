@@ -509,11 +509,21 @@ def run_family(
                     allow_interrupted=_STOP_REQUESTED,
                 )
                 row.pop("ready", None)
+                verified_report = {}
+                if row["status"] in {
+                    "training_completed_not_released", "training_interrupted_not_released"
+                }:
+                    verified_report = json.loads(
+                        (repo / plan["output_dir"] / "training_report.json").read_text(encoding="utf-8")
+                    )
                 _append_session_event(events_path, {
                     "event": "model_finished", "session_id": session_id,
                     "attempt_id": attempt_id,
                     "model_id": model_id, "status": row["status"],
                     "returncode": returncode,
+                    "report_created_at_ns": verified_report.get("report_created_at_ns"),
+                    "checkpoint_generation": verified_report.get("checkpoint_generation"),
+                    "checkpoint_sha256": verified_report.get("checkpoint_sha256"),
                     "timestamp_utc": datetime.now(timezone.utc).isoformat(),
                 })
                 persist("interrupted" if _STOP_REQUESTED else "running", model_id if _STOP_REQUESTED else None)
