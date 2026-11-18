@@ -8,6 +8,7 @@ import unittest
 
 import numpy as np
 
+from aethrion.specialist_prepare import prepare_text_dataset
 from aethrion.specialist_prepare_visual import prepare_visual_dataset
 
 MODEL_IDS = ("chat","code","vision","image","asr","tts","3d","research","document","safety","vocoder")
@@ -93,6 +94,48 @@ class DevFixtureGeneratorTests(unittest.TestCase):
                             self.assertEqual(arrays["points"].shape, (3, 32, 3))
                         else:
                             self.assertEqual(arrays["images"].shape, (3, 3, image_size, image_size))
+
+
+    def test_code_and_research_fixtures_run_through_real_text_adapters(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "fixtures"
+            output = Path(tmp) / "prepared"
+            subprocess.run(
+                [sys.executable, "scripts/generate_dev_fixtures.py", "--output", str(root)],
+                check=True, capture_output=True, text=True,
+            )
+
+            for model_id in ("code", "research"):
+                with self.subTest(model_id=model_id):
+                    result = prepare_text_dataset(
+                        root / model_id / "records.jsonl",
+                        model_id=model_id,
+                        output_root=output,
+                        license_name="synthetic-development-fixture",
+                        permitted_use="smoke-test-only",
+                        evidence_uri="local://development-fixture",
+                        source_uri="local://development-fixture",
+                        vocab_size=256,
+                        max_length=64,
+                    )
+                    manifest_path = Path(result["manifest"])
+                    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                    self.assertFalse(result["training_allowed"])
+                    self.assertFalse(manifest["training_allowed"])
+                    self.assertFalse(manifest["owner_approval"])
+                    self.assertFalse(manifest["privacy_reviewed"])
+                    self.assertTrue(all(not item["allow_training"] for item in manifest["sources"]))
+                    self.assertEqual(manifest["preparation"]["split_counts"], {
+                        "train": 1, "validation": 1, "test": 1,
+                    })
+                    with np.load(result["dataset"], allow_pickle=False) as arrays:
+                        self.assertEqual(len(arrays["sample_id"]), 3)
+                        self.assertEqual(set(arrays["split"].tolist()), {"train", "validation", "test"})
+                        if model_id == "code":
+                            self.assertEqual(arrays["token_ids"].shape, (3, 64))
+                        else:
+                            self.assertEqual(arrays["query_ids"].shape, (3, 64))
+                            self.assertEqual(arrays["passage_ids"].shape, (3, 64))
 
 
 if __name__ == "__main__":
