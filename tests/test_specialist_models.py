@@ -17,6 +17,11 @@ class SpecialistModelTests(unittest.TestCase):
         model = AETHRIONCodeLM(CodeModelConfig(
             vocab_size=300, block_size=16, n_layer=1, n_head=2, n_embd=16, dropout=0.0
         ))
+        self.assertFalse(hasattr(model, "backbone"))
+        state_keys = set(model.state_dict())
+        self.assertIn("layers.0.attention.q_proj.weight", state_keys)
+        self.assertIn("layers.0.feedforward.gate.weight", state_keys)
+        self.assertFalse(any(key.startswith("backbone.") for key in state_keys))
         tokens = torch.randint(0, 300, (2, 8))
         logits, loss = model(tokens, tokens)
         self.assertEqual(tuple(logits.shape), (2, 8, 300))
