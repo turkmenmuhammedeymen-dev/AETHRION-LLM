@@ -74,8 +74,8 @@ def validate_governance_record(record: Any, *, model_id: str) -> dict[str, Any]:
 
     if model_id in AUDIO_MODELS and record.get("speaker_consent_reviewed") is not True:
         raise GovernanceError("Training blocked: explicit speaker-consent review is required for audio.")
-    if model_id == "safety" and record.get("safety_reviewed") is not True:
-        raise GovernanceError("Training blocked: SAFE data requires separate human safety review.")
+    if record.get("safety_reviewed") is not True:
+        raise GovernanceError("Training blocked: every model dataset requires separate human safety review.")
     return record
 
 
