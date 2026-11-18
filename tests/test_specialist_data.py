@@ -145,7 +145,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             payload["sources"][0]["evidence_uri"] = "http://example.invalid/license"
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "evidence must be an HTTPS URL"):
-                validate_specialist_dataset(manifest)
+                validate_specialist_dataset(manifest, require_training_approval=False)
 
     def test_duplicate_specialist_source_ids_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -154,7 +154,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             payload["sources"].append(dict(payload["sources"][0], source_path="source.txt"))
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "Duplicate specialist source_id"):
-                validate_specialist_dataset(manifest)
+                validate_specialist_dataset(manifest, require_training_approval=False)
 
     def test_duplicate_specialist_source_paths_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -163,7 +163,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             payload["sources"].append(dict(payload["sources"][0], source_id="second-source"))
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "Duplicate specialist source_path"):
-                validate_specialist_dataset(manifest)
+                validate_specialist_dataset(manifest, require_training_approval=False)
 
     def test_source_hash_mismatch_blocks_training(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -172,7 +172,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             (root / "source.txt").write_text("changed source content", encoding="utf-8")
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "source file SHA-256 mismatch"):
-                validate_specialist_dataset(manifest)
+                validate_specialist_dataset(manifest, require_training_approval=False)
 
     def test_dataset_hash_mismatch_blocks_training(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -181,7 +181,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             payload["dataset_sha256"] = "0" * 64
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "dataset SHA-256 mismatch"):
-                validate_specialist_dataset(manifest)
+                validate_specialist_dataset(manifest, require_training_approval=False)
 
     def test_group_id_cannot_cross_data_splits(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -197,7 +197,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "crosses"):
-                validate_specialist_dataset(manifest)
+                validate_specialist_dataset(manifest, require_training_approval=False)
 
     def test_exact_duplicate_code_inputs_cannot_cross_splits(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -211,7 +211,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "duplicate token_ids input.*train and validation"):
-                validate_specialist_dataset(manifest)
+                validate_specialist_dataset(manifest, require_training_approval=False)
 
     def test_duplicate_chat_prompts_are_detected_even_when_responses_differ(self):
         from aethrion.specialist_data import _validate_input_split_uniqueness
@@ -254,7 +254,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             manifest, _ = self._fixture(root, approved=True)
             (root / "tokenizer.json").write_text('{"tampered":true}', encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "tokenizer SHA-256 mismatch"):
-                validate_specialist_dataset(manifest)
+                validate_specialist_dataset(manifest, require_training_approval=False)
 
     def test_token_ids_outside_verified_tokenizer_vocabulary_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -268,7 +268,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "outside the verified tokenizer vocabulary"):
-                validate_specialist_dataset(manifest)
+                validate_specialist_dataset(manifest, require_training_approval=False)
 
     def _safety_fixture(self, root: Path, per_class: int):
         source = root / "safety-source.txt"
@@ -355,7 +355,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             manifest = self._safety_fixture(Path(directory), per_class=24)
             with self.assertRaisesRegex(SpecialistDataError, "at least 25"):
-                validate_specialist_dataset(manifest)
+                validate_specialist_dataset(manifest, require_training_approval=False)
 
     def test_missing_held_out_split_blocks_training(self):
         with tempfile.TemporaryDirectory() as directory:
