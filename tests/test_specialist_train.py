@@ -445,3 +445,57 @@ class SpecialistTrainingTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+    def test_specialist_first_checkpoint_split_write_fails_closed_without_previous(self):
+        from aethrion.specialist_train import _capture_rng_state, _load_checkpoint, _save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            payload = {
+                "format": "aethrion-specialist-checkpoint-v2",
+                "model_id": "code", "step": 0, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": _capture_rng_state(),
+                "training_config": {
+                    "seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                    "weight_decay": 0.0, "grad_clip": 1.0,
+                    "eval_interval": 1, "save_interval": 1, "max_steps": 2,
+                },
+            }
+            sidecar = Path(str(checkpoint) + ".sha256")
+            original_replace = specialist_train.os.replace
+
+            def fail_first_live_sidecar(source, destination):
+                if Path(destination) == sidecar:
+                    raise OSError("simulated specialist first-generation sidecar interruption")
+                return original_replace(source, destination)
+
+            with patch("aethrion.specialist_train.os.replace", side_effect=fail_first_live_sidecar):
+                with self.assertRaisesRegex(OSError, "first-generation sidecar interruption"):
+                    _save_checkpoint(checkpoint, payload)
+
+            self.assertTrue(checkpoint.is_file())
+            self.assertFalse(sidecar.exists())
+            self.assertFalse(Path(str(checkpoint) + ".previous").exists())
+            with self.assertRaisesRegex(ValueError, "Checkpoint generation is missing"):
+                _load_checkpoint(checkpoint, torch.device("cpu"))
+
+    def test_specialist_loader_never_promotes_orphaned_temp_files_after_crash(self):
+        from aethrion.specialist_train import _load_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            temporary = Path(str(checkpoint) + ".tmp")
+            sidecar_temporary = Path(str(checkpoint) + ".sha256.tmp")
+            temporary.write_bytes(b"partial specialist checkpoint from terminated writer")
+            sidecar_temporary.write_text("0" * 64 + "\n", encoding="ascii")
+
+            with self.assertRaisesRegex(ValueError, "Checkpoint generation is missing"):
+                _load_checkpoint(checkpoint, torch.device("cpu"))
+
+            self.assertTrue(temporary.is_file())
+            self.assertTrue(sidecar_temporary.is_file())
+            self.assertFalse(checkpoint.exists())
+            self.assertFalse(Path(str(checkpoint) + ".previous").exists())
