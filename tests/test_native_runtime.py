@@ -27,7 +27,7 @@ class NativeModelRuntimeTests(unittest.TestCase):
         model = AETHRIONCodeLM(config)
         checkpoint = folder / "code.pt"
         torch.save({
-            "format": "aethrion-specialist-checkpoint-v1",
+            "format": "aethrion-specialist-checkpoint-v2",
             "model_id": "code",
             "step": 3,
             "model_config": asdict(config),
