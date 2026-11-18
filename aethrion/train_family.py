@@ -56,7 +56,12 @@ def _resolve_input_file(repo: Path, raw_value: Any, label: str) -> Path:
     if not isinstance(raw_value, str) or not raw_value.strip():
         raise FamilyTrainingError(f"A non-empty relative {label} is required.")
     configured = Path(raw_value)
-    if configured.is_absolute() or any(part == ".." for part in configured.parts):
+    if (
+        configured.is_absolute()
+        or "\\" in raw_value
+        or (len(raw_value) >= 2 and raw_value[1] == ":")
+        or any(part in {"", ".", ".."} for part in raw_value.split("/"))
+    ):
         raise FamilyTrainingError(f"{label} must be a safe relative path.")
     resolved = (repo / configured).resolve()
     try:
