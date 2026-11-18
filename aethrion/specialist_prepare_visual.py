@@ -16,6 +16,7 @@ from typing import Any
 import numpy as np
 
 from aethrion.specialist_prepare import _group_hash, _group_id, _split
+from aethrion.data_governance import review_template
 from aethrion.tokenizer import ByteBPETokenizer
 
 
@@ -232,6 +233,7 @@ def prepare_visual_dataset(
         "owner_approval": False,
         "privacy_reviewed": False,
         "speaker_consent_reviewed": False,
+        "governance": review_template(model_id),
         "dataset_path": f"{model_id}/dataset.npz",
         "dataset_sha256": _sha256(dataset),
         "tokenizer_path": f"{model_id}/tokenizer.json",
