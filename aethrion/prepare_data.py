@@ -67,7 +67,7 @@ def _write_report_signature(report_path: Path) -> bool:
         return False
     signature = hmac.new(key, report_path.read_bytes(), hashlib.sha256).hexdigest()
     _report_signature_path(report_path).write_text(
-        f"{REPORT_HMAC_FORMAT} {signature}\\n", encoding="ascii"
+        f"{REPORT_HMAC_FORMAT} {signature}\n", encoding="ascii"
     )
     return True
 
