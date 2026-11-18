@@ -6,7 +6,7 @@ import unittest
 import warnings
 from pathlib import Path
 import torch
-from aethrion.train import get_batch
+from aethrion.train import get_batch, capture_rng_state
 from aethrion.tokenizer import ByteBPETokenizer
 from aethrion.prepare_data import build_corpus
 from aethrion.checkpoint import load_checkpoint
@@ -263,6 +263,30 @@ class TrainingUtilityTests(unittest.TestCase):
             self.assertIn("prepared corpus SHA-256", tampered.stdout + tampered.stderr)
 
 
+    def test_checkpoint_recovers_previous_generation_when_rng_snapshot_is_malformed(self):
+        import hashlib
+        from aethrion.checkpoint import save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            payload = {
+                "format_version": 4, "step": 0, "model": {}, "optimizer": {},
+                "scaler": {}, "model_config": {}, "data_sha256": "0" * 64,
+                "tokenizer_sha256": "1" * 64, "rng_state": capture_rng_state(),
+                "training_config": {"stage": "test-fixture"},
+            }
+            save_checkpoint(payload, checkpoint)
+            save_checkpoint({**payload, "step": 1}, checkpoint)
+            malformed = {**payload, "step": 2, "rng_state": {}}
+            torch.save(malformed, checkpoint)
+            digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+            Path(str(checkpoint) + ".sha256").write_text(digest + "\\n", encoding="ascii")
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                recovered = load_checkpoint(checkpoint, map_location="cpu")
+            self.assertEqual(recovered["step"], 0)
+            self.assertTrue(any("recovering from" in str(item.message) for item in caught))
+
     def test_checkpoint_recovers_previous_generation_when_latest_safe_load_fails(self):
         import hashlib
         from aethrion.checkpoint import save_checkpoint
@@ -282,7 +306,7 @@ class TrainingUtilityTests(unittest.TestCase):
                 "model_config": {},
                 "data_sha256": "0" * 64,
                 "tokenizer_sha256": "1" * 64,
-                "rng_state": {},
+                "rng_state": capture_rng_state(),
                 "training_config": {"stage": "test-fixture"},
             }
             save_checkpoint(base, checkpoint)
