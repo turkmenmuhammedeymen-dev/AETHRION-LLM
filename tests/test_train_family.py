@@ -173,8 +173,6 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
     def test_execute_writes_durable_session_snapshot_and_event_journal(self):
         import json
         from unittest.mock import patch
-        from types import SimpleNamespace
-
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             plan = {
@@ -184,8 +182,10 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 "output_dir": "artifacts/chat",
             }
             with patch("aethrion.train_family.preflight_model", return_value=plan), \
-                 patch("aethrion.train_family.subprocess.run", return_value=SimpleNamespace(returncode=0)), \
+                 patch("aethrion.train_family.subprocess.Popen") as popen, \
                  patch("aethrion.train_family._training_outcome", return_value="training_completed_not_released"):
+                popen.return_value.wait.return_value = 0
+                popen.return_value.poll.return_value = 0
                 report = run_family(root, selected=["chat"], execute=True)
 
             self.assertTrue(report["training_started"])
@@ -217,8 +217,13 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 "output_dir": "artifacts/chat",
             }
             with patch("aethrion.train_family.preflight_model", return_value=plan), \
-                 patch("aethrion.train_family.subprocess.run", side_effect=KeyboardInterrupt):
+                 patch("aethrion.train_family.subprocess.Popen") as popen:
+                popen.return_value.wait.side_effect = [KeyboardInterrupt, -2]
+                popen.return_value.poll.return_value = None
                 report = run_family(root, selected=["chat"], execute=True)
+
+            popen.return_value.send_signal.assert_called_once()
+            self.assertTrue(report["training_started"])
 
             self.assertTrue(report["interrupted"])
             self.assertEqual(report["models"][0]["status"], "training_interrupted_not_released")
