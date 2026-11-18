@@ -30,6 +30,51 @@ class TokenizerTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 ByteBPETokenizer.load(path)
 
+    def test_rejects_exponential_merge_expansion_without_materializing_tokens(self):
+        merges = []
+        token_id = 0
+        for index in range(21):
+            merges.append([token_id, token_id])
+            token_id = 256 + index
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "hostile-tokenizer.json"
+            path.write_text(json.dumps({
+                "format": "aethrion-byte-bpe-v1",
+                "merges": merges,
+            }), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "byte limit"):
+                ByteBPETokenizer.load(path)
+
+    def test_rejects_duplicate_merge_pairs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "duplicate-tokenizer.json"
+            path.write_text(json.dumps({
+                "format": "aethrion-byte-bpe-v1",
+                "merges": [[0, 1], [0, 1]],
+            }), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "duplicate"):
+                ByteBPETokenizer.load(path)
+
+    def test_rejects_oversized_and_boolean_training_vocab_settings(self):
+        tokenizer = ByteBPETokenizer()
+        for vocab_size, min_frequency in (
+            (262145, 2),
+            (True, 2),
+            (300, False),
+        ):
+            with self.subTest(vocab_size=vocab_size, min_frequency=min_frequency):
+                with self.assertRaises(ValueError):
+                    tokenizer.train("safe test data", vocab_size, min_frequency)
+
+    def test_decode_also_bounds_manually_constructed_merge_graph(self):
+        merges = []
+        token_id = 0
+        for index in range(21):
+            merges.append((token_id, token_id))
+            token_id = 256 + index
+        with self.assertRaisesRegex(ValueError, "byte limit"):
+            ByteBPETokenizer(merges).decode([])
+
     def test_tokenizer_cli_blocks_without_dataset_approval(self):
         root = Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as directory:
