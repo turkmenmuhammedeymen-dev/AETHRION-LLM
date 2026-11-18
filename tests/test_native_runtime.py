@@ -108,9 +108,28 @@ class NativeModelRuntimeTests(unittest.TestCase):
             self.assertIsInstance(result["text"], str)
             self.assertEqual(runtime.status()["code"], "ready")
 
+    def _untrained_runtime(self, root: Path) -> NativeModelRuntime:
+        folder = root / "models"
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "manifest.json").write_text(json.dumps({
+            "format": "aethrion-native-model-family-v1",
+            "execution_policy": "local_only",
+            "models": {
+                "chat": {
+                    "architecture": "aethrion.model:AETHRIONLM",
+                    "status": "not_trained",
+                },
+                "code": {
+                    "architecture": "aethrion.code_model:AETHRIONCodeLM",
+                    "status": "not_trained",
+                },
+            },
+        }), encoding="utf-8")
+        return NativeModelRuntime(root)
+
     def test_generate_text_rejects_invalid_sampling_parameters_before_loading(self):
         with tempfile.TemporaryDirectory() as directory:
-            runtime = NativeModelRuntime(Path(directory))
+            runtime = self._untrained_runtime(Path(directory))
             invalid = [
                 {"max_new_tokens": True},
                 {"max_new_tokens": 1.5},
@@ -132,7 +151,7 @@ class NativeModelRuntimeTests(unittest.TestCase):
 
     def test_generate_text_rejects_empty_prompt_before_loading(self):
         with tempfile.TemporaryDirectory() as directory:
-            runtime = NativeModelRuntime(Path(directory))
+            runtime = self._untrained_runtime(Path(directory))
             with self.assertRaises(ValueError):
                 runtime.generate_text("chat", "   ")
             self.assertEqual(runtime._models, {})
