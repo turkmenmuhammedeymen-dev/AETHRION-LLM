@@ -340,9 +340,9 @@ def validate_specialist_dataset(
             } or any(marker in normalized_license for marker in ("pending", "unverified", "test_fixture")):
                 raise SpecialistDataError("Training blocked: source license is pending, unknown, or test-only.")
             permitted_use = source["permitted_use"].strip().casefold()
-            if not re.search(r"\b(training|train|machine learning|model development)\\b", permitted_use):
+            if not re.search(r"\b(training|train|machine learning|model development)\b", permitted_use):
                 raise SpecialistDataError("Training blocked: source permitted_use does not explicitly authorize model training.")
-            if re.search(r"\b(not for training|no training|training prohibited|training not permitted|evaluation only|testing only|unit tests only)\\b", permitted_use):
+            if re.search(r"\b(not for training|no training|training prohibited|training not permitted|evaluation only|testing only|unit tests only)\b", permitted_use):
                 raise SpecialistDataError("Training blocked: source permitted_use excludes model training.")
             evidence = urlsplit(source["evidence_uri"].strip())
             if evidence.scheme != "https" or not evidence.hostname or evidence.username or evidence.password:
