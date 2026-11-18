@@ -48,6 +48,32 @@ class TrainingUtilityTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     validate_base_training_config(candidate)
 
+    def test_checkpoint_rejects_unsafe_pickle_objects(self):
+        import hashlib
+
+        class UnsafePayload:
+            def __reduce__(self):
+                return (str, ("unsafe",))
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "unsafe.pt"
+            torch.save({
+                "format_version": 3,
+                "step": 0,
+                "model": {},
+                "optimizer": {},
+                "scaler": {},
+                "model_config": {},
+                "data_sha256": "0" * 64,
+                "tokenizer_sha256": "0" * 64,
+                "rng_state": {},
+                "extra": UnsafePayload(),
+            }, checkpoint)
+            digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+            Path(str(checkpoint) + ".sha256").write_text(digest + "\\n", encoding="ascii")
+            with self.assertRaisesRegex(ValueError, "safely deserialized"):
+                load_checkpoint(checkpoint, map_location="cpu")
+
     def test_batch_shapes_and_shift(self):
         x, y = get_batch(torch.arange(100), 4, 8, torch.device("cpu"))
         self.assertEqual(tuple(x.shape), (4, 8))
