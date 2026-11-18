@@ -57,7 +57,7 @@ def _resolve_asset(root: Path, value: Any, row_id: str) -> Path:
     path = Path(value)
     if (
         path.is_absolute()
-        or "\\\\" in value
+        or "\\" in value
         or "://" in value
         or re.match(r"^[A-Za-z]:", value)
         or any(part in {"", ".", ".."} for part in value.split("/"))
