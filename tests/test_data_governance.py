@@ -79,6 +79,7 @@ class DatasetGovernanceTests(unittest.TestCase):
 
     def test_safe_requires_separate_safety_review(self):
         record = approved_record("safety")
+        record["safety_reviewed"] = False
         with self.assertRaisesRegex(GovernanceError, "every model dataset"):
             validate_governance_record(record, model_id="safety")
         record["safety_reviewed"] = True
