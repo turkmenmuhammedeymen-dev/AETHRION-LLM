@@ -1,5 +1,6 @@
 name: tests
 on:
+  workflow_dispatch:
   push:
     branches: ["main", "hardening/**", "feature/**", "feat/**", "audit/**", "security/**"]
   pull_request:
