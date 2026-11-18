@@ -218,7 +218,7 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             }
             with patch("aethrion.train_family.preflight_model", return_value=plan), \
                  patch("aethrion.train_family.subprocess.Popen") as popen, \
-                 patch("aethrion.train_family._training_outcome", return_value="training_interrupted_not_released"):
+                 patch("aethrion.train_family._training_outcome", return_value="training_completed_not_released"):
                 popen.return_value.wait.side_effect = [KeyboardInterrupt, -2]
                 popen.return_value.poll.return_value = None
                 report = run_family(root, selected=["chat"], execute=True)
