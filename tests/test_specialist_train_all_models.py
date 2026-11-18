@@ -162,9 +162,9 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
                     "source_uri":"urn:aethrion:test:generated-fixture",
                     "source_path":source.name,
                     "sha256":hashlib.sha256(source.read_bytes()).hexdigest(),
-                    "license":"AETHRION synthetic test fixture",
+                    "license":"CC0-1.0",
                     "permitted_use":"Temporary unit-test training smoke test only",
-                    "evidence_uri":"urn:aethrion:test:fixture-provenance",
+                    "evidence_uri":"https://example.invalid/fixture-provenance",
                     "allow_training":True,
                     "privacy_reviewed":True,
                 }

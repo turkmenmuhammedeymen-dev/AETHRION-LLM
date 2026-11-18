@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 from typing import Any
+from urllib.parse import urlparse, urlsplit
 
 import numpy as np
 
@@ -40,6 +41,8 @@ REQUIRED_ARRAYS = {
     "safety": {"sample_id", "group_id", "split", "token_ids", "decision_labels", "reason_labels"},
 }
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
+UNVERIFIED_LICENSE_LABELS = frozenset({"UNKNOWN", "PENDING", "PENDING_HUMAN_REVIEW", "UNVERIFIED", "TBD", "NONE", "N_A", "NOT_SPECIFIED", "SYNTHETIC_UNIT_TEST_FIXTURE", "TEST_ONLY", "UNIT_TEST_ONLY"})
+REMOTE_SOURCE_SCHEMES = frozenset({"http", "https", "ftp", "ftps", "s3", "gs", "hf", "ipfs", "git", "ssh", "sftp", "git+http", "git+https", "git+ssh"})
 
 
 INPUT_FINGERPRINT_FIELDS = {
@@ -313,6 +316,55 @@ def validate_specialist_dataset(
             raise SpecialistDataError("Each source requires an ID, URI, path, license, permitted use and evidence.")
         source_id = source["source_id"].strip()
         source_path_value = source["source_path"].strip()
+        license_name = source["license"].strip()
+        permitted_use = source["permitted_use"].strip().casefold()
+        source_uri_scheme = urlparse(source["source_uri"].strip()).scheme.casefold()
+        normalized_license = re.sub(r"[^A-Z0-9]+", "_", license_name.upper()).strip("_")
+        if (
+            normalized_license in UNVERIFIED_LICENSE_LABELS
+            or any(normalized_license.startswith(label + "_") for label in UNVERIFIED_LICENSE_LABELS)
+            or any(marker in normalized_license for marker in ("PENDING", "UNVERIFIED", "TEST_FIXTURE", "TEST_ONLY"))
+        ):
+            raise SpecialistDataError("Training blocked: specialist source license is unknown, pending, unverified or test-only.")
+        if not source_uri_scheme:
+            raise SpecialistDataError("Training blocked: specialist source_uri must be a documented provenance URI.")
+        explicitly_permitted = any(
+            phrase in permitted_use
+            for phrase in (
+                "training permitted", "permitted for training", "ai training",
+                "machine learning training", "machine-learning training",
+                "model training", "training only", "unit-test training",
+            )
+        )
+        explicitly_denied = any(
+            phrase in permitted_use
+            for phrase in (
+                "not for training", "no training", "training prohibited",
+                "training not permitted", "training not allowed",
+                "not approved for training", "no permission to train",
+                "not permitted to train", "not allowed to train",
+                "not permitted for training", "not allowed for training",
+                "evaluation only",
+            )
+        )
+        if not explicitly_permitted or explicitly_denied:
+            raise SpecialistDataError("Training blocked: specialist source permitted_use must explicitly allow training.")
+        if source_uri_scheme in REMOTE_SOURCE_SCHEMES:
+            raise SpecialistDataError(
+                "Training blocked: remote third-party source URIs are disabled; "
+                "specialist training requires first-party owner-authored local sources."
+            )
+        if require_training_approval:
+            evidence = urlsplit(source["evidence_uri"].strip())
+            if (
+                evidence.scheme != "https"
+                or not evidence.hostname
+                or evidence.username is not None
+                or evidence.password is not None
+            ):
+                raise SpecialistDataError(
+                    "Training blocked: specialist source rights evidence must be an HTTPS URL without embedded credentials."
+                )
         if source_id in seen_source_ids:
             raise SpecialistDataError(f"Duplicate specialist source_id: {source_id}")
         if source_path_value in seen_source_paths:
