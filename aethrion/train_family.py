@@ -320,9 +320,11 @@ def _training_outcome(
             checkpoint_state = load_checkpoint(checkpoint_path, map_location="cpu")
             checkpoint_step = checkpoint_state.get("step")
             if (
-                checkpoint_state.get("session_id") != session_id
-                or checkpoint_state.get("attempt_id") != attempt_id
+                type(report.get("checkpoint_generation")) is not int
+                or report["checkpoint_generation"] < 1
                 or checkpoint_state.get("checkpoint_generation") != report.get("checkpoint_generation")
+                or checkpoint_state.get("session_id") != session_id
+                or checkpoint_state.get("attempt_id") != attempt_id
             ):
                 return "training_checkpoint_session_generation_mismatch_not_released"
             report_step = report["step"]
@@ -485,7 +487,8 @@ def run_family(
                     rows[-1]["process_started"] = True
                     _append_session_event(events_path, {
                         "event": "model_started", "session_id": session_id,
-                        "model_id": model_id, "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                        "attempt_id": attempt_id, "model_id": model_id,
+                        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
                         "checkpoint": plan["checkpoint"],
                     })
                     returncode = int(_ACTIVE_CHILD.wait())
