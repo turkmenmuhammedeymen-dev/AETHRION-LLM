@@ -394,6 +394,67 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 "training_checkpoint_hash_mismatch_not_released",
             )
 
+
+    def test_training_outcome_recovers_exact_previous_generation_named_by_report(self):
+        import hashlib
+        import shutil
+        from aethrion.train_family import _training_outcome
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(
+                Path(folder), session_id="session-prev", attempt_id="attempt-prev"
+            )
+            previous = Path(str(checkpoint) + ".previous")
+            shutil.copy2(checkpoint, previous)
+            previous_hash = hashlib.sha256(previous.read_bytes()).hexdigest()
+            Path(str(previous) + ".sha256").write_text(previous_hash + "\\n", encoding="ascii")
+            checkpoint.write_bytes(b"interrupted replacement / corrupt latest generation")
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    session_id="session-prev", attempt_id="attempt-prev",
+                ),
+                "training_completed_not_released",
+            )
+
+    def test_attempt_checkpoint_binding_rejects_journal_generation_mismatch(self):
+        from aethrion.train_family import _verify_attempt_checkpoint_binding
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, _, report = self._write_verified_report_fixture(
+                Path(folder), session_id="session-audit", attempt_id="attempt-audit"
+            )
+            journal_attempt = {
+                "state": "terminal_recorded",
+                "checkpoint_generation": report["checkpoint_generation"] + 1,
+                "checkpoint_sha256": report["checkpoint_sha256"],
+                "report_created_at_ns": report["report_created_at_ns"],
+            }
+            result = _verify_attempt_checkpoint_binding(
+                output, "code", "session-audit", "attempt-audit", journal_attempt,
+            )
+            self.assertFalse(result["verified"])
+            self.assertEqual(result["reason"], "journal_report_checkpoint_mismatch")
+
+    def test_attempt_checkpoint_binding_accepts_exact_lineage_and_digest(self):
+        from aethrion.train_family import _verify_attempt_checkpoint_binding
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, _, report = self._write_verified_report_fixture(
+                Path(folder), session_id="session-audit", attempt_id="attempt-audit"
+            )
+            journal_attempt = {
+                "state": "terminal_recorded",
+                "checkpoint_generation": report["checkpoint_generation"],
+                "checkpoint_sha256": report["checkpoint_sha256"],
+                "report_created_at_ns": report["report_created_at_ns"],
+            }
+            result = _verify_attempt_checkpoint_binding(
+                output, "code", "session-audit", "attempt-audit", journal_attempt,
+            )
+            self.assertTrue(result["verified"])
+            self.assertEqual(result["checkpoint_source"], "latest")
+
     def test_training_outcome_rejects_missing_or_nonfinite_metrics(self):
         from aethrion.train_family import _training_outcome
         import json
