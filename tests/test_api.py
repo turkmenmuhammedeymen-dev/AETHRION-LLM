@@ -397,6 +397,7 @@ class ApiHttpIntegrationTests(unittest.TestCase):
             observed["bytes"] = path.read_bytes()
             observed["prompt"] = request.prompt
             observed["exists_during_dispatch"] = path.is_file()
+            observed["temporary_path"] = str(path)
             return {"similarity": 0.75}
         self.router.register(Capability.VISION, "test-vision", vision_handler)
         response = self.client.post(
@@ -410,6 +411,7 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.assertTrue(response.json()["delegated"])
         self.assertEqual(observed["bytes"], b"PNG-test-data")
         self.assertTrue(observed["exists_during_dispatch"])
+        self.assertFalse(Path(observed["temporary_path"]).exists())
         self.assertEqual(observed["prompt"], "Describe this image")
 
     def test_assistant_upload_rejects_extension_capability_mismatch(self):
