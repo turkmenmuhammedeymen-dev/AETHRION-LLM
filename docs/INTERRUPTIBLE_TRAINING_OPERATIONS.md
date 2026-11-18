@@ -91,10 +91,13 @@ is no older generation to preserve; interruption between the two live
 replacements can leave no recoverable checkpoint, and the run must fail closed
 rather than claim recovery.
 
-Regression tests inject an `os.replace` failure specifically at the live
-sidecar promotion for both CHAT and specialist writers. They assert that the
-mismatched live pair is rejected and the prior generation is recovered. These
-are source-level tests until executed by a functioning test runner.
+Regression tests inject `os.replace` failures at three distinct boundaries
+for both CHAT and specialist writers: replacing the previous checkpoint,
+replacing the previous `.sha256` sidecar, and replacing the live checkpoint.
+They assert that the old live generation remains readable until the new live
+pair is committed. A separate live-sidecar failure test verifies fallback to
+the durable previous pair after the live checkpoint has already been replaced.
+These are source-level tests until executed by a functioning test runner.
 
 Keep the entire `artifacts/` directory on persistent storage. A temporary
 Kaggle/Colab runtime disk is not a backup: copy artifacts to durable storage
