@@ -151,6 +151,43 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             with self.assertRaisesRegex(SpecialistDataError, "crosses"):
                 validate_specialist_dataset(manifest)
 
+    def test_exact_duplicate_code_inputs_cannot_cross_splits(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            dataset = root / "dataset.npz"
+            with np.load(dataset, allow_pickle=False) as archive:
+                arrays = {key: np.array(archive[key], copy=True) for key in archive.files}
+            arrays["token_ids"][2] = arrays["token_ids"][0]
+            np.savez(dataset, **arrays)
+            payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "duplicate token_ids input.*train and validation"):
+                validate_specialist_dataset(manifest)
+
+    def test_duplicate_chat_prompts_are_detected_even_when_responses_differ(self):
+        from aethrion.specialist_data import _validate_input_split_uniqueness
+        arrays = {
+            "input_ids": np.asarray([[10, 11, 20, 21], [10, 11, 30, 31]], dtype=np.int64),
+            "labels": np.asarray([[-100, -100, 20, 21], [-100, -100, 30, 31]], dtype=np.int64),
+        }
+        with self.assertRaisesRegex(SpecialistDataError, "duplicate prompt_ids input"):
+            _validate_input_split_uniqueness("chat", arrays, ["train", "test"])
+
+    def test_asr_duplicate_inputs_ignore_different_padding_tails(self):
+        from aethrion.specialist_data import _validate_input_split_uniqueness
+        valid_audio = np.asarray([[0.1, 0.2], [0.3, 0.4]], dtype=np.float32)
+        arrays = {
+            "features": np.asarray([
+                [[0.1, 0.2], [0.3, 0.4], [0.0, 0.0]],
+                [[0.1, 0.2], [0.3, 0.4], [9.0, 9.0]],
+            ], dtype=np.float32),
+            "input_lengths": np.asarray([2, 2], dtype=np.int64),
+        }
+        self.assertEqual(valid_audio.shape, (2, 2))
+        with self.assertRaisesRegex(SpecialistDataError, "duplicate features input"):
+            _validate_input_split_uniqueness("asr", arrays, ["train", "validation"])
+
     def test_tokenizer_hash_mismatch_blocks_specialist_data(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
