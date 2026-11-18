@@ -73,6 +73,26 @@ class SpecialistTrainingTests(unittest.TestCase):
             "save_interval": 1,
         }
 
+    def test_invalid_numeric_specialist_config_fails_before_dataset_access(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            base = self._config(root)
+            invalid_cases = [
+                ("learning_rate", float("nan")),
+                ("learning_rate", float("inf")),
+                ("weight_decay", float("nan")),
+                ("grad_clip", float("inf")),
+                ("max_steps", True),
+                ("model_config", {**base["model_config"], "dropout": float("nan")}),
+            ]
+            missing_manifest = root / "not-created-manifest.json"
+            for key, value in invalid_cases:
+                candidate = dict(base)
+                candidate[key] = value
+                with self.subTest(key=key, value=value):
+                    with self.assertRaises(ValueError):
+                        train_specialist(candidate, missing_manifest)
+
     def test_unapproved_specialist_data_never_starts_training(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
