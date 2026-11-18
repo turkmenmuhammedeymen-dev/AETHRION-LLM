@@ -38,7 +38,7 @@ class VisualPreparationTests(unittest.TestCase):
     def test_visual_asset_paths_reject_urls_windows_paths_and_traversal(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
-            for value in ("../outside.png", "https://example.org/image.png", r"C:\\images\\sample.png", r"folder\\sample.png"):
+            for value in ("../outside.png", "https://example.org/image.png", r"C:\images\sample.png", r"folder\sample.png"):
                 with self.subTest(value=value):
                     with self.assertRaises(VisualPreparationError):
                         _resolve_asset(root, value, "sample")
