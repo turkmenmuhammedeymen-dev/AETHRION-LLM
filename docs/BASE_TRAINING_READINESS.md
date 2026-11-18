@@ -131,3 +131,33 @@ are present. The command writes `artifacts/tokenizer.json.provenance.json`, bind
 the tokenizer hash to the exact combined corpus, train/validation/test partition hashes,
 dataset manifest, source manifest and optional domain-review file. The BASE trainer
 requires this sidecar and re-verifies it before training and again when resuming.
+
+
+## Signed provenance and audit-report integrity
+
+BASE corpus reports are now authenticated with an HMAC-SHA256 sidecar:
+`corpus-report.json.hmac`. The signature covers the exact report bytes. The report
+also binds the SHA-256 digests of the dataset manifest, source manifest and optional
+domain-review CSV. Raw source file hashes remain recorded per source, and the validator
+reconstructs record provenance groups from the current raw sources.
+
+Set `AETHRION_BASE_AUDIT_HMAC_KEY` to a randomly generated secret containing at least
+32 UTF-8 bytes. The key must be managed outside GitHub, the repository, the Hugging Face
+Space, logs and committed files. Do not paste it into chat or place it in a source file.
+The preparation process writes a signature only when this variable is present. The
+training approval validator always requires the key and a valid sidecar; without them,
+BASE training is blocked. If the report is prepared without the key, it must be rebuilt
+after the authorized reviewer provisions the key.
+
+**Key custody matters:** HMAC is a shared-secret integrity mechanism, not a public-key
+signature. Anyone who obtains the key can create a replacement signature. The responsible
+reviewer must control the key and must not expose it to untrusted preparation jobs. The
+HMAC proves that the signed report and its bound manifests have not changed since signing;
+it does not prove that the underlying license, authorship, privacy or consent claims are
+true. Those remain subject to documented human review. Never use a CI fixture key or
+a developer convenience key for real training.
+
+Regression tests simulate changing a JSONL record's `group_id`, rewriting the raw-source
+hash in the report, and replacing the report bytes without access to the signing key.
+They also change the source manifest after signing. Both attacks must be rejected before
+the training data is accepted.
