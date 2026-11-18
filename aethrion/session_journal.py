@@ -139,6 +139,25 @@ def append_session_event(path: str | Path, event: dict[str, Any]) -> dict[str, A
     }
     if not current["valid"]:
         raise ValueError(f"Refusing to append to invalid session journal: {current['reason']}")
+    kind = event.get("event")
+    attempt_id = event.get("attempt_id")
+    record = current.get("attempts", {}).get(attempt_id)
+    if kind == "session_started":
+        if current["event_count"] != 0:
+            raise ValueError("session_started must be the first journal event.")
+    elif kind == "model_attempt_started":
+        if not isinstance(attempt_id, str) or not attempt_id or attempt_id in current.get("attempts", {}):
+            raise ValueError("Attempt ID is missing or already used in this session.")
+        if not isinstance(event.get("model_id"), str) or not event["model_id"]:
+            raise ValueError("Attempt model_id is required.")
+    elif kind == "model_started":
+        if record is None or record["state"] != "attempt_prepared" or record["model_id"] != event.get("model_id"):
+            raise ValueError("model_started requires its unique prepared attempt.")
+    elif kind == "model_finished":
+        if record is None or record["state"] != "process_running" or record["model_id"] != event.get("model_id"):
+            raise ValueError("model_finished requires a matching started process.")
+    elif kind not in {"model_blocked", "session_interrupted", "session_completed"}:
+        raise ValueError("Unknown or unsupported session event type.")
     payload = dict(event)
     if _CHAIN_FIELDS & set(payload):
         raise ValueError("Event payload cannot supply journal hash fields.")
