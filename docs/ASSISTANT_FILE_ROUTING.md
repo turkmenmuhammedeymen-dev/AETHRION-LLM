@@ -51,5 +51,7 @@ including when specialist dispatch raises an error.
   model registry.
 - IMAGE and 3D are output-generation tasks, not upload routes; VISION, ASR,
   and DOCUMENT are the supported uploaded-input specialists.
-- The Hugging Face Space UI has not yet been updated to expose this unified
-  upload flow. The change is in the GitHub source branch only.
+- The Hugging Face Space source now includes an **Assistant + Upload** tab
+  using the same intent classifier, local specialist router and SAFE-gated
+  handlers. The source change is in the GitHub branch; the live Space has not
+  yet been deployed or verified.
