@@ -58,8 +58,14 @@ def _local_audio(root: Path, value: Any, row_id: str) -> Path:
     if not isinstance(value, str) or not value.strip():
         raise AudioPreparationError(f"Record {row_id!r} requires wav_path.")
     candidate = Path(value)
-    if candidate.is_absolute():
-        raise AudioPreparationError("Audio paths must be relative to the JSONL source folder.")
+    if (
+        candidate.is_absolute()
+        or "\\\\" in value
+        or "://" in value
+        or re.match(r"^[A-Za-z]:", value)
+        or any(part in {"", ".", ".."} for part in value.split("/"))
+    ):
+        raise AudioPreparationError("Audio paths must be safe relative local paths.")
     resolved = (root / candidate).resolve()
     try:
         resolved.relative_to(root.resolve())
