@@ -147,5 +147,46 @@ class SpecialistModelTests(unittest.TestCase):
         self.assertTrue(all(item in {"ALLOW", "REVIEW", "BLOCK"} for item in prediction["decision"]))
 
 
+    def test_safety_model_joint_loss_backpropagates_for_decisions_and_reasons(self):
+        model = AETHRIONSafe(SafetyConfig(
+            vocab_size=300, max_length=16, width=32, layers=1, heads=4,
+            reason_classes=16,
+        ))
+        ids = torch.randint(0, 300, (3, 8))
+        mask = torch.ones_like(ids)
+        outputs = model(ids, mask)
+        decisions = torch.tensor([0, 1, 2], dtype=torch.long)
+        reasons = torch.zeros((3, 16), dtype=torch.float32)
+        reasons[0, 0] = 1.0
+        reasons[1, 14] = 1.0
+        reasons[2, 1] = 1.0
+        loss = model.loss(outputs, decisions, reasons)
+        self.assertTrue(torch.isfinite(loss).item())
+        loss.backward()
+        self.assertIsNotNone(model.decision_head.weight.grad)
+        self.assertIsNotNone(model.reason_head.weight.grad)
+        self.assertTrue(torch.isfinite(model.decision_head.weight.grad).all().item())
+        self.assertTrue(torch.isfinite(model.reason_head.weight.grad).all().item())
+
+    def test_safety_candidate_abstains_to_review_below_confidence_threshold(self):
+        from unittest.mock import patch
+
+        model = AETHRIONSafe(SafetyConfig(
+            vocab_size=300, max_length=16, width=32, layers=1, heads=4,
+            reason_classes=16,
+        ))
+        ids = torch.ones((1, 4), dtype=torch.long)
+        uncertain = {
+            "decision_logits": torch.tensor([[0.1, 0.0, -0.1]]),
+            "reason_logits": torch.zeros((1, 16)),
+        }
+        with patch.object(model, "forward", return_value=uncertain):
+            prediction = model.predict_candidate(ids, review_threshold=0.65)
+        self.assertEqual(prediction["decision"], ["REVIEW"])
+        self.assertLess(float(prediction["confidence"][0]), 0.65)
+        with self.assertRaises(ValueError):
+            model.predict_candidate(ids, review_threshold=1.0)
+
+
 if __name__ == "__main__":
     unittest.main()
