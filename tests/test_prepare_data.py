@@ -63,21 +63,21 @@ class CorpusPreparationTests(unittest.TestCase):
                 {"source_id": "unit-a", "path": "source-a.txt",
                  "license": "Synthetic unit-test fixture",
                  "permitted_uses": "training permitted for unit-test fixture only",
-                 "allow_training": True},
+                 "allow_training": False},
                 {"source_id": "unit-b", "path": "source-b.txt",
                  "license": "Synthetic unit-test fixture",
                  "permitted_uses": "training permitted for unit-test fixture only",
-                 "allow_training": True},
+                 "allow_training": False},
                 {"source_id": "unit-c", "path": "source-c.txt",
                  "license": "Synthetic unit-test fixture",
                  "permitted_uses": "training permitted for unit-test fixture only",
-                 "allow_training": True},
+                 "allow_training": False},
             ]}), encoding="utf-8")
             output = root / "out/corpus.txt"
             report_path = root / "out/report.json"
             report = build_corpus(
                 root, manifest, output, report_path, seed=7, min_chars=10,
-                min_records=1, dataset_manifest_path=self._write_dataset_manifest(root),
+                min_records=1, dataset_manifest_path=self._write_dataset_manifest(root, allowed=False),
             )
             self.assertEqual(report["totals"]["records_kept"], 3)
             self.assertEqual(report["totals"]["duplicates"], 1)
