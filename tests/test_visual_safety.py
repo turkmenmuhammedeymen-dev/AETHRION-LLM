@@ -35,19 +35,19 @@ class VisualSafetyTests(unittest.TestCase):
     def test_3d_rejects_non_finite_coordinates_and_mesh_faces(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "cloud.obj"
-            path.write_text("v nan 0 0\\n", encoding="utf-8")
+            path.write_text("v nan 0 0\n", encoding="utf-8")
             with self.assertRaises(VisualSafetyError):
                 inspect_visual_artifact(path, "3d")
-            path.write_text("v 0 0 0\\nf 1 1 1\\n", encoding="utf-8")
+            path.write_text("v 0 0 0\nf 1 1 1\n", encoding="utf-8")
             with self.assertRaisesRegex(VisualSafetyError, "Only vertex records"):
                 inspect_visual_artifact(path, "3d")
 
     def test_3d_rejects_unknown_obj_records_but_allows_comments(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "cloud.obj"
-            path.write_text("# point cloud\\n\\nv 0 0 0\\n", encoding="utf-8")
+            path.write_text("# point cloud\n\nv 0 0 0\n", encoding="utf-8")
             self.assertEqual(inspect_visual_artifact(path, "3d")["vertices"], 1)
-            path.write_text("v 0 0 0\\nmtllib external.mtl\\n", encoding="utf-8")
+            path.write_text("v 0 0 0\nmtllib external.mtl\n", encoding="utf-8")
             with self.assertRaisesRegex(VisualSafetyError, "Only vertex records"):
                 inspect_visual_artifact(path, "3d")
     def test_3d_semantic_verifier_must_allow_with_high_confidence(self):
