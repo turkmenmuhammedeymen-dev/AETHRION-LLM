@@ -56,6 +56,8 @@ class ByteBPETokenizer:
             raise ValueError("min_frequency must be a positive integer")
         sequences = [self._bytes(line) for line in text.splitlines() if line.strip()]
         merges: list[tuple[int, int]] = []
+        token_lengths = [1] * 256
+        total_vocab_bytes = 256
         while 256 + len(merges) < vocab_size:
             counts: Counter[tuple[int, int]] = Counter()
             for seq in sequences:
@@ -65,8 +67,16 @@ class ByteBPETokenizer:
             pair, freq = counts.most_common(1)[0]
             if freq < min_frequency:
                 break
+            token_bytes = token_lengths[pair[0]] + token_lengths[pair[1]]
+            if (
+                token_bytes > MAX_TOKEN_BYTES
+                or total_vocab_bytes + token_bytes > MAX_TOTAL_VOCAB_BYTES
+            ):
+                break
             new_id = 256 + len(merges)
             merges.append(pair)
+            token_lengths.append(token_bytes)
+            total_vocab_bytes += token_bytes
             updated = []
             for seq in sequences:
                 out: list[int] = []
