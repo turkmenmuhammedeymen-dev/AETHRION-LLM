@@ -188,3 +188,15 @@ The family outcome verifier now compares the report's checkpoint SHA-256 against
 The read-only `--audit-session` path performs the same cross-check for every recorded attempt. For terminal attempts it additionally requires the JSONL `model_finished` event's checkpoint generation, checkpoint digest, report timestamp and terminal outcome to match the report exactly. A damaged latest file can therefore be recovered only when the report names the intact previous generation and all lineage checks agree. Missing reports, mismatched attempts, generation/hash disagreement or provenance mismatch return a manual-review result; no checkpoint is rewritten and no training is resumed.
 
 Regression tests cover a corrupt latest checkpoint with an intact previous generation, a report that points to the wrong generation, journal/report generation disagreement, and exact previous-generation binding. CI execution remains necessary before this code is considered validated.
+
+
+## First-generation and orphaned-temp crash cases
+
+The crash matrix also covers the first-ever checkpoint save, where no older
+verified generation exists. If the checkpoint rename succeeds but promotion
+of its checksum sidecar is interrupted, the incomplete live pair is rejected;
+there is no `.previous` generation to recover, so loading must fail closed.
+The loader must also ignore orphaned `.tmp` and `.sha256.tmp` files left by a
+hard process termination: temporary files are never recovery candidates and
+must not be promoted automatically. Base and specialist regression tests cover
+both cases. These remain unexecuted until a functioning runner runs the suite.
