@@ -147,7 +147,7 @@ class SpecialistTrainingTests(unittest.TestCase):
                 checkpoint = root / "artifacts" / "checkpoint_last.pt"
                 self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
 
-                specialist_train._STOP_REQUESTED = False
+                # A new in-process run must clear the previous stop request itself.
                 resumed = train_specialist(config, manifest, resume=checkpoint)
                 self.assertEqual(resumed["status"], "training_complete_not_released")
                 self.assertEqual(resumed["steps"], 2)
@@ -185,6 +185,49 @@ class SpecialistTrainingTests(unittest.TestCase):
             self.assertEqual(recovered["step"], 0)
             self.assertEqual(recovered["model_id"], "code")
             self.assertEqual(report["release_status"], "NOT_RELEASED")
+
+
+    def test_specialist_checkpoint_recovers_when_checksum_valid_but_safe_load_fails(self):
+        import warnings
+        from aethrion.specialist_train import _load_checkpoint
+
+        class UnsafePayload:
+            def __reduce__(self):
+                return (eval, ("1 + 1",))
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            config["max_steps"] = 2
+            train_specialist(config, manifest)
+            checkpoint = root / "artifacts" / "checkpoint_last.pt"
+            previous = Path(str(checkpoint) + ".previous")
+            safe_previous = torch.load(previous, map_location="cpu", weights_only=True)
+
+            unsafe = {
+                "format": "aethrion-specialist-checkpoint-v1",
+                "model_id": "code",
+                "step": 99,
+                "model_config": config["model_config"],
+                "model_state": {},
+                "optimizer_state": {},
+                "dataset_sha256": "0" * 64,
+                "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64,
+                "rng_state": {},
+                "extra": UnsafePayload(),
+            }
+            torch.save(unsafe, checkpoint)
+            digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+            Path(str(checkpoint) + ".sha256").write_text(digest + "\n", encoding="ascii")
+
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
+
+            self.assertEqual(recovered["step"], safe_previous["step"])
+            self.assertTrue(any("safely loaded" in str(item.message) for item in caught))
 
     def test_training_resume_continues_after_verified_checkpoint(self):
         with tempfile.TemporaryDirectory() as directory:
