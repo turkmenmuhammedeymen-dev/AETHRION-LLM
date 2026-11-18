@@ -1,7 +1,7 @@
 name: tests
 on:
   push:
-    branches: ["main", "hardening/**", "feature/**", "feat/**"]
+    branches: ["main", "hardening/**", "feature/**", "feat/**", "audit/**", "security/**"]
   pull_request:
     branches: ["main"]
 permissions:
@@ -35,6 +35,14 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Synthetic end-to-end smoke test
         run: python -m aethrion.smoke_test
+      - name: Audit actual eleven-model training and release readiness
+        run: python -m aethrion.family_audit --output family-readiness-report.json
+      - name: Preserve family readiness report
+        uses: actions/upload-artifact@v4
+        with:
+          name: aethrion-family-readiness-${{ matrix.python-version }}
+          path: family-readiness-report.json
+          if-no-files-found: error
 
   space-runtime:
     name: Hugging Face Space runtime smoke test
@@ -114,7 +122,7 @@ jobs:
           assert "unavailable" in app.three_d_text("a small tree")[0].lower()
           assert "not trained" in app.voice("placeholder.wav")[0].lower()
           document_smoke = Path(tempfile.gettempdir()) / "aethrion-space-smoke.pdf"
-          document_smoke.write_bytes(b"%PDF-1.4\\n%%EOF")
+          document_smoke.write_bytes(b"%PDF-1.4\n%%EOF")
           try:
               assert "not trained" in app.analyse(str(document_smoke), "summarize").lower()
           finally:
