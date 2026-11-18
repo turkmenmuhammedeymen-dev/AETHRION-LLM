@@ -87,8 +87,19 @@ class SyntheticFamilyFixtureTests(unittest.TestCase):
                 result = prepare_text_dataset(**kwargs)
                 self._assert_manifest_closed(result["manifest"])
                 with np.load(result["dataset"], allow_pickle=False) as arrays:
-                    self.assertEqual(set(("sample_id", "group_id", "split")).issubset(arrays.files), True)
+                    self.assertTrue({"sample_id", "group_id", "split"}.issubset(arrays.files))
                     self.assertEqual(len(arrays["sample_id"]), family["record_counts"][model])
+                    if model == "chat":
+                        self.assertEqual(arrays["input_ids"].shape, arrays["labels"].shape)
+                    elif model == "code":
+                        self.assertEqual(arrays["token_ids"].ndim, 2)
+                    elif model == "research":
+                        self.assertEqual(arrays["query_ids"].shape, arrays["passage_ids"].shape)
+                    elif model == "document":
+                        self.assertEqual(arrays["boxes"].shape[:2], arrays["token_ids"].shape)
+                    elif model == "safety":
+                        self.assertEqual(arrays["decision_labels"].shape, (225,))
+                        self.assertEqual(arrays["reason_labels"].shape, (225, 16))
 
             for model in ("vision", "image", "3d"):
                 result = prepare_visual_dataset(
@@ -98,6 +109,12 @@ class SyntheticFamilyFixtureTests(unittest.TestCase):
                 self._assert_manifest_closed(result["manifest"])
                 with np.load(result["dataset"], allow_pickle=False) as arrays:
                     self.assertEqual(len(arrays["sample_id"]), 30)
+                    if model == "vision":
+                        self.assertEqual(arrays["images"].shape[1:], (3, 224, 224))
+                    elif model == "image":
+                        self.assertEqual(arrays["images"].shape[1:], (3, 64, 64))
+                    else:
+                        self.assertEqual(arrays["points"].shape[1:], (512, 3))
 
             for model in ("asr", "tts", "vocoder"):
                 result = prepare_audio_dataset(
@@ -107,6 +124,17 @@ class SyntheticFamilyFixtureTests(unittest.TestCase):
                 self._assert_manifest_closed(result["manifest"])
                 with np.load(result["dataset"], allow_pickle=False) as arrays:
                     self.assertEqual(len(arrays["sample_id"]), 30)
+                    if model == "asr":
+                        self.assertEqual(arrays["features"].shape[2], 80)
+                    elif model == "tts":
+                        self.assertEqual(arrays["target_mels"].shape[2], 80)
+                        self.assertEqual(arrays["token_ids"].shape, arrays["durations"].shape)
+                    else:
+                        self.assertEqual(arrays["target_mels"].shape[2], 80)
+                        self.assertEqual(
+                            arrays["target_waveforms"].shape[1],
+                            arrays["target_mels"].shape[1] * 256,
+                        )
 
             self.assertEqual(len(family["models"]), 11)
 
