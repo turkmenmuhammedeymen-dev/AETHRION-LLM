@@ -269,6 +269,33 @@ def _validate_modality_shapes(model_id: str, arrays: Any, sample_count: int) -> 
             raise SpecialistDataError("Safety reason labels must be binary multi-hot values.")
 
 
+def _reject_synthetic_jsonl_source(source_file: Path) -> None:
+    """Prevent explicitly synthetic fixture records from being promoted by manifest edits."""
+    if source_file.suffix.lower() != ".jsonl":
+        return
+    try:
+        with source_file.open("r", encoding="utf-8") as stream:
+            for line_number, line in enumerate(stream, 1):
+                if not line.strip():
+                    continue
+                try:
+                    record = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    raise SpecialistDataError(
+                        f"Training blocked: source JSONL contains invalid JSON on line {line_number}."
+                    ) from exc
+                if not isinstance(record, dict):
+                    raise SpecialistDataError(
+                        f"Training blocked: source JSONL line {line_number} must be an object."
+                    )
+                if record.get("synthetic_fixture") is True or record.get("production_training_approved") is False:
+                    raise SpecialistDataError(
+                        "Training blocked: explicitly synthetic/non-production fixture records cannot be promoted."
+                    )
+    except OSError as exc:
+        raise SpecialistDataError("Training blocked: source JSONL could not be read safely.") from exc
+
+
 def validate_specialist_dataset(
     manifest_path: str | Path,
     *,
@@ -379,6 +406,7 @@ def validate_specialist_dataset(
             raise SpecialistDataError("A reviewed source file is missing or empty.")
         if sha256_file(source_file) != digest.lower():
             raise SpecialistDataError("A reviewed source file SHA-256 mismatch.")
+        _reject_synthetic_jsonl_source(source_file)
         if source.get("allow_training") is not True:
             raise SpecialistDataError("Training blocked: one or more source licenses are not approved.")
         if source.get("privacy_reviewed") is not True:
