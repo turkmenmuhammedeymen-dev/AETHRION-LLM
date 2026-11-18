@@ -300,7 +300,7 @@ def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
             handle.flush()
             os.fsync(handle.fileno())
         digest = _sha256(tmp)
-        checksum_tmp.write_text(digest + "\n", encoding="ascii")
+        _write_text_fsync(checksum_tmp, digest + "\n", "ascii")
         if path.is_file() and checksum_path.is_file():
             expected = checksum_path.read_text(encoding="ascii").strip().split()
             if expected and _sha256(path) == expected[0]:
