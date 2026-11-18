@@ -24,6 +24,14 @@ class DispatchRequest(BaseModel):
     capability:str
     prompt:str=Field(min_length=1,max_length=12000)
     options:dict[str,Any]=Field(default_factory=dict)
+
+
+class AssistantRequest(BaseModel):
+    """Automatic-routing request; callers do not have to choose a capability."""
+    prompt:str=Field(min_length=1,max_length=12000)
+    options:dict[str,Any]=Field(default_factory=dict)
+
+
 class FileRequest(BaseModel):
     filename:str=Field(min_length=1,max_length=255)
     content_base64:str=Field(min_length=1,max_length=12_000_000)
@@ -262,7 +270,7 @@ def capabilities():
             "internal_dependencies":{"tts":["vocoder","asr"],"specialist_text_io":["safety"]}}
 
 @app.post("/assistant", dependencies=[Depends(require_api_token)])
-def assistant(request: DispatchRequest):
+def assistant(request: AssistantRequest):
     """Main text entry point: delegate clear tasks, otherwise use native CHAT."""
     # Never accept caller-controlled server paths through this general text route.
     forbidden = {"image_path", "audio_path", "document_path", "file_path"}
