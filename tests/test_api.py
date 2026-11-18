@@ -390,6 +390,54 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.assertEqual(response.status_code, 422)
         self.assertIn("image_path", response.json()["detail"])
 
+    def test_assistant_upload_routes_image_to_vision_with_bounded_temp_file(self):
+        observed = {}
+        def vision_handler(request):
+            path = Path(request.options["image_path"])
+            observed["bytes"] = path.read_bytes()
+            observed["prompt"] = request.prompt
+            observed["exists_during_dispatch"] = path.is_file()
+            return {"similarity": 0.75}
+        self.router.register(Capability.VISION, "test-vision", vision_handler)
+        response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Describe this image"},
+            files={"file": ("scene.png", b"PNG-test-data", "image/png")},
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["capability"], "vision")
+        self.assertTrue(response.json()["delegated"])
+        self.assertEqual(observed["bytes"], b"PNG-test-data")
+        self.assertTrue(observed["exists_during_dispatch"])
+        self.assertEqual(observed["prompt"], "Describe this image")
+
+    def test_assistant_upload_rejects_extension_capability_mismatch(self):
+        response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Transcribe this audio"},
+            files={"file": ("notes.txt", b"not audio", "text/plain")},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_assistant_upload_rejects_non_file_intent(self):
+        response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Write a Python function"},
+            files={"file": ("code.txt", b"code", "text/plain")},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_assistant_upload_requires_authentication(self):
+        response = self.client.post(
+            "/assistant/upload",
+            data={"prompt": "Describe this image"},
+            files={"file": ("scene.png", b"PNG-test-data", "image/png")},
+        )
+        self.assertEqual(response.status_code, 401)
+
     def test_dispatch_unconfigured_text_capability_returns_503(self):
         response=self.client.post("/dispatch",json={"capability":"research","prompt":"summarize"},headers=self.auth)
         self.assertEqual(response.status_code,503)
