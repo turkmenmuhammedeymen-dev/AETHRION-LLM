@@ -270,8 +270,10 @@ def validate_specialist_dataset(
             split_names = [str(item) for item in splits.tolist()]
             if len(set(ids)) != len(ids) or any(not item for item in ids):
                 raise SpecialistDataError("sample_id values must be unique and non-empty.")
-            if any(not item for item in group_names):
-                raise SpecialistDataError("Every sample requires a non-empty provenance group_id.")
+            if any(not SHA256.fullmatch(item) for item in group_names):
+                raise SpecialistDataError(
+                    "Every group_id must be a pseudonymous lowercase SHA-256 value."
+                )
             group_split = {}
             for group_name, split_name in zip(group_names, split_names):
                 previous = group_split.setdefault(group_name, split_name)
