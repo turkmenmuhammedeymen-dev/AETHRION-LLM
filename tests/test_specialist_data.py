@@ -71,6 +71,20 @@ class SpecialistDataApprovalTests(unittest.TestCase):
         manifest.write_text(json.dumps(payload), encoding="utf-8")
         return manifest, payload
 
+    def test_training_array_integrity_rejects_non_finite_float_values(self):
+        from aethrion.specialist_data import _validate_array_integrity
+        for value in (np.nan, np.inf, -np.inf):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(SpecialistDataError, "NaN or infinite"):
+                    _validate_array_integrity({"images": np.asarray([[value]], dtype=np.float32)}, 1)
+
+    def test_training_array_integrity_rejects_misaligned_and_non_numeric_arrays(self):
+        from aethrion.specialist_data import _validate_array_integrity
+        with self.assertRaisesRegex(SpecialistDataError, "axis 0"):
+            _validate_array_integrity({"features": np.zeros((2, 4), dtype=np.float32)}, 3)
+        with self.assertRaisesRegex(SpecialistDataError, "numeric or boolean"):
+            _validate_array_integrity({"features": np.asarray([["bad"]])}, 1)
+
     def test_unapproved_dataset_is_blocked(self):
         with tempfile.TemporaryDirectory() as directory:
             manifest, _ = self._fixture(Path(directory), approved=False)
