@@ -14,6 +14,7 @@ import math
 import os
 import signal
 import subprocess
+import torch
 import sys
 import time
 import uuid
@@ -274,9 +275,7 @@ def _training_outcome(
     except OSError:
         return "training_checkpoint_unreadable_not_released"
 
-    if status == "training_interrupted_not_released":
-        return "training_interrupted_not_released"
-
+    interrupted = status == "training_interrupted_not_released"
     if model_id == "chat":
         metrics = report.get("metrics")
         valid = (
@@ -284,21 +283,59 @@ def _training_outcome(
             and isinstance(metrics, dict)
             and _finite_metric(metrics.get("train"))
             and _finite_metric(metrics.get("val"))
-            and _finite_metric(report.get("held_out_test_loss"))
-            and isinstance(report.get("dataset_sha256"), str)
-            and isinstance(report.get("tokenizer_sha256"), str)
+            and (interrupted or _finite_metric(report.get("held_out_test_loss")))
+            and all(
+                isinstance(report.get(key), str) and len(report[key]) == 64
+                for key in ("dataset_sha256", "tokenizer_sha256")
+            )
         )
     else:
         valid = (
             type(report.get("steps")) is int and report["steps"] >= 1
             and _finite_metric(report.get("validation_loss"))
-            and _finite_metric(report.get("held_out_test_loss"))
+            and (interrupted or _finite_metric(report.get("held_out_test_loss")))
             and all(
                 isinstance(report.get(key), str) and len(report[key]) == 64
                 for key in ("dataset_sha256", "tokenizer_sha256", "manifest_sha256")
             )
         )
-    return "training_completed_not_released" if valid else "training_report_metrics_invalid_not_released"
+    if not valid:
+        return "training_report_metrics_invalid_not_released"
+
+    try:
+        if model_id == "chat":
+            from aethrion.checkpoint import load_checkpoint
+            checkpoint_state = load_checkpoint(checkpoint_path, map_location="cpu")
+            checkpoint_step = checkpoint_state.get("step")
+            report_step = report["step"]
+            if type(checkpoint_step) is not int or checkpoint_step != report_step:
+                return "training_report_checkpoint_step_mismatch_not_released"
+        else:
+            from aethrion.specialist_train import _load_checkpoint
+            checkpoint_state = _load_checkpoint(checkpoint_path, torch.device("cpu"))
+            checkpoint_step = checkpoint_state.get("step")
+            report_steps = report["steps"]
+            if (
+                checkpoint_state.get("model_id") != model_id
+                or type(checkpoint_step) is not int
+                or checkpoint_step + 1 != report_steps
+            ):
+                return "training_report_checkpoint_step_mismatch_not_released"
+            if checkpoint_state.get("dataset_sha256") != report.get("dataset_sha256"):
+                return "training_report_checkpoint_provenance_mismatch_not_released"
+            if checkpoint_state.get("tokenizer_sha256") != report.get("tokenizer_sha256"):
+                return "training_report_checkpoint_provenance_mismatch_not_released"
+            if checkpoint_state.get("manifest_sha256") != report.get("manifest_sha256"):
+                return "training_report_checkpoint_provenance_mismatch_not_released"
+        if model_id == "chat":
+            if checkpoint_state.get("data_sha256") != report.get("dataset_sha256"):
+                return "training_report_checkpoint_provenance_mismatch_not_released"
+            if checkpoint_state.get("tokenizer_sha256") != report.get("tokenizer_sha256"):
+                return "training_report_checkpoint_provenance_mismatch_not_released"
+    except Exception:
+        return "training_checkpoint_semantic_validation_failed_not_released"
+
+    return "training_interrupted_not_released" if interrupted else "training_completed_not_released"
 
 
 _STOP_REQUESTED = False
