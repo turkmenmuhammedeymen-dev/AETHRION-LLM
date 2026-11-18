@@ -158,3 +158,12 @@ This audit reconstructs verified session state; it does not claim that an interr
 
 
 The audit result also includes `reconstructed_session`: the verified snapshot rows are reconciled with each attempt's last journal state. A process-started row is explicitly tagged `checkpoint_verification_required`; a prepared-but-not-started row is tagged `safe_to_requeue_after_preflight`; terminal attempts remain terminal records. The reconstruction is descriptive only (`automatic_resume: false`) and cannot spawn a trainer or mark a model complete.
+
+
+## Exact checkpoint/report/journal cross-validation
+
+The family outcome verifier now compares the report's checkpoint SHA-256 against both `checkpoint_last.pt` and `checkpoint_last.pt.previous`. It chooses only the exact byte generation named by the report; it does not silently substitute a newer checkpoint. The selected generation must pass its own checksum sidecar and semantic deserialization checks, and its session ID, attempt ID, generation number, step and data/tokenizer/manifest provenance must match the report.
+
+The read-only `--audit-session` path performs the same cross-check for every recorded attempt. For terminal attempts it additionally requires the JSONL `model_finished` event's checkpoint generation, checkpoint digest, report timestamp and terminal outcome to match the report exactly. A damaged latest file can therefore be recovered only when the report names the intact previous generation and all lineage checks agree. Missing reports, mismatched attempts, generation/hash disagreement or provenance mismatch return a manual-review result; no checkpoint is rewritten and no training is resumed.
+
+Regression tests cover a corrupt latest checkpoint with an intact previous generation, a report that points to the wrong generation, journal/report generation disagreement, and exact previous-generation binding. CI execution remains necessary before this code is considered validated.
