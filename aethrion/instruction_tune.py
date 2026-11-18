@@ -14,6 +14,7 @@ import numpy as np
 import torch
 
 from aethrion.checkpoint import load_checkpoint, save_checkpoint, sha256_file, write_json_atomic
+from aethrion.train import capture_rng_state, restore_rng_state
 from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.specialist_data import validate_specialist_dataset
 from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
@@ -26,17 +27,6 @@ def _request_stop(signum, frame):
     global _STOP_REQUESTED
     _STOP_REQUESTED = True
     print(f"Stop requested (signal {signum}); instruction tuning will checkpoint after this step.", flush=True)
-
-
-def _rng_state():
-    state = {
-        "python": random.getstate(),
-        "numpy": np.random.get_state(),
-        "torch": torch.get_rng_state(),
-    }
-    if torch.cuda.is_available():
-        state["cuda"] = torch.cuda.get_rng_state_all()
-    return state
 
 
 def _batch(arrays, indices, device):
@@ -168,11 +158,7 @@ def tune_instructions(
         model.load_state_dict(state["model"])
         optimizer.load_state_dict(state["optimizer"])
         if state.get("rng_state"):
-            random.setstate(state["rng_state"]["python"])
-            np.random.set_state(state["rng_state"]["numpy"])
-            torch.set_rng_state(state["rng_state"]["torch"].cpu())
-            if torch.cuda.is_available() and "cuda" in state["rng_state"]:
-                torch.cuda.set_rng_state_all([item.cpu() for item in state["rng_state"]["cuda"]])
+            restore_rng_state(state["rng_state"])
         checkpoint_step = state.get("step")
         if type(checkpoint_step) is not int or checkpoint_step < 0:
             raise ValueError("Instruction-tuning resume checkpoint step is invalid.")
@@ -224,7 +210,7 @@ def tune_instructions(
                 "data_path": approval["dataset_path"],
                 "data_sha256": approval["dataset_sha256"],
                 "manifest_sha256": manifest_hash,
-                "rng_state": _rng_state(),
+                "rng_state": capture_rng_state(),
                 "training_stage": "instruction_tuning",
                 "base_checkpoint_sha256": base_checkpoint_hash,
             }
