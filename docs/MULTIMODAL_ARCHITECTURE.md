@@ -6,7 +6,7 @@ fall back to pretrained third-party models or hosted inference/search APIs.
 
 ## Independent model family
 
-- **AETHRION-BASE:** multilingual causal language model; separate pretraining
+- **AETHRION-CHAT:** multilingual causal language model; separate pretraining
   and response-only instruction tuning.
 - **AETHRION-CODE:** independent causal model for code completion, generation
   and repair.
