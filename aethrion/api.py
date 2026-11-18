@@ -236,6 +236,75 @@ def assistant(request: DispatchRequest):
         raise HTTPException(status_code=500, detail=f"Assistant orchestration failed: {type(exc).__name__}") from exc
 
 
+@app.post("/assistant/upload", dependencies=[Depends(require_api_token)])
+async def assistant_upload(
+    file: UploadFile = File(...),
+    prompt: str = Form(..., min_length=1, max_length=12000),
+    capability: str | None = Form(default=None),
+):
+    """Route one bounded uploaded file through CHAT's specialist intent path."""
+    try:
+        from aethrion.orchestrator import classify_intent
+        selected = classify_intent(
+            prompt,
+            {"capability": capability} if capability else None,
+        ).capability
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    file_contracts = {
+        Capability.VISION: ({".png", ".jpg", ".jpeg", ".webp"}, 20 * 1024 * 1024, "image_path"),
+        Capability.ASR: ({".wav"}, 25 * 1024 * 1024, "audio_path"),
+        Capability.DOCUMENT: (
+            {".pdf", ".docx", ".txt", ".md", ".json", ".csv", ".log"},
+            8 * 1024 * 1024,
+            "document_path",
+        ),
+    }
+    contract = file_contracts.get(selected)
+    if contract is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded files are supported only for VISION, ASR or DOCUMENT tasks.",
+        )
+    allowed_suffixes, max_bytes, option_key = contract
+    suffix = Path(file.filename or "").suffix.lower()
+    if suffix not in allowed_suffixes:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type for {selected.value}.")
+    raw = await file.read(max_bytes + 1)
+    await file.close()
+    if not raw:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    if len(raw) > max_bytes:
+        raise HTTPException(status_code=413, detail=f"Uploaded file exceeds {max_bytes // (1024 * 1024)} MiB.")
+
+    path = None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as handle:
+            handle.write(raw)
+            path = Path(handle.name)
+        result = AssistantOrchestrator(router).dispatch(
+            prompt,
+            {"capability": selected.value, option_key: str(path)},
+        )
+        return {
+            "capability": result.capability.value,
+            "delegated": result.delegated,
+            "reason": result.reason,
+            "provider": result.provider,
+            "result": result.output,
+        }
+    except AssistantInputRequired as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except CapabilityUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    finally:
+        if path is not None:
+            path.unlink(missing_ok=True)
+
+
 @app.post("/dispatch", dependencies=[Depends(require_api_token)])
 def dispatch(request:DispatchRequest):
     # File-bearing operations must use bounded upload endpoints. Never accept a
