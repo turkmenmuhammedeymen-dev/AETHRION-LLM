@@ -58,6 +58,75 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertEqual(report["blocked_count"], 11)
             self.assertFalse(report["training_started"])
 
+    def test_execute_preflights_entire_selection_before_starting_any_trainer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            def fake_preflight(repo, model_id):
+                if model_id == "code":
+                    raise FamilyTrainingError("code dataset is not approved")
+                return {
+                    "model_id": model_id,
+                    "ready": True,
+                    "command": ["python", "-m", "aethrion.train"],
+                    "output_dir": "artifacts/models/chat",
+                }
+
+            with patch("aethrion.train_family.preflight_model", side_effect=fake_preflight), \
+                 patch("aethrion.train_family.subprocess.run") as run:
+                report = run_family(root, selected=["chat", "code"], execute=True)
+
+            run.assert_not_called()
+            self.assertFalse(report["training_started"])
+            self.assertFalse(report["family_preflight_passed"])
+            self.assertEqual(report["models"][0]["status"], "not_started_family_preflight_blocked")
+            self.assertEqual(report["models"][1]["status"], "blocked")
+
+    def test_execute_starts_trainers_only_after_all_preflights_pass(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            def fake_preflight(repo, model_id):
+                return {
+                    "model_id": model_id,
+                    "ready": True,
+                    "command": ["python", "-m", f"aethrion.train_{model_id}"],
+                    "output_dir": f"artifacts/models/{model_id}",
+                }
+
+            completed = type("Completed", (), {"returncode": 0})()
+            with patch("aethrion.train_family.preflight_model", side_effect=fake_preflight), \
+                 patch("aethrion.train_family.subprocess.run", return_value=completed) as run:
+                report = run_family(root, selected=["chat", "code"], execute=True)
+
+            self.assertEqual(run.call_count, 2)
+            self.assertTrue(report["family_preflight_passed"])
+            self.assertEqual(report["model_count"], 2)
+            self.assertEqual(report["released_count"], 0)
+            self.assertTrue(report["training_started"])
+
+    def test_trainer_launch_os_error_is_reported_as_blocked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            def fake_preflight(repo, model_id):
+                return {
+                    "model_id": model_id,
+                    "ready": True,
+                    "command": ["missing-python", "-m", "aethrion.train"],
+                    "output_dir": "artifacts/models/chat",
+                }
+
+            with patch("aethrion.train_family.preflight_model", side_effect=fake_preflight), \
+                 patch("aethrion.train_family.subprocess.run", side_effect=FileNotFoundError("missing interpreter")):
+                report = run_family(root, selected=["chat"], execute=True)
+
+            self.assertFalse(report["training_started"])
+            self.assertEqual(report["blocked_count"], 1)
+            self.assertEqual(report["models"][0]["status"], "blocked")
+            self.assertEqual(report["models"][0]["failure_stage"], "trainer_launch")
+            self.assertIn("missing interpreter", report["models"][0]["reason"])
+
     def test_unknown_or_duplicate_model_selection_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(ValueError):

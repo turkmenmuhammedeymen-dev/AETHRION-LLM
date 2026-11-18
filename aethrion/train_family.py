@@ -175,7 +175,7 @@ def run_family(
     execute: bool = False,
     python_executable: str | None = None,
 ) -> dict[str, Any]:
-    """Preflight or sequentially execute every selected, fully approved model."""
+    """Preflight every selected model before starting any training process."""
     repo = Path(root).resolve()
     model_ids = selected or list(MODEL_IDS)
     if len(set(model_ids)) != len(model_ids):
@@ -184,6 +184,9 @@ def run_family(
     if unknown:
         raise FamilyTrainingError("Unknown model IDs: " + ", ".join(unknown))
 
+    # Phase 1: validate the complete selection. Never partially train a family
+    # because a later model turns out to have a missing or unapproved dataset.
+    plans: list[dict[str, Any] | None] = []
     rows: list[dict[str, Any]] = []
     for model_id in model_ids:
         try:
@@ -191,19 +194,10 @@ def run_family(
             command = list(plan["command"])
             if python_executable:
                 command[0] = python_executable
-            if not execute:
-                rows.append({**plan, "status": "ready_not_started"})
-                continue
-            completed = subprocess.run(command, cwd=repo, check=False)
-            rows.append({
-                **plan,
-                "command": command,
-                "status": _training_outcome(
-                    repo / plan["output_dir"], model_id, int(completed.returncode)
-                ),
-                "returncode": int(completed.returncode),
-            })
+            plans.append({**plan, "command": command})
+            rows.append({**plan, "command": command, "status": "ready_not_started"})
         except Exception as exc:
+            plans.append(None)
             rows.append({
                 "model_id": model_id,
                 "ready": False,
@@ -211,7 +205,80 @@ def run_family(
                 "reason": f"{type(exc).__name__}: {exc}",
             })
 
-    started = execute and any(
+    preflight_blocked = any(plan is None for plan in plans)
+    if execute and preflight_blocked:
+        # Explicitly mark otherwise-ready models as not started. This makes the
+        # family-wide gate visible and keeps subprocess.run untouched.
+        for row in rows:
+            if row.get("ready") is True:
+                row["status"] = "not_started_family_preflight_blocked"
+        return {
+            "format": "aethrion-family-training-run-v1",
+            "execution_policy": "local_only",
+            "model_count": len(rows),
+            "ready_count": sum(row.get("ready") is True for row in rows),
+            "blocked_count": sum(row.get("status") == "blocked" for row in rows),
+            "training_started": False,
+            "released_count": 0,
+            "execute_requested": True,
+            "family_preflight_passed": False,
+            "models": rows,
+            "note": (
+                "No trainer was started because at least one selected model failed preflight. "
+                "Resolve every selected model's independent data and approval gate, then rerun."
+            ),
+        }
+
+    if not execute:
+        for row in rows:
+            if row.get("ready") is not True:
+                row["status"] = "blocked"
+        return {
+            "format": "aethrion-family-training-run-v1",
+            "execution_policy": "local_only",
+            "model_count": len(rows),
+            "ready_count": sum(row.get("ready") is True for row in rows),
+            "blocked_count": sum(row.get("status") == "blocked" for row in rows),
+            "training_started": False,
+            "released_count": 0,
+            "execute_requested": False,
+            "family_preflight_passed": not preflight_blocked,
+            "models": rows,
+            "note": (
+                "Preflight only; no training process was started. "
+                "Training success is not a release; held-out evaluation, safety review, "
+                "artifact integrity and human approval remain mandatory."
+            ),
+        }
+
+    # Phase 2: only after every selected model has passed preflight may any
+    # trainer start. Each model still has its own checkpoint and release gate.
+    for index, model_id in enumerate(model_ids):
+        plan = plans[index]
+        assert plan is not None
+        try:
+            completed = subprocess.run(plan["command"], cwd=repo, check=False)
+        except OSError as exc:
+            # A missing interpreter/entrypoint or OS-level launch failure must
+            # become a structured blocked row, not abort the family report.
+            rows[index] = {
+                **plan,
+                "ready": False,
+                "status": "blocked",
+                "failure_stage": "trainer_launch",
+                "reason": f"{type(exc).__name__}: {exc}",
+                "training_started": False,
+            }
+            continue
+        rows[index] = {
+            **plan,
+            "status": _training_outcome(
+                repo / plan["output_dir"], model_id, int(completed.returncode)
+            ),
+            "returncode": int(completed.returncode),
+        }
+
+    started = any(
         row.get("status") in {
             "training_completed_not_released", "training_failed_not_released",
             "training_interrupted_not_released", "trainer_exited_without_verified_report",
@@ -229,7 +296,8 @@ def run_family(
         "blocked_count": sum(row.get("status") == "blocked" for row in rows),
         "training_started": bool(started),
         "released_count": 0,
-        "execute_requested": bool(execute),
+        "execute_requested": True,
+        "family_preflight_passed": True,
         "models": rows,
         "note": (
             "A successful training process is not a release. Independent held-out "
