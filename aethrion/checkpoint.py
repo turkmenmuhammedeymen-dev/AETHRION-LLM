@@ -106,8 +106,8 @@ def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
         # Preserve the last known-good generation before replacing either file.
         if target.is_file() and sidecar.is_file():
             try:
-                verify_checkpoint(target)
-            except ValueError:
+                _load_verified_checkpoint(target, "cpu")
+            except Exception:
                 pass
             else:
                 previous_tmp = Path(str(previous) + ".tmp")
