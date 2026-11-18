@@ -132,7 +132,7 @@ jobs:
               source_path = Path(temp) / filename
               source_path.write_bytes(raw)
               extracted = app.extract_doc(str(source_path))
-              assert "first paragraph" in extracted and "second paragraph" in extracted
+              assert "authentication" in extracted.lower(), "Raw document extraction must not bypass Space authentication"
 
           print("SPACE_RUNTIME_SMOKE_TEST_OK")
           PY
