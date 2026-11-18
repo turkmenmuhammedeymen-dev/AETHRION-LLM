@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from aethrion.api import build_router, get_native_model_statuses, _require_safety_allow_http, _require_safety_allow_chunks_http
 from aethrion.document_tools import create_document, extract_document_text, replace_document_text
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
+from aethrion.orchestrator import AssistantOrchestrator, AssistantInputRequired
 from aethrion.workspace_agent import MAX_ARCHIVE_BYTES, ProjectWorkspaceAgent, WorkspaceError, read_project_zip
 from aethrion.zerogpu_preflight import run_zero_gpu_preflight
 from aethrion.space_auth import space_auth_required
@@ -81,8 +82,16 @@ def gpu_diagnostics():
 
 @spaces.GPU(duration=60)
 def _gpu_local_chat(prompt):
-    result = dispatch(Capability.CHAT, prompt, {"max_new_tokens": 256})
-    return result.get("text", str(result)) if isinstance(result, dict) else str(result)
+    # The main assistant orchestrator delegates clear tasks to native specialists;
+    # ordinary or ambiguous conversation falls back to AETHRION-CHAT.
+    result = AssistantOrchestrator(router).dispatch(
+        prompt, {"max_new_tokens": 256}
+    )
+    output = result.output
+    text = output.get("text", str(output)) if isinstance(output, dict) else str(output)
+    if result.delegated:
+        return f"[AETHRION-{result.capability.value.upper()}]\\n{text}"
+    return text
 
 
 @spaces.GPU(duration=60)
@@ -128,8 +137,6 @@ def status():
 def chat(message, history):
     if not SPACE_AUTH_ENABLED:
         return _auth_required_message()
-    if Capability.CHAT.value not in router.available():
-        return "AETHRION's own trained checkpoint/tokenizer is not loaded. No third-party model is silently substituted."
     context = []
     for item in (history or [])[-8:]:
         if isinstance(item, dict) and isinstance(item.get("content"), str):
@@ -137,8 +144,10 @@ def chat(message, history):
     prompt = "\n".join(context + ["user: " + message[:4000], "assistant:"])
     try:
         return _gpu_local_chat(prompt)
-    except CapabilityUnavailable:
-        return "AETHRION's own trained checkpoint/tokenizer is not available. No third-party model is silently substituted."
+    except AssistantInputRequired as exc:
+        return str(exc)
+    except CapabilityUnavailable as exc:
+        return "AETHRION could not complete this task: " + str(exc)
 @spaces.GPU(duration=60)
 def code(prompt):
     if space_auth_required(SPACE_AUTH_ENABLED):
