@@ -66,6 +66,11 @@ def _group_id(row: dict[str, Any], *, fallback: str | None = None) -> str:
     return value.strip()
 
 
+def _group_hash(group_id: str) -> str:
+    """Store only a one-way pseudonymous provenance identifier in prepared NPZ data."""
+    return hashlib.sha256(group_id.encode("utf-8")).hexdigest()
+
+
 def _split(sample_id: str, seed: int) -> str:
     value = int(hashlib.sha256(f"{seed}:{sample_id}".encode()).hexdigest()[:8], 16) % 100
     return "train" if value < 80 else "validation" if value < 90 else "test"
