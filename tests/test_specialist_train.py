@@ -84,6 +84,8 @@ class SpecialistTrainingTests(unittest.TestCase):
                 ("grad_clip", float("inf")),
                 ("max_steps", True),
                 ("model_config", {**base["model_config"], "dropout": float("nan")}),
+                ("seed", 2**32),
+                ("model_config", {**base["model_config"], "width": 10**1000}),
             ]
             missing_manifest = root / "not-created-manifest.json"
             for key, value in invalid_cases:
