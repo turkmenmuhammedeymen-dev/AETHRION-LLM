@@ -238,6 +238,44 @@ class SpecialistTrainingTests(unittest.TestCase):
             self.assertEqual(report["status"], "training_complete_not_released")
             self.assertFalse(specialist_train._STOP_REQUESTED)
 
+    def test_specialist_sidecar_replace_crash_recovers_durable_previous_generation(self):
+        from unittest.mock import patch
+        from aethrion.specialist_train import _capture_rng_state, _load_checkpoint, _save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            base = {
+                "format": "aethrion-specialist-checkpoint-v2",
+                "model_id": "code", "step": 0, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": _capture_rng_state(),
+                "training_config": {"seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                                    "weight_decay": 0.0, "grad_clip": 1.0,
+                                    "eval_interval": 1, "save_interval": 1, "max_steps": 2},
+            }
+            _save_checkpoint(checkpoint, base)
+            original_replace = specialist_train.os.replace
+            sidecar = Path(str(checkpoint) + ".sha256")
+
+            def fail_live_sidecar(source, destination):
+                if Path(destination) == sidecar:
+                    raise OSError("simulated interruption before live sidecar promotion")
+                return original_replace(source, destination)
+
+            with patch("aethrion.specialist_train.os.replace", side_effect=fail_live_sidecar):
+                with self.assertRaisesRegex(OSError, "simulated interruption"):
+                    _save_checkpoint(checkpoint, {**base, "step": 1})
+
+            recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
+            self.assertEqual(recovered["step"], 0)
+            previous = Path(str(checkpoint) + ".previous")
+            previous_sidecar = Path(str(previous) + ".sha256")
+            self.assertEqual(
+                hashlib.sha256(previous.read_bytes()).hexdigest(),
+                previous_sidecar.read_text(encoding="ascii").strip(),
+            )
+
     def test_training_resumes_and_preserves_verified_previous_checkpoint(self):
         from aethrion.specialist_train import _load_checkpoint
         with tempfile.TemporaryDirectory() as directory:
