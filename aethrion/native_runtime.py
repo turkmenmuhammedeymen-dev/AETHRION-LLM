@@ -223,11 +223,21 @@ class NativeModelRuntime:
         output = tokenizer.decode(result[0, context.size(1):].tolist())
         return {"text": output, "model": f"AETHRION-{capability.upper()}"}
 
+    @staticmethod
+    def _validate_inference_steps(inference_steps: int) -> None:
+        if (
+            isinstance(inference_steps, bool)
+            or not isinstance(inference_steps, int)
+            or not 2 <= inference_steps <= 100
+        ):
+            raise ValueError("inference_steps must be an integer between 2 and 100.")
+
     @torch.no_grad()
     def generate_image(
         self, prompt: str, output_path: str | Path | None = None,
         *, inference_steps: int = 50
     ) -> Path:
+        self._validate_inference_steps(inference_steps)
         model = self.model("image")
         tokenizer = self.tokenizer("image")
         context = self._text_context(tokenizer, model, prompt, self.device)
@@ -325,6 +335,7 @@ class NativeModelRuntime:
     @torch.no_grad()
     def generate_point_cloud(self, prompt: str, output_path: str | Path | None = None,
                              *, inference_steps: int = 50) -> Path:
+        self._validate_inference_steps(inference_steps)
         from aethrion.model_3d import point_cloud_to_obj
         model = self.model("3d")
         tokenizer = self.tokenizer("3d")
@@ -341,18 +352,22 @@ class NativeModelRuntime:
     def handle(self, capability: str, request: Any) -> dict[str, Any]:
         """Adapt a validated local model call to the shared capability router."""
         prompt = getattr(request, "prompt", "")
-        options = getattr(request, "options", {}) or {}
+        options = getattr(request, "options", {})
+        if options is None:
+            options = {}
+        if not isinstance(options, dict):
+            raise ValueError("Request options must be an object.")
         if capability in {"chat", "code"}:
             return self.generate_text(
                 capability, prompt,
-                max_new_tokens=min(int(options.get("max_new_tokens", 256)), 1024),
-                temperature=float(options.get("temperature", 0.8)),
+                max_new_tokens=options.get("max_new_tokens", 256),
+                temperature=options.get("temperature", 0.8),
                 top_k=options.get("top_k", 50),
-                top_p=float(options.get("top_p", 0.95)),
+                top_p=options.get("top_p", 0.95),
             )
         if capability == "image":
             path = self.generate_image(
-                prompt, inference_steps=min(int(options.get("inference_steps", 50)), 100)
+                prompt, inference_steps=options.get("inference_steps", 50)
             )
             return {"image_path": str(path), "format": "png", "model": "AETHRION-IMAGE"}
         if capability == "vision":
@@ -373,13 +388,13 @@ class NativeModelRuntime:
         if capability == "3d":
             output = self.generate_point_cloud(
                 prompt,
-                inference_steps=min(int(options.get("inference_steps", 50)), 100)
+                inference_steps=options.get("inference_steps", 50)
             )
             return {"asset_path": str(output), "format": "obj-point-cloud",
                     "model": "AETHRION-3D",
                     "note": "Vertex-only point cloud; not a watertight mesh or textured asset."}
         if capability == "research":
-            return self.search_research(prompt, top_k=min(int(options.get("top_k", 5)), 20))
+            return self.search_research(prompt, top_k=options.get("top_k", 5))
         if capability == "document":
             document_path = options.get("document_path")
             if not isinstance(document_path, str) or not document_path:
@@ -470,8 +485,11 @@ class NativeModelRuntime:
     @torch.no_grad()
     def search_research(self, query: str, top_k: int = 5) -> dict[str, Any]:
         """Retrieve evidence from a previously built and hash-verified local corpus index."""
-        if not 1 <= top_k <= 20:
-            raise ValueError("top_k must be between 1 and 20.")
+        if (
+            isinstance(top_k, bool) or not isinstance(top_k, int)
+            or not 1 <= top_k <= 20
+        ):
+            raise ValueError("top_k must be an integer between 1 and 20.")
         model = self.model("research")
         tokenizer = self.tokenizer("research")
         processor = self.processor("research")
