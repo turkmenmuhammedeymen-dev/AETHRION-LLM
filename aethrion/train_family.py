@@ -239,6 +239,8 @@ def _training_outcome(
     *,
     checkpoint_path: Path | None = None,
     started_at_ns: int | None = None,
+    session_id: str | None = None,
+    attempt_id: str | None = None,
     allow_interrupted: bool = False,
 ) -> str:
     """Accept only a fresh, model-matched report backed by the exact checkpoint bytes."""
@@ -257,6 +259,16 @@ def _training_outcome(
         return "training_report_model_mismatch_not_released"
     if report.get("release_status") != "NOT_RELEASED":
         return "training_report_release_state_invalid_not_released"
+    if session_id is not None and report.get("session_id") != session_id:
+        return "training_report_session_mismatch_not_released"
+    if attempt_id is not None and report.get("attempt_id") != attempt_id:
+        return "training_report_attempt_mismatch_not_released"
+    report_created_at_ns = report.get("report_created_at_ns")
+    if (
+        type(report_created_at_ns) is not int
+        or (started_at_ns is not None and report_created_at_ns < started_at_ns)
+    ):
+        return "training_report_timestamp_invalid_not_released"
     status = report.get("status")
     if status not in {"training_complete_not_released", "training_interrupted_not_released"}:
         return "trainer_report_unrecognized_not_released"
@@ -307,6 +319,12 @@ def _training_outcome(
             from aethrion.checkpoint import load_checkpoint
             checkpoint_state = load_checkpoint(checkpoint_path, map_location="cpu")
             checkpoint_step = checkpoint_state.get("step")
+            if (
+                checkpoint_state.get("session_id") != session_id
+                or checkpoint_state.get("attempt_id") != attempt_id
+                or checkpoint_state.get("checkpoint_generation") != report.get("checkpoint_generation")
+            ):
+                return "training_checkpoint_session_generation_mismatch_not_released"
             report_step = report["step"]
             if type(checkpoint_step) is not int or checkpoint_step != report_step:
                 return "training_report_checkpoint_step_mismatch_not_released"
@@ -314,6 +332,12 @@ def _training_outcome(
             from aethrion.specialist_train import _load_checkpoint
             checkpoint_state = _load_checkpoint(checkpoint_path, torch.device("cpu"))
             checkpoint_step = checkpoint_state.get("step")
+            if (
+                checkpoint_state.get("session_id") != session_id
+                or checkpoint_state.get("attempt_id") != attempt_id
+                or checkpoint_state.get("checkpoint_generation") != report.get("checkpoint_generation")
+            ):
+                return "training_checkpoint_session_generation_mismatch_not_released"
             report_steps = report["steps"]
             if (
                 checkpoint_state.get("model_id") != model_id
@@ -445,10 +469,18 @@ def run_family(
                     rows.append({**plan, "status": "ready_not_started"})
                     continue
 
-                rows.append({**plan, "status": "running", "process_started": False})
+                attempt_id = uuid.uuid4().hex
+                command.extend(["--session-id", session_id, "--attempt-id", attempt_id])
+                rows.append({**plan, "status": "running", "process_started": False,
+                             "attempt_id": attempt_id, "session_id": session_id})
                 persist("running", model_id)
                 try:
                     report_started_at_ns = time.time_ns()
+                    _append_session_event(events_path, {
+                        "event": "model_attempt_started", "session_id": session_id,
+                        "attempt_id": attempt_id, "model_id": model_id,
+                        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                    })
                     _ACTIVE_CHILD = subprocess.Popen(command, cwd=repo)
                     rows[-1]["process_started"] = True
                     _append_session_event(events_path, {
@@ -473,11 +505,13 @@ def run_family(
                     repo / plan["output_dir"], model_id, returncode,
                     checkpoint_path=repo / plan["checkpoint"],
                     started_at_ns=report_started_at_ns,
+                    session_id=session_id, attempt_id=attempt_id,
                     allow_interrupted=_STOP_REQUESTED,
                 )
                 row.pop("ready", None)
                 _append_session_event(events_path, {
                     "event": "model_finished", "session_id": session_id,
+                    "attempt_id": attempt_id,
                     "model_id": model_id, "status": row["status"],
                     "returncode": returncode,
                     "timestamp_utc": datetime.now(timezone.utc).isoformat(),
