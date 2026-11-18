@@ -208,7 +208,7 @@ class SpecialistTrainingTests(unittest.TestCase):
                 "model_id": "code", "step": 0, "model_config": {},
                 "model_state": {}, "optimizer_state": {},
                 "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
-                "manifest_sha256": "2" * 64, "rng_state": {},
+                "manifest_sha256": "2" * 64, "rng_state": specialist_train._capture_rng_state(),
                 "training_config": {
                     "seed": 11, "batch_size": 2, "learning_rate": 0.001,
                     "weight_decay": 0.0, "grad_clip": 1.0,
