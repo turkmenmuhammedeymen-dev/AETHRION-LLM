@@ -209,6 +209,11 @@ class SpecialistTrainingTests(unittest.TestCase):
                 "model_state": {}, "optimizer_state": {},
                 "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
                 "manifest_sha256": "2" * 64, "rng_state": {},
+                "training_config": {
+                    "seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                    "weight_decay": 0.0, "grad_clip": 1.0,
+                    "eval_interval": 1, "save_interval": 1, "max_steps": 2,
+                },
             }
             _save_checkpoint(checkpoint, base)
             _save_checkpoint(checkpoint, {**base, "step": 1})
@@ -251,6 +256,32 @@ class SpecialistTrainingTests(unittest.TestCase):
             self.assertEqual(recovered["step"], 0)
             self.assertEqual(recovered["model_id"], "code")
             self.assertEqual(report["release_status"], "NOT_RELEASED")
+
+    def test_training_resume_rejects_changed_optimizer_or_batch_settings(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            config["max_steps"] = 2
+            train_specialist(config, manifest)
+            checkpoint = root / "artifacts" / "checkpoint_last.pt"
+            changed = dict(config)
+            changed["batch_size"] = 3
+            with self.assertRaisesRegex(ValueError, "training settings changed"):
+                train_specialist(changed, manifest, resume=checkpoint)
+
+    def test_training_resume_rejects_shorter_original_training_horizon(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            config["max_steps"] = 2
+            train_specialist(config, manifest)
+            checkpoint = root / "artifacts" / "checkpoint_last.pt"
+            shortened = dict(config)
+            shortened["max_steps"] = 1
+            with self.assertRaisesRegex(ValueError, "max_steps cannot be lower"):
+                train_specialist(shortened, manifest, resume=checkpoint)
 
     def test_training_resume_continues_after_verified_checkpoint(self):
         with tempfile.TemporaryDirectory() as directory:
