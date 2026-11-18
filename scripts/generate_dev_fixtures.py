@@ -4,7 +4,7 @@ These synthetic files exercise format readers only. They are not training data.
 No approval flag is ever set to true.
 """
 from __future__ import annotations
-import argparse, json, math
+import argparse, hashlib, json, math
 from pathlib import Path
 import numpy as np
 
@@ -16,6 +16,20 @@ TEXT = {
 "document":["Başlık: Sistem Durumu\nBölüm: Veri bütünlüğü\nDurum: İnceleme bekliyor","Başlık: Deney Raporu\nAmaç: Tekrarlanabilirliği ölçmek\nYöntem: Sabit tohum ve sürüm kaydı","Başlık: Proje Kararı\nKarar: Dağıtım ertelendi\nGerekçe: Değerlendirme kanıtı eksik"],
 "safety":["Bir hesabın güvenliğini artırmak için hangi savunma adımlarını uygulamalıyım?","Bu isteğin amacı belirsiz; güvenli ve yasal kullanım bağlamını açıklar mısın?","Başkasının hesabına izinsiz erişmeye yardımcı olamam; hesap kurtarma adımlarını anlatabilirim."]
 }
+def _fixture_groups(model, seed=1337):
+    """Choose deterministic group IDs covering train/validation/test splits."""
+    targets = ("train", "validation", "test")
+    found = {}
+    candidate = 1
+    while len(found) < len(targets):
+        group_id = f"synthetic-{model}-{candidate}"
+        value = int(hashlib.sha256(f"{seed}:{group_id}".encode()).hexdigest()[:8], 16) % 100
+        split = "train" if value < 80 else "validation" if value < 90 else "test"
+        found.setdefault(split, group_id)
+        candidate += 1
+    return [found[name] for name in targets]
+
+
 def write_jsonl(path, rows):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps(x,ensure_ascii=False)+"\n" for x in rows),encoding="utf-8")
@@ -30,9 +44,9 @@ def main():
     p=argparse.ArgumentParser(); p.add_argument("--output",default="data/dev_fixtures"); root=Path(p.parse_args().output).resolve(); root.mkdir(parents=True,exist_ok=True)
     (root/"base.txt").write_text("\n".join(["AETHRION fikstürü: dosya bütünlüğü SHA-256 ile denetlenir.","AETHRION fikstürü: veri bölümleri kaynak bazında ayrılır.","AETHRION fikstürü: güvenlik etiketi insan incelemesi olmadan onaylanmaz."])+"\n",encoding="utf-8")
     for model, samples in TEXT.items():
-        rows=[]
+        rows=[]; groups=_fixture_groups(model)
         for i,s in enumerate(samples,1):
-            row={"id":f"{model}-{i:03d}","group_id":f"synthetic-{model}-{i}"}
+            row={"id":f"{model}-{i:03d}","group_id":groups[i-1]}
             if model=="chat": row.update(prompt=s[0],response=s[1])
             elif model=="research": row.update(query=s[0],passage=s[1])
             else: row["text"]=s
@@ -40,16 +54,16 @@ def main():
             rows.append(row)
         write_jsonl(root/model/"records.jsonl",rows)
     for model in ("vision","image"):
-        rows=[]
+        rows=[]; groups=_fixture_groups(model)
         for i in range(3):
             name=f"abstract-{i+1}.ppm"; ppm(root/model/"assets"/name,i)
-            rows.append({"id":f"{model}-{i+1}","group_id":f"synthetic-{model}-{i+1}","image_path":f"assets/{name}","caption":"Sentetik geometrik renk deseni; gerçek dünya nesnesi değildir."})
+            rows.append({"id":f"{model}-{i+1}","group_id":groups[i],"image_path":f"assets/{name}","caption":"Sentetik geometrik renk deseni; gerçek dünya nesnesi değildir."})
         write_jsonl(root/model/"records.jsonl",rows)
-    rows=[]
+    rows=[]; groups=_fixture_groups("3d")
     for i in range(3):
         rng=np.random.default_rng(1000+i); pts=rng.uniform(-.8,.8,size=(64,3)).astype(np.float32)
         path=root/"3d"/"assets"/f"cloud-{i+1}.npy"; path.parent.mkdir(parents=True,exist_ok=True); np.save(path,pts,allow_pickle=False)
-        rows.append({"id":f"3d-{i+1}","group_id":f"synthetic-3d-{i+1}","point_path":f"assets/{path.name}","text":"Sentetik rastgele nokta bulutu; anlamlı nesne geometrisi değildir."})
+        rows.append({"id":f"3d-{i+1}","group_id":groups[i],"point_path":f"assets/{path.name}","text":"Sentetik rastgele nokta bulutu; anlamlı nesne geometrisi değildir."})
     write_jsonl(root/"3d"/"records.jsonl",rows)
     manifest={"format":"aethrion-dev-fixtures-v1","dataset_status":"synthetic_smoke_fixtures_only","training_allowed":False,"owner_approval":False,"privacy_reviewed":False,"human_reviewed":False,"production_data":False,"models":{}}
     for model in MODEL_IDS:
