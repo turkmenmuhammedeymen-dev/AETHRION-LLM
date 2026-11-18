@@ -71,6 +71,21 @@ class ExtendedMultimodalTests(unittest.TestCase):
         with self.assertRaisesRegex(DocumentError,"oversized entry"):
             _validate_docx_archive(buf.getvalue())
 
+    def test_workspace_model_changes_reject_duplicate_normalized_paths(self):
+        from aethrion.workspace_agent import _validate
+        with self.assertRaisesRegex(WorkspaceError, "Duplicate normalized"):
+            _validate({"folder\\\\" + "main.py": "print(1)", "folder/main.py": "print(2)"}, {})
+
+    def test_workspace_model_changes_enforce_total_updated_text_budget(self):
+        from aethrion.workspace_agent import MAX_PROJECT_TEXT, _validate
+        with self.assertRaisesRegex(WorkspaceError, "total text budget"):
+            _validate({"large.py": "x" * (MAX_PROJECT_TEXT + 1)}, {})
+
+    def test_workspace_rejects_non_string_archive_paths(self):
+        from aethrion.workspace_agent import _safe_name
+        with self.assertRaises(WorkspaceError):
+            _safe_name(123)
+
     def test_workspace_reads_small_python_project(self):
         buf=io.BytesIO()
         with zipfile.ZipFile(buf,"w") as z: z.writestr("main.py","print('hello')\n")
