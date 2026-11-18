@@ -13,7 +13,7 @@ from aethrion.specialist_data import (
 
 
 class SpecialistDataApprovalTests(unittest.TestCase):
-    def _fixture(self, root: Path, *, approved=True):
+    def _fixture(self, root: Path, *, approved=False):
         source = root / "source.txt"
         source.write_text("Synthetic test-only code corpus.", encoding="utf-8")
         dataset = root / "dataset.npz"
@@ -91,9 +91,9 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             with self.assertRaisesRegex(SpecialistDataError, "Training blocked"):
                 validate_specialist_dataset(manifest)
 
-    def test_approved_test_fixture_is_schema_and_hash_verified(self):
+    def test_synthetic_test_fixture_is_schema_and_hash_verified_without_training_approval(self):
         with tempfile.TemporaryDirectory() as directory:
-            manifest, _ = self._fixture(Path(directory), approved=True)
+            manifest, _ = self._fixture(Path(directory), approved=False)
             result = validate_specialist_dataset(manifest, require_training_approval=False)
             self.assertEqual(result["model_id"], "code")
             self.assertEqual(result["sample_count"], 6)
@@ -303,8 +303,8 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             "dataset_id": "synthetic-safety-taxonomy-test-only",
             "model_id": "safety",
             "modality": "text",
-            "training_allowed": True,
-            "owner_approval": True,
+            "training_allowed": False,
+            "owner_approval": False,
             "privacy_reviewed": True,
             "governance": {
                 "schema": "aethrion-human-review-v1",
@@ -336,7 +336,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                 "license": "SYNTHETIC_UNIT_TEST_FIXTURE",
                 "permitted_use": "Unit tests only; no production training",
                 "evidence_uri": "unit-test://safety-fixture",
-                "allow_training": True,
+                "allow_training": False,
                 "privacy_reviewed": True,
             }],
         }
