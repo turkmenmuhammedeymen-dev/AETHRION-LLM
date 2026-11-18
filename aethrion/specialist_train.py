@@ -309,10 +309,25 @@ def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
             candidate.unlink(missing_ok=True)
 
 
+def _resume_training_config(config: dict[str, Any]) -> dict[str, Any]:
+    """Capture the training settings that must remain stable across a resumed run."""
+    return {
+        "seed": int(config["seed"]),
+        "batch_size": int(config["batch_size"]),
+        "learning_rate": float(config["learning_rate"]),
+        "weight_decay": float(config["weight_decay"]),
+        "grad_clip": float(config["grad_clip"]),
+        "eval_interval": int(config["eval_interval"]),
+        "save_interval": int(config["save_interval"]),
+        "max_steps": int(config["max_steps"]),
+    }
+
+
 def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
     """Verify and safely load the newest generation, recovering from the previous one."""
     required = {"model_id", "step", "model_config", "model_state", "optimizer_state",
-                "dataset_sha256", "tokenizer_sha256", "manifest_sha256", "rng_state"}
+                "dataset_sha256", "tokenizer_sha256", "manifest_sha256", "rng_state",
+                "training_config"}
 
     def load_verified(candidate: Path) -> dict[str, Any]:
         sidecar = Path(str(candidate) + ".sha256")
@@ -451,6 +466,16 @@ def train_specialist(
             raise ValueError("Resume tokenizer differs from the verified specialist tokenizer.")
         if state.get("manifest_sha256") != manifest_hash:
             raise ValueError("Specialist source/approval manifest changed; refusing unsafe resume.")
+        saved_training_config = state.get("training_config")
+        current_training_config = _resume_training_config(config)
+        if not isinstance(saved_training_config, dict):
+            raise ValueError("Resume checkpoint is missing its verified training configuration.")
+        saved_fixed = {key: value for key, value in saved_training_config.items() if key != "max_steps"}
+        current_fixed = {key: value for key, value in current_training_config.items() if key != "max_steps"}
+        if saved_fixed != current_fixed:
+            raise ValueError("Specialist training settings changed; refusing a non-reproducible resume.")
+        if current_training_config["max_steps"] < saved_training_config.get("max_steps", 0):
+            raise ValueError("Resume max_steps cannot be lower than the checkpoint training horizon.")
         model.load_state_dict(state["model_state"])
         optimizer.load_state_dict(state["optimizer_state"])
         _restore_rng_state(state["rng_state"])
@@ -501,6 +526,7 @@ def train_specialist(
                 "format": "aethrion-specialist-checkpoint-v1",
                 "model_id": model_id, "step": step,
                 "model_config": config["model_config"],
+                "training_config": _resume_training_config(config),
                 "model_state": model.state_dict(),
                 "optimizer_state": optimizer.state_dict(),
                 "dataset_sha256": approval["dataset_sha256"],
