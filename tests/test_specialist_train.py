@@ -62,7 +62,7 @@ class SpecialistTrainingTests(unittest.TestCase):
                 "source_path": "source.txt",
                 "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                 "license": "Synthetic unit test fixture",
-                "permitted_use": "This fixture may only be used by the unit test",
+                "permitted_use": "Unit-test training fixture only; not production training data",
                 "evidence_uri": "unit-test://fixture-license",
                 "allow_training": approved,
                 "privacy_reviewed": approved,
