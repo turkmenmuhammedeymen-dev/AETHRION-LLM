@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 from typing import Any
+from urllib.parse import urlsplit
 
 import numpy as np
 
@@ -329,6 +330,23 @@ def validate_specialist_dataset(
             raise SpecialistDataError("A reviewed source file SHA-256 mismatch.")
         if source.get("allow_training") is not True:
             raise SpecialistDataError("Training blocked: one or more source licenses are not approved.")
+        if require_training_approval:
+            license_name = source["license"].strip()
+            normalized_license = re.sub(r"[^a-z0-9]+", "_", license_name.casefold()).strip("_")
+            if normalized_license in {
+                "unknown", "pending", "pending_human_review", "unverified", "tbd",
+                "none", "n_a", "not_specified", "synthetic_unit_test_fixture",
+                "test_only", "unit_test_only",
+            } or any(marker in normalized_license for marker in ("pending", "unverified", "test_fixture")):
+                raise SpecialistDataError("Training blocked: source license is pending, unknown, or test-only.")
+            permitted_use = source["permitted_use"].strip().casefold()
+            if not re.search(r"\\b(training|train|machine learning|model development)\\b", permitted_use):
+                raise SpecialistDataError("Training blocked: source permitted_use does not explicitly authorize model training.")
+            if re.search(r"\\b(not for training|no training|training prohibited|training not permitted|evaluation only|testing only|unit tests only)\\b", permitted_use):
+                raise SpecialistDataError("Training blocked: source permitted_use excludes model training.")
+            evidence = urlsplit(source["evidence_uri"].strip())
+            if evidence.scheme != "https" or not evidence.hostname or evidence.username or evidence.password:
+                raise SpecialistDataError("Training blocked: source rights evidence must be an HTTPS URL.")
         if source.get("privacy_reviewed") is not True:
             raise SpecialistDataError("Training blocked: one or more sources lack privacy approval.")
         if model_id in AUDIO_MODELS and source.get("speaker_consent_verified") is not True:
