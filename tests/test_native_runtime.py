@@ -33,6 +33,7 @@ class NativeModelRuntimeTests(unittest.TestCase):
             "model_config": asdict(config),
             "model_state": model.state_dict(),
             "dataset_sha256": "a" * 64,
+            "training_config": {"stage": "native-runtime-test-fixture"},
         }, checkpoint)
         tokenizer = ByteBPETokenizer()
         tokenizer.train("AETHRION native code model fixture. " * 8, vocab_size=256)
