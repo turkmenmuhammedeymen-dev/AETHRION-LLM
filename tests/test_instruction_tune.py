@@ -73,6 +73,7 @@ class InstructionTuningTests(unittest.TestCase):
                 "approval_status": "approved",
                 "author_role": "unit-test author",
                 "authorship_attested": True,
+            "first_party_origin_attested": True,
                 "rights_holder_role": "unit-test rights holder",
                 "rights_attested": True,
                 "source_rights_reviewed": True,
