@@ -181,7 +181,7 @@ def image(prompt):
             raise gr.Error("AETHRION-IMAGE returned no local PNG file.")
         return path
     except CapabilityUnavailable as exc:
-        raise gr.Error("AETHRION-IMAGE is not trained and released yet.") from exc
+        raise gr.Error("AETHRION-IMAGE is unavailable until local visual-output safety screening is implemented and released.") from exc
     except Exception as exc:
         raise gr.Error("Native image generation failed: " + type(exc).__name__) from exc
 
@@ -196,7 +196,7 @@ def three_d_text(prompt):
             return "AETHRION-3D returned no local OBJ file.", ""
         return "Native AETHRION point cloud generated. This is a vertex-only OBJ, not a watertight mesh.", str(path)
     except CapabilityUnavailable:
-        return "AETHRION-3D is not trained and released yet. No external 3D service is used.", ""
+        return "AETHRION-3D is unavailable until local 3D-output safety screening is implemented and released. No external 3D service is used.", ""
     except Exception as exc:
         return "Native 3D generation failed: " + type(exc).__name__, ""
 
