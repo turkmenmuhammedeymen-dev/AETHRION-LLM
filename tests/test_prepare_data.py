@@ -1,9 +1,12 @@
 import csv
 import hashlib
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+
+os.environ["AETHRION_BASE_AUDIT_HMAC_KEY"] = "unit-test-only-key-not-for-production-0001"
 
 from aethrion.prepare_data import (
     build_corpus,
@@ -132,7 +135,89 @@ class CorpusPreparationTests(unittest.TestCase):
             report["output"]["sha256"] = hashlib.sha256(combined).hexdigest()
             report["output"]["bytes"] = len(combined)
             report_path.write_text(json.dumps(report), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "does not reproduce from reviewed source records"):
+            with self.assertRaisesRegex(ValueError, "signature verification failed"):
+                validate_training_approval(
+                    dataset_manifest, manifest, root, corpus, report_path
+                )
+
+    def test_group_id_and_report_rewrite_attack_fails_hmac_verification(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            entries = []
+            source_paths = []
+            for index in range(3):
+                path = root / f"source-{index}.jsonl"
+                path.write_text(json.dumps({
+                    "group_id": f"reviewed-group-{index}",
+                    "text": f"Unique independent source {index} provides enough text for this fixture.",
+                }) + "\n", encoding="utf-8")
+                source_paths.append(path)
+                entries.append({
+                    "source_id": f"source-{index}",
+                    "path": path.name,
+                    "license": "Synthetic unit-test fixture",
+                    "permitted_uses": "training permitted for unit-test fixture only",
+                    "allow_training": True,
+                })
+            manifest = root / "sources.json"
+            manifest.write_text(json.dumps({"sources": entries}), encoding="utf-8")
+            dataset_manifest = self._write_dataset_manifest(root)
+            corpus = root / "out/corpus.txt"
+            report_path = root / "out/report.json"
+            report = build_corpus(
+                root, manifest, corpus, report_path, min_chars=10, min_records=1,
+                dataset_manifest_path=dataset_manifest,
+            )
+            signature_path = Path(str(report_path) + ".hmac")
+            self.assertTrue(signature_path.is_file())
+
+            # Simulate an attacker relabeling provenance and rewriting the report's
+            # source digest to match the changed raw source, while lacking the HMAC key.
+            payload = json.loads(source_paths[0].read_text(encoding="utf-8"))
+            payload["group_id"] = "attacker-invented-independent-group"
+            source_paths[0].write_text(json.dumps(payload) + "\n", encoding="utf-8")
+            report["sources"][0]["sha256"] = hashlib.sha256(
+                source_paths[0].read_bytes()
+            ).hexdigest()
+            report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+                                   encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "signature verification failed"):
+                validate_training_approval(
+                    dataset_manifest, manifest, root, corpus, report_path
+                )
+
+    def test_signed_report_is_bound_to_current_source_manifest(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            entries = []
+            for index in range(3):
+                path = root / f"source-{index}.txt"
+                path.write_text(
+                    f"Independent source {index} contains a unique reviewed sentence.\n",
+                    encoding="utf-8",
+                )
+                entries.append({
+                    "source_id": f"source-{index}",
+                    "path": path.name,
+                    "license": "Synthetic unit-test fixture",
+                    "permitted_uses": "training permitted for unit-test fixture only",
+                    "allow_training": True,
+                })
+            manifest = root / "sources.json"
+            manifest.write_text(json.dumps({"sources": entries}), encoding="utf-8")
+            dataset_manifest = self._write_dataset_manifest(root)
+            corpus = root / "out/corpus.txt"
+            report_path = root / "out/report.json"
+            build_corpus(
+                root, manifest, corpus, report_path, min_chars=10, min_records=1,
+                dataset_manifest_path=dataset_manifest,
+            )
+
+            # A valid report signature cannot authorize a changed source manifest.
+            entries[0]["license"] = "Changed after review"
+            manifest.write_text(json.dumps({"sources": entries}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "not bound to the current dataset"):
                 validate_training_approval(
                     dataset_manifest, manifest, root, corpus, report_path
                 )

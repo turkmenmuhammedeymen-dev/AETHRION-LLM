@@ -4,7 +4,9 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import hmac
 import json
+import os
 import random
 import re
 import unicodedata
@@ -36,6 +38,51 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+REPORT_HMAC_ENV = "AETHRION_BASE_AUDIT_HMAC_KEY"
+REPORT_HMAC_FORMAT = "aethrion-corpus-report-hmac-v1"
+
+
+def _audit_hmac_key(*, required: bool) -> bytes | None:
+    value = os.environ.get(REPORT_HMAC_ENV)
+    if not value:
+        if required:
+            raise ValueError(
+                "Training blocked: trusted BASE audit HMAC key is not configured."
+            )
+        return None
+    key = value.encode("utf-8")
+    if len(key) < 32:
+        raise ValueError("BASE audit HMAC key must contain at least 32 UTF-8 bytes.")
+    return key
+
+
+def _report_signature_path(report_path: Path) -> Path:
+    return Path(str(report_path) + ".hmac")
+
+
+def _write_report_signature(report_path: Path) -> bool:
+    key = _audit_hmac_key(required=False)
+    if key is None:
+        return False
+    signature = hmac.new(key, report_path.read_bytes(), hashlib.sha256).hexdigest()
+    _report_signature_path(report_path).write_text(
+        f"{REPORT_HMAC_FORMAT} {signature}\n", encoding="ascii"
+    )
+    return True
+
+
+def _verify_report_signature(report_path: Path) -> None:
+    key = _audit_hmac_key(required=True)
+    signature_path = _report_signature_path(report_path)
+    if not signature_path.is_file():
+        raise ValueError("Training blocked: signed corpus audit report is missing its HMAC sidecar.")
+    fields = signature_path.read_text(encoding="ascii").strip().split()
+    if len(fields) != 2 or fields[0] != REPORT_HMAC_FORMAT:
+        raise ValueError("Training blocked: corpus audit HMAC sidecar is malformed.")
+    expected = hmac.new(key, report_path.read_bytes(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(fields[1], expected):
+        raise ValueError("Training blocked: corpus audit report signature verification failed.")
 
 
 def load_dataset_manifest(path: Path) -> dict:
@@ -422,6 +469,14 @@ def build_corpus(
         "split_strategy": "whole-source-or-exact-hostname-group-v1",
         "splits": split_report,
         "sources": stats,
+        "integrity": {
+            "schema": "aethrion-base-input-binding-v1",
+            "dataset_manifest_sha256": sha256_file(dataset_manifest_path),
+            "source_manifest_sha256": sha256_file(manifest_path),
+            "source_review_sha256": (
+                sha256_file(source_review_path) if source_review_path is not None else None
+            ),
+        },
         "warning": (
             "Corpus preparation is not training authorization. Pending source or domain reviews "
             "must pass validate_training_approval before any model training. Automated checks "
@@ -432,6 +487,7 @@ def build_corpus(
     report_path.write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    _write_report_signature(report_path)
     return report
 
 
@@ -494,6 +550,7 @@ def validate_training_approval(
         raise ValueError(f"Training blocked: prepared corpus does not exist: {corpus_path}")
     if not corpus_report_path.is_file():
         raise ValueError(f"Training blocked: corpus audit report does not exist: {corpus_report_path}")
+    _verify_report_signature(corpus_report_path)
     report = json.loads(corpus_report_path.read_text(encoding="utf-8"))
     if not isinstance(report, dict) or report.get("format") != "aethrion-corpus-report-v3":
         raise ValueError("Training blocked: unsupported or invalid corpus audit report.")
@@ -533,6 +590,21 @@ def validate_training_approval(
         observed[item["source_id"]] = (item.get("path"), item.get("sha256"))
     if observed != expected:
         raise ValueError("Training blocked: corpus audit sources differ from the current approved source manifest.")
+
+    integrity = report.get("integrity")
+    expected_integrity = {
+        "schema": "aethrion-base-input-binding-v1",
+        "dataset_manifest_sha256": sha256_file(dataset_manifest_path),
+        "source_manifest_sha256": sha256_file(source_manifest_path),
+        "source_review_sha256": (
+            sha256_file(source_review_path) if source_review_path is not None else None
+        ),
+    }
+    if integrity != expected_integrity:
+        raise ValueError(
+            "Training blocked: signed audit report is not bound to the current dataset, "
+            "source and domain-review manifests."
+        )
 
     # Reconstruct every normalized record and its provenance group from the
     # currently approved raw sources. This prevents a hand-edited audit report
