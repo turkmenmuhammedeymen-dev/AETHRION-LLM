@@ -14,6 +14,8 @@ from aethrion.prepare_data import (
     normalize_text,
     require_training_enabled,
     validate_training_approval,
+    _write_report_signature,
+    _verify_report_signature,
 )
 
 
@@ -544,6 +546,56 @@ class CorpusPreparationTests(unittest.TestCase):
 
             result = require_training_enabled(path)
             self.assertIs(result["training_allowed"], True)
+
+
+    def test_hmac_sidecar_requires_configured_key_and_valid_format(self):
+        with tempfile.TemporaryDirectory() as folder:
+            report = Path(folder) / "report.json"
+            report.write_text('{"format":"test"}', encoding="utf-8")
+            key_name = "AETHRION_BASE_AUDIT_HMAC_KEY"
+            previous = os.environ.pop(key_name, None)
+            try:
+                with self.assertRaisesRegex(ValueError, "key is not configured"):
+                    _verify_report_signature(report)
+            finally:
+                if previous is not None:
+                    os.environ[key_name] = previous
+            sidecar = Path(str(report) + ".hmac")
+            sidecar.write_text("not-a-valid-signature\\n", encoding="ascii")
+            with self.assertRaisesRegex(ValueError, "malformed"):
+                _verify_report_signature(report)
+
+    def test_hmac_sidecar_rejects_symlinks_without_touching_target(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            report = root / "report.json"
+            report.write_text('{"format":"test"}', encoding="utf-8")
+            victim = root / "victim.txt"
+            victim.write_text("must remain unchanged", encoding="utf-8")
+            sidecar = Path(str(report) + ".hmac")
+            try:
+                sidecar.symlink_to(victim)
+            except (OSError, NotImplementedError):
+                self.skipTest("Symlink creation is unavailable on this platform")
+            with self.assertRaisesRegex(ValueError, "regular, non-symlink"):
+                _write_report_signature(report)
+            with self.assertRaisesRegex(ValueError, "missing or unsafe"):
+                _verify_report_signature(report)
+            self.assertEqual(victim.read_text(encoding="utf-8"), "must remain unchanged")
+
+    def test_hmac_sidecar_write_is_atomic_and_verifiable(self):
+        with tempfile.TemporaryDirectory() as folder:
+            report = Path(folder) / "report.json"
+            report.write_text('{"format":"test","value":1}', encoding="utf-8")
+            self.assertTrue(_write_report_signature(report))
+            sidecar = Path(str(report) + ".hmac")
+            self.assertTrue(sidecar.is_file())
+            self.assertEqual(list(report.parent.glob(".report.json.hmac.*.tmp")), [])
+            _verify_report_signature(report)
+            report.write_text('{"format":"test","value":2}', encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "signature verification failed"):
+                _verify_report_signature(report)
+
 
 
 if __name__ == "__main__":
