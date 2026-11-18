@@ -29,6 +29,8 @@ and training permission evidence, privacy review, and speaker consent review
 for ASR/TTS/Vocoder. Do not set an approval to true unless the responsible human has
 actually reviewed and documented that evidence.
 
+Specialist training follows the same first-party-only policy as BASE. Source URIs must not use network-backed schemes (HTTP(S), FTP, S3, Hugging Face, Git, and similar remote locations); keep the reviewed owner-authored source file locally beside the manifest. The `permitted_use` text must explicitly include training, and placeholder license labels such as UNKNOWN, PENDING, UNVERIFIED or TBD are rejected. A human attestation is still required; these checks do not independently prove authorship or legal rights.
+
 Each source entry must contain:
 `source_id`, `source_uri`, `source_path`, `sha256`, `license`,
 `permitted_use`, `evidence_uri`, `allow_training: true` and
