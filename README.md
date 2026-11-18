@@ -88,6 +88,9 @@ python -m unittest discover -s tests -v
 
 The synthetic smoke-test path is exclusively for software validation. It must
 not be used as production training data or as evidence that a model is trained.
+Specialist test fixtures are explicitly marked test-only and are validated in
+schema/integrity mode without training approval; production preflight continues
+to require the full source-rights and human-approval checks.
 
 ## Hugging Face Space
 
