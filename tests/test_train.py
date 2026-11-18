@@ -58,7 +58,7 @@ class TrainingUtilityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             checkpoint = Path(directory) / "unsafe.pt"
             torch.save({
-                "format_version": 3,
+                "format_version": 4,
                 "step": 0,
                 "model": {},
                 "optimizer": {},
@@ -216,8 +216,29 @@ class TrainingUtilityTests(unittest.TestCase):
             self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
             checkpoint = load_checkpoint(checkpoint_path, map_location="cpu")
             self.assertEqual(checkpoint["step"], 2)
-            self.assertEqual(checkpoint["format_version"], 3)
+            self.assertEqual(checkpoint["format_version"], 4)
+            self.assertEqual(checkpoint["training_config"]["schedule_max_steps"], 2)
             self.assertTrue(Path(str(checkpoint_path) + ".sha256").is_file())
+
+            config["max_steps"] = 4
+            config["batch_size"] = 2
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            changed_settings = subprocess.run(
+                command + ["--resume", str(checkpoint_path)],
+                cwd=root, capture_output=True, text=True, timeout=120
+            )
+            self.assertNotEqual(changed_settings.returncode, 0)
+            self.assertIn("training settings changed", changed_settings.stdout + changed_settings.stderr)
+
+            config["batch_size"] = 1
+            config["max_steps"] = 2
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            shorter_horizon = subprocess.run(
+                command + ["--resume", str(checkpoint_path)],
+                cwd=root, capture_output=True, text=True, timeout=120
+            )
+            self.assertNotEqual(shorter_horizon.returncode, 0)
+            self.assertIn("max_steps cannot be lower", shorter_horizon.stdout + shorter_horizon.stderr)
 
             checkpoint_path.write_bytes(checkpoint_path.read_bytes() + b"tampered")
             with warnings.catch_warnings(record=True) as caught:
@@ -243,7 +264,7 @@ class TrainingUtilityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             checkpoint = Path(directory) / "checkpoint.pt"
             base = {
-                "format_version": 3,
+                "format_version": 4,
                 "step": 0,
                 "model": {},
                 "optimizer": {},
@@ -252,6 +273,7 @@ class TrainingUtilityTests(unittest.TestCase):
                 "data_sha256": "0" * 64,
                 "tokenizer_sha256": "1" * 64,
                 "rng_state": {},
+                "training_config": {"stage": "test-fixture"},
             }
             save_checkpoint(base, checkpoint)
             save_checkpoint({**base, "step": 1}, checkpoint)

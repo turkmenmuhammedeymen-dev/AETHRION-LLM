@@ -19,6 +19,27 @@ def _request_stop(signum, frame):
     print(f"Stop requested (signal {signum}); will save after the current training step.", flush=True)
 
 
+def _base_resume_training_config(cfg: dict, schedule_max_steps: int) -> dict:
+    """Persist the exact BASE training settings and original LR schedule horizon."""
+    return {
+        "stage": "base_pretraining",
+        "seed": int(cfg["seed"]),
+        "batch_size": int(cfg["batch_size"]),
+        "gradient_accumulation_steps": int(cfg["gradient_accumulation_steps"]),
+        "learning_rate": float(cfg["learning_rate"]),
+        "min_learning_rate": float(cfg["min_learning_rate"]),
+        "weight_decay": float(cfg["weight_decay"]),
+        "warmup_steps": int(cfg["warmup_steps"]),
+        "eval_interval": int(cfg["eval_interval"]),
+        "eval_batches": int(cfg["eval_batches"]),
+        "save_interval": int(cfg["save_interval"]),
+        "grad_clip": float(cfg["grad_clip"]),
+        "amp": bool(cfg["amp"]),
+        "max_steps": int(cfg["max_steps"]),
+        "schedule_max_steps": int(schedule_max_steps),
+    }
+
+
 def set_seed(seed: int) -> None:
     random.seed(seed); np.random.seed(seed); torch.manual_seed(seed)
     if torch.cuda.is_available(): torch.cuda.manual_seed_all(seed)
@@ -148,6 +169,7 @@ def main() -> None:
     data_hash, tokenizer_hash = sha256_file(data_path), sha256_file(tokenizer_path)
     split_hashes = {name: split_info[name]["sha256"] for name in ("train", "validation", "test")}
     start_step = 0
+    schedule_max_steps = cfg["max_steps"]
     if args.resume:
         checkpoint = load_checkpoint(args.resume, map_location=device)
         if checkpoint.get("model_config") != model.config_dict(): raise ValueError("Checkpoint model config differs.")
@@ -157,6 +179,28 @@ def main() -> None:
             raise ValueError("Tokenizer provenance changed; refusing unsafe resume.")
         if checkpoint.get("split_sha256") != split_hashes:
             raise ValueError("Approved train/validation/test split changed; refusing unsafe resume.")
+        saved_training_config = checkpoint.get("training_config")
+        current_training_config = _base_resume_training_config(cfg, cfg["max_steps"])
+        if (
+            not isinstance(saved_training_config, dict)
+            or set(saved_training_config) != set(current_training_config)
+            or any(type(saved_training_config[key]) is not type(value)
+                   for key, value in current_training_config.items())
+        ):
+            raise ValueError("Resume checkpoint is missing or has an invalid BASE training configuration.")
+        ignored_horizon = {"max_steps", "schedule_max_steps"}
+        saved_fixed = {key: value for key, value in saved_training_config.items() if key not in ignored_horizon}
+        current_fixed = {key: value for key, value in current_training_config.items() if key not in ignored_horizon}
+        if saved_fixed != current_fixed:
+            raise ValueError("BASE training settings changed; refusing a non-reproducible resume.")
+        if cfg["max_steps"] < saved_training_config["max_steps"]:
+            raise ValueError("Resume max_steps cannot be lower than the checkpoint training horizon.")
+        schedule_max_steps = saved_training_config["schedule_max_steps"]
+        if (
+            schedule_max_steps < cfg["warmup_steps"]
+            or schedule_max_steps > saved_training_config["max_steps"]
+        ):
+            raise ValueError("Resume checkpoint learning-rate schedule horizon is invalid.")
         checkpoint_step = checkpoint.get("step")
         if type(checkpoint_step) is not int or checkpoint_step < 0:
             raise ValueError("Checkpoint step is invalid.")
@@ -182,7 +226,7 @@ def main() -> None:
         if step < cfg["warmup_steps"]:
             lr = cfg["learning_rate"] * (step + 1) / max(1, cfg["warmup_steps"])
         else:
-            progress = (step - cfg["warmup_steps"]) / max(1, cfg["max_steps"] - cfg["warmup_steps"])
+            progress = (step - cfg["warmup_steps"]) / max(1, schedule_max_steps - cfg["warmup_steps"])
             lr = cfg["min_learning_rate"] + 0.5 * (cfg["learning_rate"] - cfg["min_learning_rate"]) * (1 + math.cos(math.pi * min(progress, 1.0)))
         for group in optimizer.param_groups: group["lr"] = lr
         optimizer.zero_grad(set_to_none=True)
@@ -230,7 +274,7 @@ def main() -> None:
         )
         if should_save:
             payload = {
-                "format_version": 3,
+                "format_version": 4,
                 "step": step,
                 "model": model.state_dict(),
                 "optimizer": optimizer.state_dict(),
@@ -243,6 +287,7 @@ def main() -> None:
                 "data_sha256": data_hash,
                 "split_sha256": split_hashes,
                 "rng_state": capture_rng_state(),
+                "training_config": _base_resume_training_config(cfg, schedule_max_steps),
             }
             target = output / "checkpoint_last.pt"
             checksum = save_checkpoint(payload, target)
