@@ -7,7 +7,9 @@ No third-party model weights or inference APIs are used.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import math
 import os
 import signal
 import subprocess
@@ -211,28 +213,72 @@ def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
 
 
 
-def _training_outcome(output_dir: Path, model_id: str, returncode: int) -> str:
-    """Derive status from the trainer's durable report, never from exit code alone."""
+def _training_outcome(
+    output_dir: Path,
+    model_id: str,
+    returncode: int,
+    *,
+    checkpoint_path: Path | None = None,
+    started_at_ns: int | None = None,
+) -> str:
+    """Accept only a fresh, model-matched report backed by the current checkpoint."""
     if returncode != 0:
         return "training_failed_not_released"
     report_path = output_dir / "training_report.json"
     if report_path.is_file():
         try:
+            if started_at_ns is not None and report_path.stat().st_mtime_ns < started_at_ns:
+                return "training_report_stale_not_released"
             report = json.loads(report_path.read_text(encoding="utf-8"))
         except (OSError, UnicodeError, json.JSONDecodeError):
             return "training_report_invalid_not_released"
+        if not isinstance(report, dict) or report.get("model_id") != model_id:
+            return "training_report_model_mismatch_not_released"
+        if report.get("release_status") != "NOT_RELEASED":
+            return "training_report_release_state_invalid_not_released"
         status = report.get("status")
+        if status not in {"training_complete_not_released", "training_interrupted_not_released"}:
+            return "trainer_report_unrecognized_not_released"
+        checkpoint = checkpoint_path or (output_dir / "checkpoint_last.pt")
+        try:
+            digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+        except OSError:
+            return "training_checkpoint_missing_not_released"
+        if report.get("checkpoint_sha256") != digest:
+            return "training_checkpoint_hash_mismatch_not_released"
+        for key in ("dataset_sha256", "tokenizer_sha256"):
+            value = report.get(key)
+            if not isinstance(value, str) or len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
+                return "training_report_integrity_fields_invalid_not_released"
+        if model_id != "chat":
+            value = report.get("manifest_sha256")
+            if not isinstance(value, str) or len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
+                return "training_report_integrity_fields_invalid_not_released"
         if status == "training_complete_not_released":
-            return "training_completed_not_released"
-        if status == "training_interrupted_not_released":
-            return "training_interrupted_not_released"
-        if status == "instruction_tuning_complete_not_released":
-            return "instruction_tuning_completed_not_released"
-        return "trainer_report_unrecognized_not_released"
+            steps = report.get("steps", report.get("step"))
+            if type(steps) is not int or steps < 1:
+                return "training_report_metrics_invalid_not_released"
+            losses = [report.get("held_out_test_loss")]
+            if model_id == "chat":
+                metrics = report.get("metrics")
+                if not isinstance(metrics, dict):
+                    return "training_report_metrics_invalid_not_released"
+                losses.extend([metrics.get("train"), metrics.get("val")])
+            else:
+                losses.append(report.get("validation_loss"))
+            if any(type(value) not in (int, float) or not math.isfinite(value) or value < 0 for value in losses):
+                return "training_report_metrics_invalid_not_released"
+        return (
+            "training_completed_not_released"
+            if status == "training_complete_not_released"
+            else "training_interrupted_not_released"
+        )
     if model_id == "chat":
         progress_path = output_dir / "progress.json"
         if progress_path.is_file():
             try:
+                if started_at_ns is not None and progress_path.stat().st_mtime_ns < started_at_ns:
+                    return "training_progress_stale_not_released"
                 progress = json.loads(progress_path.read_text(encoding="utf-8"))
             except (OSError, UnicodeError, json.JSONDecodeError):
                 return "training_progress_invalid_not_released"
@@ -356,6 +402,7 @@ def run_family(
                     "checkpoint": plan["checkpoint"],
                 })
                 try:
+                    report_started_at_ns = __import__("time").time_ns()
                     _ACTIVE_CHILD = subprocess.Popen(command, cwd=repo)
                     rows[-1]["process_started"] = True
                     returncode = int(_ACTIVE_CHILD.wait())
@@ -374,7 +421,11 @@ def run_family(
                 row["status"] = (
                     "training_interrupted_not_released"
                     if _STOP_REQUESTED
-                    else _training_outcome(repo / plan["output_dir"], model_id, returncode)
+                    else _training_outcome(
+                        repo / plan["output_dir"], model_id, returncode,
+                        checkpoint_path=repo / plan["checkpoint"],
+                        started_at_ns=report_started_at_ns,
+                    )
                 )
                 row.pop("ready", None)
                 _append_session_event(events_path, {
