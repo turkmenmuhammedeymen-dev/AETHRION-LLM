@@ -277,6 +277,7 @@ class ApiHttpIntegrationTests(unittest.TestCase):
     def setUp(self):
         self.router=CapabilityRouter()
         self.router.register(Capability.CODE,"test-code",lambda req:{"text":"generated code"})
+        self.router.register(Capability.CHAT,"test-chat",lambda req:{"text":"chat reply"})
         self.client=TestClient(api.app)
         self.env_patch=patch.dict("os.environ", {"AETHRION_API_TOKEN": "test-api-token"})
         self.env_patch.start()
@@ -340,7 +341,7 @@ class ApiHttpIntegrationTests(unittest.TestCase):
     def test_capabilities_endpoint_reports_registered_handlers(self):
         response=self.client.get("/capabilities",headers=self.auth)
         self.assertEqual(response.status_code,200)
-        self.assertEqual(response.json()["available"],{"code":"test-code"})
+        self.assertEqual(response.json()["available"],{"code":"test-code","chat":"test-chat"})
         self.assertIn("image",response.json()["unavailable"])
     def test_dispatch_endpoint_routes_selected_capability(self):
         response=self.client.post("/dispatch",json={"capability":"code","prompt":"write a function"},headers=self.auth)
@@ -350,6 +351,41 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         response=self.client.post("/dispatch",json={"capability":"3d","prompt":"create a model"},headers=self.auth)
         self.assertEqual(response.status_code,400)
         self.assertIn("dedicated",response.json()["detail"])
+
+    def test_assistant_endpoint_delegates_clear_code_tasks(self):
+        response = self.client.post(
+            "/assistant", headers=self.auth,
+            json={"prompt": "Write a Python function to sort records."},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["capability"], "code")
+        self.assertTrue(response.json()["delegated"])
+        self.assertEqual(response.json()["result"]["text"], "generated code")
+
+    def test_assistant_endpoint_uses_chat_for_general_conversation(self):
+        response = self.client.post(
+            "/assistant", headers=self.auth,
+            json={"prompt": "Explain why the sky looks blue."},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["capability"], "chat")
+        self.assertFalse(response.json()["delegated"])
+        self.assertEqual(response.json()["result"]["text"], "chat reply")
+
+    def test_assistant_endpoint_rejects_server_paths(self):
+        response = self.client.post(
+            "/assistant", headers=self.auth,
+            json={"prompt": "Describe this image", "options": {"image_path": "/etc/passwd"}},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_assistant_endpoint_requires_attachment_for_vision(self):
+        response = self.client.post(
+            "/assistant", headers=self.auth,
+            json={"prompt": "Describe this image"},
+        )
+        self.assertEqual(response.status_code, 422)
+        self.assertIn("image_path", response.json()["detail"])
 
     def test_dispatch_unconfigured_text_capability_returns_503(self):
         response=self.client.post("/dispatch",json={"capability":"research","prompt":"summarize"},headers=self.auth)
