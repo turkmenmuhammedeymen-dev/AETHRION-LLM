@@ -47,7 +47,7 @@ class AudioPreparationTests(unittest.TestCase):
     def test_audio_asset_paths_reject_urls_windows_paths_and_traversal(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
-            for value in ("../outside.wav", "https://example.org/audio.wav", r"C:\\audio\\sample.wav", r"folder\\sample.wav"):
+            for value in ("../outside.wav", "https://example.org/audio.wav", r"C:\audio\sample.wav", r"folder\sample.wav"):
                 with self.subTest(value=value):
                     with self.assertRaises(AudioPreparationError):
                         _local_audio(root, value, "sample")
