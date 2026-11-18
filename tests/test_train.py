@@ -48,6 +48,16 @@ class TrainingUtilityTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     validate_base_training_config(candidate)
 
+    def test_checkpoint_rejects_malformed_sha256_sidecar(self):
+        from aethrion.checkpoint import verify_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            checkpoint.write_bytes(b"checkpoint-bytes")
+            Path(str(checkpoint) + ".sha256").write_text("not-a-sha256-value\\n", encoding="ascii")
+            with self.assertRaisesRegex(ValueError, "SHA-256 verification failed"):
+                verify_checkpoint(checkpoint)
+
     def test_checkpoint_rejects_unsafe_pickle_objects(self):
         import hashlib
 
