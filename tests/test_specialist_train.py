@@ -335,7 +335,7 @@ class SpecialistTrainingTests(unittest.TestCase):
             _save_checkpoint(checkpoint, payload)
             _save_checkpoint(checkpoint, {**payload, "step": 1})
             torch.save({**payload, "step": 2, "rng_state": {}}, checkpoint)
-            Path(str(checkpoint) + ".sha256").write_text(_sha256(checkpoint) + "\\n", encoding="ascii")
+            Path(str(checkpoint) + ".sha256").write_text(_sha256(checkpoint) + "\n", encoding="ascii")
 
             with self.assertWarnsRegex(RuntimeWarning, "recovering from"):
                 recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
