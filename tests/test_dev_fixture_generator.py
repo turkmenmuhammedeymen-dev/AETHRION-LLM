@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -32,6 +33,19 @@ class DevFixtureGeneratorTests(unittest.TestCase):
             safety = (Path(tmp) / "safety/records.jsonl").read_text(encoding="utf-8")
             self.assertIn('"decision": null', safety)
             self.assertIn("training_allowed", result.stdout)
+
+            # The existing preparation adapters require all three deterministic splits.
+            for model in ("chat", "code", "research", "document", "safety", "vision", "image", "3d"):
+                rows = [
+                    json.loads(line)
+                    for line in (Path(tmp) / model / "records.jsonl").read_text(encoding="utf-8").splitlines()
+                ]
+                splits = set()
+                for row in rows:
+                    group_id = row["group_id"]
+                    value = int(hashlib.sha256(f"1337:{group_id}".encode()).hexdigest()[:8], 16) % 100
+                    splits.add("train" if value < 80 else "validation" if value < 90 else "test")
+                self.assertEqual(splits, {"train", "validation", "test"}, model)
 
 
 if __name__ == "__main__":
