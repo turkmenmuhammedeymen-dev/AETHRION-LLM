@@ -129,6 +129,9 @@ class DevFixtureGeneratorTests(unittest.TestCase):
                     self.assertFalse(manifest["owner_approval"])
                     self.assertFalse(manifest["privacy_reviewed"])
                     self.assertTrue(all(not item["allow_training"] for item in manifest["sources"]))
+                    # Prepared synthetic text fixtures must never pass the production training gate.
+                    with self.assertRaises(SpecialistDataError):
+                        validate_specialist_dataset(manifest_path, require_training_approval=True)
                     self.assertEqual(manifest["preparation"]["split_counts"], {
                         "train": 1, "validation": 1, "test": 1,
                     })
