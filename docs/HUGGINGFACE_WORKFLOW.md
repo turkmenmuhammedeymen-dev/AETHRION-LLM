@@ -47,15 +47,18 @@ requests.
 
 The current repository has eleven independent model entries. Their
 architectures and training/evaluation scaffolding are not trained model
-weights. Each capability remains unavailable until its own licensed data,
-processor/tokenizer, trained checkpoint, SHA-256 integrity record, training
-report, held-out benchmark, safety review and human release approval exist.
+weights. Each capability remains unavailable until its own first-party,
+owner-authored dataset, processor/tokenizer, trained checkpoint, SHA-256
+integrity record, training report, held-out benchmark, safety review and
+human release approval exist.
 
-The global corpus gate currently remains `training_allowed: false`; all
-candidate datasets remain unapproved for training. The project-owner approval
-covers public-source review and non-destructive preparation planning only. It
-does not grant third-party rights, approve gated datasets, verify speaker
-consent, or authorize accepting provider terms. Do not bypass these gates.
+The global corpus gate remains `training_allowed: false`. Every third-party
+dataset candidate is prohibited for download, preparation and training under
+the current first-party-only policy. Only newly authored first-party material
+may be considered, and only after documented authorship, rights-holder role,
+provenance, privacy, quality and human review. This policy does not create
+data, establish speaker consent or authorize accepting provider terms. Do not
+bypass these gates.
 
 ZeroGPU requests are short-lived and may be reclaimed. A training process
 must never depend on the Space process filesystem for its only copy of a

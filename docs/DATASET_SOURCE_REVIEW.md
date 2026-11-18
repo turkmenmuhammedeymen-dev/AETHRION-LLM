@@ -1,3 +1,5 @@
+> **Current policy override (18 Nov 2026):** this register is historical metadata research only. Every external/third-party dataset listed below is prohibited for download, preparation and training under the current first-party owner-authored data policy. None of these candidates is authorized. The only permitted future training path is new owner-authored data with documented rights, privacy/quality review and human approval. The AETHRION-SAFE internal authoring track is not yet created or approved.
+
 # Dataset source review — 17 November 2026
 
 This is a source-review register, not a training approval. The project owner authorizes training only on exact datasets whose source-specific rights, provenance, privacy and consent checks pass. That authorization does not replace provider terms or third-party rights.

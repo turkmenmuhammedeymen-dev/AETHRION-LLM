@@ -30,6 +30,11 @@ for ASR/TTS/Vocoder. Do not set an approval to true unless the responsible human
 actually reviewed and documented that evidence.
 
 Specialist training follows the same first-party-only policy as BASE. Source URIs must not use network-backed schemes (HTTP(S), FTP, S3, Hugging Face, Git, and similar remote locations); keep the reviewed owner-authored source file locally beside the manifest. The `permitted_use` text must explicitly allow model training; placeholder, unverified and test-only license labels are rejected. Rights evidence must be an HTTPS URL without embedded credentials. A human attestation is still required; these checks do not independently prove authorship or legal rights.
+For a first-party local source, `source_uri` is a stable, non-network provenance
+identifier (for example `owner-authored://aethrion/dataset-release`), not a
+remote download URL. Keep the source bytes in the reviewed local `source_path`.
+The separate `evidence_uri` points to the HTTPS rights/authorship evidence.
+
 
 Each source entry must contain:
 `source_id`, `source_uri`, `source_path`, `sha256`, `license`,
@@ -82,7 +87,7 @@ python -m aethrion.specialist_prepare \
   --license "record the exact source license" \
   --permitted-use "record the exact permitted training use" \
   --evidence-uri "https://source.example/license-or-terms" \
-  --source-uri "https://source.example/dataset-release"
+  --source-uri "owner-authored://aethrion/dataset-release"
 ```
 
 Example (CODE):
@@ -94,7 +99,7 @@ python -m aethrion.specialist_prepare \
   --output-root data/specialists \
   --license "record the exact source license" \
   --permitted-use "record the exact permitted training use" \
-  --evidence-uri "https://source.example/license-or-terms" \\\n  --source-uri "https://source.example/dataset-release"
+  --evidence-uri "https://source.example/license-or-terms" \\\n  --source-uri "owner-authored://aethrion/dataset-release"
 ```
 
 The command always writes `training_allowed=false`, `owner_approval=false`,
@@ -133,7 +138,7 @@ python -m aethrion.specialist_prepare_audio \
   --license "record the exact source license" \
   --permitted-use "record the exact permitted training use" \
   --evidence-uri "https://source.example/license-or-terms" \
-  --source-uri "https://source.example/dataset-release"
+  --source-uri "owner-authored://aethrion/dataset-release"
 ```
 
 For TTS, include the per-token `durations` arrays. For Vocoder, the default
@@ -175,7 +180,7 @@ python -m aethrion.specialist_prepare_visual \
   --license "record exact image rights" \
   --permitted-use "record exact permitted use" \
   --evidence-uri "https://source.example/terms" \
-  --source-uri "https://source.example/dataset-release"
+  --source-uri "owner-authored://aethrion/dataset-release"
 ```
 
 Per-asset records may override `source_uri`, `license`, `permitted_use`

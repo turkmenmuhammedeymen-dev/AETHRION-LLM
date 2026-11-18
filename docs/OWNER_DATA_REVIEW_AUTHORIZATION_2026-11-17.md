@@ -4,11 +4,10 @@
 **Project:** AETHRION-LLM  
 **Scope:** AETHRION-LLM repository and its designated Hugging Face Space only.
 
-The project owner explicitly authorizes the team to review public dataset sources, prepare datasets, and train first-party AETHRION models **only after the exact dataset release and every included source item pass the project's license, provenance, privacy and consent gates**.
+The project owner authorizes training only on **first-party, owner-authored data** after authorship, rights, provenance, privacy, quality and human-review gates pass. Third-party datasets are not authorized for download, preparation or training.
 
 This authorization covers:
-- Public metadata and source-rights review, evidence recording and source-specific allowlist creation.
-- Non-destructive validation, hashing, deduplication, privacy filtering and train/validation/test preparation.
+- Preparation, validation, hashing, deduplication, privacy filtering and train/validation/test splitting of owner-authored first-party material only.
 - From-random-initialization training for the eleven first-party model IDs after the model-specific manifest and data validator pass.
 - Training checkpoints, resumable jobs, evaluation reports and release-readiness checks.
 - Changes to this AETHRION-LLM repository and deployment to `vizyon2027/AETHRION-LLM` only.
@@ -23,7 +22,7 @@ This authorization does **not**:
 
 ## Current gate decision
 
-`permits_training` is true only for data that has already passed all source-specific checks. The global `training_approval_granted` and all dataset-level `training_allowed` flags remain false until each exact release and source item has documented rights for the intended ML-training use, required attribution, provenance, privacy/consent review, pinned revision, source and prepared-data SHA-256 hashes, deduplication and source-disjoint train/validation/test splits.
+`permits_training` applies only to first-party owner-authored data after all source-specific checks. It does not authorize any third-party dataset. The global `training_approval_granted` and all dataset-level `training_allowed` flags remain false until the exact owner-authored corpus has documented authorship and rights, provenance, privacy/consent review, source and prepared-data SHA-256 hashes, deduplication and source-disjoint train/validation/test splits.
 
 For speech data, the intended use and consent scope must explicitly cover the model objective. ASR permission does not automatically authorize TTS or voice synthesis. No voice cloning or speaker impersonation is authorized.
 

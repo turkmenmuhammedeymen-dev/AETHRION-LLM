@@ -22,7 +22,7 @@ REQUIRED_FILES = {
     "chat": {
         "config": "configs/small.json",
         "dataset_manifest": "data/processed/corpus_manifest.json",
-        "source_manifest": "data/raw/cosmos/sources.json",
+        "source_manifest": "data/raw/owner_authored/sources.json",
     },
     **{
         model_id: {
