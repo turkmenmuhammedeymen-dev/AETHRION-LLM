@@ -32,12 +32,16 @@ def _normalized_review_label(value: str) -> str:
     return re.sub(r"[^A-Z0-9]+", "_", value.upper()).strip("_")
 
 
-def _license_is_verified(value: str) -> bool:
+def _label_is_unverified(value: str) -> bool:
     normalized = _normalized_review_label(value)
-    return not (
+    return (
         normalized in UNVERIFIED_LICENSE_LABELS
         or any(normalized.startswith(label + "_") for label in UNVERIFIED_LICENSE_LABELS)
     )
+
+
+def _license_is_verified(value: str) -> bool:
+    return not _label_is_unverified(value)
 
 
 def _training_use_is_explicitly_allowed(value: str) -> bool:
@@ -322,7 +326,7 @@ def load_domain_review(path: Path) -> dict[str, dict]:
                 and bool(license_name) and _license_is_verified(license_name)
                 and evidence_is_url
                 and bool(rights_holder)
-                and _normalized_review_label(rights_holder) not in UNVERIFIED_LICENSE_LABELS
+                and not _label_is_unverified(rights_holder)
                 and attribution in {"YES", "NO"}
             )
             reviews[domain] = {
