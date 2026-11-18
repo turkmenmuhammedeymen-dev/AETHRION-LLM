@@ -8,10 +8,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import signal
 import subprocess
 import sys
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from aethrion.checkpoint import write_json_atomic
 
 MODEL_IDS = (
     "chat", "code", "vision", "image", "asr", "tts", "3d",
@@ -173,6 +179,23 @@ def _training_outcome(output_dir: Path, model_id: str, returncode: int) -> str:
     return "trainer_exited_without_verified_report"
 
 
+_STOP_REQUESTED = False
+
+
+def _request_family_stop(signum, frame):
+    global _STOP_REQUESTED
+    _STOP_REQUESTED = True
+
+
+def _append_session_event(path: Path, event: dict[str, Any]) -> None:
+    """Append one durable, newline-delimited family-training event."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
 def run_family(
     root: str | Path = ".",
     *,
@@ -180,7 +203,8 @@ def run_family(
     execute: bool = False,
     python_executable: str | None = None,
 ) -> dict[str, Any]:
-    """Preflight or sequentially execute every selected, fully approved model."""
+    """Preflight or sequentially execute approved models with durable session journaling."""
+    global _STOP_REQUESTED
     repo = Path(root).resolve()
     model_ids = list(MODEL_IDS) if selected is None else list(selected)
     if not model_ids:
@@ -191,58 +215,143 @@ def run_family(
     if unknown:
         raise FamilyTrainingError("Unknown model IDs: " + ", ".join(unknown))
 
+    session_id = uuid.uuid4().hex
+    session_dir = repo / "artifacts" / "training_sessions"
+    progress_path = session_dir / f"{session_id}.json"
+    events_path = session_dir / f"{session_id}.jsonl"
     rows: list[dict[str, Any]] = []
-    for model_id in model_ids:
-        try:
-            plan = preflight_model(repo, model_id)
-            command = list(plan["command"])
-            if python_executable:
-                command[0] = python_executable
-            if not execute:
-                rows.append({**plan, "status": "ready_not_started"})
-                continue
-            completed = subprocess.run(command, cwd=repo, check=False)
-            rows.append({
-                **plan,
-                "command": command,
-                "status": _training_outcome(
-                    repo / plan["output_dir"], model_id, int(completed.returncode)
-                ),
-                "returncode": int(completed.returncode),
-            })
-        except Exception as exc:
-            rows.append({
-                "model_id": model_id,
-                "ready": False,
-                "status": "blocked",
-                "reason": f"{type(exc).__name__}: {exc}",
-            })
+    started_at = datetime.now(timezone.utc).isoformat()
+    _STOP_REQUESTED = False
+    previous_handlers = {}
+    if execute:
+        for stop_signal in (signal.SIGINT, signal.SIGTERM):
+            previous_handlers[stop_signal] = signal.signal(stop_signal, _request_family_stop)
 
-    started = execute and any(
-        row.get("status") in {
-            "training_completed_not_released", "training_failed_not_released",
-            "training_interrupted_not_released", "trainer_exited_without_verified_report",
-            "training_report_invalid_not_released", "training_progress_invalid_not_released",
-            "trainer_report_unrecognized_not_released",
-            "instruction_tuning_completed_not_released",
+    def persist(status: str, current_model: str | None = None) -> None:
+        if not execute:
+            return
+        snapshot = {
+            "format": "aethrion-family-training-session-v1",
+            "session_id": session_id,
+            "status": status,
+            "current_model": current_model,
+            "started_at_utc": started_at,
+            "updated_at_utc": datetime.now(timezone.utc).isoformat(),
+            "execute_requested": True,
+            "model_count": len(model_ids),
+            "completed_count": sum(row.get("status") not in {"running", "blocked"} for row in rows),
+            "blocked_count": sum(row.get("status") == "blocked" for row in rows),
+            "models": rows,
+            "released_count": 0,
         }
-        for row in rows
-    )
-    return {
-        "format": "aethrion-family-training-run-v1",
-        "execution_policy": "local_only",
-        "model_count": len(rows),
-        "ready_count": sum(row.get("ready") is True for row in rows),
-        "blocked_count": sum(row.get("status") == "blocked" for row in rows),
-        "training_started": bool(started),
-        "released_count": 0,
-        "execute_requested": bool(execute),
-        "models": rows,
-        "note": (
-            "A successful training process is not a release. Independent held-out "
-            "evaluation, safety review, artifact integrity and human release approval remain mandatory."
-        ),
-    }
+        write_json_atomic(snapshot, progress_path)
+
+    try:
+        if execute:
+            _append_session_event(events_path, {
+                "event": "session_started", "session_id": session_id,
+                "timestamp_utc": started_at, "models": model_ids,
+            })
+            persist("running")
+
+        for model_id in model_ids:
+            if _STOP_REQUESTED:
+                rows.append({"model_id": model_id, "ready": False, "status": "not_started_interrupted"})
+                break
+            try:
+                plan = preflight_model(repo, model_id)
+                command = list(plan["command"])
+                if python_executable:
+                    command[0] = python_executable
+                if not execute:
+                    rows.append({**plan, "status": "ready_not_started"})
+                    continue
+
+                rows.append({**plan, "status": "running"})
+                persist("running", model_id)
+                _append_session_event(events_path, {
+                    "event": "model_started", "session_id": session_id,
+                    "model_id": model_id, "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                    "checkpoint": plan["checkpoint"],
+                })
+                try:
+                    completed = subprocess.run(command, cwd=repo, check=False)
+                    returncode = int(completed.returncode)
+                except KeyboardInterrupt:
+                    _STOP_REQUESTED = True
+                    returncode = 130
+                row = rows[-1]
+                row["returncode"] = returncode
+                row["status"] = (
+                    "training_interrupted_not_released"
+                    if _STOP_REQUESTED
+                    else _training_outcome(repo / plan["output_dir"], model_id, returncode)
+                )
+                row.pop("ready", None)
+                _append_session_event(events_path, {
+                    "event": "model_finished", "session_id": session_id,
+                    "model_id": model_id, "status": row["status"],
+                    "returncode": returncode,
+                    "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                })
+                persist("interrupted" if _STOP_REQUESTED else "running", model_id if _STOP_REQUESTED else None)
+                if _STOP_REQUESTED:
+                    break
+            except Exception as exc:
+                row = {
+                    "model_id": model_id, "ready": False, "status": "blocked",
+                    "reason": f"{type(exc).__name__}: {exc}",
+                }
+                rows.append(row)
+                if execute:
+                    _append_session_event(events_path, {
+                        "event": "model_blocked", "session_id": session_id,
+                        "model_id": model_id, "reason": row["reason"],
+                        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                    })
+                    persist("running")
+
+        interrupted = _STOP_REQUESTED or any(
+            row.get("status") == "not_started_interrupted" for row in rows
+        )
+        report = {
+            "format": "aethrion-family-training-run-v1",
+            "session_id": session_id,
+            "execution_policy": "local_only",
+            "model_count": len(rows),
+            "ready_count": sum(row.get("ready") is True for row in rows),
+            "blocked_count": sum(row.get("status") == "blocked" for row in rows),
+            "training_started": bool(execute and any(
+                row.get("status") in {
+                    "running", "training_completed_not_released", "training_failed_not_released",
+                    "training_interrupted_not_released", "trainer_exited_without_verified_report",
+                    "training_report_invalid_not_released", "training_progress_invalid_not_released",
+                    "trainer_report_unrecognized_not_released",
+                    "instruction_tuning_completed_not_released",
+                } for row in rows
+            )),
+            "released_count": 0,
+            "execute_requested": bool(execute),
+            "interrupted": bool(interrupted),
+            "models": rows,
+            "note": (
+                "A successful training process is not a release. Independent held-out "
+                "evaluation, safety review, artifact integrity and human release approval remain mandatory."
+            ),
+        }
+        if execute:
+            final_status = "interrupted" if interrupted else "completed"
+            persist(final_status)
+            _append_session_event(events_path, {
+                "event": "session_" + final_status, "session_id": session_id,
+                "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                "blocked_count": report["blocked_count"],
+            })
+            write_json_atomic({**report, "status": final_status}, progress_path)
+        return report
+    finally:
+        for stop_signal, previous_handler in previous_handlers.items():
+            signal.signal(stop_signal, previous_handler)
 
 
 def main() -> int:
@@ -267,9 +376,7 @@ def main() -> int:
     if args.report:
         target = Path(args.report)
         target.parent.mkdir(parents=True, exist_ok=True)
-        temporary = Path(str(target) + ".tmp")
-        temporary.write_text(rendered + "\n", encoding="utf-8")
-        temporary.replace(target)
+        write_json_atomic(report, target)
     return 0 if report["blocked_count"] == 0 else 2
 
 
