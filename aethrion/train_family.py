@@ -202,7 +202,11 @@ def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
         ]
         checkpoint = output_dir / "checkpoint_last.pt"
 
-    if checkpoint.is_file():
+    # If only the previous generation survived (for example after a crash
+    # between artifact replacement steps), still invoke the trainer's verified
+    # loader. It tries checkpoint_last.pt first and then checkpoint_last.pt.previous.
+    previous_checkpoint = Path(str(checkpoint) + ".previous")
+    if checkpoint.is_file() or previous_checkpoint.is_file():
         command.extend(["--resume", str(checkpoint.relative_to(repo))])
 
     return {
@@ -406,15 +410,15 @@ def run_family(
 
                 rows.append({**plan, "status": "running", "process_started": False})
                 persist("running", model_id)
-                _append_session_event(events_path, {
-                    "event": "model_started", "session_id": session_id,
-                    "model_id": model_id, "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-                    "checkpoint": plan["checkpoint"],
-                })
                 try:
                     report_started_at_ns = time.time_ns()
                     _ACTIVE_CHILD = subprocess.Popen(command, cwd=repo)
                     rows[-1]["process_started"] = True
+                    _append_session_event(events_path, {
+                        "event": "model_started", "session_id": session_id,
+                        "model_id": model_id, "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                        "checkpoint": plan["checkpoint"],
+                    })
                     returncode = int(_ACTIVE_CHILD.wait())
                 except KeyboardInterrupt:
                     _STOP_REQUESTED = True
