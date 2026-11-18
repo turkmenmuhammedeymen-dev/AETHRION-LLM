@@ -111,7 +111,12 @@ def load_checkpoint(
         )
         load_path = previous
 
-    state = torch.load(load_path, map_location=map_location, weights_only=False)
+    try:
+        state = torch.load(load_path, map_location=map_location, weights_only=True)
+    except Exception as exc:
+        raise ValueError(
+            "Checkpoint could not be safely deserialized; unsafe pickle objects are not accepted."
+        ) from exc
     if not isinstance(state, dict) or state.get("format_version") != 3:
         raise ValueError("Unsupported or invalid AETHRION checkpoint format.")
     required = {

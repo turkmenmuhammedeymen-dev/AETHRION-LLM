@@ -24,18 +24,42 @@ def set_seed(seed: int) -> None:
     if torch.cuda.is_available(): torch.cuda.manual_seed_all(seed)
 
 def capture_rng_state() -> dict:
-    state = {"python": random.getstate(), "numpy": np.random.get_state(), "torch": torch.get_rng_state()}
-    if torch.cuda.is_available(): state["cuda"] = torch.cuda.get_rng_state_all()
+    """Capture RNG state using weights-only-safe primitive containers and tensors."""
+    py = random.getstate()
+    np_state = np.random.get_state()
+    state = {
+        "python": {
+            "version": int(py[0]),
+            "state": [int(value) for value in py[1]],
+            "gauss": py[2],
+        },
+        "numpy": {
+            "algorithm": str(np_state[0]),
+            "keys": np_state[1].tolist(),
+            "position": int(np_state[2]),
+            "has_gauss": int(np_state[3]),
+            "cached_gaussian": float(np_state[4]),
+        },
+        "torch": torch.get_rng_state(),
+    }
+    if torch.cuda.is_available():
+        state["cuda"] = torch.cuda.get_rng_state_all()
     return state
 
+
 def restore_rng_state(state: dict) -> None:
-    # torch.load(..., map_location=device) may move the saved CPU RNG ByteTensor
-    # onto CUDA. The CPU generator requires a CPU ByteTensor when restoring.
-    random.setstate(state["python"])
-    np.random.set_state(state["numpy"])
+    """Restore the primitive RNG representation saved in native checkpoints."""
+    py = state["python"]
+    random.setstate((int(py["version"]), tuple(int(value) for value in py["state"]), py["gauss"]))
+    ns = state["numpy"]
+    np.random.set_state((
+        str(ns["algorithm"]), np.asarray(ns["keys"], dtype=np.uint32),
+        int(ns["position"]), int(ns["has_gauss"]), float(ns["cached_gaussian"]),
+    ))
     torch.set_rng_state(state["torch"].cpu())
     if torch.cuda.is_available() and "cuda" in state:
         torch.cuda.set_rng_state_all([item.cpu() for item in state["cuda"]])
+
 
 def load_tokens(path: str, tokenizer: ByteBPETokenizer, *, min_tokens: int = 2) -> torch.Tensor:
     ids = tokenizer.encode(Path(path).read_text(encoding="utf-8"))

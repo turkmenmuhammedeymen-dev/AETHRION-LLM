@@ -13,6 +13,7 @@ from aethrion.checkpoint import save_checkpoint, load_checkpoint, sha256_file
 import aethrion.instruction_tune as instruction_tune
 from aethrion.instruction_tune import tune_instructions
 from aethrion.model import AETHRIONLM, ModelConfig
+from aethrion.train import capture_rng_state
 from aethrion.tokenizer import ByteBPETokenizer
 
 
@@ -39,11 +40,7 @@ class InstructionTuningTests(unittest.TestCase):
             "model_config": model_config.__dict__,
             "data_sha256": "d" * 64,
             "tokenizer_sha256": sha256_file(tokenizer_path),
-            "rng_state": {
-                "python": random.getstate(),
-                "numpy": np.random.get_state(),
-                "torch": torch.get_rng_state(),
-            },
+            "rng_state": capture_rng_state(),
         }
         save_checkpoint(payload, base_checkpoint)
         dataset = root / "instructions.npz"
