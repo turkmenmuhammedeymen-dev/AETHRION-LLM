@@ -8,6 +8,8 @@ import hmac
 import json
 import os
 import random
+import stat
+import tempfile
 import re
 import unicodedata
 from collections import Counter, defaultdict
@@ -61,26 +63,110 @@ def _report_signature_path(report_path: Path) -> Path:
     return Path(str(report_path) + ".hmac")
 
 
+def _read_regular_file_no_follow(path: Path, label: str, *, max_bytes: int | None = None) -> bytes:
+    """Read a regular file without following a final-component symlink."""
+    flags = os.O_RDONLY
+    if hasattr(os, "O_BINARY"):
+        flags |= os.O_BINARY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as exc:
+        raise ValueError(f"Training blocked: {label} is missing or unsafe.") from exc
+    try:
+        metadata = os.fstat(descriptor)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ValueError(f"Training blocked: {label} must be a regular file.")
+        with os.fdopen(descriptor, "rb") as handle:
+            descriptor = -1
+            content = handle.read() if max_bytes is None else handle.read(max_bytes + 1)
+        if max_bytes is not None and len(content) > max_bytes:
+            raise ValueError(f"Training blocked: {label} exceeds its size limit.")
+        return content
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+
+
+def _reject_existing_unsafe_sidecar(path: Path) -> None:
+    try:
+        metadata = path.lstat()
+    except FileNotFoundError:
+        return
+    except OSError as exc:
+        raise ValueError("Training blocked: cannot inspect BASE audit HMAC sidecar.") from exc
+    if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
+        raise ValueError("Training blocked: BASE audit HMAC sidecar must be a regular, non-symlink file.")
+
+
 def _write_report_signature(report_path: Path) -> bool:
     key = _audit_hmac_key(required=False)
     if key is None:
         return False
-    signature = hmac.new(key, report_path.read_bytes(), hashlib.sha256).hexdigest()
-    _report_signature_path(report_path).write_text(
-        f"{REPORT_HMAC_FORMAT} {signature}\n", encoding="ascii"
+    report_bytes = _read_regular_file_no_follow(report_path, "BASE corpus audit report")
+    signature = hmac.new(key, report_bytes, hashlib.sha256).hexdigest()
+    sidecar = _report_signature_path(report_path)
+    parent = sidecar.parent
+    if not parent.is_dir():
+        raise ValueError("Training blocked: BASE audit HMAC sidecar directory is missing.")
+    _reject_existing_unsafe_sidecar(sidecar)
+
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{sidecar.name}.", suffix=".tmp", dir=str(parent)
     )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(f"{REPORT_HMAC_FORMAT} {signature}\n".encode("ascii"))
+            handle.flush()
+            os.fsync(handle.fileno())
+        # Re-check immediately before replacement. os.replace replaces a final
+        # symlink itself rather than following it, so it cannot overwrite its target.
+        _reject_existing_unsafe_sidecar(sidecar)
+        os.replace(temporary, sidecar)
+        try:
+            directory_fd = os.open(parent, os.O_RDONLY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
+        except OSError:
+            # Some platforms do not support fsync on directory descriptors.
+            pass
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
     return True
 
 
 def _verify_report_signature(report_path: Path) -> None:
     key = _audit_hmac_key(required=True)
     signature_path = _report_signature_path(report_path)
-    if not signature_path.is_file():
-        raise ValueError("Training blocked: signed corpus audit report is missing its HMAC sidecar.")
-    fields = signature_path.read_text(encoding="ascii").strip().split()
-    if len(fields) != 2 or fields[0] != REPORT_HMAC_FORMAT:
+    try:
+        sidecar_bytes = _read_regular_file_no_follow(
+            signature_path, "BASE audit HMAC sidecar", max_bytes=256
+        )
+    except ValueError as exc:
+        if not signature_path.exists() and not signature_path.is_symlink():
+            raise ValueError(
+                "Training blocked: signed corpus audit report is missing its HMAC sidecar."
+            ) from exc
+        raise
+    try:
+        fields = sidecar_bytes.decode("ascii").strip().split()
+    except UnicodeDecodeError as exc:
+        raise ValueError("Training blocked: corpus audit HMAC sidecar is malformed.") from exc
+    if (
+        len(fields) != 2
+        or fields[0] != REPORT_HMAC_FORMAT
+        or re.fullmatch(r"[0-9a-f]{64}", fields[1]) is None
+    ):
         raise ValueError("Training blocked: corpus audit HMAC sidecar is malformed.")
-    expected = hmac.new(key, report_path.read_bytes(), hashlib.sha256).hexdigest()
+    report_bytes = _read_regular_file_no_follow(report_path, "BASE corpus audit report")
+    expected = hmac.new(key, report_bytes, hashlib.sha256).hexdigest()
     if not hmac.compare_digest(fields[1], expected):
         raise ValueError("Training blocked: corpus audit report signature verification failed.")
 
