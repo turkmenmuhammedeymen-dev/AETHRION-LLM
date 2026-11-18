@@ -78,6 +78,24 @@ then atomically replaced. Directory entries are fsynced where the operating
 system/filesystem supports it. The specialist and base trainers retain their
 own previous verified checkpoint generation.
 
+A checkpoint file and its `.sha256` sidecar are two separate filesystem
+objects; their pair cannot be replaced as one portable atomic operation. The
+writers therefore stage and fsync both temporary files, copy and fsync the
+currently verified generation into the `.previous` pair, replace both previous
+files, and fsync the directory **before** replacing either live file. They then
+replace the live checkpoint and sidecar and fsync the directory again. If a
+process stops between the two live replacements, the live pair fails checksum
+verification and the loader must recover from the already-durable previous
+pair. It must never accept the mismatched live pair. On a first-ever save there
+is no older generation to preserve; interruption between the two live
+replacements can leave no recoverable checkpoint, and the run must fail closed
+rather than claim recovery.
+
+Regression tests inject an `os.replace` failure specifically at the live
+sidecar promotion for both CHAT and specialist writers. They assert that the
+mismatched live pair is rejected and the prior generation is recovered. These
+are source-level tests until executed by a functioning test runner.
+
 Keep the entire `artifacts/` directory on persistent storage. A temporary
 Kaggle/Colab runtime disk is not a backup: copy artifacts to durable storage
 before closing or deleting the runtime. Do not commit large checkpoints,
