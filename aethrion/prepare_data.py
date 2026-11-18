@@ -57,7 +57,10 @@ def _training_use_is_explicitly_allowed(value: str) -> bool:
         )
         or re.search(r"\b(?:evaluation|testing|unit tests)\s+only\b", normalized)
     )
-    return explicitly_permitted and not explicitly_deniedREVIEW_COLUMNS = {
+    return explicitly_permitted and not explicitly_denied
+
+
+REVIEW_COLUMNS = {
     "domain",
     "license_name",
     "license_evidence_url",
