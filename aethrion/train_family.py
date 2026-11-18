@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import hmac
 import json
 import math
 import os
@@ -233,9 +234,10 @@ def _training_outcome(
     *,
     checkpoint_path: Path | None = None,
     started_at_ns: int | None = None,
+    allow_interrupted: bool = False,
 ) -> str:
     """Accept only a fresh, model-matched report backed by the exact checkpoint bytes."""
-    if returncode != 0:
+    if returncode != 0 and not allow_interrupted:
         return "training_failed_not_released"
     report_path = output_dir / "training_report.json"
     if not report_path.is_file():
@@ -251,10 +253,10 @@ def _training_outcome(
     if report.get("release_status") != "NOT_RELEASED":
         return "training_report_release_state_invalid_not_released"
     status = report.get("status")
-    if status == "training_interrupted_not_released":
-        return "training_interrupted_not_released"
-    if status != "training_complete_not_released":
+    if status not in {"training_complete_not_released", "training_interrupted_not_released"}:
         return "trainer_report_unrecognized_not_released"
+    if status == "training_complete_not_released" and returncode != 0:
+        return "training_failed_not_released"
 
     checkpoint_path = checkpoint_path or (output_dir / "checkpoint_last.pt")
     try:
@@ -263,10 +265,13 @@ def _training_outcome(
         expected_hash = report.get("checkpoint_sha256")
         if not isinstance(expected_hash, str) or len(expected_hash) != 64:
             return "training_report_checkpoint_hash_invalid_not_released"
-        if not __import__("hmac").compare_digest(expected_hash.lower(), _file_sha256(checkpoint_path)):
+        if not hmac.compare_digest(expected_hash.lower(), _file_sha256(checkpoint_path)):
             return "training_checkpoint_hash_mismatch_not_released"
     except OSError:
         return "training_checkpoint_unreadable_not_released"
+
+    if status == "training_interrupted_not_released":
+        return "training_interrupted_not_released"
 
     if model_id == "chat":
         metrics = report.get("metrics")
@@ -407,7 +412,7 @@ def run_family(
                     "checkpoint": plan["checkpoint"],
                 })
                 try:
-                    report_started_at_ns = __import__("time").time_ns()
+                    report_started_at_ns = time.time_ns()
                     _ACTIVE_CHILD = subprocess.Popen(command, cwd=repo)
                     rows[-1]["process_started"] = True
                     returncode = int(_ACTIVE_CHILD.wait())
@@ -423,14 +428,11 @@ def run_family(
                     _ACTIVE_CHILD = None
                 row = rows[-1]
                 row["returncode"] = returncode
-                row["status"] = (
-                    "training_interrupted_not_released"
-                    if _STOP_REQUESTED
-                    else _training_outcome(
-                        repo / plan["output_dir"], model_id, returncode,
-                        checkpoint_path=repo / plan["checkpoint"],
-                        started_at_ns=report_started_at_ns,
-                    )
+                row["status"] = _training_outcome(
+                    repo / plan["output_dir"], model_id, returncode,
+                    checkpoint_path=repo / plan["checkpoint"],
+                    started_at_ns=report_started_at_ns,
+                    allow_interrupted=_STOP_REQUESTED,
                 )
                 row.pop("ready", None)
                 _append_session_event(events_path, {
