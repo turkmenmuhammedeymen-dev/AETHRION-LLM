@@ -315,6 +315,33 @@ class SpecialistTrainingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "manifest changed"):
                 train_specialist(config, manifest, resume=checkpoint)
 
+    def test_specialist_checkpoint_recovers_when_latest_rng_snapshot_is_malformed(self):
+        from aethrion.specialist_train import _capture_rng_state, _load_checkpoint, _save_checkpoint, _sha256
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            payload = {
+                "format": "aethrion-specialist-checkpoint-v2",
+                "model_id": "code", "step": 0, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": _capture_rng_state(),
+                "training_config": {
+                    "seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                    "weight_decay": 0.0, "grad_clip": 1.0,
+                    "eval_interval": 1, "save_interval": 1, "max_steps": 2,
+                },
+            }
+            _save_checkpoint(checkpoint, payload)
+            _save_checkpoint(checkpoint, {**payload, "step": 1})
+            torch.save({**payload, "step": 2, "rng_state": {}}, checkpoint)
+            Path(str(checkpoint) + ".sha256").write_text(_sha256(checkpoint) + "\\n", encoding="ascii")
+
+            with self.assertWarnsRegex(RuntimeWarning, "recovering from"):
+                recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
+            self.assertEqual(recovered["step"], 0)
+            self.assertEqual(recovered["model_id"], "code")
+
     def test_checkpoint_with_invalid_checksum_and_no_backup_fails_closed(self):
         from aethrion.specialist_train import _load_checkpoint, _save_checkpoint
 
