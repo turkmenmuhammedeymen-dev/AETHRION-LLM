@@ -24,7 +24,8 @@ NEGATIVE_TRAINING_PHRASES = (
     "not for training", "no training", "training prohibited",
     "training not permitted", "training not allowed",
     "not approved for training", "no permission to train",
-    "not permitted to train", "not allowed to train", "evaluation only",
+    "not permitted to train", "not allowed to train",
+    "not permitted for training", "not allowed for training", "evaluation only",
 )
 
 
@@ -46,7 +47,15 @@ def _license_is_verified(value: str) -> bool:
 
 def _training_use_is_explicitly_allowed(value: str) -> bool:
     normalized = " ".join(value.casefold().split())
-    return "train" in normalized and not any(
+    explicitly_permitted = any(
+        phrase in normalized
+        for phrase in (
+            "training permitted", "permitted for training", "ai training",
+            "machine learning training", "machine-learning training",
+            "model training", "training only", "unit-test training",
+        )
+    )
+    return explicitly_permitted and not any(
         phrase in normalized for phrase in NEGATIVE_TRAINING_PHRASES
     )
 
