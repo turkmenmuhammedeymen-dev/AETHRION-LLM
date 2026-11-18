@@ -42,7 +42,7 @@ REQUIRED_ARRAYS = {
 }
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 UNVERIFIED_LICENSE_LABELS = frozenset({"UNKNOWN", "PENDING", "PENDING_HUMAN_REVIEW", "UNVERIFIED", "TBD"})
-REMOTE_SOURCE_SCHEMES = frozenset({"http", "https", "ftp", "ftps", "s3", "gs", "hf", "ipfs", "git", "ssh"})
+REMOTE_SOURCE_SCHEMES = frozenset({"http", "https", "ftp", "ftps", "s3", "gs", "hf", "ipfs", "git", "ssh", "sftp", "git+http", "git+https", "git+ssh"})
 
 
 INPUT_FINGERPRINT_FIELDS = {
