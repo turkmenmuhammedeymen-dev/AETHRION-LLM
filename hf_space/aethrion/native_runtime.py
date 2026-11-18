@@ -102,8 +102,13 @@ class NativeModelRuntime:
                 state = torch.load(
                     artifacts.checkpoint, map_location="cpu", weights_only=True
                 )
-                if not isinstance(state, dict) or state.get("format") != "aethrion-specialist-checkpoint-v1":
+                if not isinstance(state, dict) or state.get("format") != "aethrion-specialist-checkpoint-v2":
                     raise NativeRuntimeError(f"Unsupported {capability} checkpoint format.")
+                if (
+                    not isinstance(state.get("training_config"), dict)
+                    or not state["training_config"]
+                ):
+                    raise NativeRuntimeError(f"Checkpoint training_config is missing for {capability}.")
                 if state.get("model_id") != capability:
                     raise NativeRuntimeError(f"Checkpoint model_id mismatch for {capability}.")
                 if state.get("model_config") != artifacts.model_config:
