@@ -5,10 +5,17 @@ import math
 from typing import Any
 
 
-def require_int(value: Any, name: str, *, minimum: int = 0) -> int:
-    """Require an exact integer (booleans are deliberately not accepted)."""
-    if type(value) is not int or value < minimum:
-        raise ValueError(f"{name} must be an integer >= {minimum}.")
+def require_int(
+    value: Any,
+    name: str,
+    *,
+    minimum: int = 0,
+    maximum: int | None = None,
+) -> int:
+    """Require an exact bounded integer (booleans are deliberately not accepted)."""
+    if type(value) is not int or value < minimum or (maximum is not None and value > maximum):
+        bounds = f"{minimum}..{maximum}" if maximum is not None else f">= {minimum}"
+        raise ValueError(f"{name} must be an integer {bounds}.")
     return value
 
 
@@ -22,9 +29,14 @@ def require_finite_number(
     maximum_inclusive: bool = True,
 ) -> float:
     """Require a finite int/float within the supplied bounds."""
-    if type(value) not in (int, float) or not math.isfinite(float(value)):
+    if type(value) not in (int, float):
         raise ValueError(f"{name} must be a finite number.")
-    number = float(value)
+    try:
+        number = float(value)
+    except (OverflowError, ValueError) as exc:
+        raise ValueError(f"{name} must be a finite number.") from exc
+    if not math.isfinite(number):
+        raise ValueError(f"{name} must be a finite number.")
     if minimum is not None and (
         number < minimum if minimum_inclusive else number <= minimum
     ):
@@ -52,5 +64,4 @@ def validate_numeric_tree(value: Any, name: str = "model_config") -> None:
         for index, child in enumerate(value):
             validate_numeric_tree(child, f"{name}[{index}]")
         return
-    if type(value) not in (int, float) or not math.isfinite(float(value)):
-        raise ValueError(f"{name} must contain only finite numeric values.")
+    require_finite_number(value, name)
