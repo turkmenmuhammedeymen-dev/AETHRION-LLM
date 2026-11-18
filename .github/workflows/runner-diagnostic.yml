@@ -1,7 +1,5 @@
 name: runner-diagnostic
 on:
-  push:
-    branches: ["data/**"]
   pull_request:
     branches: ["main"]
   workflow_dispatch:
