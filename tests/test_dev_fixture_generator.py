@@ -54,6 +54,50 @@ class DevFixtureGeneratorTests(unittest.TestCase):
                 self.assertEqual(splits, {"train", "validation", "test"}, model)
 
 
+    def test_chat_fixture_uses_existing_base_tokenizer_and_is_blocked_from_training(self):
+        from aethrion.tokenizer import ByteBPETokenizer
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "fixtures"
+            output = Path(tmp) / "prepared"
+            subprocess.run(
+                [sys.executable, "scripts/generate_dev_fixtures.py", "--output", str(root)],
+                check=True, capture_output=True, text=True,
+            )
+            base_text = (root / "base.txt").read_text(encoding="utf-8")
+            tokenizer = ByteBPETokenizer()
+            tokenizer.train(base_text, vocab_size=256)
+            tokenizer_path = Path(tmp) / "base-tokenizer.json"
+            tokenizer.save(tokenizer_path)
+
+            result = prepare_text_dataset(
+                root / "chat" / "records.jsonl",
+                model_id="chat",
+                output_root=output,
+                license_name="synthetic-development-fixture",
+                permitted_use="smoke-test-only",
+                evidence_uri="local://development-fixture",
+                source_uri="local://development-fixture",
+                max_length=64,
+                tokenizer_source_path=tokenizer_path,
+            )
+            manifest_path = Path(result["manifest"])
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            self.assertFalse(result["training_allowed"])
+            self.assertFalse(manifest["training_allowed"])
+            self.assertFalse(manifest["owner_approval"])
+            self.assertFalse(manifest["privacy_reviewed"])
+            self.assertTrue(all(not item["allow_training"] for item in manifest["sources"]))
+            self.assertEqual(manifest["preparation"]["split_counts"], {
+                "train": 1, "validation": 1, "test": 1,
+            })
+            with np.load(result["dataset"], allow_pickle=False) as arrays:
+                self.assertEqual(arrays["input_ids"].shape, (3, 64))
+                self.assertEqual(arrays["labels"].shape, (3, 64))
+                self.assertTrue(np.any(arrays["labels"] != -100))
+            with self.assertRaises(SpecialistDataError):
+                validate_specialist_dataset(manifest_path, require_training_approval=True)
+
     def test_visual_fixtures_run_through_real_preparation_adapters(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "fixtures"
