@@ -101,6 +101,11 @@ def _validate(changes, originals):
             try: ast.parse(content,filename=name)
             except SyntaxError as exc: raise WorkspaceError(f"Invalid Python syntax in {name}: {exc.msg}.") from exc
         out[name]=content
+    updated=dict(originals)
+    updated.update(out)
+    combined_bytes=sum(len(content.encode("utf-8")) for content in updated.values())
+    if combined_bytes > MAX_PROJECT_TEXT:
+        raise WorkspaceError("Updated project exceeds the total text budget.")
     return out
 
 class ProjectWorkspaceAgent:
