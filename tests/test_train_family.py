@@ -213,5 +213,25 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertEqual(report["ready_count"], 2)
 
 
+    def test_trainer_launch_oserror_is_reported_without_claiming_training_started(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            plan = {
+                "model_id": "code", "ready": True,
+                "command": ["missing-python", "-m", "aethrion.specialist_train"],
+                "checkpoint": "artifacts/models/code/checkpoint_last.pt",
+                "output_dir": "artifacts/models/code",
+            }
+            with patch("aethrion.train_family.preflight_model", return_value=plan), \
+                 patch("aethrion.train_family.subprocess.run", side_effect=OSError("executable missing")):
+                report = run_family(root, selected=["code"], execute=True)
+            self.assertFalse(report["training_started"])
+            self.assertEqual(
+                report["models"][0]["status"],
+                "trainer_launch_failed_not_started",
+            )
+            self.assertIn("executable missing", report["models"][0]["launch_error"])
+
+
 if __name__ == "__main__":
     unittest.main()
