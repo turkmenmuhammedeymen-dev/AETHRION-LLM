@@ -60,7 +60,7 @@ def _local_audio(root: Path, value: Any, row_id: str) -> Path:
     candidate = Path(value)
     if (
         candidate.is_absolute()
-        or "\\\\" in value
+        or "\\" in value
         or "://" in value
         or re.match(r"^[A-Za-z]:", value)
         or any(part in {"", ".", ".."} for part in value.split("/"))
