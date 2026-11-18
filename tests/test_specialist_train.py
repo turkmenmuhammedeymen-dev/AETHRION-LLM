@@ -20,9 +20,13 @@ class SpecialistTrainingTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(["s1", "s2", "s3", "s4", "s5", "s6"]),
+            group_id=np.asarray([hashlib.sha256(x.encode()).hexdigest() for x in ("g1", "g2", "g3", "g4", "g5", "g6")]),
             split=np.asarray(["train", "train", "validation", "validation", "test", "test"]),
             token_ids=np.random.default_rng(42).integers(0, 256, size=(6, 12), dtype=np.int64),
         )
+        from aethrion.tokenizer import ByteBPETokenizer
+        tokenizer_path = root / "tokenizer.json"
+        ByteBPETokenizer().save(tokenizer_path)
         manifest = root / "manifest.json"
         payload = {
             "format": "aethrion-specialist-dataset-v1",
@@ -34,6 +38,8 @@ class SpecialistTrainingTests(unittest.TestCase):
             "privacy_reviewed": approved,
             "dataset_path": "dataset.npz",
             "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+            "tokenizer_path": "tokenizer.json",
+            "tokenizer_sha256": hashlib.sha256(tokenizer_path.read_bytes()).hexdigest(),
             "sources": [{
                 "source_id": "synthetic-fixture",
                 "source_uri": "unit-test://synthetic",
@@ -66,6 +72,28 @@ class SpecialistTrainingTests(unittest.TestCase):
             "eval_interval": 1,
             "save_interval": 1,
         }
+
+    def test_invalid_numeric_specialist_config_fails_before_dataset_access(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            base = self._config(root)
+            invalid_cases = [
+                ("learning_rate", float("nan")),
+                ("learning_rate", float("inf")),
+                ("weight_decay", float("nan")),
+                ("grad_clip", float("inf")),
+                ("max_steps", True),
+                ("model_config", {**base["model_config"], "dropout": float("nan")}),
+                ("seed", 2**32),
+                ("model_config", {**base["model_config"], "width": 10**1000}),
+            ]
+            missing_manifest = root / "not-created-manifest.json"
+            for key, value in invalid_cases:
+                candidate = dict(base)
+                candidate[key] = value
+                with self.subTest(key=key, value=value):
+                    with self.assertRaises(ValueError):
+                        train_specialist(candidate, missing_manifest)
 
     def test_unapproved_specialist_data_never_starts_training(self):
         with tempfile.TemporaryDirectory() as directory:

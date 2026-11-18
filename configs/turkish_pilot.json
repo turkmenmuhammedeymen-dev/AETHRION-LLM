@@ -19,7 +19,6 @@
   "eval_interval": 50,
   "eval_batches": 5,
   "save_interval": 50,
-  "train_split": 0.98,
   "grad_clip": 1.0,
   "num_workers": 0,
   "amp": true

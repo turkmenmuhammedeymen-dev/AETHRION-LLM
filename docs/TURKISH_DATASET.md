@@ -49,18 +49,26 @@ they do not provide legal advice or independently determine whether a license ap
 
 For plain text or JSONL without per-record URLs, use a manifest that documents each
 source and explicitly approves it. URL-attributed JSONL additionally requires
---source-review as described above.
+--source-review as described above. BASE splitting is provenance-disjoint: each
+plain-text source file forms its own group, URL-attributed records are grouped by
+exact hostname, and JSONL may provide an explicit `group_id`. At least three
+independent groups are required so train, validation and test each receive whole
+groups. Keep unrelated sources in separate files or give records explicit group IDs.
 
 The pipeline normalizes Unicode to NFC, collapses whitespace, removes duplicates,
-excludes basic email-pattern matches, and enforces length limits. The email-pattern
-filter is only a basic precaution, not a PII detector. Review audit reports and sample
-records manually; check Turkish coverage, source balance, duplication, spelling,
-encoding, privacy, and license compatibility.
+excludes basic email-pattern matches, and enforces length limits. It writes
+`corpus-train.txt`, `corpus-validation.txt` and `corpus-test.txt`, hashes each split,
+and verifies that no provenance group crosses partitions. The tokenizer is learned
+from the train-only file and emits a provenance sidecar binding it to source, corpus,
+review and split hashes. The email-pattern filter is only a basic precaution, not a
+PII detector. Review audit reports and sample records manually; check Turkish
+coverage, source balance, duplication, spelling, encoding, privacy, and license compatibility.
 
 ## Train and evaluate
 
 ~~~bash
-python -m aethrion.tokenizer --train data/processed/corpus.txt \
+python -m aethrion.tokenizer --train data/processed/corpus-train.txt \
+  --corpus data/processed/corpus.txt \
   --output artifacts/tokenizer.json --vocab-size 512 \
   --dataset-manifest data/processed/corpus_manifest.json \
   --source-manifest data/raw/cosmos/sources.json \

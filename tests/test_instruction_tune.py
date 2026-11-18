@@ -53,6 +53,7 @@ class InstructionTuningTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(["a", "b", "c", "d", "e", "f"]),
+            group_id=np.asarray([hashlib.sha256(x.encode()).hexdigest() for x in ("ga", "gb", "gc", "gd", "ge", "gf")]),
             split=np.asarray(["train", "train", "validation", "validation", "test", "test"]),
             input_ids=inputs,
             labels=labels,
@@ -66,6 +67,7 @@ class InstructionTuningTests(unittest.TestCase):
             "training_allowed": approved,
             "owner_approval": approved,
             "privacy_reviewed": approved,
+            "tokenizer_path": tokenizer_path.name,
             "tokenizer_sha256": sha256_file(tokenizer_path),
             "dataset_path": "instructions.npz",
             "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
@@ -95,6 +97,27 @@ class InstructionTuningTests(unittest.TestCase):
             "save_interval": 1,
         }
         return manifest, config, base_checkpoint
+
+    def test_invalid_numeric_instruction_config_fails_before_manifest_access(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, config, base = self._fixture(root, approved=False)
+            invalid_cases = [
+                ("learning_rate", float("nan")),
+                ("weight_decay", float("inf")),
+                ("grad_clip", float("nan")),
+                ("seed", True),
+                ("model_config", {**config["model_config"], "dropout": float("nan")}),
+                ("seed", 2**32),
+                ("model_config", {**config["model_config"], "width": 10**1000}),
+            ]
+            missing_manifest = root / "missing-manifest.json"
+            for key, value in invalid_cases:
+                candidate = dict(config)
+                candidate[key] = value
+                with self.subTest(key=key, value=value):
+                    with self.assertRaises(ValueError):
+                        tune_instructions(candidate, missing_manifest, base)
 
     def test_unapproved_instruction_data_is_blocked(self):
         with tempfile.TemporaryDirectory() as directory:

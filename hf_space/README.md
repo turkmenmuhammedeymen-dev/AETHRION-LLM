@@ -26,6 +26,15 @@ image-generation, ASR, TTS, 3D, research, document-intelligence and safety
 specialists are separate first-party model programs and remain unavailable
 until each one is independently trained and passes its release gates.
 
+The current VISION architecture provides image/text embedding similarity;
+it is not OCR, image captioning, or visual question answering. The current DOC
+adapter extracts existing text and uses placeholder page geometry; it is not
+an OCR engine. AETHRION-3D generates vertex-only point clouds, not textured
+watertight meshes. Image-to-3D conditioning and video generation are not
+implemented. Image and 3D file-producing capabilities remain unregistered in the
+local router until a dedicated visual/geometry output safety verifier is
+implemented, tested and release-gated. Text SAFE alone cannot review those files.
+
 Deterministic document creation and text extraction are available as software
 utilities; they are not a trained document-understanding model. Uploaded
 project code is not executed. Training is not started from the Space UI.

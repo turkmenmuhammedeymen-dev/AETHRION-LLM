@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from aethrion.api import build_router, get_native_model_statuses, _require_safety_allow_http, _require_safety_allow_chunks_http
 from aethrion.document_tools import create_document, extract_document_text, replace_document_text
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
-from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError, read_project_zip
+from aethrion.workspace_agent import MAX_ARCHIVE_BYTES, ProjectWorkspaceAgent, WorkspaceError, read_project_zip
 from aethrion.zerogpu_preflight import run_zero_gpu_preflight
 
 def _resolve_space_auth(environ=None):
@@ -181,7 +181,7 @@ def image(prompt):
             raise gr.Error("AETHRION-IMAGE returned no local PNG file.")
         return path
     except CapabilityUnavailable as exc:
-        raise gr.Error("AETHRION-IMAGE is not trained and released yet.") from exc
+        raise gr.Error("AETHRION-IMAGE is unavailable until local visual-output safety screening is implemented and released.") from exc
     except Exception as exc:
         raise gr.Error("Native image generation failed: " + type(exc).__name__) from exc
 
@@ -196,17 +196,12 @@ def three_d_text(prompt):
             return "AETHRION-3D returned no local OBJ file.", ""
         return "Native AETHRION point cloud generated. This is a vertex-only OBJ, not a watertight mesh.", str(path)
     except CapabilityUnavailable:
-        return "AETHRION-3D is not trained and released yet. No external 3D service is used.", ""
+        return "AETHRION-3D is unavailable until local 3D-output safety screening is implemented and released. No external 3D service is used.", ""
     except Exception as exc:
         return "Native 3D generation failed: " + type(exc).__name__, ""
 
 def three_d_image(path,texture_prompt):
     return "Current AETHRION-3D release architecture supports text-conditioned point clouds only; image-conditioned 3D is not implemented.", ""
-
-def three_d_poll(asset_path):
-    if asset_path and Path(asset_path).is_file():
-        return "Local OBJ point cloud is ready. It contains vertices only; no faces or textures.", asset_path
-    return "No local OBJ asset found. Generate a text-conditioned point cloud first.", None
 
 @spaces.GPU(duration=60)
 def research(query):
@@ -238,6 +233,9 @@ def analyse(file_path,question):
         return _auth_required_message()
     if not file_path:
         return "Upload a PDF, DOCX or supported text file."
+    source=Path(file_path)
+    if not source.is_file() or source.is_symlink() or source.stat().st_size>8*1024*1024:
+        return "Document upload must be a regular file no larger than 8 MiB."
     try:
         result = dispatch(
             Capability.DOCUMENT,
@@ -278,18 +276,80 @@ def voice(path):
         return "Native speech conversation failed: " + type(exc).__name__, None
 
 def make_doc(title,content,fmt):
-    raw,name,mime=create_document(title,content,fmt)
-    p=Path(tempfile.gettempdir())/("aethrion-"+os.urandom(5).hex()+"-"+name);p.write_bytes(raw);return str(p)
+    if not SPACE_AUTH_ENABLED:
+        raise gr.Error(_auth_required_message())
+    runtime=providers.get("runtime")
+    if runtime is None:
+        raise gr.Error("Document creation is unavailable until the local SAFE model is released.")
+    if not isinstance(title,str) or not isinstance(content,str) or not isinstance(fmt,str):
+        raise gr.Error("Title, content and format must be text.")
+    if len(title)+len(content)>20000:
+        raise gr.Error("Document text exceeds the 20,000-character review limit.")
+    try:
+        review_text=title+"\n"+content
+        _require_safety_allow_http(runtime,review_text)
+        _require_safety_allow_chunks_http(runtime,review_text)
+        raw,name,mime=create_document(title,content,fmt)
+        _require_safety_allow_chunks_http(runtime,content)
+        output=Path(tempfile.gettempdir())/("aethrion-"+os.urandom(5).hex()+"-"+name)
+        output.write_bytes(raw)
+        return str(output)
+    except HTTPException as exc:
+        raise gr.Error("Document creation blocked by AETHRION-SAFE: "+str(exc.detail)) from exc
+    except Exception as exc:
+        raise gr.Error("Document creation failed: "+type(exc).__name__) from exc
 
 def extract_doc(path):
-    return extract_document_text(path) if path else "Upload a document."
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    if not path:
+        return "Upload a document."
+    runtime=providers.get("runtime")
+    if runtime is None:
+        return "Document extraction is unavailable until the local SAFE model is released."
+    source=Path(path)
+    if not source.is_file() or source.is_symlink() or source.stat().st_size>8*1024*1024:
+        return "Document upload must be a regular file no larger than 8 MiB."
+    try:
+        text=extract_document_text(source)
+        _require_safety_allow_chunks_http(runtime,text)
+        return text
+    except HTTPException as exc:
+        return "Document extraction blocked by AETHRION-SAFE: "+str(exc.detail)
+    except Exception as exc:
+        return "Document extraction failed: "+type(exc).__name__
 
 def edit_doc(path,find_text,replacement,fmt):
-    if not path:return "Upload a document.",None
-    raw,name,mime=replace_document_text(path,find_text,replacement,fmt)
-    p=Path(tempfile.gettempdir())/("aethrion-edited-"+os.urandom(5).hex()+"-"+name)
-    p.write_bytes(raw)
-    return "Edited copy created. Original file was not modified.",str(p)
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message(),None
+    if not path:
+        return "Upload a document.",None
+    runtime=providers.get("runtime")
+    if runtime is None:
+        return "Document editing is unavailable until the local SAFE model is released.",None
+    if not isinstance(find_text,str) or not isinstance(replacement,str) or not isinstance(fmt,str):
+        return "Find text, replacement and format must be text.",None
+    if len(find_text)+len(replacement)>20000:
+        return "Document edit exceeds the 20,000-character review limit.",None
+    output=None
+    try:
+        source_text=extract_document_text(path)
+        _require_safety_allow_chunks_http(runtime,source_text)
+        _require_safety_allow_http(runtime,replacement)
+        raw,name,mime=replace_document_text(path,find_text,replacement,fmt)
+        output=Path(tempfile.gettempdir())/("aethrion-edited-"+os.urandom(5).hex()+"-"+name)
+        output.write_bytes(raw)
+        edited_text=extract_document_text(output)
+        _require_safety_allow_chunks_http(runtime,edited_text)
+        return "Edited copy created. Original file was not modified.",str(output)
+    except HTTPException as exc:
+        if output is not None:
+            output.unlink(missing_ok=True)
+        return "Document editing blocked by AETHRION-SAFE: "+str(exc.detail),None
+    except Exception as exc:
+        if output is not None:
+            output.unlink(missing_ok=True)
+        return "Document editing failed: "+type(exc).__name__,None
 
 @spaces.GPU(duration=60)
 def edit_project(path,task):
@@ -302,7 +362,12 @@ def edit_project(path,task):
     runtime = providers.get("runtime")
     try:
         _require_safety_allow_http(runtime, task)
-        project_bytes = Path(path).read_bytes()
+        source_file=Path(path)
+        if not source_file.is_file() or source_file.is_symlink():
+            raise WorkspaceError("Project upload must be a regular file.")
+        if source_file.stat().st_size>MAX_ARCHIVE_BYTES:
+            raise WorkspaceError("Project ZIP exceeds the 8 MiB upload limit.")
+        project_bytes = source_file.read_bytes()
         for filename, source_text in read_project_zip(project_bytes).items():
             _require_safety_allow_chunks_http(runtime, source_text)
         def local_code_provider(request):
@@ -310,6 +375,10 @@ def edit_project(path,task):
         raw, summary = ProjectWorkspaceAgent(local_code_provider).propose(
             project_bytes, task
         )
+        # Review every generated file, not only the agent's natural-language summary.
+        for filename, output_text in read_project_zip(raw).items():
+            _require_safety_allow_chunks_http(runtime, output_text)
+        _require_safety_allow_chunks_http(runtime, summary)
         output = Path(tempfile.gettempdir()) / (
             "aethrion-review-" + os.urandom(5).hex() + ".zip"
         )
@@ -351,8 +420,11 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             sm=gr.Markdown();d=gr.File(label="Review ZIP")
             gr.Button("Propose project changes").click(edit_project,inputs=[z,t],outputs=[sm,d])
         with gr.Tab("Image"):
-            p=gr.Textbox(lines=3,label="Image prompt");o=gr.Image(type="filepath")
-            gr.Button("Generate image").click(image,inputs=p,outputs=o)
+            gr.Markdown(
+                "Image generation is disabled until a local visual-output safety verifier "
+                "is implemented, tested and released."
+            )
+            gr.Button("Generate image — unavailable", interactive=False)
         with gr.Tab("Vision"):
             vision_image=gr.Image(type="filepath",sources=["upload"],label="Upload image")
             vision_text=gr.Textbox(lines=2,label="Text to compare with the image")
@@ -361,14 +433,14 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
                 vision_compare,inputs=[vision_image,vision_text],outputs=vision_result
             )
         with gr.Tab("3D Studio"):
-            p=gr.Textbox(lines=3,label="Text-to-3D prompt");task_msg=gr.Markdown()
-            task_ref=gr.Textbox(label="Local OBJ file path")
-            gr.Button("Create from text").click(three_d_text,inputs=p,outputs=[task_msg,task_ref])
-            image_ref=gr.Image(type="filepath",sources=["upload"],label="Image-to-3D reference")
-            texture=gr.Textbox(label="Optional texture prompt")
-            gr.Button("Image-to-3D (not yet implemented)").click(three_d_image,inputs=[image_ref,texture],outputs=[task_msg,task_ref])
-            task_status=gr.Markdown();model_file=gr.File(label="Generated OBJ point cloud (vertices only)")
-            gr.Button("Check / download OBJ point cloud").click(three_d_poll,inputs=task_ref,outputs=[task_status,model_file])
+            gr.Markdown(
+                "3D generation, image-to-3D conversion and asset downloads are disabled. "
+                "They will remain unavailable until local geometry-output safety screening "
+                "and a server-owned, access-controlled artifact store are implemented, "
+                "tested and released."
+            )
+            gr.Button("Create from text — unavailable", interactive=False)
+            gr.Button("Image-to-3D — unavailable", interactive=False)
         with gr.Tab("Research"):
             q=gr.Textbox(lines=3,label="Research question");o=gr.Markdown()
             gr.Button("Search").click(research,inputs=q,outputs=o)

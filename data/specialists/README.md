@@ -1,23 +1,27 @@
 # AETHRION specialist dataset format
 
 All specialist datasets are prepared locally as a NumPy NPZ archive loaded with
-`allow_pickle=False`. The archive must contain `sample_id` and `split`
-arrays. Every record must be assigned exactly one of `train`, `validation`
-or `test`; all three splits must be non-empty and sample IDs must be unique.
+`allow_pickle=False`. The archive must contain `sample_id`, `group_id` and
+`split` arrays. Every record must be assigned exactly one of `train`,
+`validation` or `test`; all three splits must be non-empty, sample IDs must be
+unique, and each provenance group must occur in only one split. Prepared archives
+store only SHA-256 pseudonyms of the supplied group IDs, not the raw author or
+speaker identifiers. Text-conditioned specialist tokenizers are learned from the
+training partition only and their exact SHA-256 values are recorded in their manifests.
 
 | Model | Required NPZ arrays |
 |---|---|
-| BASE instruction tuning | `sample_id, split, input_ids, labels` |
-| Code | `sample_id, split, token_ids` |
-| Vision | `sample_id, split, images, token_ids` |
-| Image | `sample_id, split, images, token_ids` |
-| ASR | `sample_id, split, features, input_lengths, targets, target_lengths` |
-| TTS | `sample_id, split, token_ids, frame_to_token, target_mels, durations` |
-| Vocoder | `sample_id, split, target_mels, target_waveforms` |
-| 3D | `sample_id, split, points, token_ids` |
-| Research | `sample_id, split, query_ids, passage_ids` |
-| Document | `sample_id, split, token_ids, boxes, layout_ids, tag_labels` |
-| Safety | `sample_id, split, token_ids, decision_labels, reason_labels` |
+| BASE instruction tuning | `sample_id, group_id, split, input_ids, labels` |
+| Code | `sample_id, group_id, split, token_ids` |
+| Vision | `sample_id, group_id, split, images, token_ids` |
+| Image | `sample_id, group_id, split, images, token_ids` |
+| ASR | `sample_id, group_id, split, features, input_lengths, targets, target_lengths` |
+| TTS | `sample_id, group_id, split, token_ids, frame_to_token, target_mels, durations` |
+| Vocoder | `sample_id, group_id, split, target_mels, target_waveforms` |
+| 3D | `sample_id, group_id, split, points, token_ids` |
+| Research | `sample_id, group_id, split, query_ids, passage_ids` |
+| Document | `sample_id, group_id, split, token_ids, boxes, layout_ids, tag_labels` |
+| Safety | `sample_id, group_id, split, token_ids, decision_labels, reason_labels` |
 
 The manifest is fail-closed. It requires exact boolean approval fields,
 reviewed sources with local source paths and matching SHA-256 values, license
@@ -46,18 +50,38 @@ trained Vocoder learns mel-to-waveform conversion; both datasets require
 documented speaker consent. TTS cannot be released unless its companion
 AETHRION-VOCODER also passes its own evaluation and release gates.
 
-## Raw JSONL preparation (CODE, RESEARCH, DOCUMENT, SAFE)
+## Raw JSONL preparation (CHAT, CODE, RESEARCH, DOCUMENT, SAFE)
 
 The first-party preparation CLI converts owner-supplied, reviewed JSONL records
-into the NPZ contract above, learns a byte-BPE tokenizer from only those records,
-copies the original source file for provenance, and writes SHA-256 hashes.
+into the NPZ contract above, learns byte-BPE tokenizers only from training-split
+records for specialist text tasks, copies the original source file for provenance,
+and writes SHA-256 hashes. CHAT is the exception: it must reuse the exact BASE
+tokenizer from the pretraining checkpoint; the command refuses to create a new
+instruction tokenizer that could be incompatible with the BASE weights.
 
 Supported record shapes:
 
-- `code`: `{"id":"...","text":"..."}`
-- `research`: `{"id":"...","query":"...","passage":"..."}`
-- `document`: `{"id":"...","text":"...","boxes":[[x0,y0,x1,y1],...],"layout_ids":[...],"tag_labels":[...]}`; layout arrays must align with byte-BPE token positions.
-- `safety`: `{"id":"...","text":"...","decision":"ALLOW|REVIEW|BLOCK","reasons":[integer,...]}`; decisions are human-supplied, never inferred by the tool.
+- `chat`: `{"id":"...","group_id":"...","prompt":"...","response":"..."}`; only response tokens are supervised, while prompt and padding positions use the `-100` ignore index. The resulting `model_id: "chat"` manifest can be used by `aethrion.instruction_tune` after its source, privacy and tokenizer reviews are explicitly approved.
+
+- `code`: `{"id":"...","group_id":"...","text":"..."}`
+- `research`: `{"id":"...","group_id":"...","query":"...","passage":"..."}`
+- `document`: `{"id":"...","group_id":"...","text":"...","boxes":[[x0,y0,x1,y1],...],"layout_ids":[...],"tag_labels":[...]}`; layout arrays must align with byte-BPE token positions.
+- `safety`: `{"id":"...","group_id":"...","text":"...","decision":"ALLOW|REVIEW|BLOCK","reasons":[integer,...]}`; decisions are human-supplied, never inferred by the tool.
+
+For CHAT, pass the exact BASE tokenizer generated during BASE pretraining. Do not
+train a new tokenizer for the instruction dataset:
+
+```bash
+python -m aethrion.specialist_prepare \
+  --input data/incoming/chat-reviewed.jsonl \
+  --model chat \
+  --output-root data/specialists \
+  --tokenizer artifacts/tokenizer.json \
+  --license "record the exact source license" \
+  --permitted-use "record the exact permitted training use" \
+  --evidence-uri "https://source.example/license-or-terms" \
+  --source-uri "https://source.example/dataset-release"
+```
 
 Example (CODE):
 
@@ -91,11 +115,11 @@ PCM WAV files, resamples to 16 kHz, extracts native log-mel features, creates
 the required padded arrays, and copies each source WAV into the provenance
 folder with SHA-256. The JSONL file contains one record per clip:
 
-- ASR: `{"id":"clip-001","wav_path":"audio/clip-001.wav","transcript":"..."}`
+- ASR: `{"id":"clip-001","speaker_id":"speaker-001","wav_path":"audio/clip-001.wav","transcript":"..."}`
 - TTS: the same fields plus `"durations":[...]`, one positive frame count per
   byte-BPE token. Durations must come from a documented, reviewed alignment
   process and must sum exactly to that clip's mel-frame count.
-- Vocoder: `{"id":"clip-001","wav_path":"audio/clip-001.wav"}`
+- Vocoder: `{"id":"clip-001","speaker_id":"speaker-001","wav_path":"audio/clip-001.wav"}`
 
 Example:
 
@@ -112,7 +136,9 @@ python -m aethrion.specialist_prepare_audio \
 
 For TTS, include the per-token `durations` arrays. For Vocoder, the default
 hop length matches the current model config (256 samples); ASR/TTS default to
-160. The tool never infers speaker consent: all audio source records keep
+160. The audio adapter requires either a stable `speaker_id` or explicit `group_id`
+on every clip so recordings from the same speaker cannot cross evaluation splits.
+The tool never infers speaker consent: all audio source records keep
 `speaker_consent_verified=false`, and the dataset manifest keeps
 `speaker_consent_reviewed=false`, `privacy_reviewed=false`,
 `training_allowed=false` and `owner_approval=false`. A responsible adult

@@ -80,6 +80,7 @@ jobs:
           from pathlib import Path
           import gradio as gr
           import app
+          from aethrion.document_tools import create_document
 
           assert isinstance(app.demo, gr.Blocks), "Gradio Blocks UI was not constructed"
           assert app._resolve_space_auth({}) is None
@@ -110,22 +111,33 @@ jobs:
           assert "not trained" in app.code("write a function").lower()
           assert ("not trained" in app.research("latest AI research").lower() or "not ready" in app.research("latest AI research").lower())
           assert "not trained" in app.vision_compare("placeholder.png", "cat").lower()
-          assert "not trained" in app.three_d_text("a small tree")[0].lower()
+          assert "unavailable" in app.three_d_text("a small tree")[0].lower()
           assert "not trained" in app.voice("placeholder.wav")[0].lower()
-          assert "not trained" in app.analyse("placeholder.pdf", "summarize").lower()
+          document_smoke = Path(tempfile.gettempdir()) / "aethrion-space-smoke.pdf"
+          document_smoke.write_bytes(b"%PDF-1.4\\n%%EOF")
+          try:
+              assert "not trained" in app.analyse(str(document_smoke), "summarize").lower()
+          finally:
+              document_smoke.unlink(missing_ok=True)
           app.SPACE_AUTH_ENABLED = False
           assert app.REMOTE_PROVIDERS_ENABLED is False, "The production Space must remain native-only"
 
           with tempfile.TemporaryDirectory() as temp:
-              created = app.make_doc("AETHRION smoke test", "first paragraph\n\nsecond paragraph", "docx")
-              extracted = app.extract_doc(created)
-              assert "first paragraph" in extracted and "second paragraph" in extracted
-              message, edited = app.edit_doc(created, "first paragraph", "updated paragraph", "docx")
-              assert edited and "created" in message.lower()
-              edited_text = app.extract_doc(edited)
-              assert "updated paragraph" in edited_text
-              Path(created).unlink(missing_ok=True)
-              Path(edited).unlink(missing_ok=True)
+              try:
+                  app.make_doc("AETHRION smoke test", "first paragraph\n\nsecond paragraph", "docx")
+              except gr.Error:
+                  pass
+              else:
+                  raise AssertionError("Document creation must fail closed without authentication and released SAFE")
+              message, edited = app.edit_doc("unused.docx", "find", "replace", "docx")
+              assert edited is None and "authentication" in message.lower()
+              raw, filename, mime = create_document(
+                  "AETHRION smoke test", "first paragraph\n\nsecond paragraph", "docx"
+              )
+              source_path = Path(temp) / filename
+              source_path.write_bytes(raw)
+              extracted = app.extract_doc(str(source_path))
+              assert "authentication" in extracted.lower(), "Raw document extraction must not bypass Space authentication"
 
           print("SPACE_RUNTIME_SMOKE_TEST_OK")
           PY

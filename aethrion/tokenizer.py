@@ -5,7 +5,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from aethrion.prepare_data import validate_training_approval
+from aethrion.prepare_data import sha256_file, validate_training_approval
 
 class ByteBPETokenizer:
     def __init__(self, merges: list[tuple[int, int]] | None = None):
@@ -111,9 +111,62 @@ class ByteBPETokenizer:
         tokenizer.decode([])
         return tokenizer
 
+def validate_tokenizer_provenance(
+    tokenizer_path: str | Path,
+    corpus_path: str | Path,
+    dataset_manifest_path: str | Path,
+    source_manifest_path: str | Path,
+    source_root: str | Path,
+    corpus_report_path: str | Path,
+    source_review_path: str | Path | None = None,
+) -> tuple[dict[str, dict], str]:
+    """Verify that the tokenizer was trained from the current approved train-only partition."""
+    tokenizer_file = Path(tokenizer_path).resolve()
+    corpus_file = Path(corpus_path).resolve()
+    dataset_file = Path(dataset_manifest_path).resolve()
+    source_file = Path(source_manifest_path).resolve()
+    report_file = Path(corpus_report_path).resolve()
+    review_file = Path(source_review_path).resolve() if source_review_path is not None else None
+    verified_splits = validate_training_approval(
+        dataset_file, source_file, Path(source_root), corpus_file, report_file, review_file
+    )
+    if not tokenizer_file.is_file():
+        raise ValueError(f"Training blocked: tokenizer is missing: {tokenizer_file}")
+    # Loading also validates the tokenizer's actual merge graph before trusting its hash.
+    ByteBPETokenizer.load(tokenizer_file)
+    provenance_path = Path(str(tokenizer_file) + ".provenance.json")
+    if not provenance_path.is_file():
+        raise ValueError("Training blocked: tokenizer provenance sidecar is missing.")
+    try:
+        provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError("Training blocked: tokenizer provenance sidecar is invalid.") from exc
+    expected = {
+        "format": "aethrion-tokenizer-provenance-v1",
+        "tokenizer_sha256": sha256_file(tokenizer_file),
+        "corpus_sha256": sha256_file(corpus_file),
+        "corpus_report_sha256": sha256_file(report_file),
+        "dataset_manifest_sha256": sha256_file(dataset_file),
+        "source_manifest_sha256": sha256_file(source_file),
+        "source_review_sha256": (
+            sha256_file(review_file) if review_file is not None else None
+        ),
+        "train_split_sha256": verified_splits["train"]["sha256"],
+        "validation_split_sha256": verified_splits["validation"]["sha256"],
+        "test_split_sha256": verified_splits["test"]["sha256"],
+    }
+    if provenance != expected:
+        raise ValueError(
+            "Training blocked: tokenizer provenance does not match the approved corpus, "
+            "source manifests and split hashes."
+        )
+    return verified_splits, sha256_file(provenance_path)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train the AETHRION byte-level BPE tokenizer")
-    parser.add_argument("--train", required=True, help="UTF-8 corpus text file")
+    parser.add_argument("--train", required=True, help="UTF-8 approved train-only split file")
+    parser.add_argument("--corpus", required=True, help="Combined corpus path bound to the audit report")
     parser.add_argument("--output", required=True)
     parser.add_argument("--vocab-size", type=int, default=2048)
     parser.add_argument("--min-frequency", type=int, default=2)
@@ -128,16 +181,43 @@ def main() -> None:
     parser.add_argument("--source-review", default=None,
                         help="Evidence-backed per-domain approval CSV for URL-attributed records.")
     args = parser.parse_args()
-    validate_training_approval(
+    verified_splits = validate_training_approval(
         Path(args.dataset_manifest), Path(args.source_manifest), Path(args.source_root),
-        Path(args.train), Path(args.corpus_report),
+        Path(args.corpus), Path(args.corpus_report),
         Path(args.source_review) if args.source_review else None,
     )
-    text = Path(args.train).read_text(encoding="utf-8")
+    train_path = Path(args.train).resolve()
+    if train_path != verified_splits["train"]["path"]:
+        raise ValueError("Tokenizer training input must be the approved train-only split; validation/test text is forbidden.")
+    text = train_path.read_text(encoding="utf-8")
     tokenizer = ByteBPETokenizer()
     tokenizer.train(text, args.vocab_size, args.min_frequency)
-    tokenizer.save(args.output)
-    print(f"Tokenizer saved: {args.output} | vocab_size={tokenizer.vocab_size}")
+    tokenizer_path = Path(args.output)
+    tokenizer.save(tokenizer_path)
+    source_review_path = Path(args.source_review) if args.source_review else None
+    provenance = {
+        "format": "aethrion-tokenizer-provenance-v1",
+        "tokenizer_sha256": sha256_file(tokenizer_path),
+        "corpus_sha256": sha256_file(Path(args.corpus)),
+        "corpus_report_sha256": sha256_file(Path(args.corpus_report)),
+        "dataset_manifest_sha256": sha256_file(Path(args.dataset_manifest)),
+        "source_manifest_sha256": sha256_file(Path(args.source_manifest)),
+        "source_review_sha256": (
+            sha256_file(source_review_path) if source_review_path is not None else None
+        ),
+        "train_split_sha256": verified_splits["train"]["sha256"],
+        "validation_split_sha256": verified_splits["validation"]["sha256"],
+        "test_split_sha256": verified_splits["test"]["sha256"],
+    }
+    provenance_path = Path(str(tokenizer_path) + ".provenance.json")
+    temporary_path = Path(str(provenance_path) + ".tmp")
+    temporary_path.write_text(
+        json.dumps(provenance, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    temporary_path.replace(provenance_path)
+    print(f"Tokenizer saved: {tokenizer_path} | vocab_size={tokenizer.vocab_size}")
+    print(f"Tokenizer provenance: {provenance_path}")
 
 if __name__ == "__main__":
     main()

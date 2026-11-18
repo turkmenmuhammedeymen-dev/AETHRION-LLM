@@ -10,7 +10,9 @@ license explicitly permits the intended ML training use.
 4. Run the preparation command from the repository root.
 
 The pipeline rejects unlisted/unapproved files, normalizes Unicode and whitespace,
-deduplicates records, excludes email-like records, deterministically shuffles, and
-writes an audit report with source checksums. These checks do not prove license
-validity, Turkish language quality, or absence of personal/copyrighted material.
-Human review remains mandatory.
+deduplicates records, groups records by provenance, and creates separate train,
+validation and test files with SHA-256 audit metadata. At least three independent
+source groups are required. The BASE tokenizer learns from the train-only split and
+writes a provenance sidecar bound to the approved source manifest and split hashes.
+These checks do not prove license validity, Turkish language quality, or absence of
+personal/copyrighted material. Human review remains mandatory.

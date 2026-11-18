@@ -23,6 +23,7 @@ import torch.nn as nn
 
 from aethrion.specialist_data import validate_specialist_dataset
 from aethrion.checkpoint import write_json_atomic
+from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
 
 
 _STOP_REQUESTED = False
@@ -225,7 +226,7 @@ def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
     if not isinstance(payload, dict) or payload.get("format") != "aethrion-specialist-checkpoint-v1":
         raise ValueError("Unsupported specialist checkpoint format.")
     required = {"model_id", "step", "model_config", "model_state", "optimizer_state",
-                "dataset_sha256", "rng_state"}
+                "dataset_sha256", "tokenizer_sha256", "manifest_sha256", "rng_state"}
     if required - set(payload):
         raise ValueError("Specialist checkpoint is missing required resume fields.")
     return payload
@@ -265,25 +266,37 @@ def train_specialist(
     if missing:
         raise ValueError("Missing specialist training keys: " + ", ".join(sorted(missing)))
     for key in ("max_steps", "batch_size", "eval_interval", "save_interval"):
-        if type(config[key]) is not int or config[key] < 1:
-            raise ValueError(f"{key} must be a positive integer.")
-    if config["learning_rate"] <= 0 or config["weight_decay"] < 0 or config["grad_clip"] <= 0:
-        raise ValueError("Invalid optimizer configuration.")
-    if type(config["seed"]) is not int:
-        raise ValueError("seed must be an integer.")
-    approval = validate_specialist_dataset(manifest_path, require_training_approval=True)
+        require_int(config[key], key, minimum=1)
+    require_int(config["seed"], "seed", minimum=0, maximum=2**32 - 1)
+    require_finite_number(config["learning_rate"], "learning_rate", minimum=0, minimum_inclusive=False)
+    require_finite_number(config["weight_decay"], "weight_decay", minimum=0)
+    require_finite_number(config["grad_clip"], "grad_clip", minimum=0, minimum_inclusive=False)
     model_id = config["model_id"]
+    if not isinstance(model_id, str) or not model_id.strip():
+        raise ValueError("model_id must be a non-empty string.")
+    model_config = config.get("model_config")
+    if not isinstance(model_config, dict) or not model_config:
+        raise ValueError("model_config must be a non-empty object.")
+    validate_numeric_tree(model_config)
+    if not isinstance(config["output_dir"], str) or not config["output_dir"].strip():
+        raise ValueError("output_dir must be a non-empty path string.")
+    approval = validate_specialist_dataset(manifest_path, require_training_approval=True)
     if approval["model_id"] != model_id:
         raise ValueError("Training config model_id differs from approved dataset manifest.")
+    if approval["tokenizer_vocab_size"] is not None:
+        model_vocab_size = model_config.get("vocab_size")
+        if type(model_vocab_size) is not int or model_vocab_size < approval["tokenizer_vocab_size"]:
+            raise ValueError("Model vocab_size must be at least the verified tokenizer vocabulary size.")
 
     manifest_file = Path(manifest_path).resolve()
+    manifest_hash = _sha256(manifest_file)
     with np.load(approval["dataset_path"], allow_pickle=False) as archive:
         arrays = {key: np.array(archive[key], copy=True) for key in archive.files}
     split_names = arrays["split"].astype(str)
     train_idx = np.flatnonzero(split_names == "train")
     val_idx = np.flatnonzero(split_names == "validation")
     test_idx = np.flatnonzero(split_names == "test")
-    keys = sorted(set(arrays) - {"sample_id", "split"})
+    keys = sorted(set(arrays) - {"sample_id", "group_id", "split"})
     if not len(train_idx) or not len(val_idx) or not len(test_idx):
         raise ValueError("Train, validation and test partitions must all be populated.")
 
@@ -306,6 +319,10 @@ def train_specialist(
             raise ValueError("Resume model or approved dataset differs from checkpoint.")
         if state.get("model_config") != config["model_config"]:
             raise ValueError("Resume model configuration differs from checkpoint.")
+        if state.get("tokenizer_sha256") != approval["tokenizer_sha256"]:
+            raise ValueError("Resume tokenizer differs from the verified specialist tokenizer.")
+        if state.get("manifest_sha256") != manifest_hash:
+            raise ValueError("Specialist source/approval manifest changed; refusing unsafe resume.")
         model.load_state_dict(state["model_state"])
         optimizer.load_state_dict(state["optimizer_state"])
         _restore_rng_state(state["rng_state"])
@@ -329,7 +346,11 @@ def train_specialist(
         if not torch.isfinite(loss):
             raise FloatingPointError(f"Non-finite {model_id} training loss at step {step}.")
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), float(config["grad_clip"]))
+        grad_norm = torch.nn.utils.clip_grad_norm_(
+            model.parameters(), float(config["grad_clip"]), error_if_nonfinite=True
+        )
+        if not torch.isfinite(grad_norm).item():
+            raise FloatingPointError(f"Non-finite {model_id} gradient norm at step {step}.")
         optimizer.step()
 
         if step % config["eval_interval"] == 0 or step == config["max_steps"] - 1 or _STOP_REQUESTED:
@@ -355,6 +376,8 @@ def train_specialist(
                 "model_state": model.state_dict(),
                 "optimizer_state": optimizer.state_dict(),
                 "dataset_sha256": approval["dataset_sha256"],
+                "tokenizer_sha256": approval["tokenizer_sha256"],
+                "manifest_sha256": manifest_hash,
                 "rng_state": _capture_rng_state(),
             })
             write_json_atomic({
@@ -362,6 +385,8 @@ def train_specialist(
                 "release_status": "NOT_RELEASED",
                 "model_id": model_id, "step": step,
                 "dataset_sha256": approval["dataset_sha256"],
+                "tokenizer_sha256": approval["tokenizer_sha256"],
+                "manifest_sha256": manifest_hash,
                 "checkpoint_sha256": checkpoint_hash,
                 "validation_loss": last_validation,
                 "note": "Training alone does not authorize registry status=trained; run independent quality and safety evaluation."
@@ -374,6 +399,8 @@ def train_specialist(
                 "model_id": model_id,
                 "steps": step + 1,
                 "dataset_sha256": approval["dataset_sha256"],
+                "tokenizer_sha256": approval["tokenizer_sha256"],
+                "manifest_sha256": manifest_hash,
                 "checkpoint_sha256": checkpoint_hash,
                 "validation_loss": last_validation,
                 "sample_counts": approval["split_counts"],
@@ -390,10 +417,13 @@ def train_specialist(
         "model_id": model_id,
         "steps": config["max_steps"],
         "dataset_sha256": approval["dataset_sha256"],
+        "tokenizer_sha256": approval["tokenizer_sha256"],
+        "manifest_sha256": manifest_hash,
         "checkpoint_sha256": _sha256(checkpoint_path),
         "validation_loss": last_validation,
         "held_out_test_loss": test_loss,
         "sample_counts": approval["split_counts"],
+        "provenance_group_count": approval["group_count"],
         "device": str(device),
         "note": "Independent benchmark, calibration, safety review and release approval remain required."
     }

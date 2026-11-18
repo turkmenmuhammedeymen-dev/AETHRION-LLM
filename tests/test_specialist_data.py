@@ -20,9 +20,13 @@ class SpecialistDataApprovalTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(["a", "b", "c", "d", "e", "f"]),
+            group_id=np.asarray([hashlib.sha256(x.encode()).hexdigest() for x in ("ga", "gb", "gc", "gd", "ge", "gf")]),
             split=np.asarray(["train", "train", "validation", "validation", "test", "test"]),
-            token_ids=np.random.default_rng(1).integers(0, 300, size=(6, 12), dtype=np.int64),
+            token_ids=np.random.default_rng(1).integers(0, 256, size=(6, 12), dtype=np.int64),
         )
+        from aethrion.tokenizer import ByteBPETokenizer
+        tokenizer_path = root / "tokenizer.json"
+        ByteBPETokenizer().save(tokenizer_path)
         payload = {
             "format": "aethrion-specialist-dataset-v1",
             "dataset_id": "unit-test-only",
@@ -33,6 +37,8 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             "privacy_reviewed": approved,
             "dataset_path": "dataset.npz",
             "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+            "tokenizer_path": "tokenizer.json",
+            "tokenizer_sha256": hashlib.sha256(tokenizer_path.read_bytes()).hexdigest(),
             "sources": [{
                 "source_id": "synthetic-fixture",
                 "source_uri": "unit-test://synthetic-fixture",
@@ -81,6 +87,44 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             with self.assertRaisesRegex(SpecialistDataError, "dataset SHA-256 mismatch"):
                 validate_specialist_dataset(manifest)
 
+    def test_group_id_cannot_cross_data_splits(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            dataset = root / "dataset.npz"
+            with np.load(dataset, allow_pickle=False) as archive:
+                arrays = {key: np.array(archive[key], copy=True) for key in archive.files}
+            shared_group = hashlib.sha256(b"shared-provenance-group").hexdigest()
+            arrays["group_id"][0] = shared_group
+            arrays["group_id"][2] = shared_group
+            np.savez(dataset, **arrays)
+            payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "crosses"):
+                validate_specialist_dataset(manifest)
+
+    def test_tokenizer_hash_mismatch_blocks_specialist_data(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, _ = self._fixture(root, approved=True)
+            (root / "tokenizer.json").write_text('{"tampered":true}', encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "tokenizer SHA-256 mismatch"):
+                validate_specialist_dataset(manifest)
+
+    def test_token_ids_outside_verified_tokenizer_vocabulary_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            dataset = root / "dataset.npz"
+            with np.load(dataset, allow_pickle=False) as archive:
+                arrays = {key: np.array(archive[key], copy=True) for key in archive.files}
+            arrays["token_ids"][0, 0] = 256
+            np.savez(dataset, **arrays)
+            payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "outside the verified tokenizer vocabulary"):
+                validate_specialist_dataset(manifest)
+
     def _safety_fixture(self, root: Path, per_class: int):
         source = root / "safety-source.txt"
         source.write_text("Synthetic taxonomy-only safety fixture.", encoding="utf-8")
@@ -100,11 +144,15 @@ class SpecialistDataApprovalTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(sample_ids),
+            group_id=np.asarray([hashlib.sha256(value.encode()).hexdigest() for value in sample_ids]),
             split=np.asarray(splits),
             token_ids=np.random.default_rng(7).integers(0, 256, size=(count, 12), dtype=np.int64),
             decision_labels=np.asarray(decisions, dtype=np.int64),
             reason_labels=reasons,
         )
+        from aethrion.tokenizer import ByteBPETokenizer
+        tokenizer_path = root / "tokenizer.json"
+        ByteBPETokenizer().save(tokenizer_path)
         payload = {
             "format": "aethrion-specialist-dataset-v1",
             "dataset_id": "synthetic-safety-taxonomy-test-only",
@@ -116,6 +164,8 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             "safety_min_per_class": 25,
             "dataset_path": "safety.npz",
             "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+            "tokenizer_path": "tokenizer.json",
+            "tokenizer_sha256": hashlib.sha256(tokenizer_path.read_bytes()).hexdigest(),
             "sources": [{
                 "source_id": "synthetic-taxonomy-fixture",
                 "source_uri": "unit-test://safety-taxonomy",
@@ -153,8 +203,9 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             np.savez(
                 dataset,
                 sample_id=np.asarray(["a", "b", "c"]),
+                group_id=np.asarray([hashlib.sha256(x.encode()).hexdigest() for x in ("ga", "gb", "gc")]),
                 split=np.asarray(["train", "train", "validation"]),
-                token_ids=np.random.default_rng(1).integers(0, 300, size=(3, 12), dtype=np.int64),
+                token_ids=np.random.default_rng(1).integers(0, 256, size=(3, 12), dtype=np.int64),
             )
             payload["dataset_sha256"] = hashlib.sha256(dataset.read_bytes()).hexdigest()
             manifest.write_text(json.dumps(payload), encoding="utf-8")

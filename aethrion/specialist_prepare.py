@@ -1,8 +1,9 @@
 """Prepare auditable text-family datasets from owner-supplied JSONL records.
 
-Supported IDs: code, research, document, safety.
-This tool never approves data. It always emits training_allowed=false and
-owner_approval=false; a human must review provenance, rights and privacy.
+Supported IDs: chat, code, research, document and safety. Non-CHAT text
+tokenizers are trained only on their training partition; CHAT must reuse the
+exact BASE tokenizer. This tool never approves data and always emits
+training_allowed=false and owner_approval=false.
 """
 from __future__ import annotations
 
@@ -17,7 +18,7 @@ import numpy as np
 
 from aethrion.tokenizer import ByteBPETokenizer
 
-SUPPORTED = {"code", "research", "document", "safety"}
+SUPPORTED = {"chat", "code", "research", "document", "safety"}
 SPLITS = ("train", "validation", "test")
 
 
@@ -55,6 +56,21 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _group_id(row: dict[str, Any], *, fallback: str | None = None) -> str:
+    value = row.get("group_id")
+    if (not isinstance(value, str) or not value.strip()) and fallback:
+        value = row.get(fallback)
+    if not isinstance(value, str) or not value.strip():
+        required = "group_id" if fallback is None else f"group_id or {fallback}"
+        raise PreparationError(f"Every record requires a non-empty {required} for leakage-safe splitting.")
+    return value.strip()
+
+
+def _group_hash(group_id: str) -> str:
+    """Store only a one-way pseudonymous provenance identifier in prepared NPZ data."""
+    return hashlib.sha256(group_id.encode("utf-8")).hexdigest()
+
+
 def _split(sample_id: str, seed: int) -> str:
     value = int(hashlib.sha256(f"{seed}:{sample_id}".encode()).hexdigest()[:8], 16) % 100
     return "train" if value < 80 else "validation" if value < 90 else "test"
@@ -78,12 +94,36 @@ def _build_arrays(model_id: str, rows: list[dict[str, Any]], tokenizer: ByteBPET
                   max_length: int, reason_classes: int, seed: int,
                   layout_vocab_size: int, tag_classes: int) -> dict[str, np.ndarray]:
     ids = [str(row["id"]) for row in rows]
-    splits = [_split(str(row.get("group_id", item)), seed) for item, row in zip(ids, rows)]
+    group_ids = [_group_id(row) for row in rows]
+    splits = [_split(group_id, seed) for group_id in group_ids]
+    group_hashes = [_group_hash(group_id) for group_id in group_ids]
     arrays: dict[str, np.ndarray] = {
         "sample_id": np.asarray(ids, dtype=np.str_),
+        "group_id": np.asarray(group_hashes, dtype=np.str_),
         "split": np.asarray(splits, dtype=np.str_),
     }
-    if model_id == "code":
+    if model_id == "chat":
+        inputs, labels = [], []
+        for row_id, row in zip(ids, rows):
+            prompt = _required_text(row, "prompt", row_id)
+            response = _required_text(row, "response", row_id)
+            prompt_ids = tokenizer.encode(prompt + "\n")
+            response_ids = tokenizer.encode(response)
+            if not response_ids:
+                raise PreparationError(f"Record {row_id!r} has no response tokens.")
+            prompt_ids = prompt_ids[:max_length - 1]
+            response_ids = response_ids[:max_length - len(prompt_ids)]
+            if not response_ids:
+                raise PreparationError(
+                    f"Record {row_id!r} prompt leaves no room for a supervised response token."
+                )
+            sequence = prompt_ids + response_ids
+            target = [-100] * len(prompt_ids) + response_ids
+            inputs.append(_pad(sequence, max_length))
+            labels.append(target + [-100] * (max_length - len(target)))
+        arrays["input_ids"] = np.asarray(inputs, dtype=np.int64)
+        arrays["labels"] = np.asarray(labels, dtype=np.int64)
+    elif model_id == "code":
         sequences = [
             _pad(tokenizer.encode(_required_text(row, "text", row_id)), max_length)
             for row_id, row in zip(ids, rows)
@@ -165,6 +205,7 @@ def prepare_text_dataset(
     reason_classes: int = 16,
     layout_vocab_size: int = 32,
     tag_classes: int = 32,
+    tokenizer_source_path: str | Path | None = None,
 ) -> dict[str, Any]:
     if model_id not in SUPPORTED:
         raise PreparationError(f"Unsupported text preparation model: {model_id}")
@@ -172,17 +213,34 @@ def prepare_text_dataset(
         raise PreparationError("License, permitted_use and evidence_uri must be documented; approvals stay false.")
     if max_length < 2 or vocab_size < 256 or reason_classes < 1 or layout_vocab_size < 1 or tag_classes < 1:
         raise PreparationError("Invalid tokenizer or sequence dimensions.")
+    if model_id == "chat" and tokenizer_source_path is None:
+        raise PreparationError("CHAT instruction preparation requires the exact existing BASE tokenizer via tokenizer_source_path.")
+    if model_id != "chat" and tokenizer_source_path is not None:
+        raise PreparationError("tokenizer_source_path is supported only for CHAT instruction data.")
+    tokenizer_source = Path(tokenizer_source_path).resolve() if tokenizer_source_path is not None else None
+    if tokenizer_source is not None and (not tokenizer_source.is_file() or tokenizer_source.stat().st_size == 0):
+        raise PreparationError("The supplied BASE tokenizer file is missing or empty.")
     source = Path(input_path).resolve()
     rows = _read_jsonl(source)
+    group_ids = [_group_id(row) for row in rows]
+    split_names = [_split(group_id, seed) for group_id in group_ids]
     corpus_fields = []
-    for row in rows:
-        for key in ("text", "query", "passage"):
+    for row, split_name in zip(rows, split_names):
+        if split_name != "train":
+            continue
+        for key in ("prompt", "response", "text", "query", "passage"):
             if isinstance(row.get(key), str):
                 corpus_fields.append(row[key])
     if not corpus_fields:
-        raise PreparationError("No text fields found to train the tokenizer.")
-    tokenizer = ByteBPETokenizer()
-    tokenizer.train("\n".join(corpus_fields), vocab_size=vocab_size)
+        raise PreparationError("No training-split text fields found to train the tokenizer.")
+    if model_id == "chat":
+        try:
+            tokenizer = ByteBPETokenizer.load(tokenizer_source)
+        except (OSError, UnicodeError, ValueError, KeyError) as exc:
+            raise PreparationError("The supplied BASE tokenizer is invalid.") from exc
+    else:
+        tokenizer = ByteBPETokenizer()
+        tokenizer.train("\n".join(corpus_fields), vocab_size=vocab_size)
     arrays = _build_arrays(model_id, rows, tokenizer, max_length, reason_classes, seed,
                            layout_vocab_size, tag_classes)
     split_names = arrays["split"].tolist()
@@ -201,7 +259,10 @@ def prepare_text_dataset(
     dataset_path = destination / "dataset.npz"
     np.savez_compressed(dataset_path, **arrays)
     tokenizer_path = destination / "tokenizer.json"
-    tokenizer.save(tokenizer_path)
+    if tokenizer_source is not None:
+        shutil.copyfile(tokenizer_source, tokenizer_path)
+    else:
+        tokenizer.save(tokenizer_path)
     manifest_path = destination.parent / f"{model_id}.json"
     source_record = {
         "source_id": f"{model_id}-input-jsonl",
@@ -218,7 +279,10 @@ def prepare_text_dataset(
         "format": "aethrion-specialist-dataset-v1",
         "dataset_id": f"{model_id}-prepared-{_sha256(dataset_path)[:12]}",
         "model_id": model_id,
-        "modality": "text" if model_id in {"research", "safety"} else ("code" if model_id == "code" else "document"),
+        "modality": (
+            "text" if model_id in {"chat", "research", "safety"}
+            else ("code" if model_id == "code" else "document")
+        ),
         "training_allowed": False,
         "owner_approval": False,
         "privacy_reviewed": False,
@@ -269,6 +333,10 @@ def main() -> None:
     parser.add_argument("--reason-classes", type=int, default=16)
     parser.add_argument("--layout-vocab-size", type=int, default=32)
     parser.add_argument("--tag-classes", type=int, default=32)
+    parser.add_argument(
+        "--tokenizer", default=None,
+        help="Existing BASE tokenizer path required for --model chat; never retrain it during instruction preparation.",
+    )
     args = parser.parse_args()
     result = prepare_text_dataset(
         args.input, model_id=args.model, output_root=args.output_root,
@@ -276,6 +344,7 @@ def main() -> None:
         evidence_uri=args.evidence_uri, source_uri=args.source_uri, seed=args.seed, vocab_size=args.vocab_size,
         max_length=args.max_length, reason_classes=args.reason_classes,
         layout_vocab_size=args.layout_vocab_size, tag_classes=args.tag_classes,
+        tokenizer_source_path=args.tokenizer,
     )
     print(json.dumps(result, ensure_ascii=False, indent=2))
 

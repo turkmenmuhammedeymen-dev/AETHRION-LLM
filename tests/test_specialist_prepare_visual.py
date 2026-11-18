@@ -25,11 +25,11 @@ class VisualPreparationTests(unittest.TestCase):
             if model_id == "3d":
                 points = np.random.default_rng(index).uniform(-1, 1, size=(64, 3)).astype(np.float32)
                 np.save(root / f"points-{index}.npy", points, allow_pickle=False)
-                rows.append({"id": f"object-{index}", "point_path": f"points-{index}.npy",
+                rows.append({"id": f"object-{index}", "group_id": f"group-{index}", "point_path": f"points-{index}.npy",
                              "text": f"point cloud object {index}"})
             else:
                 Image.new("RGB", (16, 12), (index, 20, 30)).save(root / f"image-{index}.png")
-                rows.append({"id": f"image-{index}", "image_path": f"image-{index}.png",
+                rows.append({"id": f"image-{index}", "group_id": f"group-{index}", "image_path": f"image-{index}.png",
                              "caption": f"scene number {index}"})
         source = root / f"{model_id}.jsonl"
         source.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")

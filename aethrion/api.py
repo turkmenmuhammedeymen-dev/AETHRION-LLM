@@ -132,25 +132,55 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
         Capability.DOCUMENT, Capability.SAFETY,
     )
     safety_ready = runtime.registry.status(Capability.SAFETY.value) == "ready"
+    # Text SAFE can review prompts and text results, but cannot inspect image/3D
+    # artifacts. Never expose file-producing visual models until an independent
+    # local visual-output safety verifier is implemented and release-gated.
+    visual_output_capabilities = {Capability.IMAGE, Capability.THREE_D}
     for capability in supported:
+        if capability in visual_output_capabilities:
+            continue
         if runtime.registry.status(capability.value) != "ready":
             continue
+        if capability == Capability.TTS and (
+            runtime.registry.status("vocoder") != "ready"
+            or runtime.registry.status(Capability.ASR.value) != "ready"
+        ):
+            continue
+        if capability == Capability.RESEARCH:
+            try:
+                runtime.validate_research_index()
+            except Exception:
+                # Missing, stale, malformed or unreadable local indexes fail closed.
+                continue
         # No capability except the SAFE classifier is exposed until SAFE itself
         # has a verified local release.
         if capability != Capability.SAFETY and not safety_ready:
             continue
         def handler(request: CapabilityRequest, selected=capability.value):
             if selected != Capability.SAFETY.value:
-                _require_safety_allow(runtime, request.prompt)
+                _require_safety_allow_chunks(runtime, request.prompt)
             if selected == Capability.DOCUMENT.value:
                 document_path = request.options.get("document_path")
                 if isinstance(document_path, str) and document_path:
                     _require_safety_allow_chunks(runtime, extract_document_text(document_path))
             result = runtime.handle(selected, request)
+            if selected == Capability.TTS:
+                audio_path = result.get("audio_path") if isinstance(result, dict) else None
+                try:
+                    if not isinstance(audio_path, str) or not audio_path:
+                        raise CapabilityUnavailable("TTS returned no verifiable audio file.")
+                    spoken_text = runtime.transcribe_wav(audio_path)
+                    if not isinstance(spoken_text, str) or not spoken_text.strip():
+                        raise CapabilityUnavailable("Generated speech could not be transcribed for safety review.")
+                    _require_safety_allow_chunks(runtime, spoken_text)
+                except Exception:
+                    if isinstance(audio_path, str):
+                        Path(audio_path).unlink(missing_ok=True)
+                    raise
             if selected != Capability.SAFETY.value:
                 output_text = _text_for_safety(result)
                 if output_text:
-                    _require_safety_allow(runtime, output_text)
+                    _require_safety_allow_chunks(runtime, output_text)
             return result
         router.register(capability,runtime.registry.resolve(capability.value).architecture,handler)
     return router,providers
@@ -173,6 +203,13 @@ def capabilities():
 
 @app.post("/dispatch", dependencies=[Depends(require_api_token)])
 def dispatch(request:DispatchRequest):
+    # File-bearing operations must use bounded upload endpoints. Never accept a
+    # caller-controlled server filesystem path through arbitrary JSON options.
+    if request.capability in {"document", "vision", "asr", "image", "3d", "tts"}:
+        raise HTTPException(
+            status_code=400,
+            detail="Use the dedicated, bounded upload/output endpoint for this file-producing capability.",
+        )
     try:
         result=router.dispatch(request.capability,CapabilityRequest(request.prompt,request.options))
         return {"capability":result.capability.value,"provider":result.provider,"result":result.output}
@@ -185,7 +222,7 @@ def analyze_file(request:FileRequest):
     runtime=providers.get("runtime")
     if runtime is None or Capability.DOCUMENT.value not in router.available():
         raise HTTPException(status_code=503,detail="AETHRION-DOC is not trained and released.")
-    _require_safety_allow_http(runtime, request.question)
+    _require_safety_allow_chunks_http(runtime, request.question)
     try:
         raw=base64.b64decode(request.content_base64,validate=True)
     except (ValueError,TypeError) as exc:
@@ -216,7 +253,7 @@ def get_3d_task(task_id:str):
 def generate_3d(request:dict[str,Any]):
     runtime=providers.get("runtime")
     if runtime is None or Capability.THREE_D.value not in router.available():
-        raise HTTPException(status_code=503,detail="AETHRION-3D is not trained and released.")
+        raise HTTPException(status_code=503,detail="AETHRION-3D is unavailable until local 3D-output safety screening is implemented and released.")
     prompt=request.get("prompt")
     if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>4000:
         raise HTTPException(status_code=400,detail="prompt must contain 1–4000 characters.")
@@ -233,7 +270,7 @@ def generate_3d(request:dict[str,Any]):
         if path is not None: path.unlink(missing_ok=True)
 
 @app.post("/vision/compare", dependencies=[Depends(require_api_token)])
-async def vision_compare(file:UploadFile=File(...),text:str=Form(...)):
+async def vision_compare(file:UploadFile=File(...),text:str=Form(...,max_length=4000)):
     runtime=providers.get("runtime")
     if runtime is None or Capability.VISION.value not in router.available():
         raise HTTPException(status_code=503,detail="AETHRION-VISION is not trained and released.")
@@ -243,7 +280,7 @@ async def vision_compare(file:UploadFile=File(...),text:str=Form(...)):
     suffix=Path(file.filename or "image.png").suffix.lower()
     if suffix not in {".png",".jpg",".jpeg",".webp"}:
         raise HTTPException(status_code=400,detail="Supported image formats are PNG, JPG and WebP.")
-    _require_safety_allow_http(runtime, text)
+    _require_safety_allow_chunks_http(runtime, text)
     with tempfile.NamedTemporaryFile(suffix=suffix) as handle:
         handle.write(raw); handle.flush()
         try: score=runtime.image_text_similarity(handle.name,text)
@@ -266,7 +303,7 @@ async def audio_transcriptions(file:UploadFile=File(...)):
         handle.write(raw); handle.flush()
         try:
             transcript=runtime.transcribe_wav(handle.name)
-            _require_safety_allow_http(runtime, transcript)
+            _require_safety_allow_chunks_http(runtime, transcript)
         except HTTPException:
             raise
         except CapabilityUnavailable:
@@ -282,10 +319,11 @@ def audio_speech(request:dict[str,Any]):
     text=request.get("text")
     if not isinstance(text,str) or not text.strip() or len(text)>4096:
         raise HTTPException(status_code=400,detail="text must contain 1–4096 characters.")
-    _require_safety_allow_http(runtime, text)
+    _require_safety_allow_chunks_http(runtime, text)
     path=None
     try:
-        path=runtime.synthesize_wav(text)
+        result=router.dispatch(Capability.TTS.value, CapabilityRequest(text, {}))
+        path=Path(result["audio_path"])
         return Response(content=path.read_bytes(),media_type="audio/wav",
                         headers={"Cache-Control":"no-store"})
     except Exception as exc:
@@ -306,7 +344,7 @@ async def documents_extract(file: UploadFile = File(...)):
         handle.write(raw); handle.flush()
         try:
             content=extract_document_text(handle.name)
-            _require_safety_allow_http(runtime, content)
+            _require_safety_allow_chunks_http(runtime, content)
         except CapabilityUnavailable:
             raise HTTPException(status_code=503,detail="AETHRION-SAFE did not allow this extracted document.")
         except (DocumentError,UnicodeError,ValueError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
@@ -315,25 +353,30 @@ async def documents_extract(file: UploadFile = File(...)):
 @app.post("/documents/create", dependencies=[Depends(require_api_token)])
 def documents_create(request: dict[str,Any]):
     runtime=providers.get("runtime")
-    title=str(request.get("title",""))
-    content=str(request.get("content",""))
+    if runtime is None or runtime.registry.status(Capability.SAFETY.value) != "ready":
+        raise HTTPException(status_code=503,detail="AETHRION-SAFE is not trained and released.")
+    title=request.get("title")
+    content=request.get("content")
+    output_format=request.get("format","docx")
+    if not isinstance(title,str) or not isinstance(content,str) or not isinstance(output_format,str):
+        raise HTTPException(status_code=400,detail="title, content and format must be strings.")
     if len(title)+len(content)>20000:
         raise HTTPException(status_code=413,detail="Document text exceeds the 20,000-character safety review limit.")
-    _require_safety_allow_chunks_http(runtime, title+"\\n"+content)
+    _require_safety_allow_chunks_http(runtime, title+"\n"+content)
     try:
-        raw,name,mime=create_document(title,content,str(request.get("format","docx")))
+        raw,name,mime=create_document(title,content,output_format)
         return Response(content=raw,media_type=mime,headers={"Content-Disposition":f'attachment; filename="{name}"',"Cache-Control":"no-store"})
     except DocumentError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
 
 @app.post("/workspace/propose", dependencies=[Depends(require_api_token)])
-async def workspace_propose(file:UploadFile=File(...),task:str=Form(...)):
+async def workspace_propose(file:UploadFile=File(...),task:str=Form(...,max_length=4000)):
     runtime=providers.get("runtime")
     if runtime is None or Capability.CODE.value not in router.available():
         raise HTTPException(status_code=503,detail="AETHRION-CODE is not trained and released.")
     raw=await file.read(8*1024*1024+1)
     if not raw or len(raw)>8*1024*1024:
         raise HTTPException(status_code=413,detail="Project ZIP must be between 1 byte and 8 MiB.")
-    _require_safety_allow_http(runtime, task)
+    _require_safety_allow_chunks_http(runtime, task)
     try:
         uploaded_files = read_project_zip(raw)
         for filename, source_text in uploaded_files.items():
@@ -343,12 +386,15 @@ async def workspace_propose(file:UploadFile=File(...),task:str=Form(...)):
     except WorkspaceError as exc:
         raise HTTPException(status_code=400,detail=str(exc)) from exc
     def local_code_provider(request):
-        _require_safety_allow_http(runtime, request.prompt)
+        _require_safety_allow_chunks_http(runtime, request.prompt)
         generated = runtime.generate_text("code",request.prompt,max_new_tokens=1024,temperature=0.1)
-        _require_safety_allow_http(runtime, _text_for_safety(generated))
+        _require_safety_allow_chunks_http(runtime, _text_for_safety(generated))
         return generated
     try:
         output,summary=ProjectWorkspaceAgent(local_code_provider).propose(raw,task)
+        for filename, output_text in read_project_zip(output).items():
+            _require_safety_allow_chunks_http(runtime, output_text)
+        _require_safety_allow_chunks_http(runtime, summary)
         return Response(content=output,media_type="application/zip",
             headers={"Content-Disposition":'attachment; filename="aethrion-review.zip"',
                      "X-Aethrion-Summary":summary[:500],"Cache-Control":"no-store"})

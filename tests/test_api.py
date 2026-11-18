@@ -83,6 +83,17 @@ class _FakeSafetyRuntime:
         self.decisions = decisions or {}
         self.output_text = output_text
         self.reviewed = []
+        self.research_index_valid = True
+        self.audio_path = None
+        self.spoken_text = "safe spoken output"
+
+    def validate_research_index(self):
+        if not self.research_index_valid:
+            raise api.NativeModelError("Research index is not verified.")
+        return True
+
+    def transcribe_wav(self, path):
+        return self.spoken_text
 
     def classify_safety(self, text):
         self.reviewed.append(text)
@@ -91,6 +102,8 @@ class _FakeSafetyRuntime:
     def handle(self, capability, request):
         if capability == "safety":
             return {"decision": self.decisions.get(request.prompt, "ALLOW")}
+        if capability == "tts":
+            return {"audio_path": self.audio_path}
         return {"text": self.output_text}
 
 
@@ -105,6 +118,49 @@ class SafeRuntimeGateTests(unittest.TestCase):
         router, _, _ = self._build({"chat": "ready", "safety": "not_trained"})
         self.assertNotIn("chat", router.available())
         self.assertNotIn("safety", router.available())
+
+    def test_tts_requires_both_vocoder_and_asr(self):
+        cases = [
+            {"tts": "ready", "safety": "ready", "vocoder": "ready"},
+            {"tts": "ready", "safety": "ready", "asr": "ready"},
+        ]
+        for statuses in cases:
+            with self.subTest(statuses=statuses):
+                router, _, _ = self._build(statuses)
+                self.assertNotIn("tts", router.available())
+
+    def test_tts_reviews_transcribed_audio_and_deletes_blocked_output(self):
+        runtime = _FakeSafetyRuntime({
+            "tts": "ready", "vocoder": "ready", "asr": "ready", "safety": "ready",
+        }, decisions={"unsafe spoken output": "BLOCK"})
+        with tempfile.TemporaryDirectory() as folder:
+            audio = Path(folder) / "tts.wav"
+            audio.write_bytes(b"synthetic-audio")
+            runtime.audio_path = str(audio)
+            runtime.spoken_text = "unsafe spoken output"
+            with patch.object(api, "NativeModelRuntime", return_value=runtime):
+                router, _ = build_router(allow_remote_providers=False)
+            self.assertIn("tts", router.available())
+            with self.assertRaises(CapabilityUnavailable):
+                router.dispatch("tts", CapabilityRequest("hello", {}))
+            self.assertFalse(audio.exists())
+
+    def test_research_is_not_registered_without_verified_local_index(self):
+        runtime = _FakeSafetyRuntime({"research": "ready", "safety": "ready"})
+        runtime.research_index_valid = False
+        with patch.object(api, "NativeModelRuntime", return_value=runtime):
+            router, _ = build_router(allow_remote_providers=False)
+        self.assertNotIn("research", router.available())
+
+    def test_image_and_3d_output_models_stay_unavailable_without_visual_output_safety(self):
+        router, _, _ = self._build({
+            "safety": "ready", "image": "ready", "3d": "ready",
+            "chat": "ready", "code": "ready",
+        })
+        self.assertIn("chat", router.available())
+        self.assertIn("code", router.available())
+        self.assertNotIn("image", router.available())
+        self.assertNotIn("3d", router.available())
 
     def test_safe_allow_is_required_for_prompt_and_generated_text(self):
         router, _, runtime = self._build({"chat": "ready", "safety": "ready"})
@@ -149,6 +205,21 @@ class SafeRuntimeGateTests(unittest.TestCase):
         with self.assertRaises(CapabilityUnavailable):
             api._require_safety_allow(runtime, "invalid score")
 
+    def test_router_screens_long_prompt_and_generated_output_in_chunks(self):
+        router, _, runtime = self._build({"chat": "ready", "safety": "ready"}, output_text="O" * 1001)
+        router.dispatch("chat", CapabilityRequest("P" * 1001, {}))
+        self.assertEqual([len(x) for x in runtime.reviewed], [400, 400, 201, 400, 400, 201])
+
+    def test_generic_dispatch_cannot_use_document_filesystem_paths(self):
+        client=TestClient(api.app)
+        with patch.dict("os.environ", {"AETHRION_API_TOKEN":"test-api-token"}):
+            response=client.post(
+                "/dispatch",
+                headers={"Authorization":"Bearer test-api-token"},
+                json={"capability":"document","prompt":"read file","options":{"document_path":"/etc/passwd"}},
+            )
+        self.assertEqual(response.status_code,400)
+
     def test_safe_chunk_gate_checks_every_segment(self):
         runtime = _FakeSafetyRuntime({"safety": "ready"})
         api._require_safety_allow_chunks(runtime, "x" * 1001, chunk_chars=400)
@@ -177,6 +248,20 @@ class SafeRuntimeGateTests(unittest.TestCase):
             api._text_for_safety({"results": [{"title": "Title", "excerpt": "Passage"}]}),
             "Passage\nTitle",
         )
+
+    def test_document_creation_fails_closed_when_safe_is_not_released(self):
+        runtime = _FakeSafetyRuntime({"safety": "not_trained"})
+        with patch.object(api, "providers", {"runtime": runtime}):
+            with self.assertRaises(api.HTTPException) as caught:
+                api.documents_create({"title": "Test", "content": "Safe sample."})
+        self.assertEqual(caught.exception.status_code, 503)
+
+    def test_document_creation_rejects_non_string_fields(self):
+        runtime = _FakeSafetyRuntime({"safety": "ready"})
+        with patch.object(api, "providers", {"runtime": runtime}):
+            with self.assertRaises(api.HTTPException) as caught:
+                api.documents_create({"title": ["not", "text"], "content": "Content"})
+        self.assertEqual(caught.exception.status_code, 400)
 
     def test_safe_classifier_route_does_not_gate_itself(self):
         router, _, runtime = self._build(
@@ -233,6 +318,25 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.assertEqual(missing.status_code,401)
         self.assertEqual(invalid.status_code,401)
 
+    def test_dispatch_rejects_server_filesystem_path_capabilities(self):
+        cases = [
+            ("document", {"document_path": "/etc/passwd"}),
+            ("vision", {"image_path": "/etc/passwd"}),
+            ("asr", {"audio_path": "/etc/passwd"}),
+            ("image", {"output_path": "/etc/passwd"}),
+            ("3d", {"output_path": "/etc/passwd"}),
+            ("tts", {"output_path": "/etc/passwd"}),
+        ]
+        for capability, options in cases:
+            with self.subTest(capability=capability):
+                response=self.client.post(
+                    "/dispatch",
+                    headers=self.auth,
+                    json={"capability":capability,"prompt":"inspect file","options":options},
+                )
+                self.assertEqual(response.status_code,400)
+                self.assertIn("dedicated",response.json()["detail"])
+
     def test_capabilities_endpoint_reports_registered_handlers(self):
         response=self.client.get("/capabilities",headers=self.auth)
         self.assertEqual(response.status_code,200)
@@ -242,8 +346,13 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         response=self.client.post("/dispatch",json={"capability":"code","prompt":"write a function"},headers=self.auth)
         self.assertEqual(response.status_code,200)
         self.assertEqual(response.json()["result"]["text"],"generated code")
-    def test_dispatch_unconfigured_capability_returns_503(self):
+    def test_dispatch_rejects_file_output_capability(self):
         response=self.client.post("/dispatch",json={"capability":"3d","prompt":"create a model"},headers=self.auth)
+        self.assertEqual(response.status_code,400)
+        self.assertIn("dedicated",response.json()["detail"])
+
+    def test_dispatch_unconfigured_text_capability_returns_503(self):
+        response=self.client.post("/dispatch",json={"capability":"research","prompt":"summarize"},headers=self.auth)
         self.assertEqual(response.status_code,503)
 
 if __name__=="__main__": unittest.main()

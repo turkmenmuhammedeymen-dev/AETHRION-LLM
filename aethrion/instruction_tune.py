@@ -16,6 +16,7 @@ import torch
 from aethrion.checkpoint import load_checkpoint, save_checkpoint, sha256_file, write_json_atomic
 from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.specialist_data import validate_specialist_dataset
+from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
 
 
 _STOP_REQUESTED = False
@@ -79,21 +80,33 @@ def tune_instructions(
     if missing:
         raise ValueError("Missing instruction-tuning config keys: " + ", ".join(sorted(missing)))
     for key in ("max_steps", "batch_size", "eval_interval", "save_interval"):
-        if type(config[key]) is not int or config[key] < 1:
-            raise ValueError(f"{key} must be a positive integer.")
-    if config["learning_rate"] <= 0 or config["weight_decay"] < 0 or config["grad_clip"] <= 0:
-        raise ValueError("Invalid instruction-tuning optimizer configuration.")
+        require_int(config[key], key, minimum=1)
+    require_int(config["seed"], "seed", minimum=0, maximum=2**32 - 1)
+    require_finite_number(config["learning_rate"], "learning_rate", minimum=0, minimum_inclusive=False)
+    require_finite_number(config["weight_decay"], "weight_decay", minimum=0)
+    require_finite_number(config["grad_clip"], "grad_clip", minimum=0, minimum_inclusive=False)
+    validate_numeric_tree(config["model_config"])
+    if not isinstance(config["tokenizer_path"], str) or not config["tokenizer_path"].strip():
+        raise ValueError("tokenizer_path must be a non-empty path string.")
+    if not isinstance(config["output_dir"], str) or not config["output_dir"].strip():
+        raise ValueError("output_dir must be a non-empty path string.")
 
     approval = validate_specialist_dataset(manifest_path, require_training_approval=True)
     if approval["model_id"] != "chat":
         raise ValueError("AETHRION-BASE instruction tuning requires model_id='chat'.")
-    manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
-    tokenizer_path = Path(config["tokenizer_path"]).resolve()
-    if not tokenizer_path.is_file():
+    manifest_file = Path(manifest_path).resolve()
+    manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+    manifest_hash = sha256_file(manifest_file)
+    tokenizer_path = Path(approval["tokenizer_path"]).resolve()
+    configured_tokenizer_path = Path(config["tokenizer_path"]).resolve()
+    if not tokenizer_path.is_file() or not configured_tokenizer_path.is_file():
         raise ValueError("Instruction-tuning tokenizer is missing.")
     tokenizer_hash = sha256_file(tokenizer_path)
-    if manifest.get("tokenizer_sha256") != tokenizer_hash:
-        raise ValueError("Instruction dataset tokenizer SHA-256 does not match the selected tokenizer.")
+    if (
+        manifest.get("tokenizer_sha256") != tokenizer_hash
+        or sha256_file(configured_tokenizer_path) != tokenizer_hash
+    ):
+        raise ValueError("Instruction tokenizer must byte-match both the reviewed manifest copy and the BASE tokenizer configured for this run.")
 
     base = load_checkpoint(base_checkpoint, map_location="cpu")
     model_config = ModelConfig(**config["model_config"])
@@ -148,6 +161,8 @@ def tune_instructions(
             raise ValueError("Instruction dataset changed; refusing unsafe resume.")
         if state.get("tokenizer_sha256") != tokenizer_hash:
             raise ValueError("Instruction tokenizer changed; refusing unsafe resume.")
+        if state.get("manifest_sha256") != manifest_hash:
+            raise ValueError("Instruction source/approval manifest changed; refusing unsafe resume.")
         if state.get("base_checkpoint_sha256") != base_checkpoint_hash:
             raise ValueError("Base checkpoint changed; refusing unsafe instruction-tuning resume.")
         model.load_state_dict(state["model"])
@@ -208,6 +223,7 @@ def tune_instructions(
                 "tokenizer_sha256": tokenizer_hash,
                 "data_path": approval["dataset_path"],
                 "data_sha256": approval["dataset_sha256"],
+                "manifest_sha256": manifest_hash,
                 "rng_state": _rng_state(),
                 "training_stage": "instruction_tuning",
                 "base_checkpoint_sha256": base_checkpoint_hash,
@@ -220,6 +236,7 @@ def tune_instructions(
                 "checkpoint_sha256": checkpoint_hash,
                 "dataset_sha256": approval["dataset_sha256"],
                 "tokenizer_sha256": tokenizer_hash,
+                "manifest_sha256": manifest_hash,
                 "validation_loss": validation_loss,
                 "note": "Independent benchmark, safety review and explicit release approval remain required."
             }, output / "instruction_tuning_report.json")
@@ -232,6 +249,7 @@ def tune_instructions(
                 "steps": step + 1,
                 "dataset_sha256": approval["dataset_sha256"],
                 "tokenizer_sha256": tokenizer_hash,
+                "manifest_sha256": manifest_hash,
                 "checkpoint_sha256": checkpoint_hash,
                 "validation_loss": validation_loss,
                 "device": str(device),
@@ -248,6 +266,7 @@ def tune_instructions(
         "steps": config["max_steps"],
         "dataset_sha256": approval["dataset_sha256"],
         "tokenizer_sha256": tokenizer_hash,
+        "manifest_sha256": manifest_hash,
         "checkpoint_sha256": sha256_file(checkpoint_path),
         "validation_loss": validation_loss,
         "held_out_test_loss": test_loss,
