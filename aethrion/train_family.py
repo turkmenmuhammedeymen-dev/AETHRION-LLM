@@ -175,7 +175,7 @@ def run_family(
     execute: bool = False,
     python_executable: str | None = None,
 ) -> dict[str, Any]:
-    """Preflight or sequentially execute every selected, fully approved model."""
+    """Preflight the complete selection before launching any trainer."""
     repo = Path(root).resolve()
     model_ids = selected or list(MODEL_IDS)
     if len(set(model_ids)) != len(model_ids):
@@ -184,31 +184,55 @@ def run_family(
     if unknown:
         raise FamilyTrainingError("Unknown model IDs: " + ", ".join(unknown))
 
-    rows: list[dict[str, Any]] = []
+    # Phase 1: validate every selected model. No subprocess may start here.
+    plans: dict[str, dict[str, Any]] = {}
+    failures: dict[str, str] = {}
     for model_id in model_ids:
         try:
             plan = preflight_model(repo, model_id)
             command = list(plan["command"])
             if python_executable:
                 command[0] = python_executable
-            if not execute:
-                rows.append({**plan, "status": "ready_not_started"})
-                continue
-            completed = subprocess.run(command, cwd=repo, check=False)
+            plans[model_id] = {**plan, "command": command}
+        except Exception as exc:
+            failures[model_id] = f"{type(exc).__name__}: {exc}"
+
+    rows: list[dict[str, Any]] = []
+    if execute and failures:
+        # Atomic family policy: one blocked model prevents every selected trainer
+        # from starting, including models whose individual preflight succeeded.
+        for model_id in model_ids:
+            if model_id in failures:
+                rows.append({
+                    "model_id": model_id, "ready": False, "status": "blocked",
+                    "reason": failures[model_id],
+                })
+            else:
+                plan = plans[model_id]
+                rows.append({
+                    **plan, "status": "not_started_family_preflight_failed",
+                    "reason": "No model trainer was launched because another selected model failed preflight.",
+                })
+    elif not execute:
+        for model_id in model_ids:
+            if model_id in failures:
+                rows.append({
+                    "model_id": model_id, "ready": False, "status": "blocked",
+                    "reason": failures[model_id],
+                })
+            else:
+                rows.append({**plans[model_id], "status": "ready_not_started"})
+    else:
+        # Phase 2: only a fully preflighted selection reaches this loop.
+        for model_id in model_ids:
+            plan = plans[model_id]
+            completed = subprocess.run(plan["command"], cwd=repo, check=False)
             rows.append({
                 **plan,
-                "command": command,
                 "status": _training_outcome(
                     repo / plan["output_dir"], model_id, int(completed.returncode)
                 ),
                 "returncode": int(completed.returncode),
-            })
-        except Exception as exc:
-            rows.append({
-                "model_id": model_id,
-                "ready": False,
-                "status": "blocked",
-                "reason": f"{type(exc).__name__}: {exc}",
             })
 
     started = execute and any(
