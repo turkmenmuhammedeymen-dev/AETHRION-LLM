@@ -2,7 +2,7 @@
   "format": "aethrion-dataset-candidate-register-v1",
   "owner_review_authorized": true,
   "training_approval_granted": false,
-  "notes": "Owner authorized review and preparation planning. Source rights, per-item licenses, privacy, provenance, consent, exact downloaded release and hashes remain separate fail-closed requirements.",
+  "notes": "Current policy: only owner-authored first-party training data is permitted. All third-party dataset entries below are historical source-review records and are prohibited for download, preparation and training. The internal AETHRION-SAFE authoring track remains first-party but still requires creation and independent human review.",
   "candidates": [
     {
       "id": "cosmos-turkish-v1",
@@ -11,14 +11,15 @@
       ],
       "uri": "https://huggingface.co/datasets/ytu-ce-cosmos/Cosmos-Turkish-Corpus-v1.0",
       "declared_license": "CC-BY-4.0",
-      "review_status": "source_rights_review_required",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
         "Third-party website/forum/news/Wikipedia content requires source-level rights and attribution policy",
         "Pin exact revision and compute source/prepared hashes",
-        "Content-level deduplication and privacy filtering"
+        "Content-level deduplication and privacy filtering",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -26,7 +27,7 @@
         "evidence_urls": [
           "https://huggingface.co/datasets/ytu-ce-cosmos/Cosmos-Turkish-Corpus-v1.0"
         ],
-        "next_gate": "No ingestion until source-level rights, attribution, privacy, exact revision and file hashes are verified."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -36,8 +37,8 @@
       ],
       "uri": "https://commonvoice.mozilla.org/lss/datasets",
       "declared_license": "CC0-1.0",
-      "review_status": "release_and_consent_metadata_review_required",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
@@ -45,7 +46,8 @@
         "Pin the exact Turkish v27 release, record downloaded file inventory and SHA-256 values",
         "Verify release-specific speaker contribution, consent/provenance and privacy metadata before preparation",
         "Confirm sufficient persistent storage for the listed 2.79 GB release plus extracted/prepared data",
-        "Keep training_allowed=false until the exact prepared dataset and human review are approved"
+        "Keep training_allowed=false until the exact prepared dataset and human review are approved",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -56,7 +58,7 @@
           "https://huggingface.co/datasets/mozilla-foundation/common_voice_17_0",
           "https://huggingface.co/datasets/mozilla-foundation/common_voice_27_0"
         ],
-        "next_gate": "Use the official Mozilla Data Collective release only. Before any download/preparation, verify dataset-specific contributor/consent metadata, exact release contents, storage capacity and checksums; training remains blocked until a prepared dataset manifest receives explicit review."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -66,15 +68,16 @@
       ],
       "uri": "https://huggingface.co/datasets/allenai/objaverse",
       "declared_license": "ODC-By-1.0 plus per-asset licenses",
-      "review_status": "per_asset_license_filter_required",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
         "Inspect each asset license",
         "Exclude non-commercial assets for commercial-intent training",
         "Preserve ODC-By and per-asset attribution",
-        "Pin revision and hashes"
+        "Pin revision and hashes",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -82,7 +85,7 @@
         "evidence_urls": [
           "https://huggingface.co/datasets/allenai/objaverse"
         ],
-        "next_gate": "Read each asset's license and metadata; exclude incompatible/non-commercial assets for commercial-intent use; preserve attribution and review share-alike obligations."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -93,14 +96,15 @@
       ],
       "uri": "https://cocodataset.org/",
       "declared_license": "CC-BY-4.0 annotations; images subject to Flickr/source terms",
-      "review_status": "image_rights_not_cleared",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
         "COCO does not own underlying image copyrights",
         "Verify per-image rights and applicable Flickr terms",
-        "Do not treat annotation license as image training permission"
+        "Do not treat annotation license as image training permission",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -108,7 +112,7 @@
         "evidence_urls": [
           "https://cocodataset.org/dataset/termsofuse.htm"
         ],
-        "next_gate": "Image training remains blocked without item-level image rights evidence; annotation license does not clear image pixels."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -118,14 +122,15 @@
       ],
       "uri": "https://huggingface.co/datasets/bigcode/the-stack-dedup",
       "declared_license": "Mixed/source-specific; gated access",
-      "review_status": "access_and_per_file_rights_unverified",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
         "Dataset access was restricted",
         "Obtain authorized access and verify each source repository/file license",
-        "Preserve provenance and remove disallowed files"
+        "Preserve provenance and remove disallowed files",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -134,7 +139,7 @@
           "https://www.bigcode-project.org/docs/about/the-stack/",
           "https://huggingface.co/datasets/bigcode/the-stack"
         ],
-        "next_gate": "Do not request gated access or share contact information. Use only an authorized release with source-level licenses, provenance, current opt-out exclusions and pinned hashes."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -144,15 +149,16 @@
       ],
       "uri": "https://huggingface.co/datasets/docling-project/DocLayNet",
       "declared_license": "CDLA-Permissive-1.0 (dataset card)",
-      "review_status": "source_provenance_privacy_and_schema_review_required",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
         "Confirm upstream document/source rights for the exact release; dataset-level terms do not replace review of embedded source documents",
         "Review pages for personal or sensitive information and define redaction/exclusion before training",
         "Current AETHRION-DOCUMENT needs OCR text tokens paired with layout boxes; DocLayNet layout labels alone do not complete the OCR pipeline",
-        "Pin revision, inventory files, hash source and prepared artifacts"
+        "Pin revision, inventory files, hash source and prepared artifacts",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -161,7 +167,7 @@
           "https://huggingface.co/datasets/docling-project/DocLayNet",
           "https://huggingface.co/datasets/docling-project/DocLayNet/blob/main/README.md"
         ],
-        "next_gate": "Inspect exact revision, source provenance, privacy exposure and OCR/text availability; prepare only after human review."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -171,8 +177,8 @@
       ],
       "uri": "https://storage.googleapis.com/openimages/web/factsfigures_v7.html",
       "declared_license": "CC-BY-4.0 annotations; images listed as CC-BY-2.0 individually, subject to per-image verification",
-      "review_status": "per_image_rights_and_privacy_review_required",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
@@ -180,7 +186,8 @@
         "Preserve annotation attribution and source metadata",
         "Review images for personal/sensitive content and applicable restrictions",
         "Open Images is not a natural-language caption corpus; do not use it as IMAGE text-pair training without separately authored/licensed captions",
-        "Pin release and hash selected image/annotation files"
+        "Pin release and hash selected image/annotation files",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -188,7 +195,7 @@
         "evidence_urls": [
           "https://storage.googleapis.com/openimages/web/factsfigures_v7.html"
         ],
-        "next_gate": "No image ingestion until every selected image has verified rights, privacy filtering and attribution metadata."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -198,8 +205,8 @@
       ],
       "uri": "https://github.com/github/CodeSearchNet",
       "declared_license": "Mixed original repository/file licenses; dataset repository tooling is MIT",
-      "review_status": "per_file_license_filter_and_provenance_required",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
@@ -207,7 +214,8 @@
         "Exclude unknown, incompatible or unapproved source files; do not infer MIT from the dataset tooling license",
         "Preserve original copyright notices and repository provenance",
         "Remove secrets, credentials, personal data and disallowed content",
-        "Pin dataset release and hashes"
+        "Pin dataset release and hashes",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -216,7 +224,7 @@
           "https://github.com/github/CodeSearchNet",
           "https://github.com/github/CodeSearchNet/blob/master/LICENSE"
         ],
-        "next_gate": "Build a source-level allowlist only after verifying each source license and permitted ML-training use."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -226,15 +234,16 @@
       ],
       "uri": "https://microsoft.github.io/msmarco/Datasets.html",
       "declared_license": "Microsoft Research dataset terms; non-commercial research use only; no underlying IP rights granted",
-      "review_status": "noncommercial_terms_and_underlying_rights_incompatible_or_unresolved",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
         "Official terms limit use to non-commercial research and grant no underlying intellectual-property rights; do not use for a commercial-intent product",
         "Underlying web-document rights are not guaranteed by Microsoft",
         "Terms are automatically accepted by use; no download or acceptance is authorized",
-        "Prefer an independently rights-cleared retrieval corpus"
+        "Prefer an independently rights-cleared retrieval corpus",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -243,7 +252,7 @@
           "https://microsoft.github.io/msmarco/Datasets.html",
           "https://microsoft.github.io/msmarco/"
         ],
-        "next_gate": "Do not use for AETHRION product training under current intended-use assumptions; select a rights-cleared alternative."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -255,15 +264,16 @@
       ],
       "uri": "https://huggingface.co/datasets/SpeechDataAI/turkish-conversational-speech",
       "declared_license": "Custom commercial license claimed by provider; paid; not hosted on Hugging Face",
-      "review_status": "commercial_contract_and_speaker_consent_evidence_required",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
         "Audio is not hosted in the HF dataset repository; no access or files acquired",
         "Provider contract, exact permitted use, redistribution terms and full speaker-consent evidence require independent review",
         "Commercial acquisition has a stated price; no purchase, quote request or provider contact is authorized",
-        "Do not use TTS/Vocoder until consent explicitly covers speech synthesis and the intended use"
+        "Do not use TTS/Vocoder until consent explicitly covers speech synthesis and the intended use",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -272,7 +282,7 @@
           "https://huggingface.co/datasets/SpeechDataAI/turkish-conversational-speech",
           "https://www.speechdata.ai/datasets/turkish"
         ],
-        "next_gate": "Only reconsider after an adult-authorized contract review, full speaker-consent scope evidence, price approval and exact data provenance review."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -284,15 +294,16 @@
       ],
       "uri": "https://huggingface.co/datasets/yagmurtuncer/turkasr-bench-tts",
       "declared_license": "Mixed per-engine/source licenses; gated access",
-      "review_status": "evaluation_only_mixed_license_and_access_gate",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
         "Dataset is a synthetic-speech benchmark, not evidence of real human speech or speaker consent",
         "Dataset card identifies engines with non-commercial or share-alike restrictions; inspect every engine and source-text license",
         "Gated access requires acceptance of terms; no terms accepted or data downloaded",
-        "Keep for evaluation research only if exact terms permit; do not train production TTS/Vocoder from this mixed corpus"
+        "Keep for evaluation research only if exact terms permit; do not train production TTS/Vocoder from this mixed corpus",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -300,7 +311,7 @@
         "evidence_urls": [
           "https://huggingface.co/datasets/yagmurtuncer/turkasr-bench-tts"
         ],
-        "next_gate": "No access or training until terms and per-engine/source licenses are reviewed; benchmark-only role preferred."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -310,14 +321,15 @@
       ],
       "uri": "https://huggingface.co/datasets/turkmedstt/turkish-asr-benchmark",
       "declared_license": "CC-BY-4.0 for benchmark metadata",
-      "review_status": "evaluation_metadata_only_no_training_audio",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
         "Repository contains benchmark metrics only and does not redistribute source audio, transcripts or hypotheses",
         "Cannot create ASR training examples from metric tables",
-        "Use only as evaluation/provenance reference if the license and source terms are verified"
+        "Use only as evaluation/provenance reference if the license and source terms are verified",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -325,7 +337,7 @@
         "evidence_urls": [
           "https://huggingface.co/datasets/turkmedstt/turkish-asr-benchmark"
         ],
-        "next_gate": "Evaluation metadata only; acquire no source audio through this dataset."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -335,14 +347,15 @@
       ],
       "uri": "https://huggingface.co/datasets/ShapeNet/ShapeNetCore-archive",
       "declared_license": "ShapeNet terms: non-commercial research and educational use only",
-      "review_status": "noncommercial_terms_incompatible_with_product_training",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
         "Terms restrict use to non-commercial research and education; do not use for commercial-intent AETHRION model training",
         "Gated access requires acceptance of terms; no access or terms accepted",
-        "Prefer per-asset-cleared Objaverse CC0/CC-BY items or original procedural geometry"
+        "Prefer per-asset-cleared Objaverse CC0/CC-BY items or original procedural geometry",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -351,7 +364,7 @@
           "https://huggingface.co/datasets/ShapeNet/ShapeNetCore-archive",
           "https://huggingface.co/datasets/ShapeNet/ShapeNetCore"
         ],
-        "next_gate": "Exclude from product training under current intended-use assumptions."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     },
     {
@@ -387,15 +400,16 @@
       ],
       "uri": "https://mozilladatacollective.com/datasets/cmonjhxee01ako007kohpbg34",
       "declared_license": "CC0-1.0 (Mozilla Data Collective catalogue)",
-      "review_status": "speaker_synthesis_consent_and_release_hash_review_required",
-      "owner_review_authorized": true,
+      "review_status": "prohibited_by_first_party_only_policy",
+      "owner_review_authorized": false,
       "downloaded": false,
       "training_allowed": false,
       "blockers": [
         "Public catalogue describes a single speaker and public-domain audio/text, but the source record does not independently document the narrator's consent scope for synthetic voice generation",
         "Verify the exact release, file inventory, audio/text provenance and SHA-256 before preparation",
         "Confirm that the public-domain text status applies to every selected passage and retain attribution/provenance",
-        "Do not train TTS or Vocoder until speaker-synthesis permission is explicitly documented and reviewed"
+        "Do not train TTS or Vocoder until speaker-synthesis permission is explicitly documented and reviewed",
+        "Current AETHRION policy permits only first-party owner-authored data; do not download, prepare or train on this third-party dataset."
       ],
       "public_metadata_review": {
         "checked_at": "2026-11-17",
@@ -403,19 +417,20 @@
         "evidence_urls": [
           "https://mozilladatacollective.com/datasets/cmonjhxee01ako007kohpbg34"
         ],
-        "next_gate": "No download or training until the exact release is pinned and a documented review confirms the rights and consent scope for TTS/Vocoder use."
+        "next_gate": "Do not ingest, download or train on this third-party dataset under the current first-party-only policy."
       }
     }
   ],
   "owner_approval": {
     "recorded_at": "2026-11-17",
     "record_path": "docs/OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md",
-    "scope": "public-source review, evidence recording, non-destructive preparation, and training only on exact datasets whose source-specific rights, privacy and consent gates have passed",
+    "scope": "Owner-authored first-party data only: private local source preparation, documented authorship and rights, human review, and training only after the exact owner-authored dataset passes every gate.",
     "permits_training": true,
     "permits_restricted_download": false,
     "permits_accepting_provider_legal_terms": false,
     "permits_paid_acquisition": false,
     "permits_paid_compute": false,
-    "note": "The project owner authorizes training on fully cleared data. This does not approve any current dataset, grant third-party rights, accept click-through terms, authorize paid purchases/jobs, or satisfy privacy, per-item license, provenance or speaker-consent review."
+    "note": "The project owner authorizes training only on owner-authored first-party data after source, rights, privacy, quality and human-review gates pass. No third-party dataset is authorized for download or training. This does not create data, grant rights, accept provider terms, authorize paid acquisition or paid compute, or satisfy speaker consent.",
+    "permits_third_party_dataset_training": false
   }
 }
