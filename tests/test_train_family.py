@@ -121,7 +121,10 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
         from aethrion.train_family import _resolve_repo_input
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder).resolve()
-            self.assertEqual(_resolve_repo_input(root, "data/processed/corpus.txt", "data_path"), root / "data/processed/corpus.txt")
+            corpus = root / "data/processed/corpus.txt"
+            corpus.parent.mkdir(parents=True)
+            corpus.write_text("approved local fixture", encoding="utf-8")
+            self.assertEqual(_resolve_repo_input(root, "data/processed/corpus.txt", "data_path"), corpus)
 
     def test_valid_output_directory_is_resolved_inside_repo(self):
         with tempfile.TemporaryDirectory() as folder:
