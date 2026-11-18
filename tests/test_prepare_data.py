@@ -11,6 +11,7 @@ os.environ["AETHRION_BASE_AUDIT_HMAC_KEY"] = "unit-test-only-key-not-for-product
 from aethrion.prepare_data import (
     build_corpus,
     load_sources_manifest,
+    load_domain_review,
     normalize_text,
     require_training_enabled,
     validate_training_approval,
@@ -596,6 +597,58 @@ class CorpusPreparationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "signature verification failed"):
                 _verify_report_signature(report)
 
+
+
+    def test_source_manifest_rejects_disguised_pending_license_labels(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "source.txt").write_text("Owner-authored test source.", encoding="utf-8")
+            manifest = root / "sources.json"
+            manifest.write_text(json.dumps({"sources": [{
+                "source_id": "owner-source",
+                "path": "source.txt",
+                "license": "PENDING - awaiting human review",
+                "permitted_uses": "AI training",
+                "allow_training": True,
+            }]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "license is not verified"):
+                load_sources_manifest(manifest, root, require_training_approval=True)
+
+    def test_source_manifest_rejects_negative_training_permission(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "source.txt").write_text("Owner-authored test source.", encoding="utf-8")
+            manifest = root / "sources.json"
+            manifest.write_text(json.dumps({"sources": [{
+                "source_id": "owner-source",
+                "path": "source.txt",
+                "license": "AETHRION owner-authored",
+                "permitted_uses": "Not for training; evaluation only",
+                "allow_training": True,
+            }]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "must explicitly include training"):
+                load_sources_manifest(manifest, root, require_training_approval=True)
+
+    def test_domain_review_rejects_disguised_unknown_license_and_rights_holder(self):
+        with tempfile.TemporaryDirectory() as folder:
+            review = Path(folder) / "review.csv"
+            with review.open("w", encoding="utf-8", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=[
+                    "domain", "license_name", "license_evidence_url", "rights_holder",
+                    "ai_training_permission", "attribution_required", "review_status",
+                ])
+                writer.writeheader()
+                writer.writerow({
+                    "domain": "example.org",
+                    "license_name": "UNKNOWN - pending",
+                    "license_evidence_url": "https://example.org/license",
+                    "rights_holder": "UNKNOWN - not checked",
+                    "ai_training_permission": "YES",
+                    "attribution_required": "NO",
+                    "review_status": "APPROVED",
+                })
+            result = load_domain_review(review)
+            self.assertFalse(result["example.org"]["approved"])
 
 
 if __name__ == "__main__":
