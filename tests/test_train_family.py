@@ -292,5 +292,92 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertFalse(report["training_started"])
             self.assertFalse((root / "artifacts" / "training_sessions").exists())
 
+
+    def _write_verified_report_fixture(self, root: Path, *, model_id="code", status="training_complete_not_released"):
+        import hashlib
+        import json
+
+        output = root / "artifacts" / "models" / model_id
+        output.mkdir(parents=True)
+        checkpoint = output / "checkpoint_last.pt"
+        checkpoint.write_bytes(b"verified-checkpoint-fixture")
+        digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+        report = {
+            "status": status, "release_status": "NOT_RELEASED", "model_id": model_id,
+            "steps": 10, "dataset_sha256": "a" * 64, "tokenizer_sha256": "b" * 64,
+            "manifest_sha256": "c" * 64, "checkpoint_sha256": digest,
+            "validation_loss": 1.25, "held_out_test_loss": 1.5,
+        }
+        (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+        return output, checkpoint, report
+
+    def test_training_outcome_accepts_only_fresh_report_with_matching_checkpoint(self):
+        from aethrion.train_family import _training_outcome
+        import time
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, _ = self._write_verified_report_fixture(Path(folder))
+            outcome = _training_outcome(
+                output, "code", 0, checkpoint_path=checkpoint,
+                started_at_ns=time.time_ns() - 1_000_000_000,
+            )
+            self.assertEqual(outcome, "training_completed_not_released")
+
+    def test_training_outcome_rejects_wrong_model_and_missing_checkpoint(self):
+        from aethrion.train_family import _training_outcome
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, _ = self._write_verified_report_fixture(Path(folder))
+            self.assertEqual(
+                _training_outcome(output, "vision", 0, checkpoint_path=checkpoint),
+                "training_report_model_mismatch_not_released",
+            )
+            checkpoint.unlink()
+            self.assertEqual(
+                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
+                "training_checkpoint_missing_not_released",
+            )
+
+    def test_training_outcome_rejects_checkpoint_hash_mismatch(self):
+        from aethrion.train_family import _training_outcome
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(Path(folder))
+            report["checkpoint_sha256"] = "0" * 64
+            import json
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
+                "training_checkpoint_hash_mismatch_not_released",
+            )
+
+    def test_training_outcome_rejects_missing_or_nonfinite_metrics(self):
+        from aethrion.train_family import _training_outcome
+        import json
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(Path(folder))
+            report["held_out_test_loss"] = float("nan")
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
+                "training_report_metrics_invalid_not_released",
+            )
+
+    def test_training_outcome_rejects_stale_report(self):
+        from aethrion.train_family import _training_outcome
+        import time
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, _ = self._write_verified_report_fixture(Path(folder))
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    started_at_ns=time.time_ns() + 1_000_000_000,
+                ),
+                "training_report_stale_not_released",
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
