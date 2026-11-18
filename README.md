@@ -62,12 +62,13 @@ GPU is required for practical large-scale training.
 
 ## Data governance and training
 
-Only use material you own, public-domain material, or sources whose terms and
-rights explicitly permit the intended machine-learning training use. Preserve
-source URLs, licenses, attribution, provenance and SHA-256 hashes. Review
-privacy and consent; speech datasets require speaker-consent evidence.
-Dataset-level license labels do not automatically clear embedded third-party
-web pages, recordings, images, code repositories, or 3D assets.
+AETHRION's current data policy permits only first-party, owner-authored
+material. Do not download, prepare, or train on third-party datasets, including
+public-domain or openly licensed corpora. For each owner-authored source,
+preserve documented authorship, rights-holder role, provenance and SHA-256
+hashes. Review privacy and quality; speech data additionally requires explicit
+speaker consent for the intended model objective. Automated checks validate
+recorded evidence but do not make legal or consent decisions.
 
 Keep raw data, prepared corpora, NPZ datasets, tokenizers, checkpoints and
 private evaluation material outside Git. The training gate must remain closed
