@@ -34,5 +34,23 @@
     "safety_label_review_required": false
   },
   "sources": [],
-  "block_reason": "No verified first-party source files, source-specific rights evidence, prepared dataset, and required human reviews are recorded. This manifest is a fail-closed registration, not training data or approval."
+  "block_reason": "No verified first-party source files, source-specific rights evidence, prepared dataset, and required human reviews are recorded. This manifest is a fail-closed registration, not training data or approval.",
+  "governance": {
+    "schema": "aethrion-human-review-v1",
+    "model_id": "image",
+    "approval_status": "pending",
+    "author_role": "",
+    "authorship_attested": false,
+    "first_party_origin_attested": false,
+    "rights_holder_role": "",
+    "rights_attested": false,
+    "source_rights_reviewed": false,
+    "privacy_reviewed": false,
+    "quality_reviewed": false,
+    "reviewer_role": "",
+    "reviewed_at": "",
+    "evidence_uri": "",
+    "speaker_consent_reviewed": false,
+    "safety_reviewed": false
+  }
 }
