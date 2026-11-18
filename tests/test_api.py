@@ -106,6 +106,16 @@ class SafeRuntimeGateTests(unittest.TestCase):
         self.assertNotIn("chat", router.available())
         self.assertNotIn("safety", router.available())
 
+    def test_image_and_3d_output_models_stay_unavailable_without_visual_output_safety(self):
+        router, _, _ = self._build({
+            "safety": "ready", "image": "ready", "3d": "ready",
+            "chat": "ready", "code": "ready",
+        })
+        self.assertIn("chat", router.available())
+        self.assertIn("code", router.available())
+        self.assertNotIn("image", router.available())
+        self.assertNotIn("3d", router.available())
+
     def test_safe_allow_is_required_for_prompt_and_generated_text(self):
         router, _, runtime = self._build({"chat": "ready", "safety": "ready"})
         result = router.dispatch("chat", CapabilityRequest("hello", {}))
