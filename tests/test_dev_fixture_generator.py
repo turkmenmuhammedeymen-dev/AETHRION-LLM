@@ -10,6 +10,7 @@ import numpy as np
 
 from aethrion.specialist_prepare import prepare_text_dataset
 from aethrion.specialist_prepare_visual import prepare_visual_dataset
+from aethrion.specialist_data import SpecialistDataError, validate_specialist_dataset
 
 MODEL_IDS = ("chat","code","vision","image","asr","tts","3d","research","document","safety","vocoder")
 
@@ -84,6 +85,9 @@ class DevFixtureGeneratorTests(unittest.TestCase):
                     self.assertFalse(manifest["owner_approval"])
                     self.assertFalse(manifest["privacy_reviewed"])
                     self.assertTrue(all(not item["allow_training"] for item in manifest["sources"]))
+                    # The exact prepared artifact must still be rejected by the production trainer gate.
+                    with self.assertRaises(SpecialistDataError):
+                        validate_specialist_dataset(manifest_path, require_training_approval=True)
                     self.assertEqual(manifest["preparation"]["split_counts"], {
                         "train": 1, "validation": 1, "test": 1,
                     })
