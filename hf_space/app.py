@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from aethrion.api import build_router, get_native_model_statuses, _require_safety_allow_http, _require_safety_allow_chunks_http
 from aethrion.document_tools import create_document, extract_document_text, replace_document_text
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
-from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError, read_project_zip
+from aethrion.workspace_agent import MAX_ARCHIVE_BYTES, ProjectWorkspaceAgent, WorkspaceError, read_project_zip
 from aethrion.zerogpu_preflight import run_zero_gpu_preflight
 
 def _resolve_space_auth(environ=None):
@@ -278,18 +278,63 @@ def voice(path):
         return "Native speech conversation failed: " + type(exc).__name__, None
 
 def make_doc(title,content,fmt):
-    raw,name,mime=create_document(title,content,fmt)
-    p=Path(tempfile.gettempdir())/("aethrion-"+os.urandom(5).hex()+"-"+name);p.write_bytes(raw);return str(p)
+    if not SPACE_AUTH_ENABLED:
+        raise gr.Error(_auth_required_message())
+    runtime=providers.get("runtime")
+    if runtime is None:
+        raise gr.Error("Document creation is unavailable until the local SAFE model is released.")
+    if not isinstance(title,str) or not isinstance(content,str) or not isinstance(fmt,str):
+        raise gr.Error("Title, content and format must be text.")
+    if len(title)+len(content)>20000:
+        raise gr.Error("Document text exceeds the 20,000-character review limit.")
+    try:
+        review_text=title+"\\n"+content
+        _require_safety_allow_http(runtime,review_text)
+        _require_safety_allow_chunks_http(runtime,review_text)
+        raw,name,mime=create_document(title,content,fmt)
+        _require_safety_allow_chunks_http(runtime,content)
+        output=Path(tempfile.gettempdir())/("aethrion-"+os.urandom(5).hex()+"-"+name)
+        output.write_bytes(raw)
+        return str(output)
+    except HTTPException as exc:
+        raise gr.Error("Document creation blocked by AETHRION-SAFE: "+str(exc.detail)) from exc
+    except Exception as exc:
+        raise gr.Error("Document creation failed: "+type(exc).__name__) from exc
 
 def extract_doc(path):
     return extract_document_text(path) if path else "Upload a document."
 
 def edit_doc(path,find_text,replacement,fmt):
-    if not path:return "Upload a document.",None
-    raw,name,mime=replace_document_text(path,find_text,replacement,fmt)
-    p=Path(tempfile.gettempdir())/("aethrion-edited-"+os.urandom(5).hex()+"-"+name)
-    p.write_bytes(raw)
-    return "Edited copy created. Original file was not modified.",str(p)
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message(),None
+    if not path:
+        return "Upload a document.",None
+    runtime=providers.get("runtime")
+    if runtime is None:
+        return "Document editing is unavailable until the local SAFE model is released.",None
+    if not isinstance(find_text,str) or not isinstance(replacement,str) or not isinstance(fmt,str):
+        return "Find text, replacement and format must be text.",None
+    if len(find_text)+len(replacement)>20000:
+        return "Document edit exceeds the 20,000-character review limit.",None
+    output=None
+    try:
+        source_text=extract_document_text(path)
+        _require_safety_allow_chunks_http(runtime,source_text)
+        _require_safety_allow_http(runtime,replacement)
+        raw,name,mime=replace_document_text(path,find_text,replacement,fmt)
+        output=Path(tempfile.gettempdir())/("aethrion-edited-"+os.urandom(5).hex()+"-"+name)
+        output.write_bytes(raw)
+        edited_text=extract_document_text(output)
+        _require_safety_allow_chunks_http(runtime,edited_text)
+        return "Edited copy created. Original file was not modified.",str(output)
+    except HTTPException as exc:
+        if output is not None:
+            output.unlink(missing_ok=True)
+        return "Document editing blocked by AETHRION-SAFE: "+str(exc.detail),None
+    except Exception as exc:
+        if output is not None:
+            output.unlink(missing_ok=True)
+        return "Document editing failed: "+type(exc).__name__,None
 
 @spaces.GPU(duration=60)
 def edit_project(path,task):
@@ -302,7 +347,12 @@ def edit_project(path,task):
     runtime = providers.get("runtime")
     try:
         _require_safety_allow_http(runtime, task)
-        project_bytes = Path(path).read_bytes()
+        source_file=Path(path)
+        if not source_file.is_file() or source_file.is_symlink():
+            raise WorkspaceError("Project upload must be a regular file.")
+        if source_file.stat().st_size>MAX_ARCHIVE_BYTES:
+            raise WorkspaceError("Project ZIP exceeds the 8 MiB upload limit.")
+        project_bytes = source_file.read_bytes()
         for filename, source_text in read_project_zip(project_bytes).items():
             _require_safety_allow_chunks_http(runtime, source_text)
         def local_code_provider(request):
