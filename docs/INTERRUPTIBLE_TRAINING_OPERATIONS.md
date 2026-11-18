@@ -82,3 +82,23 @@ private datasets or credentials to Git.
 Independent held-out evaluation, safety/security review and explicit human
 release approval remain mandatory. Development fixtures are for tests only and
 must never be promoted into production training corpora.
+
+## Family report verification
+
+After a child trainer exits with code zero, the family supervisor does not infer
+success from the exit code or a status string alone. It requires a report
+created during the current process attempt, matching the selected model ID and
+the explicit `NOT_RELEASED` release state. A completion report must also point
+to an existing final checkpoint whose bytes match the report's SHA-256 digest.
+
+The supervisor validates the model-specific report contract:
+
+- CHAT: final step, finite train/validation metrics, finite held-out test loss,
+  dataset hash and tokenizer hash.
+- Specialist models: positive completed step count, finite validation and
+  held-out test losses, plus dataset, tokenizer and manifest hashes.
+
+Missing, stale, malformed, wrong-model, incomplete-metric, missing-checkpoint
+and checksum-mismatched reports are recorded as non-success outcomes. A valid
+training completion is still `training_completed_not_released`, never a
+release. A non-zero trainer exit is a failure even if an old report exists.
