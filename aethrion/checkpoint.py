@@ -7,6 +7,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import math
 import os
 import shutil
 import warnings
@@ -127,6 +128,44 @@ def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
         sidecar_temporary.unlink(missing_ok=True)
 
 
+def _validate_rng_state(state: Any) -> None:
+    """Reject structurally invalid RNG snapshots before choosing a generation."""
+    if not isinstance(state, dict) or not {"python", "numpy", "torch"} <= set(state):
+        raise ValueError("Checkpoint RNG state is incomplete.")
+    py = state["python"]
+    if not isinstance(py, dict) or not {"version", "state", "gauss"} <= set(py):
+        raise ValueError("Checkpoint Python RNG state is invalid.")
+    py_values = py["state"]
+    if (
+        type(py["version"]) is not int or py["version"] != 3
+        or not isinstance(py_values, list) or len(py_values) != 625
+        or any(type(value) is not int or value < 0 or value > 0xFFFFFFFF for value in py_values)
+        or (py["gauss"] is not None and (type(py["gauss"]) not in (int, float) or not math.isfinite(float(py["gauss"]))))
+    ):
+        raise ValueError("Checkpoint Python RNG state is invalid.")
+    ns = state["numpy"]
+    if not isinstance(ns, dict) or not {"algorithm", "keys", "position", "has_gauss", "cached_gaussian"} <= set(ns):
+        raise ValueError("Checkpoint NumPy RNG state is invalid.")
+    if (
+        ns["algorithm"] != "MT19937" or not isinstance(ns["keys"], list) or len(ns["keys"]) != 624
+        or any(type(value) is not int or value < 0 or value > 0xFFFFFFFF for value in ns["keys"])
+        or type(ns["position"]) is not int or not 0 <= ns["position"] <= 624
+        or type(ns["has_gauss"]) is not int or ns["has_gauss"] not in (0, 1)
+        or type(ns["cached_gaussian"]) not in (int, float)
+        or not math.isfinite(float(ns["cached_gaussian"]))
+    ):
+        raise ValueError("Checkpoint NumPy RNG state is invalid.")
+    torch_state = state["torch"]
+    if not isinstance(torch_state, torch.Tensor) or torch_state.dtype != torch.uint8 or torch_state.ndim != 1:
+        raise ValueError("Checkpoint Torch RNG state is invalid.")
+    cuda_states = state.get("cuda", [])
+    if not isinstance(cuda_states, list) or any(
+        not isinstance(item, torch.Tensor) or item.dtype != torch.uint8 or item.ndim != 1
+        for item in cuda_states
+    ):
+        raise ValueError("Checkpoint CUDA RNG state is invalid.")
+
+
 def _load_verified_checkpoint(
     path: Path,
     map_location: str | torch.device,
@@ -150,6 +189,17 @@ def _load_verified_checkpoint(
         raise ValueError("Checkpoint is missing required fields: " + ", ".join(missing))
     if not isinstance(state["training_config"], dict) or not state["training_config"]:
         raise ValueError("Checkpoint training_config must be a non-empty object.")
+    if type(state["step"]) is not int or state["step"] < 0:
+        raise ValueError("Checkpoint step is invalid.")
+    for key in ("data_sha256", "tokenizer_sha256"):
+        value = state[key]
+        if not isinstance(value, str) or len(value) != 64 or any(ch not in "0123456789abcdef" for ch in value.lower()):
+            raise ValueError(f"Checkpoint {key} is invalid.")
+    if not isinstance(state["model"], dict) or not isinstance(state["optimizer"], dict):
+        raise ValueError("Checkpoint model or optimizer state is invalid.")
+    if not isinstance(state["scaler"], dict) or not isinstance(state["model_config"], dict):
+        raise ValueError("Checkpoint scaler or model configuration is invalid.")
+    _validate_rng_state(state["rng_state"])
     return state
 
 
