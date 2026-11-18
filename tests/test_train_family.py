@@ -80,6 +80,25 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             with self.assertRaisesRegex(FamilyTrainingError, "escapes"):
                 _resolve_output_dir(root, "artifacts")
 
+    def test_base_training_input_paths_reject_windows_and_dot_paths(self):
+        from aethrion.train_family import _resolve_repo_input
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            for invalid in (r"C:\\outside.txt", r"..\\outside.txt", "./inside.txt", "data//corpus.txt"):
+                with self.subTest(invalid=invalid):
+                    with self.assertRaises(FamilyTrainingError):
+                        _resolve_repo_input(root, invalid, "data_path")
+
+    def test_base_training_input_paths_require_existing_regular_files(self):
+        from aethrion.train_family import _resolve_repo_input
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            with self.assertRaisesRegex(FamilyTrainingError, "regular file"):
+                _resolve_repo_input(root, "missing.txt", "data_path")
+            valid = root / "inside.txt"
+            valid.write_text("local", encoding="utf-8")
+            self.assertEqual(_resolve_repo_input(root, "inside.txt", "data_path"), valid)
+
     def test_base_training_input_paths_reject_absolute_and_parent_paths(self):
         from aethrion.train_family import _resolve_repo_input
         with tempfile.TemporaryDirectory() as folder:
