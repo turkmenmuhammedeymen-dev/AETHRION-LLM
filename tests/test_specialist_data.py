@@ -202,7 +202,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             np.savez(
                 dataset,
                 sample_id=np.asarray(["a", "b", "c"]),
-                group_id=np.asarray(["ga", "gb", "gc"]),
+                group_id=np.asarray([hashlib.sha256(x.encode()).hexdigest() for x in ("ga", "gb", "gc")]),
                 split=np.asarray(["train", "train", "validation"]),
                 token_ids=np.random.default_rng(1).integers(0, 256, size=(3, 12), dtype=np.int64),
             )
