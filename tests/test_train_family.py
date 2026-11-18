@@ -331,8 +331,16 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
         output = root / "artifacts" / "models" / model_id
         output.mkdir(parents=True)
         checkpoint = output / "checkpoint_last.pt"
-        checkpoint.write_bytes(b"verified-checkpoint-fixture")
-        digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+        from aethrion.specialist_train import _capture_rng_state, _save_checkpoint, _sha256
+        _save_checkpoint(checkpoint, {
+            "format": "aethrion-specialist-checkpoint-v2",
+            "model_id": model_id, "step": 9, "model_config": {},
+            "training_config": {"seed": 1, "max_steps": 10},
+            "model_state": {}, "optimizer_state": {},
+            "dataset_sha256": "a" * 64, "tokenizer_sha256": "b" * 64,
+            "manifest_sha256": "c" * 64, "rng_state": _capture_rng_state(),
+        })
+        digest = _sha256(checkpoint)
         report = {
             "status": status, "release_status": "NOT_RELEASED", "model_id": model_id,
             "steps": 10, "dataset_sha256": "a" * 64, "tokenizer_sha256": "b" * 64,
@@ -393,6 +401,32 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertEqual(
                 _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
                 "training_report_metrics_invalid_not_released",
+            )
+
+    def test_training_outcome_rejects_report_checkpoint_step_mismatch(self):
+        from aethrion.train_family import _training_outcome
+        import json
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(Path(folder))
+            report["steps"] = 11
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
+                "training_report_checkpoint_step_mismatch_not_released",
+            )
+
+    def test_training_outcome_rejects_checkpoint_provenance_mismatch(self):
+        from aethrion.train_family import _training_outcome
+        import json
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(Path(folder))
+            report["dataset_sha256"] = "d" * 64
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
+                "training_report_checkpoint_provenance_mismatch_not_released",
             )
 
     def test_training_outcome_rejects_stale_report(self):
