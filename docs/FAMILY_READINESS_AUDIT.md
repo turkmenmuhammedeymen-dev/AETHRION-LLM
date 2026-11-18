@@ -19,7 +19,7 @@ For specialist datasets, the canonical manifest path is
 `data/specialists/manifest.template.json` is only a template and is never
 treated as an approved dataset. BASE uses
 `data/processed/corpus_manifest.json` and
-`data/raw/cosmos/sources.json`.
+`data/raw/owner_authored/sources.json`.
 
 Release readiness is checked through the native model registry, including
 required local artifacts, SHA-256 integrity, held-out benchmark thresholds,
