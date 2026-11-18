@@ -12,6 +12,40 @@ from aethrion.prepare_data import build_corpus
 from aethrion.checkpoint import load_checkpoint
 
 class TrainingUtilityTests(unittest.TestCase):
+    def test_base_training_config_rejects_non_finite_and_inconsistent_values(self):
+        from aethrion.train import validate_base_training_config
+
+        valid = {
+            "seed": 1337, "data_path": "corpus.txt", "tokenizer_path": "tokenizer.json",
+            "output_dir": "artifacts", "vocab_size": 256, "block_size": 8,
+            "n_layer": 1, "n_head": 2, "n_embd": 16, "dropout": 0.1,
+            "batch_size": 2, "gradient_accumulation_steps": 1,
+            "learning_rate": 0.001, "min_learning_rate": 0.0001,
+            "weight_decay": 0.0, "max_steps": 10, "warmup_steps": 2,
+            "eval_interval": 1, "eval_batches": 1, "save_interval": 1,
+            "grad_clip": 1.0, "amp": False,
+        }
+        validate_base_training_config(valid)
+        invalid_cases = [
+            ("learning_rate", float("nan")),
+            ("learning_rate", float("inf")),
+            ("min_learning_rate", float("nan")),
+            ("weight_decay", float("inf")),
+            ("grad_clip", float("nan")),
+            ("dropout", float("nan")),
+            ("dropout", 1.0),
+            ("batch_size", True),
+            ("amp", "false"),
+            ("warmup_steps", 11),
+            ("min_learning_rate", 0.002),
+        ]
+        for key, value in invalid_cases:
+            candidate = dict(valid)
+            candidate[key] = value
+            with self.subTest(key=key, value=value):
+                with self.assertRaises(ValueError):
+                    validate_base_training_config(candidate)
+
     def test_batch_shapes_and_shift(self):
         x, y = get_batch(torch.arange(100), 4, 8, torch.device("cpu"))
         self.assertEqual(tuple(x.shape), (4, 8))
