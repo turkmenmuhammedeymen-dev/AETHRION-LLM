@@ -16,6 +16,8 @@ import wave
 
 import numpy as np
 
+from aethrion.audio_features import log_mel_spectrogram, read_wav
+
 MODELS = ("chat", "code", "vision", "image", "asr", "tts", "vocoder",
           "3d", "research", "document", "safety")
 SPLITS = ("train", "validation", "test")
@@ -59,18 +61,16 @@ def make_text_rows(model: str, groups: dict[str, list[str]]) -> list[dict]:
                 row = {**common, "prompt": f"Türkçe bir test sorusunu açıkla: {suffix}.",
                        "response": f"Bu sentetik yazılım testi yanıtıdır; doğrulanmış bilgi iddiası taşımaz. {suffix}."}
             elif model == "code":
-                row = {**common, "text": f"# SYNTHETIC TEST ONLY\n def sample_{index}():\n    return {index}\n"}
+                row = {**common, "text": f"# SYNTHETIC TEST ONLY\ndef sample_{index}():\n    return {index}\n"}
             elif model == "research":
                 row = {**common, "query": f"Sentetik araştırma sorgusu {suffix}",
                        "passage": f"Bu pasaj yalnızca arama hattı testidir. {suffix}."}
             elif model == "document":
-                # The visual preparation pipeline validates geometry against tokenizer
-                # output. This raw fixture deliberately uses a one-character token.
+                # One UTF-8 byte keeps the synthetic token/box alignment deterministic.
                 row = {**common, "text": "A", "boxes": [[0.0, 0.0, 1.0, 1.0]],
                        "layout_ids": [0], "tag_labels": [0]}
             else:
-                # Labels are deliberately simple policy-contract fixtures. They are
-                # not human safety annotations and must not be used to train SAFE.
+                # These placeholders exercise tensor shapes only, never SAFE learning.
                 decision, reason = (("ALLOW", 0) if index % 3 == 0 else
                                     ("REVIEW", 14) if index % 3 == 1 else ("BLOCK", 1))
                 row = {**common, "text": f"Sentetik güvenlik sınıflandırma girdisi {suffix}.",
@@ -80,19 +80,19 @@ def make_text_rows(model: str, groups: dict[str, list[str]]) -> list[dict]:
     return rows
 
 
-def make_safe_rows(seed: int, groups: dict[str, list[str]]) -> list[dict]:
-    # SAFE's existing preparer requires at least 25 examples of each decision
-    # in each split. These labels are placeholders for shape/validator tests only.
+def make_safe_rows(seed: int) -> list[dict]:
+    # The preparer requires >=25 samples of each decision in every split.
+    # Unique groups prevent leakage; labels are synthetic shape-test placeholders.
     rows = []
     index = 0
     for split in SPLITS:
         for decision, reason in (("ALLOW", 0), ("REVIEW", 14), ("BLOCK", 1)):
             for sample in range(25):
-                group = f"safe-{seed}-{split}-{decision}-{sample:02d}"
-                # Find a deterministic group that hashes into the requested split.
+                base = f"safe-{seed}-{split}-{decision}-{sample:02d}"
+                group = base
                 probe = 0
                 while split_for(group, seed) != split:
-                    group = f"safe-{seed}-{split}-{decision}-{sample:02d}-{probe}"
+                    group = f"{base}-{probe}"
                     probe += 1
                 rows.append(tagged({
                     "id": f"safety-{index:05d}", "group_id": group,
@@ -110,7 +110,7 @@ def make_audio(root: Path, groups: dict[str, list[str]], sample_rate: int) -> No
     index = 0
     for split in SPLITS:
         for group in groups[split]:
-            # Non-speech synthetic tone; never represents a speaker or a voice.
+            # Non-speech tone: never a human voice or speaker recording.
             frequency = 180.0 + (index % 12) * 17.0
             count = sample_rate // 2
             t = np.arange(count, dtype=np.float64) / sample_rate
@@ -121,19 +121,28 @@ def make_audio(root: Path, groups: dict[str, list[str]], sample_rate: int) -> No
                 handle.setsampwidth(2)
                 handle.setframerate(sample_rate)
                 handle.writeframes(samples.tobytes())
+            wav_path = audio_dir / name
+            # Use the exact same feature extractor and hop lengths as the adapters.
+            waveform, rate = read_wav(wav_path, target_sample_rate=sample_rate)
+            asr_tts_frames = int(log_mel_spectrogram(
+                waveform, sample_rate=rate, n_mels=80, n_fft=640, hop_length=160
+            ).shape[0])
             rows.append(tagged({
                 "id": f"audio-{index:04d}", "group_id": group,
                 "speaker_id": group, "wav_path": f"audio/{name}",
-                "transcript": "sentetik ton testi",
+                # A single-token placeholder makes CTC and duration alignment testable.
+                "transcript": "a", "durations": [asr_tts_frames],
             }))
             index += 1
     for model in ("asr", "tts", "vocoder"):
-        write_jsonl(root / f"{model}.jsonl", rows if model != "vocoder" else [
-            {k: v for k, v in row.items() if k != "transcript"} for row in rows
-        ])
+        model_rows = rows if model != "vocoder" else [
+            {k: v for k, v in row.items() if k not in {"transcript", "durations"}}
+            for row in rows
+        ]
+        write_jsonl(root / f"{model}.jsonl", model_rows)
 
 
-def make_visual(root: Path, groups: dict[str, list[str]], image_size: int) -> None:
+def make_visual(root: Path, groups: dict[str, list[str]]) -> None:
     try:
         from PIL import Image, ImageDraw
     except ImportError as exc:
@@ -190,14 +199,13 @@ def main() -> None:
         parser.error("AETHRION audio fixture adapters currently require 16000 Hz.")
     root = Path(args.output).resolve()
     root.mkdir(parents=True, exist_ok=True)
-    counts = {"train": 24, "validation": 3, "test": 3}
-    groups = group_ids_for(args.seed, counts)
+    groups = group_ids_for(args.seed, {"train": 24, "validation": 3, "test": 3})
 
     for model in ("chat", "code", "research", "document"):
         write_jsonl(root / f"{model}.jsonl", make_text_rows(model, groups))
-    write_jsonl(root / "safety.jsonl", make_safe_rows(args.seed, groups))
+    write_jsonl(root / "safety.jsonl", make_safe_rows(args.seed))
     make_audio(root, groups, args.sample_rate)
-    make_visual(root, groups, 224)
+    make_visual(root, groups)
 
     manifest = {
         "format": "aethrion-synthetic-fixture-family-v1",
