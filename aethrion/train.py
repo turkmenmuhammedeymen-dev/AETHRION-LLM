@@ -295,14 +295,28 @@ def main() -> None:
 
         if _STOP_REQUESTED:
             elapsed = max(time.perf_counter() - started, 1e-9)
+            timestamp_utc = datetime.now(timezone.utc).isoformat()
             write_json_atomic({
                 "status": "interrupted",
                 "step": step,
                 "max_steps": cfg["max_steps"],
                 "elapsed_seconds": elapsed,
-                "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                "timestamp_utc": timestamp_utc,
                 **last_metrics,
             }, progress_path)
+            write_json_atomic({
+                "status": "training_interrupted_not_released",
+                "release_status": "NOT_RELEASED",
+                "model_id": "chat",
+                "step": step,
+                "dataset_sha256": data_hash,
+                "tokenizer_sha256": tokenizer_hash,
+                "tokenizer_provenance_sha256": tokenizer_provenance_hash,
+                "checkpoint_sha256": sha256_file(output / "checkpoint_last.pt"),
+                "metrics": last_metrics,
+                "timestamp_utc": timestamp_utc,
+                "note": "Training was interrupted after a durable checkpoint. Resume and independently evaluate before any release decision.",
+            }, output / "training_report.json")
             print("Training safely paused after checkpoint save. Resume with --resume.", flush=True)
             interrupted = True
             break
