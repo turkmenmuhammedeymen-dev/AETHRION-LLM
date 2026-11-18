@@ -22,6 +22,7 @@ def approved_record(model_id="base"):
         "reviewer_role": "independent human reviewer",
         "reviewed_at": "2026-11-18T10:00:00+03:00",
         "evidence_uri": "review-record://dataset-001",
+        "safety_reviewed": True,
     })
     return record
 
@@ -68,9 +69,17 @@ class DatasetGovernanceTests(unittest.TestCase):
         record["speaker_consent_reviewed"] = True
         validate_governance_record(record, model_id="asr")
 
+    def test_every_model_requires_separate_safety_review(self):
+        for model_id in ("base", "chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d", "research", "document", "safety"):
+            record = approved_record(model_id)
+            record["safety_reviewed"] = False
+            with self.subTest(model_id=model_id):
+                with self.assertRaisesRegex(GovernanceError, "every model dataset"):
+                    validate_governance_record(record, model_id=model_id)
+
     def test_safe_requires_separate_safety_review(self):
         record = approved_record("safety")
-        with self.assertRaisesRegex(GovernanceError, "SAFE data"):
+        with self.assertRaisesRegex(GovernanceError, "every model dataset"):
             validate_governance_record(record, model_id="safety")
         record["safety_reviewed"] = True
         validate_governance_record(record, model_id="safety")
