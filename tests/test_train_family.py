@@ -234,6 +234,7 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertEqual(state["released_count"], 0)
 
     def test_failed_process_spawn_is_blocked_not_reported_as_training_started(self):
+        import json
         from unittest.mock import patch
 
         with tempfile.TemporaryDirectory() as folder:
