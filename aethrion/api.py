@@ -254,7 +254,7 @@ app=FastAPI(title="AETHRION-LLM API",version="0.4.0")
 router,providers=build_router()
 
 @app.get("/health")
-def health(): return {"status":"ok","service":"AETHRION-LLM","version":"0.4.0"}
+def health(): return {"status":"ok","service":"AETHRION-LLM","version":app.version}
 
 @app.get("/capabilities", dependencies=[Depends(require_api_token)])
 def capabilities():
