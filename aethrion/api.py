@@ -299,6 +299,16 @@ def assistant(request: AssistantRequest):
         raise HTTPException(status_code=500, detail=f"Assistant orchestration failed: {type(exc).__name__}") from exc
 
 
+def _validate_document_upload(filename: str, raw: bytes) -> str:
+    """Validate document extension and content signature before parsing bytes."""
+    suffix = Path(filename or "").suffix.lower()
+    allowed = {".pdf", ".docx", ".txt", ".md", ".json", ".csv", ".log"}
+    if suffix not in allowed:
+        raise HTTPException(status_code=400, detail="Unsupported document file type.")
+    _validate_upload_payload(suffix, raw)
+    return suffix
+
+
 def _validate_upload_payload(suffix: str, raw: bytes) -> None:
     """Reject filename-only modality spoofing before a specialist reads bytes."""
     if not raw:
@@ -423,7 +433,8 @@ def analyze_file(request:FileRequest):
         raise HTTPException(status_code=400,detail="Invalid base64 document content.") from exc
     if not raw or len(raw)>8*1024*1024:
         raise HTTPException(status_code=413,detail="Document must be between 1 byte and 8 MiB.")
-    with tempfile.NamedTemporaryFile(suffix=Path(request.filename).suffix.lower()) as handle:
+    suffix = _validate_document_upload(request.filename, raw)
+    with tempfile.NamedTemporaryFile(suffix=suffix) as handle:
         handle.write(raw); handle.flush()
         try:
             source_text = extract_document_text(handle.name)
