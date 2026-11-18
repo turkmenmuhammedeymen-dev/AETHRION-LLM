@@ -257,6 +257,22 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.assertEqual(missing.status_code,401)
         self.assertEqual(invalid.status_code,401)
 
+    def test_dispatch_rejects_server_filesystem_path_capabilities(self):
+        cases = [
+            ("document", {"document_path": "/etc/passwd"}),
+            ("vision", {"image_path": "/etc/passwd"}),
+            ("asr", {"audio_path": "/etc/passwd"}),
+        ]
+        for capability, options in cases:
+            with self.subTest(capability=capability):
+                response=self.client.post(
+                    "/dispatch",
+                    headers=self.auth,
+                    json={"capability":capability,"prompt":"inspect file","options":options},
+                )
+                self.assertEqual(response.status_code,400)
+                self.assertIn("dedicated file-upload endpoint",response.json()["detail"])
+
     def test_capabilities_endpoint_reports_registered_handlers(self):
         response=self.client.get("/capabilities",headers=self.auth)
         self.assertEqual(response.status_code,200)
