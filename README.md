@@ -73,6 +73,10 @@ recorded evidence but do not make legal or consent decisions.
 Keep raw data, prepared corpora, NPZ datasets, tokenizers, checkpoints and
 private evaluation material outside Git. The training gate must remain closed
 until each dataset and every required source review has been genuinely approved.
+
+Specialist test fixtures are explicitly marked test-only and are validated in
+schema/integrity mode without training approval; production preflight continues
+to require the full source-rights and human-approval checks.
 Automated checks validate recorded evidence; they do not make legal decisions.
 
 BASE pretraining, instruction tuning, and each specialist training stage have
