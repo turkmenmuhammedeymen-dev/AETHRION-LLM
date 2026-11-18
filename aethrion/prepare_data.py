@@ -12,6 +12,8 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from urllib.parse import urlparse
 
+from aethrion.data_governance import GovernanceError, validate_governance_record
+
 EMAIL_RE = re.compile(r"(?i)\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b")
 REVIEW_COLUMNS = {
     "domain",
@@ -50,6 +52,10 @@ def require_training_enabled(path: Path) -> dict:
             "Training blocked: dataset manifest must explicitly set "
             "training_allowed to true."
         )
+    try:
+        validate_governance_record(payload.get("governance"), model_id="base")
+    except GovernanceError as exc:
+        raise ValueError(str(exc)) from exc
 
     return payload
 
