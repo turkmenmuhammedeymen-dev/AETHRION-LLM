@@ -38,15 +38,24 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def require_training_enabled(path: Path) -> dict:
-    """Fail closed unless the dataset-level manifest explicitly enables training."""
+def load_dataset_manifest(path: Path) -> dict:
+    """Load a dataset manifest without opening its training gate."""
     if not path.is_file():
         raise ValueError(f"Dataset manifest does not exist: {path}")
-
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError("Dataset manifest is missing or invalid JSON.") from exc
     if not isinstance(payload, dict):
         raise ValueError("Dataset manifest must be a JSON object.")
+    if type(payload.get("training_allowed")) is not bool:
+        raise ValueError("Dataset manifest training_allowed must be an exact JSON boolean.")
+    return payload
 
+
+def require_training_enabled(path: Path) -> dict:
+    """Fail closed unless dataset and human-review approvals explicitly allow training."""
+    payload = load_dataset_manifest(path)
     if payload.get("training_allowed") is not True:
         raise ValueError(
             "Training blocked: dataset manifest must explicitly set "
@@ -56,11 +65,12 @@ def require_training_enabled(path: Path) -> dict:
         validate_governance_record(payload.get("governance"), model_id="base")
     except GovernanceError as exc:
         raise ValueError(str(exc)) from exc
-
     return payload
 
 
-def load_sources_manifest(path: Path, root: Path) -> list[dict]:
+def load_sources_manifest(
+    path: Path, root: Path, *, require_training_approval: bool = True
+) -> list[dict]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     entries = payload.get("sources") if isinstance(payload, dict) else None
     if not isinstance(entries, list) or not entries:
@@ -74,7 +84,13 @@ def load_sources_manifest(path: Path, root: Path) -> list[dict]:
         if not isinstance(entry, dict):
             raise ValueError("Each source entry must be an object.")
         required = ("path", "source_id", "license", "permitted_uses", "allow_training")
-        missing = [key for key in required if not entry.get(key)]
+        missing = [
+            key for key in required
+            if key not in entry or (
+                key != "allow_training"
+                and (not isinstance(entry[key], str) or not entry[key].strip())
+            )
+        ]
         if missing:
             raise ValueError(f"Source entry missing: {', '.join(missing)}")
         source_id = entry["source_id"]
@@ -88,13 +104,15 @@ def load_sources_manifest(path: Path, root: Path) -> list[dict]:
             raise ValueError(f"Source path must be a non-empty relative string: {source_id}")
         if Path(relative_path).is_absolute() or "\\\\" in relative_path or "://" in relative_path:
             raise ValueError(f"Source path must be a relative local path: {source_id}")
-        if entry["allow_training"] is not True:
+        if type(entry["allow_training"]) is not bool:
+            raise ValueError(f"Source allow_training must be an exact JSON boolean: {entry['source_id']}")
+        if require_training_approval and entry["allow_training"] is not True:
             raise ValueError(f"Source is not approved for training: {entry['source_id']}")
-        if not isinstance(entry["license"], str) or entry["license"].strip().upper() in {
+        if require_training_approval and entry["license"].strip().upper() in {
             "UNKNOWN", "PENDING", "PENDING_HUMAN_REVIEW", "UNVERIFIED", "TBD"
         }:
             raise ValueError(f"Source license is not verified: {entry['source_id']}")
-        if not isinstance(entry["permitted_uses"], str) or "train" not in entry["permitted_uses"].lower():
+        if require_training_approval and "train" not in entry["permitted_uses"].lower():
             raise ValueError(f"Source permitted_uses must explicitly include training: {entry['source_id']}")
 
         source = (root / entry["path"]).resolve()
@@ -219,10 +237,14 @@ def build_corpus(
         raise ValueError("Invalid corpus size limits.")
 
     if dataset_manifest_path is None:
-        raise ValueError("Training blocked: dataset_manifest_path is required.")
-    require_training_enabled(dataset_manifest_path)
+        raise ValueError("dataset_manifest_path is required for auditable corpus preparation.")
+    # Preparation is allowed while approvals are pending. The independent
+    # validate_training_approval gate remains mandatory before any training.
+    load_dataset_manifest(dataset_manifest_path)
 
-    sources = load_sources_manifest(manifest_path, input_dir)
+    sources = load_sources_manifest(
+        manifest_path, input_dir, require_training_approval=False
+    )
     domain_reviews = (
         load_domain_review(source_review_path) if source_review_path is not None else None
     )
@@ -254,14 +276,9 @@ def build_corpus(
                     raise ValueError(
                         f"Record in {path.name} has an invalid source URL; refusing it."
                     )
-                if domain_reviews is None:
-                    raise ValueError(
-                        "URL-attributed JSONL requires --source-review with explicit "
-                        "approval for every source hostname."
-                    )
                 group_id = f"host:{domain}"
                 domain_counts[domain] += 1
-                review = domain_reviews.get(domain)
+                review = domain_reviews.get(domain) if domain_reviews is not None else None
                 if review is None or not review["approved"]:
                     blocked_domains.add(domain)
             if "group_id" in metadata:
@@ -305,14 +322,6 @@ def build_corpus(
             "sha256": sha256_file(path),
             **dict(counts),
         })
-
-    if blocked_domains:
-        sample = ", ".join(sorted(blocked_domains)[:20])
-        suffix = " ..." if len(blocked_domains) > 20 else ""
-        raise ValueError(
-            "Training blocked: these URL hostnames are missing an evidence-backed "
-            f"APPROVED review: {sample}{suffix}"
-        )
 
     records = list(unique.values())
     if len(records) < min_records:
@@ -360,11 +369,11 @@ def build_corpus(
             domain_report.append({
                 "domain": domain,
                 "records": count,
-                "license_name": review["license_name"],
-                "license_evidence_url": review["license_evidence_url"],
-                "rights_holder": review["rights_holder"],
-                "attribution_required": review["attribution_required"],
-                "review_status": review["review_status"],
+                "license_name": review["license_name"] if review else None,
+                "license_evidence_url": review["license_evidence_url"] if review else None,
+                "rights_holder": review["rights_holder"] if review else None,
+                "attribution_required": review["attribution_required"] if review else None,
+                "review_status": review["review_status"] if review else "PENDING",
             })
 
     report = {
