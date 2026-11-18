@@ -209,27 +209,46 @@ def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
 
 
 def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
-    def verified(candidate: Path) -> bool:
-        sidecar = Path(str(candidate) + ".sha256")
-        if not candidate.is_file() or not sidecar.is_file():
-            return False
-        expected = sidecar.read_text(encoding="ascii").strip().split()
-        return bool(expected and _sha256(candidate) == expected[0])
-
-    load_path = path
-    if not verified(path):
-        previous = Path(str(path) + ".previous")
-        if not verified(previous):
-            raise ValueError("Resume checkpoint and its verified previous generation are unavailable.")
-        load_path = previous
-    payload = torch.load(load_path, map_location=device, weights_only=True)
-    if not isinstance(payload, dict) or payload.get("format") != "aethrion-specialist-checkpoint-v1":
-        raise ValueError("Unsupported specialist checkpoint format.")
+    """Verify and safely load the newest generation, recovering from the previous one."""
     required = {"model_id", "step", "model_config", "model_state", "optimizer_state",
                 "dataset_sha256", "tokenizer_sha256", "manifest_sha256", "rng_state"}
-    if required - set(payload):
-        raise ValueError("Specialist checkpoint is missing required resume fields.")
-    return payload
+
+    def load_verified(candidate: Path) -> dict[str, Any]:
+        sidecar = Path(str(candidate) + ".sha256")
+        if not candidate.is_file() or not sidecar.is_file():
+            raise ValueError(f"Checkpoint generation is missing: {candidate}")
+        expected = sidecar.read_text(encoding="ascii").strip().split()
+        if not expected or _sha256(candidate) != expected[0]:
+            raise ValueError(f"Checkpoint integrity verification failed: {candidate}")
+        try:
+            payload = torch.load(candidate, map_location=device, weights_only=True)
+        except Exception as exc:
+            raise ValueError(
+                "Specialist checkpoint could not be safely deserialized; unsafe pickle objects are rejected."
+            ) from exc
+        if not isinstance(payload, dict) or payload.get("format") != "aethrion-specialist-checkpoint-v1":
+            raise ValueError("Unsupported specialist checkpoint format.")
+        if required - set(payload):
+            raise ValueError("Specialist checkpoint is missing required resume fields.")
+        if type(payload.get("step")) is not int or payload["step"] < 0:
+            raise ValueError("Specialist checkpoint step is invalid.")
+        return payload
+
+    try:
+        return load_verified(path)
+    except Exception as primary_error:
+        previous = Path(str(path) + ".previous")
+        try:
+            recovered = load_verified(previous)
+        except Exception:
+            raise primary_error
+        import warnings
+        warnings.warn(
+            f"Latest specialist checkpoint could not be verified and safely loaded; recovering from {previous}.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return recovered
 
 
 def _evaluate(model, model_id, arrays, keys, indices, device, batch_size):
@@ -257,6 +276,8 @@ def train_specialist(
     resume: str | Path | None = None,
 ) -> dict[str, Any]:
     """Train one independent specialist using a licensed, approved local NPZ dataset."""
+    global _STOP_REQUESTED
+    _STOP_REQUESTED = False
     if not isinstance(config, dict):
         raise TypeError("Training config must be a JSON object.")
     required = {"model_id", "model_config", "output_dir", "seed", "max_steps",
