@@ -89,6 +89,32 @@ class SpecialistTrainingTests(unittest.TestCase):
             "save_interval": 1,
         }
 
+    def test_specialist_artifact_paths_reject_escape_and_allow_local_paths(self):
+        from aethrion.specialist_train import _resolve_artifact_path
+        with tempfile.TemporaryDirectory() as folder, tempfile.TemporaryDirectory() as outside:
+            root = Path(folder).resolve()
+            for invalid in ("../outside", str(Path(outside) / "artifacts")):
+                with self.subTest(invalid=invalid):
+                    with self.assertRaisesRegex(ValueError, "escapes|parent traversal"):
+                        _resolve_artifact_path(root, invalid, "output_dir")
+            self.assertEqual(_resolve_artifact_path(root, "artifacts/models/code", "output_dir"), root / "artifacts/models/code")
+
+    def test_specialist_artifact_paths_reject_symlink_escape(self):
+        from aethrion.specialist_train import _resolve_artifact_path
+        with tempfile.TemporaryDirectory() as folder, tempfile.TemporaryDirectory() as outside:
+            root = Path(folder).resolve()
+            (root / "linked-artifacts").symlink_to(Path(outside), target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "escapes"):
+                _resolve_artifact_path(root, "linked-artifacts/run", "output_dir")
+
+    def test_specialist_training_rejects_external_output_before_data_access(self):
+        with tempfile.TemporaryDirectory() as folder, tempfile.TemporaryDirectory() as outside:
+            root = Path(folder)
+            config = self._config(root)
+            config["output_dir"] = str(Path(outside) / "artifacts")
+            with self.assertRaisesRegex(ValueError, "escapes"):
+                train_specialist(config, root / "missing-manifest.json")
+
     def test_invalid_numeric_specialist_config_fails_before_dataset_access(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
