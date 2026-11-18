@@ -22,7 +22,7 @@ import torch
 import torch.nn as nn
 
 from aethrion.specialist_data import validate_specialist_dataset
-from aethrion.checkpoint import write_json_atomic
+from aethrion.checkpoint import _fsync_directory, _write_text_fsync, write_json_atomic
 from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
 
 
@@ -310,6 +310,7 @@ def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
                 os.replace(previous_checksum_tmp, previous_checksum)
         os.replace(tmp, path)
         os.replace(checksum_tmp, checksum_path)
+        _fsync_directory(path.parent)
         return digest
     finally:
         for candidate in (tmp, checksum_tmp, previous_tmp, previous_checksum_tmp):
@@ -341,7 +342,11 @@ def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
         if not candidate.is_file() or not sidecar.is_file():
             raise ValueError(f"Checkpoint generation is missing: {candidate}")
         expected = sidecar.read_text(encoding="ascii").strip().split()
-        if not expected or _sha256(candidate) != expected[0]:
+        if (
+            not expected or len(expected[0]) != 64
+            or any(character not in "0123456789abcdefABCDEF" for character in expected[0])
+            or _sha256(candidate) != expected[0].lower()
+        ):
             raise ValueError(f"Checkpoint integrity verification failed: {candidate}")
         try:
             payload = torch.load(candidate, map_location=device, weights_only=True)
