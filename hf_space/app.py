@@ -131,6 +131,8 @@ def status():
     rows = [f"- **{name}**: {state.upper()}" for name, state in model_status.items()]
     if not SPACE_AUTH_ENABLED:
         rows.append("- **Local model access**: DISABLED — Space authentication is not configured")
+    rows.append("- **Main assistant routing**: CHAT default; clear tasks delegate to native specialists")
+    rows.append("- **Internal dependencies**: TTS requires VOCODER and ASR; specialist text I/O requires SAFE")
     rows.append("- **External model/API providers**: DISABLED — native-only policy")
     return "### Native model release status\n" + "\n".join(rows)
 
