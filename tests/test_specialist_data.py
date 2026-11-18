@@ -60,9 +60,9 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                 "source_uri": "unit-test://synthetic-fixture",
                 "source_path": "source.txt",
                 "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-                "license": "CC0-1.0",
-                "permitted_use": "AI model training and evaluation",
-                "evidence_uri": "https://example.invalid/license-fixture",
+                "license": "SYNTHETIC_UNIT_TEST_FIXTURE",
+                "permitted_use": "Unit tests only; no production training",
+                "evidence_uri": "unit-test://license-fixture",
                 "allow_training": approved,
                 "privacy_reviewed": approved,
             }],
@@ -94,7 +94,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
     def test_approved_test_fixture_is_schema_and_hash_verified(self):
         with tempfile.TemporaryDirectory() as directory:
             manifest, _ = self._fixture(Path(directory), approved=True)
-            result = validate_specialist_dataset(manifest)
+            result = validate_specialist_dataset(manifest, require_training_approval=False)
             self.assertEqual(result["model_id"], "code")
             self.assertEqual(result["sample_count"], 6)
             self.assertEqual(result["split_counts"], {"train": 2, "validation": 2, "test": 2})
@@ -110,7 +110,9 @@ class SpecialistDataApprovalTests(unittest.TestCase):
     def test_evaluation_only_source_permission_blocks_training(self):
         with tempfile.TemporaryDirectory() as directory:
             manifest, payload = self._fixture(Path(directory), approved=True)
+            payload["sources"][0]["license"] = "CC0-1.0"
             payload["sources"][0]["permitted_use"] = "Evaluation only"
+            payload["sources"][0]["evidence_uri"] = "https://example.invalid/license-fixture"
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "does not explicitly authorize model training"):
                 validate_specialist_dataset(manifest)
@@ -118,7 +120,9 @@ class SpecialistDataApprovalTests(unittest.TestCase):
     def test_negative_training_permission_blocks_training(self):
         with tempfile.TemporaryDirectory() as directory:
             manifest, payload = self._fixture(Path(directory), approved=True)
+            payload["sources"][0]["license"] = "CC0-1.0"
             payload["sources"][0]["permitted_use"] = "Not for training; evaluation only"
+            payload["sources"][0]["evidence_uri"] = "https://example.invalid/license-fixture"
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "excludes model training"):
                 validate_specialist_dataset(manifest)
@@ -126,6 +130,8 @@ class SpecialistDataApprovalTests(unittest.TestCase):
     def test_non_https_source_evidence_blocks_training(self):
         with tempfile.TemporaryDirectory() as directory:
             manifest, payload = self._fixture(Path(directory), approved=True)
+            payload["sources"][0]["license"] = "CC0-1.0"
+            payload["sources"][0]["permitted_use"] = "AI model training and evaluation"
             payload["sources"][0]["evidence_uri"] = "http://example.invalid/license"
             manifest.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(SpecialistDataError, "evidence must be an HTTPS URL"):
@@ -317,9 +323,9 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                 "source_uri": "unit-test://safety-taxonomy",
                 "source_path": "safety-source.txt",
                 "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-                "license": "CC0-1.0",
-                "permitted_use": "AI model training and evaluation",
-                "evidence_uri": "https://example.invalid/safety-fixture",
+                "license": "SYNTHETIC_UNIT_TEST_FIXTURE",
+                "permitted_use": "Unit tests only; no production training",
+                "evidence_uri": "unit-test://safety-fixture",
                 "allow_training": True,
                 "privacy_reviewed": True,
             }],
@@ -331,7 +337,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
     def test_safety_dataset_requires_minimum_per_decision_in_each_split(self):
         with tempfile.TemporaryDirectory() as directory:
             manifest = self._safety_fixture(Path(directory), per_class=25)
-            result = validate_specialist_dataset(manifest)
+            result = validate_specialist_dataset(manifest, require_training_approval=False)
             self.assertEqual(result["model_id"], "safety")
             self.assertEqual(result["split_counts"], {"train": 75, "validation": 75, "test": 75})
 
