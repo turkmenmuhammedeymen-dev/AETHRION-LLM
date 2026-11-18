@@ -194,10 +194,6 @@ def _validate_model_data_compatibility(
             valid = row[:int(length)]
             if np.any(valid == config["blank_id"]):
                 raise ValueError("ASR CTC targets must not contain the blank token.")
-            repeats = int(np.count_nonzero(valid[1:] == valid[:-1]))
-            if int(length) + repeats > int((arrays["input_lengths"][0] + 3) // 4):
-                # Per-sample check below handles each input length independently.
-                pass
         for index, (row, target_length, input_length) in enumerate(
             zip(targets, target_lengths, arrays["input_lengths"])
         ):
@@ -423,6 +419,7 @@ def train_specialist(
     manifest_hash = _sha256(manifest_file)
     with np.load(approval["dataset_path"], allow_pickle=False) as archive:
         arrays = {key: np.array(archive[key], copy=True) for key in archive.files}
+    _validate_model_data_compatibility(model_id, arrays, model_config)
     split_names = arrays["split"].astype(str)
     train_idx = np.flatnonzero(split_names == "train")
     val_idx = np.flatnonzero(split_names == "validation")
