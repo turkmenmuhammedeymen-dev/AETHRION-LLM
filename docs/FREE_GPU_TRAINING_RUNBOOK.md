@@ -20,11 +20,12 @@ Do not use a paid accelerator or billing-linked cloud project.
 
 ## Before any real training
 
-1. Obtain the exact source release and retain its license, attribution and
-   provenance evidence.
-2. Have a responsible adult/teacher review the source terms, privacy, creator
-   rights and any required speaker consent. A catalogue license label alone
-   is not a completed rights or consent review.
+1. Use only first-party, owner-authored source material. Record authorship,
+   the rights-holder role, provenance and SHA-256 hashes; third-party datasets
+   must not be downloaded, prepared or used for training.
+2. Have a responsible adult/teacher review authorship, rights, privacy, quality
+   and any required speaker consent. A dataset label alone is not a completed
+   rights or consent review.
 3. Keep the source and prepared dataset private while reviewing it. Never put
    private conversations, personal records, secrets or identifying data into
    the training corpus.
