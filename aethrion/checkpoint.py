@@ -28,6 +28,13 @@ def _sidecar(path: Path) -> Path:
     return Path(str(path) + ".sha256")
 
 
+def _fsync_file(path: Path) -> None:
+    """Flush copied artifact bytes before promoting a backup generation."""
+    with path.open("rb+") as handle:
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
 def _fsync_directory(path: Path) -> None:
     """Persist directory-entry replacements where the platform supports it."""
     flags = getattr(os, "O_DIRECTORY", 0) | os.O_RDONLY
@@ -106,6 +113,8 @@ def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
                 previous_sidecar_tmp = Path(str(previous_sidecar) + ".tmp")
                 shutil.copy2(target, previous_tmp)
                 shutil.copy2(sidecar, previous_sidecar_tmp)
+                _fsync_file(previous_tmp)
+                _fsync_file(previous_sidecar_tmp)
                 os.replace(previous_tmp, previous)
                 os.replace(previous_sidecar_tmp, previous_sidecar)
 
