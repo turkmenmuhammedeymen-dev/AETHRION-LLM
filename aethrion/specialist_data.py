@@ -219,12 +219,22 @@ def validate_specialist_dataset(
     sources = payload.get("sources")
     if not isinstance(sources, list) or not sources:
         raise SpecialistDataError("At least one documented training source is required.")
+    seen_source_ids: set[str] = set()
+    seen_source_paths: set[str] = set()
     for source in sources:
         if not isinstance(source, dict):
             raise SpecialistDataError("Each source review must be an object.")
         required_text = ("source_id", "source_uri", "source_path", "license", "permitted_use", "evidence_uri")
         if any(not isinstance(source.get(key), str) or not source[key].strip() for key in required_text):
             raise SpecialistDataError("Each source requires an ID, URI, path, license, permitted use and evidence.")
+        source_id = source["source_id"].strip()
+        source_path_value = source["source_path"].strip()
+        if source_id in seen_source_ids:
+            raise SpecialistDataError(f"Duplicate specialist source_id: {source_id}")
+        if source_path_value in seen_source_paths:
+            raise SpecialistDataError(f"Duplicate specialist source_path: {source_path_value}")
+        seen_source_ids.add(source_id)
+        seen_source_paths.add(source_path_value)
         digest = source.get("sha256")
         if not isinstance(digest, str) or not SHA256.fullmatch(digest.lower()):
             raise SpecialistDataError("Each source requires a valid SHA-256.")
