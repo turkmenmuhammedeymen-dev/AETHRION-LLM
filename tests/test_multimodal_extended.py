@@ -74,7 +74,7 @@ class ExtendedMultimodalTests(unittest.TestCase):
     def test_workspace_model_changes_reject_duplicate_normalized_paths(self):
         from aethrion.workspace_agent import _validate
         with self.assertRaisesRegex(WorkspaceError, "Duplicate normalized"):
-            _validate({"folder\\\\" + "main.py": "print(1)", "folder/main.py": "print(2)"}, {})
+            _validate({"folder\\main.py": "print(1)", "folder/main.py": "print(2)"}, {})
 
     def test_workspace_model_changes_enforce_total_updated_text_budget(self):
         from aethrion.workspace_agent import MAX_PROJECT_TEXT, _validate
