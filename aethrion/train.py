@@ -273,18 +273,26 @@ def main() -> None:
         print("Training finished. Evaluate instruction-following and safety on independent held-out datasets before release.")
 
 def validate_base_training_config(cfg: dict) -> None:
-    """Reject malformed or non-finite BASE training settings before data/model work."""
+    """Reject malformed, extreme or non-finite BASE training settings."""
     if not isinstance(cfg, dict):
         raise ValueError("BASE training config must be a JSON object.")
     integer_fields = {
-        "vocab_size": 256, "block_size": 8, "n_layer": 1,
-        "n_head": 1, "n_embd": 8, "batch_size": 1,
-        "gradient_accumulation_steps": 1, "max_steps": 1, "warmup_steps": 0,
-        "eval_interval": 1, "eval_batches": 1, "save_interval": 1,
+        "vocab_size": (256, 262144),
+        "block_size": (8, 16384),
+        "n_layer": (1, 256),
+        "n_head": (1, 256),
+        "n_embd": (8, 16384),
+        "batch_size": (1, 4096),
+        "gradient_accumulation_steps": (1, 4096),
+        "max_steps": (1, 10_000_000),
+        "warmup_steps": (0, 10_000_000),
+        "eval_interval": (1, 10_000_000),
+        "eval_batches": (1, 10_000_000),
+        "save_interval": (1, 10_000_000),
     }
-    for name, minimum in integer_fields.items():
-        maximum = 2**32 - 1 if name == "seed" else None
+    for name, (minimum, maximum) in integer_fields.items():
         require_int(cfg.get(name), name, minimum=minimum, maximum=maximum)
+    require_int(cfg.get("seed"), "seed", minimum=0, maximum=2**32 - 1)
     require_finite_number(cfg.get("learning_rate"), "learning_rate", minimum=0, minimum_inclusive=False)
     require_finite_number(cfg.get("min_learning_rate"), "min_learning_rate", minimum=0)
     require_finite_number(cfg.get("weight_decay"), "weight_decay", minimum=0)
