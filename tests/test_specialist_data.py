@@ -60,9 +60,9 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                 "source_uri": "unit-test://synthetic-fixture",
                 "source_path": "source.txt",
                 "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-                "license": "Synthetic unit-test fixture",
-                "permitted_use": "Unit tests only; not a production training corpus",
-                "evidence_uri": "unit-test://license-fixture",
+                "license": "CC0-1.0",
+                "permitted_use": "AI model training and evaluation",
+                "evidence_uri": "https://example.invalid/license-fixture",
                 "allow_training": approved,
                 "privacy_reviewed": approved,
             }],
@@ -98,6 +98,38 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             self.assertEqual(result["model_id"], "code")
             self.assertEqual(result["sample_count"], 6)
             self.assertEqual(result["split_counts"], {"train": 2, "validation": 2, "test": 2})
+
+    def test_pending_source_license_blocks_training(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest, payload = self._fixture(Path(directory), approved=True)
+            payload["sources"][0]["license"] = "PENDING_HUMAN_REVIEW"
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "license is pending, unknown, or test-only"):
+                validate_specialist_dataset(manifest)
+
+    def test_evaluation_only_source_permission_blocks_training(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest, payload = self._fixture(Path(directory), approved=True)
+            payload["sources"][0]["permitted_use"] = "Evaluation only"
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "does not explicitly authorize model training"):
+                validate_specialist_dataset(manifest)
+
+    def test_negative_training_permission_blocks_training(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest, payload = self._fixture(Path(directory), approved=True)
+            payload["sources"][0]["permitted_use"] = "Not for training; evaluation only"
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "excludes model training"):
+                validate_specialist_dataset(manifest)
+
+    def test_non_https_source_evidence_blocks_training(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest, payload = self._fixture(Path(directory), approved=True)
+            payload["sources"][0]["evidence_uri"] = "http://example.invalid/license"
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "evidence must be an HTTPS URL"):
+                validate_specialist_dataset(manifest)
 
     def test_duplicate_specialist_source_ids_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -285,9 +317,9 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                 "source_uri": "unit-test://safety-taxonomy",
                 "source_path": "safety-source.txt",
                 "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-                "license": "Synthetic unit-test fixture",
-                "permitted_use": "Unit tests only; not production training data",
-                "evidence_uri": "unit-test://safety-fixture",
+                "license": "CC0-1.0",
+                "permitted_use": "AI model training and evaluation",
+                "evidence_uri": "https://example.invalid/safety-fixture",
                 "allow_training": True,
                 "privacy_reviewed": True,
             }],
