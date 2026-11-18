@@ -352,13 +352,19 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                         validate_specialist_dataset(manifest)
 
     def test_specialist_sources_reject_remote_third_party_source_uris(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            manifest, payload = self._fixture(root, approved=True)
-            payload["sources"][0]["source_uri"] = "https://example.invalid/external-dataset"
-            manifest.write_text(json.dumps(payload), encoding="utf-8")
-            with self.assertRaisesRegex(SpecialistDataError, "remote third-party source URIs are disabled"):
-                validate_specialist_dataset(manifest)
+        for source_uri in (
+            "https://example.invalid/external-dataset",
+            "git+https://example.invalid/external-dataset.git",
+            "s3://external-bucket/dataset",
+        ):
+            with self.subTest(source_uri=source_uri):
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    manifest, payload = self._fixture(root, approved=True)
+                    payload["sources"][0]["source_uri"] = source_uri
+                    manifest.write_text(json.dumps(payload), encoding="utf-8")
+                    with self.assertRaisesRegex(SpecialistDataError, "remote third-party source URIs are disabled"):
+                        validate_specialist_dataset(manifest)
 
 
 if __name__ == "__main__":
