@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from aethrion.checkpoint import write_json_atomic
-from aethrion.session_journal import append_session_event, audit_session_journal
+from aethrion.session_journal import append_session_event, audit_session_journal, audit_session_artifacts
 from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
 
 MODEL_IDS = (
@@ -580,12 +580,22 @@ def run_family(
         }
         if execute:
             final_status = "interrupted" if interrupted else "completed"
-            persist(final_status)
             _append_session_event(events_path, {
                 "event": "session_" + final_status, "session_id": session_id,
                 "timestamp_utc": datetime.now(timezone.utc).isoformat(),
                 "blocked_count": report["blocked_count"],
             })
+            final_audit = audit_session_journal(events_path, session_id)
+            if not final_audit.get("valid"):
+                raise FamilyTrainingError(
+                    "Final session journal integrity failure: " + str(final_audit.get("reason"))
+                )
+            report.update({
+                "journal_integrity": "sha256_chain_verified",
+                "journal_event_count": final_audit["event_count"],
+                "journal_last_event_sha256": final_audit["last_event_sha256"],
+            })
+            persist(final_status)
             write_json_atomic({**report, "status": final_status}, progress_path)
         return report
     finally:
@@ -605,7 +615,18 @@ def main() -> int:
     )
     parser.add_argument("--python", default=None, help="Python executable for child trainers.")
     parser.add_argument("--report", default=None, help="Optional JSON report output path.")
+    parser.add_argument(
+        "--audit-session", default=None,
+        help="Verify an existing session JSONL hash chain and matching snapshot; never starts training.",
+    )
     args = parser.parse_args()
+    if args.audit_session:
+        result = audit_session_artifacts(
+            Path(args.root).resolve() / "artifacts" / "training_sessions",
+            args.audit_session,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0 if result.get("valid") else 3
     report = run_family(
         args.root, selected=args.models, execute=args.execute,
         python_executable=args.python,
