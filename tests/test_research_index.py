@@ -76,6 +76,40 @@ class NativeResearchIndexTests(unittest.TestCase):
                     chunk_tokens=64, project_root=root
                 )
 
+
+    def test_symlinked_source_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            records, approval, tokenizer = self._fixture(root)
+            source = root / "source.txt"
+            real_source = root / "real-source.txt"
+            source.rename(real_source)
+            try:
+                source.symlink_to(real_source.name)
+            except (OSError, NotImplementedError):
+                self.skipTest("Symbolic links are unavailable in this environment.")
+            with self.assertRaisesRegex(ResearchIndexError, "symbolic links"):
+                build_local_research_index(
+                    records, approval, tokenizer, root / "artifacts" / "research",
+                    chunk_tokens=64, project_root=root
+                )
+
+    def test_symlinked_records_file_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            records, approval, tokenizer = self._fixture(root)
+            real_records = root / "real-records.jsonl"
+            records.rename(real_records)
+            try:
+                records.symlink_to(real_records.name)
+            except (OSError, NotImplementedError):
+                self.skipTest("Symbolic links are unavailable in this environment.")
+            with self.assertRaisesRegex(ResearchIndexError, "symbolic links"):
+                build_local_research_index(
+                    records, approval, tokenizer, root / "artifacts" / "research",
+                    chunk_tokens=64, project_root=root
+                )
+
     def test_unapproved_index_use_is_blocked(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
