@@ -35,6 +35,31 @@ def _request_stop(signum, frame):
     print(f"Stop requested (signal {signum}); checkpointing after the current step.", flush=True)
 
 
+def _manifest_repository_root(manifest_path: str | Path) -> Path:
+    """Find the checkout root; isolated tests fall back to the manifest directory."""
+    manifest = Path(manifest_path).resolve()
+    for parent in (manifest.parent, *manifest.parent.parents):
+        if (parent / ".git").exists():
+            return parent.resolve()
+    return manifest.parent.resolve()
+
+
+def _resolve_artifact_path(root: Path, raw_value: str | Path, label: str) -> Path:
+    """Confine training outputs and resume checkpoints to the project checkout."""
+    candidate = Path(raw_value)
+    if not str(raw_value).strip():
+        raise ValueError(f"{label} must be a non-empty path.")
+    if not candidate.is_absolute() and any(part == '..' for part in candidate.parts):
+        raise ValueError(f"{label} must not contain parent traversal.")
+    resolved = (candidate if candidate.is_absolute() else root / candidate).resolve()
+    try:
+        resolved.relative_to(root.resolve())
+    except ValueError as exc:
+        raise ValueError(f"{label} escapes the AETHRION repository root.") from exc
+    if resolved == root.resolve():
+        raise ValueError(f"{label} must not target the repository root itself.")
+    return resolved
+
 def _build_model(model_id: str, config: dict[str, Any]) -> nn.Module:
     if model_id == "code":
         from aethrion.code_model import AETHRIONCodeLM, CodeModelConfig
@@ -301,6 +326,12 @@ def train_specialist(
     validate_numeric_tree(model_config)
     if not isinstance(config["output_dir"], str) or not config["output_dir"].strip():
         raise ValueError("output_dir must be a non-empty path string.")
+    repository_root = _manifest_repository_root(manifest_path)
+    output = _resolve_artifact_path(repository_root, config["output_dir"], "output_dir")
+    if resume is not None:
+        resume = _resolve_artifact_path(repository_root, resume, "resume checkpoint")
+        if not resume.is_file():
+            raise ValueError("Resume checkpoint must be an existing repository-local file.")
     approval = validate_specialist_dataset(manifest_path, require_training_approval=True)
     if approval["model_id"] != model_id:
         raise ValueError("Training config model_id differs from approved dataset manifest.")
@@ -330,7 +361,6 @@ def train_specialist(
         model.parameters(), lr=float(config["learning_rate"]),
         weight_decay=float(config["weight_decay"])
     )
-    output = Path(config["output_dir"])
     output.mkdir(parents=True, exist_ok=True)
     checkpoint_path = output / "checkpoint_last.pt"
     start_step = 0
