@@ -473,6 +473,8 @@ def train_specialist(
     manifest_path: str | Path,
     *,
     resume: str | Path | None = None,
+    session_id: str | None = None,
+    attempt_id: str | None = None,
 ) -> dict[str, Any]:
     """Train one independent specialist using a licensed, approved local NPZ dataset."""
     global _STOP_REQUESTED
@@ -539,6 +541,7 @@ def train_specialist(
     output.mkdir(parents=True, exist_ok=True)
     checkpoint_path = output / "checkpoint_last.pt"
     start_step = 0
+    checkpoint_generation = 0
     if resume is not None:
         state = _load_checkpoint(Path(resume), device)
         if state.get("model_id") != model_id or state.get("dataset_sha256") != approval["dataset_sha256"]:
@@ -567,6 +570,9 @@ def train_specialist(
         model.load_state_dict(state["model_state"])
         optimizer.load_state_dict(state["optimizer_state"])
         _restore_rng_state(state["rng_state"])
+        checkpoint_generation = state.get("checkpoint_generation", 0)
+        if type(checkpoint_generation) is not int or checkpoint_generation < 0:
+            raise ValueError("Resume checkpoint generation is invalid.")
         checkpoint_step = state.get("step")
         if type(checkpoint_step) is not int or checkpoint_step < 0:
             raise ValueError("Resume checkpoint step is invalid.")
@@ -610,9 +616,12 @@ def train_specialist(
             print(json.dumps(record, ensure_ascii=False), flush=True)
 
         if step % config["save_interval"] == 0 or step == config["max_steps"] - 1 or _STOP_REQUESTED:
+            checkpoint_generation += 1
             checkpoint_hash = _save_checkpoint(checkpoint_path, {
                 "format": "aethrion-specialist-checkpoint-v2",
                 "model_id": model_id, "step": step,
+                "checkpoint_generation": checkpoint_generation,
+                "session_id": session_id, "attempt_id": attempt_id,
                 "model_config": config["model_config"],
                 "training_config": _resume_training_config(config),
                 "model_state": model.state_dict(),
@@ -626,6 +635,9 @@ def train_specialist(
                 "status": "training_in_progress_not_released",
                 "release_status": "NOT_RELEASED",
                 "model_id": model_id, "step": step,
+                "session_id": session_id, "attempt_id": attempt_id,
+                "checkpoint_generation": checkpoint_generation,
+                "report_created_at_ns": time.time_ns(),
                 "dataset_sha256": approval["dataset_sha256"],
                 "tokenizer_sha256": approval["tokenizer_sha256"],
                 "manifest_sha256": manifest_hash,
@@ -639,6 +651,9 @@ def train_specialist(
                 "status": "training_interrupted_not_released",
                 "release_status": "NOT_RELEASED",
                 "model_id": model_id,
+                "session_id": session_id, "attempt_id": attempt_id,
+                "checkpoint_generation": checkpoint_generation,
+                "report_created_at_ns": time.time_ns(),
                 "steps": step + 1,
                 "dataset_sha256": approval["dataset_sha256"],
                 "tokenizer_sha256": approval["tokenizer_sha256"],
@@ -657,6 +672,9 @@ def train_specialist(
         "status": "training_complete_not_released",
         "release_status": "NOT_RELEASED",
         "model_id": model_id,
+        "session_id": session_id, "attempt_id": attempt_id,
+        "checkpoint_generation": checkpoint_generation,
+        "report_created_at_ns": time.time_ns(),
         "steps": config["max_steps"],
         "dataset_sha256": approval["dataset_sha256"],
         "tokenizer_sha256": approval["tokenizer_sha256"],
@@ -678,6 +696,8 @@ def main():
     parser.add_argument("--config", required=True, help="JSON model and optimizer configuration.")
     parser.add_argument("--manifest", required=True, help="Approved specialist dataset manifest.")
     parser.add_argument("--resume", default=None, help="Optional SHA-256 verified checkpoint.")
+    parser.add_argument("--session-id", default=None)
+    parser.add_argument("--attempt-id", default=None)
     args = parser.parse_args()
     config = json.loads(Path(args.config).read_text(encoding="utf-8"))
     global _STOP_REQUESTED
@@ -686,7 +706,10 @@ def main():
     for stop_signal in (signal.SIGINT, signal.SIGTERM):
         previous_handlers[stop_signal] = signal.signal(stop_signal, _request_stop)
     try:
-        report = train_specialist(config, args.manifest, resume=args.resume)
+        report = train_specialist(
+            config, args.manifest, resume=args.resume,
+            session_id=args.session_id, attempt_id=args.attempt_id,
+        )
     finally:
         for stop_signal, previous_handler in previous_handlers.items():
             signal.signal(stop_signal, previous_handler)
