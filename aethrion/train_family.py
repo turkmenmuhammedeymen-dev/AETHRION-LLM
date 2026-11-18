@@ -60,7 +60,12 @@ def _resolve_output_dir(repo: Path, raw_value: Any) -> Path:
     if not isinstance(raw_value, str) or not raw_value.strip():
         raise FamilyTrainingError("A non-empty relative output_dir is required.")
     configured = Path(raw_value)
-    if configured.is_absolute() or any(part == ".." for part in configured.parts):
+    if (
+        configured.is_absolute()
+        or "\\" in raw_value
+        or ":" in raw_value
+        or any(part in {"", ".", ".."} for part in raw_value.split("/"))
+    ):
         raise FamilyTrainingError("output_dir must be a safe relative path.")
     resolved = (repo / configured).resolve()
     try:
@@ -177,7 +182,9 @@ def run_family(
 ) -> dict[str, Any]:
     """Preflight or sequentially execute every selected, fully approved model."""
     repo = Path(root).resolve()
-    model_ids = selected or list(MODEL_IDS)
+    model_ids = list(MODEL_IDS) if selected is None else list(selected)
+    if not model_ids:
+        raise FamilyTrainingError("At least one model ID must be selected.")
     if len(set(model_ids)) != len(model_ids):
         raise FamilyTrainingError("Duplicate model IDs are not allowed.")
     unknown = sorted(set(model_ids) - set(MODEL_IDS))
