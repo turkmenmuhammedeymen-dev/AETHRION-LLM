@@ -7,51 +7,38 @@ pipeline and manifest template; the project owner supplies approved source mater
 Every source needs a documented origin, license, permitted use, and explicit training
 approval. Exclude personal, confidential, private, or unlawfully obtained material.
 
-## Bounded public-corpus pilot
+## External datasets are disabled
 
-The Hugging Face dataset card for ytu-ce-cosmos/Cosmos-Turkish-Corpus-v1.0
-declares CC BY 4.0 for the dataset. This is a candidate source, not a blanket guarantee
-about every upstream webpage or component. Review the card, attribution requirements,
-privacy, and the rights for each original source before use.
+Earlier revisions documented a bounded Cosmos Turkish Corpus download. That
+workflow is obsolete and must not be used. AETHRION's current data policy is
+first-party owner-authored material only; external dataset downloads, gated
+dataset access, and third-party corpus imports are disabled.
 
-The importer preserves the original URL on each JSONL record. Because the corpus is
-mixed-source, a single dataset-level license flag is not enough. Before preparing
-URL-attributed JSONL, create and complete a domain review CSV with one row for every
-exact hostname. The review must contain a license name, HTTPS evidence URL, rights
-holder, explicit AI-training permission (YES), attribution requirement (YES or NO),
-and review_status=APPROVED. Unknown, missing, or pending entries block corpus
-preparation. Exact hostnames are matched; approval for one host does not
-automatically approve its subdomains.
-
-Example:
+The legacy command remains only as a compatibility stub:
 
 ~~~bash
-pip install -e ".[data]"
-python -m aethrion.import_hf_dataset --max-records 5000
-# Review data/raw/cosmos/sources.json and every original source URL.
-# Complete data/processed/privacy_review/source_review_template.csv.
-# The dataset-level manifest gate and every exact-host review must be approved.
-python -m aethrion.prepare_data --input data/raw/cosmos \
-  --manifest data/raw/cosmos/sources.json \
-  --dataset-manifest data/processed/corpus_manifest.json \
-  --source-review data/processed/privacy_review/source_review_template.csv \
-  --output data/processed/corpus.txt \
-  --report data/processed/corpus-report.json
+python -m aethrion.import_hf_dataset --max-records 1
 ~~~
 
-The importer streams at most 5,000 rows by default; it does not fetch the full upstream
-corpus. Keep allow_training=false until the dataset-level rights review is complete.
-The preparation pipeline also requires an evidence-backed approval for every exact
-hostname found in URL-attributed JSONL. These checks enforce recorded review decisions;
-they do not provide legal advice or independently determine whether a license applies.
+It exits with an explicit policy error and does not create an output directory,
+download data, or contact Hugging Face. Do not enable it or replace the stub
+with an external importer without a separately authorized policy change.
+
+Prepare only owner-authored source files kept outside GitHub. Use
+[BASE_TRAINING_READINESS.md](BASE_TRAINING_READINESS.md) for the required
+source manifest, rights and authorship evidence, privacy/quality review,
+human approval, HMAC signing, corpus preparation, and training commands.
+Keep training_allowed=false until the exact first-party corpus has been
+reviewed and approved. A source manifest, synthetic fixture, or CI test is
+not itself evidence of real authorship or rights.
 
 ## Preparation
 
-For plain text or JSONL without per-record URLs, use a manifest that documents each
-source and explicitly approves it. URL-attributed JSONL additionally requires
---source-review as described above. BASE splitting is provenance-disjoint: each
-plain-text source file forms its own group, URL-attributed records are grouped by
-exact hostname, and JSONL may provide an explicit `group_id`. At least three
+For owner-authored plain text or JSONL, use a manifest that documents each
+source and records its actual authorship and rights review. Do not add third-party
+URL-attributed records. BASE splitting is provenance-disjoint: each
+plain-text source file forms its own group, and owner-authored JSONL may provide
+an explicit `group_id`. At least three
 independent groups are required so train, validation and test each receive whole
 groups. Keep unrelated sources in separate files or give records explicit group IDs.
 
@@ -66,29 +53,14 @@ coverage, source balance, duplication, spelling, encoding, privacy, and license 
 
 ## Train and evaluate
 
-~~~bash
-python -m aethrion.tokenizer --train data/processed/corpus-train.txt \
-  --corpus data/processed/corpus.txt \
-  --output artifacts/tokenizer.json --vocab-size 512 \
-  --dataset-manifest data/processed/corpus_manifest.json \
-  --source-manifest data/raw/cosmos/sources.json \
-  --source-root data/raw/cosmos \
-  --corpus-report data/processed/corpus-report.json \
-  --source-review data/processed/privacy_review/source_review_template.csv
-python -m aethrion.train --config configs/turkish_pilot.json \
-  --dataset-manifest data/processed/corpus_manifest.json \
-  --source-manifest data/raw/cosmos/sources.json \
-  --source-root data/raw/cosmos \
-  --corpus-report data/processed/corpus-report.json \
-  --source-review data/processed/privacy_review/source_review_template.csv
-python -m aethrion.evaluate --checkpoint artifacts/turkish_pilot/checkpoint_last.pt \
-  --tokenizer artifacts/tokenizer.json --data data/heldout/approved-eval.txt
-~~~
-
-Keep evaluation text disjoint from training data. Build a human-reviewed benchmark
-for grammar, reading comprehension, summarization, reasoning, instruction following,
-factuality, dialect/register variation, and safety. Record corpus hashes, model and
-tokenizer versions, hardware, training steps, and evaluation results.
+Do not use legacy Cosmos paths or the old `turkish_pilot` command sequence.
+Follow the current, evidence-first procedure in
+[BASE_TRAINING_READINESS.md](BASE_TRAINING_READINESS.md). It uses a private
+owner-authored source directory, validates the signed corpus report and
+train/validation/test partitions, and keeps training blocked until genuine
+human approval has been recorded. After approval, use the exact tokenizer and
+BASE training commands documented there. Keep held-out evaluation data
+separate and independently reviewed.
 
 ## Scale and limitations
 

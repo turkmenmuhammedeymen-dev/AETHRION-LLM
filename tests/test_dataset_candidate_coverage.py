@@ -1,4 +1,7 @@
 import json
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -36,6 +39,25 @@ class DatasetCandidateCoverageTests(unittest.TestCase):
         self.assertIs(approval["permits_accepting_provider_legal_terms"], False)
         self.assertIs(approval["permits_paid_acquisition"], False)
         self.assertIs(approval["permits_paid_compute"], False)
+
+
+    def test_legacy_external_huggingface_import_command_fails_without_writing_data(self):
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "must-not-be-created"
+            result = subprocess.run(
+                [
+                    sys.executable, "-m", "aethrion.import_hf_dataset",
+                    "--output-dir", str(output), "--max-records", "1",
+                ],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("imports are disabled", result.stdout + result.stderr)
+            self.assertFalse(output.exists(), "Disabled importer must not create an output directory")
 
 
 if __name__ == "__main__":
