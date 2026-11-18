@@ -328,7 +328,7 @@ def validate_specialist_dataset(
             raise SpecialistDataError("A reviewed source file is missing or empty.")
         if sha256_file(source_file) != digest.lower():
             raise SpecialistDataError("A reviewed source file SHA-256 mismatch.")
-        if source.get("allow_training") is not True:
+        if require_training_approval and source.get("allow_training") is not True:
             raise SpecialistDataError("Training blocked: one or more source licenses are not approved.")
         if require_training_approval:
             license_name = source["license"].strip()
