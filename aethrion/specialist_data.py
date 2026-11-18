@@ -42,6 +42,21 @@ REQUIRED_ARRAYS = {
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
+INPUT_FINGERPRINT_FIELDS = {
+    "chat": ("prompt_ids",),
+    "code": ("token_ids",),
+    "vision": ("images",),
+    "image": ("images",),
+    "asr": ("features",),
+    "tts": ("token_ids",),
+    "vocoder": ("target_mels",),
+    "3d": ("points",),
+    "research": ("query_ids", "passage_ids"),
+    "document": ("document_input",),
+    "safety": ("token_ids",),
+}
+
+
 class SpecialistDataError(ValueError):
     """Invalid, unapproved, or integrity-failing specialist dataset."""
 
@@ -66,6 +81,61 @@ def _safe_local_path(root: Path, relative: str) -> Path:
     except ValueError as exc:
         raise SpecialistDataError("Dataset path escapes the declared data root.") from exc
     return resolved
+
+
+def _input_fingerprint_rows(model_id: str, arrays: dict[str, np.ndarray], index: int):
+    """Yield exact model inputs, excluding target labels and padded sequence tails."""
+    if model_id == "chat":
+        prompt_mask = np.asarray(arrays["labels"][index]) == -100
+        prompt_ids = np.asarray(arrays["input_ids"][index])[prompt_mask]
+        if prompt_ids.size:
+            yield "prompt_ids", prompt_ids
+    elif model_id in {"vision", "image"}:
+        yield "images", arrays["images"][index]
+    elif model_id == "asr":
+        length = int(arrays["input_lengths"][index])
+        yield "features", arrays["features"][index, :length]
+    elif model_id == "tts":
+        length = int(arrays["token_lengths"][index])
+        yield "token_ids", arrays["token_ids"][index, :length]
+    elif model_id == "vocoder":
+        length = int(arrays["frame_lengths"][index])
+        yield "target_mels", arrays["target_mels"][index, :length]
+    elif model_id == "research":
+        yield "query_ids", arrays["query_ids"][index]
+        yield "passage_ids", arrays["passage_ids"][index]
+    elif model_id == "document":
+        yield "document_input", (
+            arrays["token_ids"][index], arrays["boxes"][index], arrays["layout_ids"][index]
+        )
+    else:
+        for field in INPUT_FINGERPRINT_FIELDS[model_id]:
+            yield field, arrays[field][index]
+
+
+def _validate_input_split_uniqueness(
+    model_id: str,
+    arrays: dict[str, np.ndarray],
+    split_names: list[str],
+) -> None:
+    """Reject identical model inputs assigned to different data splits."""
+    seen: dict[tuple[str, str], str] = {}
+    for index, split_name in enumerate(split_names):
+        for field, value in _input_fingerprint_rows(model_id, arrays, index):
+            digest = hashlib.sha256()
+            values = value if isinstance(value, tuple) else (value,)
+            for part in values:
+                row = np.ascontiguousarray(part)
+                digest.update(row.dtype.str.encode("ascii"))
+                digest.update(json.dumps(row.shape, separators=(",", ":")).encode("ascii"))
+                digest.update(row.tobytes(order="C"))
+            fingerprint = (field, digest.hexdigest())
+            previous = seen.get(fingerprint)
+            if previous is not None and previous != split_name:
+                raise SpecialistDataError(
+                    f"Exact duplicate {field} input appears across {previous} and {split_name} splits."
+                )
+            seen[fingerprint] = split_name
 
 
 def _validate_array_integrity(arrays: dict[str, np.ndarray], sample_count: int) -> None:
@@ -320,6 +390,7 @@ def validate_specialist_dataset(
             sample_count = len(ids)
             _validate_array_integrity(arrays, sample_count)
             _validate_modality_shapes(model_id, arrays, sample_count)
+            _validate_input_split_uniqueness(model_id, arrays, split_names)
             if model_id == "safety":
                 minimum = payload.get("safety_min_per_class")
                 if type(minimum) is not int or minimum < 25:
