@@ -84,6 +84,24 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             self.assertEqual(result["sample_count"], 6)
             self.assertEqual(result["split_counts"], {"train": 2, "validation": 2, "test": 2})
 
+    def test_duplicate_specialist_source_ids_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            payload["sources"].append(dict(payload["sources"][0], source_path="source.txt"))
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "Duplicate specialist source_id"):
+                validate_specialist_dataset(manifest)
+
+    def test_duplicate_specialist_source_paths_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            payload["sources"].append(dict(payload["sources"][0], source_id="second-source"))
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "Duplicate specialist source_path"):
+                validate_specialist_dataset(manifest)
+
     def test_source_hash_mismatch_blocks_training(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
