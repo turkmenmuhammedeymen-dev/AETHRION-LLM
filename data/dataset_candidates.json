@@ -1,0 +1,421 @@
+{
+  "format": "aethrion-dataset-candidate-register-v1",
+  "owner_review_authorized": true,
+  "training_approval_granted": false,
+  "notes": "Owner authorized review and preparation planning. Source rights, per-item licenses, privacy, provenance, consent, exact downloaded release and hashes remain separate fail-closed requirements.",
+  "candidates": [
+    {
+      "id": "cosmos-turkish-v1",
+      "model_ids": [
+        "chat"
+      ],
+      "uri": "https://huggingface.co/datasets/ytu-ce-cosmos/Cosmos-Turkish-Corpus-v1.0",
+      "declared_license": "CC-BY-4.0",
+      "review_status": "source_rights_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Third-party website/forum/news/Wikipedia content requires source-level rights and attribution policy",
+        "Pin exact revision and compute source/prepared hashes",
+        "Content-level deduplication and privacy filtering"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Public dataset card currently reports CC-BY-4.0, 9,075,453 rows and 22.8 GB; records include source URLs and corpus aggregates third-party websites, forums, news and Wikipedia.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/ytu-ce-cosmos/Cosmos-Turkish-Corpus-v1.0"
+        ],
+        "next_gate": "No ingestion until source-level rights, attribution, privacy, exact revision and file hashes are verified."
+      }
+    },
+    {
+      "id": "common-voice-tr-scripted-27",
+      "model_ids": [
+        "asr"
+      ],
+      "uri": "https://commonvoice.mozilla.org/lss/datasets",
+      "declared_license": "CC0-1.0",
+      "review_status": "release_and_consent_metadata_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Acquire only through the official Mozilla Data Collective catalogue; do not use the legacy Hugging Face mirror as the source of the v27 release",
+        "Pin the exact Turkish v27 release, record downloaded file inventory and SHA-256 values",
+        "Verify release-specific speaker contribution, consent/provenance and privacy metadata before preparation",
+        "Confirm sufficient persistent storage for the listed 2.79 GB release plus extracted/prepared data",
+        "Keep training_allowed=false until the exact prepared dataset and human review are approved"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Official Mozilla Data Collective catalogue lists Common Voice Scripted Speech 27.0 Turkish (tr), ASR, CC0-1.0, MP3, 2.79 GB. Direct Hugging Face inspection found the legacy mozilla-foundation/common_voice_17_0 dataset empty with a notice that Common Voice datasets moved exclusively to Mozilla Data Collective effective October 2025; the candidate v27 HF repo ID was not found. Therefore the official MCD catalogue is the current discovery/download source; this does not establish speaker-level provenance/consent or authorize training.",
+        "evidence_urls": [
+          "https://commonvoice.mozilla.org/lss/datasets",
+          "https://commonvoice.mozilla.org/en/terms",
+          "https://huggingface.co/datasets/mozilla-foundation/common_voice_17_0",
+          "https://huggingface.co/datasets/mozilla-foundation/common_voice_27_0"
+        ],
+        "next_gate": "Use the official Mozilla Data Collective release only. Before any download/preparation, verify dataset-specific contributor/consent metadata, exact release contents, storage capacity and checksums; training remains blocked until a prepared dataset manifest receives explicit review."
+      }
+    },
+    {
+      "id": "objaverse-filtered-assets",
+      "model_ids": [
+        "3d"
+      ],
+      "uri": "https://huggingface.co/datasets/allenai/objaverse",
+      "declared_license": "ODC-By-1.0 plus per-asset licenses",
+      "review_status": "per_asset_license_filter_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Inspect each asset license",
+        "Exclude non-commercial assets for commercial-intent training",
+        "Preserve ODC-By and per-asset attribution",
+        "Pin revision and hashes"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Dataset card states collection ODC-By 1.0 and per-object licenses include CC-BY-4.0, CC-BY-NC-4.0, CC-BY-NC-SA-4.0, CC-BY-SA-4.0 and CC0 1.0.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/allenai/objaverse"
+        ],
+        "next_gate": "Read each asset's license and metadata; exclude incompatible/non-commercial assets for commercial-intent use; preserve attribution and review share-alike obligations."
+      }
+    },
+    {
+      "id": "coco-2014-annotations-and-images",
+      "model_ids": [
+        "vision",
+        "image"
+      ],
+      "uri": "https://cocodataset.org/",
+      "declared_license": "CC-BY-4.0 annotations; images subject to Flickr/source terms",
+      "review_status": "image_rights_not_cleared",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "COCO does not own underlying image copyrights",
+        "Verify per-image rights and applicable Flickr terms",
+        "Do not treat annotation license as image training permission"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Official COCO terms license annotations and website CC-BY-4.0 but explicitly state COCO does not own image copyrights and images remain subject to Flickr terms.",
+        "evidence_urls": [
+          "https://cocodataset.org/dataset/termsofuse.htm"
+        ],
+        "next_gate": "Image training remains blocked without item-level image rights evidence; annotation license does not clear image pixels."
+      }
+    },
+    {
+      "id": "the-stack-code",
+      "model_ids": [
+        "code"
+      ],
+      "uri": "https://huggingface.co/datasets/bigcode/the-stack-dedup",
+      "declared_license": "Mixed/source-specific; gated access",
+      "review_status": "access_and_per_file_rights_unverified",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Dataset access was restricted",
+        "Obtain authorized access and verify each source repository/file license",
+        "Preserve provenance and remove disallowed files"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "BigCode documentation says each code item remains subject to its original repository license and attribution. Current Hugging Face dataset page is gated and requires agreement to terms and sharing contact information with maintainers.",
+        "evidence_urls": [
+          "https://www.bigcode-project.org/docs/about/the-stack/",
+          "https://huggingface.co/datasets/bigcode/the-stack"
+        ],
+        "next_gate": "Do not request gated access or share contact information. Use only an authorized release with source-level licenses, provenance, current opt-out exclusions and pinned hashes."
+      }
+    },
+    {
+      "id": "doclaynet-v1",
+      "model_ids": [
+        "document"
+      ],
+      "uri": "https://huggingface.co/datasets/docling-project/DocLayNet",
+      "declared_license": "CDLA-Permissive-1.0 (dataset card)",
+      "review_status": "source_provenance_privacy_and_schema_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Confirm upstream document/source rights for the exact release; dataset-level terms do not replace review of embedded source documents",
+        "Review pages for personal or sensitive information and define redaction/exclusion before training",
+        "Current AETHRION-DOCUMENT needs OCR text tokens paired with layout boxes; DocLayNet layout labels alone do not complete the OCR pipeline",
+        "Pin revision, inventory files, hash source and prepared artifacts"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Hugging Face dataset card describes 80,863 human-annotated pages from six document categories and declares CDLA-Permissive-1.0. This is a strong layout-supervision candidate, not an already cleared OCR/text corpus.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/docling-project/DocLayNet",
+          "https://huggingface.co/datasets/docling-project/DocLayNet/blob/main/README.md"
+        ],
+        "next_gate": "Inspect exact revision, source provenance, privacy exposure and OCR/text availability; prepare only after human review."
+      }
+    },
+    {
+      "id": "open-images-v7",
+      "model_ids": [
+        "vision"
+      ],
+      "uri": "https://storage.googleapis.com/openimages/web/factsfigures_v7.html",
+      "declared_license": "CC-BY-4.0 annotations; images listed as CC-BY-2.0 individually, subject to per-image verification",
+      "review_status": "per_image_rights_and_privacy_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Google states it makes no representation or warranty about each image's license; verify each selected image and retain its license evidence",
+        "Preserve annotation attribution and source metadata",
+        "Review images for personal/sensitive content and applicable restrictions",
+        "Open Images is not a natural-language caption corpus; do not use it as IMAGE text-pair training without separately authored/licensed captions",
+        "Pin release and hash selected image/annotation files"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Official Open Images V7 facts page states annotations are CC BY 4.0 and images are listed as CC BY 2.0, while explicitly requiring users to verify image licenses themselves. It is a possible VISION candidate only after item-level review.",
+        "evidence_urls": [
+          "https://storage.googleapis.com/openimages/web/factsfigures_v7.html"
+        ],
+        "next_gate": "No image ingestion until every selected image has verified rights, privacy filtering and attribution metadata."
+      }
+    },
+    {
+      "id": "codesearchnet-license-filtered",
+      "model_ids": [
+        "code"
+      ],
+      "uri": "https://github.com/github/CodeSearchNet",
+      "declared_license": "Mixed original repository/file licenses; dataset repository tooling is MIT",
+      "review_status": "per_file_license_filter_and_provenance_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Read each language archive's _licenses.pkl and retain the source repository/file license per sample",
+        "Exclude unknown, incompatible or unapproved source files; do not infer MIT from the dataset tooling license",
+        "Preserve original copyright notices and repository provenance",
+        "Remove secrets, credentials, personal data and disallowed content",
+        "Pin dataset release and hashes"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "The official CodeSearchNet repository says source-code licenses are supplied in per-language _licenses.pkl files. The repository's MIT license covers its code/documentation, not every code sample in the dataset.",
+        "evidence_urls": [
+          "https://github.com/github/CodeSearchNet",
+          "https://github.com/github/CodeSearchNet/blob/master/LICENSE"
+        ],
+        "next_gate": "Build a source-level allowlist only after verifying each source license and permitted ML-training use."
+      }
+    },
+    {
+      "id": "ms-marco-passage-ranking",
+      "model_ids": [
+        "research"
+      ],
+      "uri": "https://microsoft.github.io/msmarco/Datasets.html",
+      "declared_license": "Microsoft Research dataset terms; non-commercial research use only; no underlying IP rights granted",
+      "review_status": "noncommercial_terms_and_underlying_rights_incompatible_or_unresolved",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Official terms limit use to non-commercial research and grant no underlying intellectual-property rights; do not use for a commercial-intent product",
+        "Underlying web-document rights are not guaranteed by Microsoft",
+        "Terms are automatically accepted by use; no download or acceptance is authorized",
+        "Prefer an independently rights-cleared retrieval corpus"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Official MS MARCO terms state the datasets are intended for non-commercial research only and are made available without extending IP rights; Microsoft warns it may not own underlying document rights.",
+        "evidence_urls": [
+          "https://microsoft.github.io/msmarco/Datasets.html",
+          "https://microsoft.github.io/msmarco/"
+        ],
+        "next_gate": "Do not use for AETHRION product training under current intended-use assumptions; select a rights-cleared alternative."
+      }
+    },
+    {
+      "id": "speechdataai-turkish-conversational-speech",
+      "model_ids": [
+        "asr",
+        "tts",
+        "vocoder"
+      ],
+      "uri": "https://huggingface.co/datasets/SpeechDataAI/turkish-conversational-speech",
+      "declared_license": "Custom commercial license claimed by provider; paid; not hosted on Hugging Face",
+      "review_status": "commercial_contract_and_speaker_consent_evidence_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Audio is not hosted in the HF dataset repository; no access or files acquired",
+        "Provider contract, exact permitted use, redistribution terms and full speaker-consent evidence require independent review",
+        "Commercial acquisition has a stated price; no purchase, quote request or provider contact is authorized",
+        "Do not use TTS/Vocoder until consent explicitly covers speech synthesis and the intended use"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Provider's HF dataset card claims 2,000 hours of Turkish conversational audio, 200 speakers and a commercial license for ASR/TTS/voice AI, but says audio is not hosted and samples are provided on request. Vendor page lists a paid per-hour price; no purchase or contact was made.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/SpeechDataAI/turkish-conversational-speech",
+          "https://www.speechdata.ai/datasets/turkish"
+        ],
+        "next_gate": "Only reconsider after an adult-authorized contract review, full speaker-consent scope evidence, price approval and exact data provenance review."
+      }
+    },
+    {
+      "id": "turkasr-bench-tts-synthetic-evaluation",
+      "model_ids": [
+        "asr",
+        "tts",
+        "vocoder"
+      ],
+      "uri": "https://huggingface.co/datasets/yagmurtuncer/turkasr-bench-tts",
+      "declared_license": "Mixed per-engine/source licenses; gated access",
+      "review_status": "evaluation_only_mixed_license_and_access_gate",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Dataset is a synthetic-speech benchmark, not evidence of real human speech or speaker consent",
+        "Dataset card identifies engines with non-commercial or share-alike restrictions; inspect every engine and source-text license",
+        "Gated access requires acceptance of terms; no terms accepted or data downloaded",
+        "Keep for evaluation research only if exact terms permit; do not train production TTS/Vocoder from this mixed corpus"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "HF card describes synthetic Turkish speech generated by nine TTS engines and notes mixed per-engine licenses, including non-commercial and share-alike terms. It is gated and intended as an evaluation benchmark.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/yagmurtuncer/turkasr-bench-tts"
+        ],
+        "next_gate": "No access or training until terms and per-engine/source licenses are reviewed; benchmark-only role preferred."
+      }
+    },
+    {
+      "id": "turkish-asr-benchmark-metrics",
+      "model_ids": [
+        "asr"
+      ],
+      "uri": "https://huggingface.co/datasets/turkmedstt/turkish-asr-benchmark",
+      "declared_license": "CC-BY-4.0 for benchmark metadata",
+      "review_status": "evaluation_metadata_only_no_training_audio",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Repository contains benchmark metrics only and does not redistribute source audio, transcripts or hypotheses",
+        "Cannot create ASR training examples from metric tables",
+        "Use only as evaluation/provenance reference if the license and source terms are verified"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "HF dataset card says the release publishes ASR benchmark metrics only; source audio and reference transcripts are not distributed and original source licenses/access conditions continue to apply.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/turkmedstt/turkish-asr-benchmark"
+        ],
+        "next_gate": "Evaluation metadata only; acquire no source audio through this dataset."
+      }
+    },
+    {
+      "id": "shapenetcore-noncommercial",
+      "model_ids": [
+        "3d"
+      ],
+      "uri": "https://huggingface.co/datasets/ShapeNet/ShapeNetCore-archive",
+      "declared_license": "ShapeNet terms: non-commercial research and educational use only",
+      "review_status": "noncommercial_terms_incompatible_with_product_training",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Terms restrict use to non-commercial research and education; do not use for commercial-intent AETHRION model training",
+        "Gated access requires acceptance of terms; no access or terms accepted",
+        "Prefer per-asset-cleared Objaverse CC0/CC-BY items or original procedural geometry"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "The official ShapeNetCore card requires agreement to ShapeNet terms that restrict use to non-commercial research and educational purposes.",
+        "evidence_urls": [
+          "https://huggingface.co/datasets/ShapeNet/ShapeNetCore-archive",
+          "https://huggingface.co/datasets/ShapeNet/ShapeNetCore"
+        ],
+        "next_gate": "Exclude from product training under current intended-use assumptions."
+      }
+    },
+    {
+      "id": "aethrion-safe-original-curated-v1",
+      "model_ids": [
+        "safety"
+      ],
+      "uri": "urn:aethrion:internal:safety-corpus",
+      "declared_license": "Original AETHRION-authored and human-reviewed content; corpus not yet created",
+      "review_status": "authoring_and_independent_human_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "No approved SAFE corpus currently exists",
+        "Create non-operational, age-appropriate classification examples with ALLOW/REVIEW/BLOCK and reason labels",
+        "Use independent human review, disagreement resolution, source-disjoint held-out splits and bias checks",
+        "Do not include procedural harmful instructions or private user conversations",
+        "Keep runtime fail-closed until trained model calibration and independent evaluation pass"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "No external public dataset has been approved for AETHRION-SAFE. The safer first-party path is a new, documented, human-reviewed classification corpus authored for the policy taxonomy; this record does not contain training samples.",
+        "evidence_urls": [],
+        "next_gate": "Author and independently review the dataset before setting any approval flag."
+      }
+    },
+    {
+      "id": "ljspeech-cc0-mcd",
+      "model_ids": [
+        "tts",
+        "vocoder"
+      ],
+      "uri": "https://mozilladatacollective.com/datasets/cmonjhxee01ako007kohpbg34",
+      "declared_license": "CC0-1.0 (Mozilla Data Collective catalogue)",
+      "review_status": "speaker_synthesis_consent_and_release_hash_review_required",
+      "owner_review_authorized": true,
+      "downloaded": false,
+      "training_allowed": false,
+      "blockers": [
+        "Public catalogue describes a single speaker and public-domain audio/text, but the source record does not independently document the narrator's consent scope for synthetic voice generation",
+        "Verify the exact release, file inventory, audio/text provenance and SHA-256 before preparation",
+        "Confirm that the public-domain text status applies to every selected passage and retain attribution/provenance",
+        "Do not train TTS or Vocoder until speaker-synthesis permission is explicitly documented and reviewed"
+      ],
+      "public_metadata_review": {
+        "checked_at": "2026-11-17",
+        "finding": "Mozilla Data Collective lists The LJSpeech Dataset as CC0-1.0, WAV/TSV, 3.00 GB, 13,100 clips from a single speaker reading seven non-fiction books; the catalogue says the text and audio are public domain. This is a candidate, not approval of the narrator's consent for voice synthesis.",
+        "evidence_urls": [
+          "https://mozilladatacollective.com/datasets/cmonjhxee01ako007kohpbg34"
+        ],
+        "next_gate": "No download or training until the exact release is pinned and a documented review confirms the rights and consent scope for TTS/Vocoder use."
+      }
+    }
+  ],
+  "owner_approval": {
+    "recorded_at": "2026-11-17",
+    "record_path": "docs/OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md",
+    "scope": "public-source review, evidence recording, non-destructive preparation, and training only on exact datasets whose source-specific rights, privacy and consent gates have passed",
+    "permits_training": true,
+    "permits_restricted_download": false,
+    "permits_accepting_provider_legal_terms": false,
+    "permits_paid_acquisition": false,
+    "permits_paid_compute": false,
+    "note": "The project owner authorizes training on fully cleared data. This does not approve any current dataset, grant third-party rights, accept click-through terms, authorize paid purchases/jobs, or satisfy privacy, per-item license, provenance or speaker-consent review."
+  }
+}

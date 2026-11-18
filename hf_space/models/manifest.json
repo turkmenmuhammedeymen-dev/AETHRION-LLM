@@ -1,0 +1,170 @@
+{
+  "format": "aethrion-native-model-family-v1",
+  "execution_policy": "local_only",
+  "models": {
+    "chat": {
+      "architecture": "aethrion.model:AETHRIONLM",
+      "model_config": {
+        "vocab_size": 2048,
+        "block_size": 256,
+        "n_layer": 4,
+        "n_head": 4,
+        "n_embd": 256,
+        "dropout": 0.1
+      },
+      "checkpoint": "artifacts/models/chat/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/chat/tokenizer.json",
+      "status": "not_trained"
+    },
+    "code": {
+      "architecture": "aethrion.code_model:AETHRIONCodeLM",
+      "model_config": {
+        "vocab_size": 2048,
+        "block_size": 512,
+        "n_layer": 4,
+        "n_head": 4,
+        "n_embd": 128,
+        "dropout": 0.1
+      },
+      "checkpoint": "artifacts/models/code/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/code/tokenizer.json",
+      "status": "not_trained"
+    },
+    "vision": {
+      "architecture": "aethrion.vision_model:AETHRIONVision",
+      "model_config": {
+        "image_size": 224,
+        "patch_size": 16,
+        "vocab_size": 2048,
+        "max_text_length": 128,
+        "width": 128,
+        "layers": 4,
+        "heads": 4,
+        "projection_dim": 256,
+        "dropout": 0.1
+      },
+      "checkpoint": "artifacts/models/vision/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/vision/tokenizer.json",
+      "status": "not_trained",
+      "processor": "artifacts/models/vision/processor.json"
+    },
+    "image": {
+      "architecture": "aethrion.image_model:AETHRIONImageGenerator",
+      "model_config": {
+        "vocab_size": 2048,
+        "image_size": 64,
+        "text_length": 128,
+        "width": 64,
+        "time_dim": 128,
+        "diffusion_steps": 1000
+      },
+      "checkpoint": "artifacts/models/image/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/image/tokenizer.json",
+      "status": "not_trained",
+      "processor": "artifacts/models/image/processor.json"
+    },
+    "asr": {
+      "architecture": "aethrion.asr_model:AETHRIONASR",
+      "model_config": {
+        "vocab_size": 2048,
+        "n_mels": 80,
+        "width": 128,
+        "layers": 4,
+        "heads": 4,
+        "dropout": 0.1,
+        "blank_id": 0
+      },
+      "checkpoint": "artifacts/models/asr/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/asr/tokenizer.json",
+      "status": "not_trained",
+      "processor": "artifacts/models/asr/processor.json"
+    },
+    "tts": {
+      "architecture": "aethrion.tts_model:AETHRIONTTS",
+      "model_config": {
+        "vocab_size": 2048,
+        "mel_bins": 80,
+        "width": 128,
+        "layers": 4,
+        "heads": 4,
+        "dropout": 0.1
+      },
+      "checkpoint": "artifacts/models/tts/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/tts/tokenizer.json",
+      "status": "not_trained",
+      "processor": "artifacts/models/tts/processor.json"
+    },
+    "3d": {
+      "architecture": "aethrion.model_3d:AETHRION3D",
+      "model_config": {
+        "vocab_size": 2048,
+        "width": 128,
+        "points": 512,
+        "layers": 4,
+        "heads": 4,
+        "diffusion_steps": 1000
+      },
+      "checkpoint": "artifacts/models/3d/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/3d/tokenizer.json",
+      "status": "not_trained",
+      "processor": "artifacts/models/3d/processor.json"
+    },
+    "research": {
+      "architecture": "aethrion.research_model:AETHRIONResearch",
+      "model_config": {
+        "vocab_size": 2048,
+        "max_length": 512,
+        "width": 128,
+        "layers": 4,
+        "heads": 4,
+        "embedding_dim": 256
+      },
+      "checkpoint": "artifacts/models/research/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/research/tokenizer.json",
+      "status": "not_trained",
+      "processor": "artifacts/models/research/processor.json"
+    },
+    "document": {
+      "architecture": "aethrion.document_model:AETHRIONDocument",
+      "model_config": {
+        "vocab_size": 4096,
+        "layout_vocab_size": 32,
+        "max_length": 512,
+        "width": 128,
+        "layers": 4,
+        "heads": 4,
+        "tag_classes": 32
+      },
+      "checkpoint": "artifacts/models/document/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/document/tokenizer.json",
+      "status": "not_trained",
+      "processor": "artifacts/models/document/processor.json"
+    },
+    "safety": {
+      "architecture": "aethrion.safety_model:AETHRIONSafe",
+      "model_config": {
+        "vocab_size": 4096,
+        "max_length": 512,
+        "width": 128,
+        "layers": 4,
+        "heads": 4,
+        "reason_classes": 16,
+        "decisions": 3
+      },
+      "checkpoint": "artifacts/models/safety/checkpoint_last.pt",
+      "tokenizer": "artifacts/models/safety/tokenizer.json",
+      "status": "not_trained",
+      "processor": "artifacts/models/safety/processor.json"
+    },
+    "vocoder": {
+      "architecture": "aethrion.tts_model:AETHRIONVocoder",
+      "model_config": {
+        "mel_bins": 80,
+        "channels": 128,
+        "hop_length": 256
+      },
+      "checkpoint": "artifacts/models/vocoder/checkpoint_last.pt",
+      "status": "not_trained"
+    }
+  }
+}

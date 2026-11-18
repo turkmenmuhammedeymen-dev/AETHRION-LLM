@@ -1,0 +1,56 @@
+{
+  "format": "aethrion-specialist-dataset-v1",
+  "dataset_id": "tts-first-party-pending-review",
+  "model_id": "tts",
+  "modality": "audio",
+  "dataset_status": "awaiting_owner_authored_data_and_independent_review",
+  "training_allowed": false,
+  "owner_approval": false,
+  "privacy_reviewed": false,
+  "speaker_consent_reviewed": false,
+  "human_source_reviewed": false,
+  "independent_safety_reviewed": false,
+  "safety_min_per_class": 25,
+  "source_policy": {
+    "accepted_origin": "first_party_owner_authored_only",
+    "third_party_corpora": false,
+    "pretrained_weights": false,
+    "external_inference": false,
+    "remote_source_download": false
+  },
+  "data_requirements": {
+    "dataset_path": "prepared/tts/dataset.npz",
+    "dataset_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "required_splits": [
+      "train",
+      "validation",
+      "test"
+    ],
+    "group_disjoint_splits": true,
+    "deduplication_required": true,
+    "privacy_review_required": true,
+    "human_rights_review_required": true,
+    "speaker_consent_required": true,
+    "safety_label_review_required": false
+  },
+  "sources": [],
+  "block_reason": "No verified first-party source files, source-specific rights evidence, prepared dataset, and required human reviews are recorded. This manifest is a fail-closed registration, not training data or approval.",
+  "governance": {
+    "schema": "aethrion-human-review-v1",
+    "model_id": "tts",
+    "approval_status": "pending",
+    "author_role": "",
+    "authorship_attested": false,
+    "first_party_origin_attested": false,
+    "rights_holder_role": "",
+    "rights_attested": false,
+    "source_rights_reviewed": false,
+    "privacy_reviewed": false,
+    "quality_reviewed": false,
+    "reviewer_role": "",
+    "reviewed_at": "",
+    "evidence_uri": "",
+    "speaker_consent_reviewed": false,
+    "safety_reviewed": false
+  }
+}

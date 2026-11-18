@@ -1,0 +1,20 @@
+{
+  "model_id": "image",
+  "model_config": {
+    "vocab_size": 2048,
+    "image_size": 64,
+    "text_length": 128,
+    "width": 64,
+    "time_dim": 128,
+    "diffusion_steps": 1000
+  },
+  "output_dir": "artifacts/models/image",
+  "seed": 42,
+  "max_steps": 2000,
+  "batch_size": 4,
+  "learning_rate": 0.0003,
+  "weight_decay": 0.01,
+  "grad_clip": 1,
+  "eval_interval": 100,
+  "save_interval": 100
+}

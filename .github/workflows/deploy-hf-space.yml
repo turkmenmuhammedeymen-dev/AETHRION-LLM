@@ -1,0 +1,110 @@
+name: Deploy AETHRION-LLM to Hugging Face Space
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "hf_space/**"
+      - "aethrion/**"
+      - "models/manifest.json"
+      - ".github/workflows/deploy-hf-space.yml"
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade huggingface_hub
+      - name: Assemble Space from canonical runtime sources
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          staging="$RUNNER_TEMP/aethrion-space"
+          rm -rf "$staging"
+          mkdir -p "$staging"
+          cp -a hf_space/. "$staging/"
+          rm -rf "$staging/aethrion"
+          mkdir -p "$staging/aethrion" "$staging/models"
+          cp -a aethrion/. "$staging/aethrion/"
+          cp models/manifest.json "$staging/models/manifest.json"
+          echo "Staged canonical first-party AETHRION runtime."
+          # Keep syntax-check bytecode outside the folder uploaded to the Space.
+          PYTHONPYCACHEPREFIX="$RUNNER_TEMP/aethrion-pycache" \
+            python -m compileall -q "$staging/aethrion" "$staging/app.py"
+          if find "$staging" \( -type d -name "__pycache__" -o -type f -name "*.py[co]" \) -print -quit | grep -q .; then
+            echo "Refusing to upload Python bytecode or __pycache__ directories."
+            exit 1
+          fi
+      - name: Upload Space files
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SPACE_STAGING_DIR: ${{ runner.temp }}/aethrion-space
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import PurePosixPath
+          from huggingface_hub import HfApi
+          token = os.environ.get("HF_TOKEN", "")
+          if not token:
+              raise SystemExit("Missing HF_TOKEN repository secret.")
+
+          repo_id = "vizyon2027/AETHRION-LLM"
+          api = HfApi(token=token)
+
+          # Keep the Space's existing ZeroGPU hardware. This workflow never
+          # requests paid hardware or changes the Space hardware setting.
+          runtime = api.get_space_runtime(repo_id=repo_id)
+          print(f"SPACE_HARDWARE_BEFORE={runtime.hardware}")
+          print(f"SPACE_REQUESTED_HARDWARE_BEFORE={runtime.requested_hardware}")
+
+          api.upload_folder(
+              repo_id=repo_id,
+              repo_type="space",
+              folder_path=os.environ["SPACE_STAGING_DIR"],
+              commit_message="Deploy canonical native-only AETHRION runtime",
+          )
+          print("Space upload completed.")
+
+          # Purge bytecode uploaded by older workflow revisions.
+          remote_files = api.list_repo_files(repo_id=repo_id, repo_type="space")
+          cache_patterns = set()
+          for filename in remote_files:
+              parts = PurePosixPath(filename).parts
+              if "__pycache__" in parts:
+                  cache_index = parts.index("__pycache__")
+                  cache_patterns.add(str(PurePosixPath(*parts[:cache_index + 1])) + "/")
+              elif filename.endswith((".pyc", ".pyo")):
+                  cache_patterns.add(filename)
+          if cache_patterns:
+              patterns = sorted(cache_patterns)
+              api.delete_files(
+                  repo_id=repo_id, repo_type="space", delete_patterns=patterns,
+                  commit_message="Remove generated Python bytecode from Space",
+              )
+              print(f"Removed {len(patterns)} generated Python cache paths.")
+          remaining = [
+              name for name in api.list_repo_files(repo_id=repo_id, repo_type="space")
+              if "__pycache__" in PurePosixPath(name).parts or name.endswith((".pyc", ".pyo"))
+          ]
+          if remaining:
+              raise SystemExit("Generated Python bytecode remains: " + ", ".join(remaining[:20]))
+          print("SPACE_BYTECODE_CLEAN=PASS")
+
+          # Remove retired remote inference adapters from older Space revisions.
+          for legacy_path in ("aethrion/audio.py", "aethrion/providers.py"):
+              if api.file_exists(repo_id=repo_id, filename=legacy_path, repo_type="space"):
+                  api.delete_file(
+                      path_in_repo=legacy_path,
+                      repo_id=repo_id,
+                      repo_type="space",
+                      commit_message="Remove retired external model adapters",
+                  )
+                  print(f"Removed legacy Space file: {legacy_path}")
+              else:
+                  print(f"Legacy Space file already absent: {legacy_path}")
+          PY

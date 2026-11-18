@@ -1,0 +1,259 @@
+name: tests
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main", "hardening/**", "feature/**", "feat/**", "audit/**", "security/**"]
+  pull_request:
+    branches: ["main"]
+permissions:
+  contents: read
+concurrency:
+  group: aethrion-llm-tests-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  unit-tests:
+    name: Python ${{ matrix.python-version }} / CPU
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "numpy>=1.24"
+          python -m pip install "torch>=2.2" --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e ".[api,visual]"
+      - name: Space application syntax checks
+        run: python -m compileall -q aethrion hf_space/app.py hf_space/aethrion
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Synthetic end-to-end smoke test
+        run: python -m aethrion.smoke_test
+      - name: Audit actual eleven-model training and release readiness
+        run: python -m aethrion.family_audit --output family-readiness-report.json
+      - name: Preserve family readiness report
+        uses: actions/upload-artifact@v4
+        with:
+          name: aethrion-family-readiness-${{ matrix.python-version }}
+          path: family-readiness-report.json
+          if-no-files-found: error
+
+
+      - name: Capture failure diagnostics
+        if: failure()
+        run: |
+          set +e
+          {
+            echo "=== Python ==="
+            python --version
+            echo "=== pip ==="
+            python -m pip --version
+            echo "=== dependency consistency ==="
+            python -m pip check
+            echo "=== unit tests (diagnostic rerun) ==="
+            python -m unittest discover -s tests -v
+            echo "=== synthetic smoke test (diagnostic rerun) ==="
+            python -m aethrion.smoke_test
+            echo "=== family audit (diagnostic rerun) ==="
+            python -m aethrion.family_audit --output /tmp/aethrion-family-readiness-diagnostics.json
+          } > ci-diagnostics.log 2>&1
+          cat ci-diagnostics.log
+      - name: Upload failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aethrion-ci-diagnostics-${{ matrix.python-version }}
+          path: ci-diagnostics.log
+          if-no-files-found: warn
+
+  space-runtime:
+    name: Hugging Face Space runtime smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+      - name: Install CPU PyTorch
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "numpy>=1.24"
+          python -m pip install "torch>=2.2" --index-url https://download.pytorch.org/whl/cpu
+      - name: Install Space dependencies
+        run: |
+          grep -v -E '^torch([<=>]|$)' hf_space/requirements.txt > /tmp/space-requirements.txt
+          python -m pip install -r /tmp/space-requirements.txt
+          python -m pip install "gradio[oauth,mcp]==5.49.1" "spaces==0.52.1"
+          python -m pip check
+      - name: Assemble Space exactly as the deployment workflow does
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          staging="$RUNNER_TEMP/aethrion-space"
+          rm -rf "$staging"
+          mkdir -p "$staging/aethrion" "$staging/models"
+          cp -a hf_space/. "$staging/"
+          rm -rf "$staging/aethrion"
+          mkdir -p "$staging/aethrion"
+          cp -a aethrion/. "$staging/aethrion/"
+          cp models/manifest.json "$staging/models/manifest.json"
+      - name: Import and construct the actual Space UI
+        working-directory: ${{ runner.temp }}/aethrion-space
+        env:
+          PYTHONPATH: .
+        run: |
+          python - <<'PY'
+          import os
+          import tempfile
+          from pathlib import Path
+          import gradio as gr
+          import app
+          from aethrion.document_tools import create_document
+
+          assert isinstance(app.demo, gr.Blocks), "Gradio Blocks UI was not constructed"
+          assert app._resolve_space_auth({}) is None
+          assert app._resolve_space_auth({"AETHRION_SPACE_USERNAME": "tester"}) is None
+          assert app._resolve_space_auth({
+              "AETHRION_SPACE_USERNAME": "tester",
+              "AETHRION_SPACE_PASSWORD": "test-password"
+          }) == ("tester", "test-password")
+          assert app.REMOTE_PROVIDERS_ENABLED is False, "Remote providers must be disabled without Space auth"
+          config = app.demo.get_config_file()
+          assert isinstance(config, dict) and config.get("components"), "Gradio UI config is empty"
+          assert len(config["components"]) >= 20, "Expected all Space tabs and controls in UI config"
+          api_info = app.demo.get_api_info()
+          assert isinstance(api_info, dict), "Gradio API schema generation failed"
+
+          status = app.status()
+          for capability in ("chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d", "research", "document", "safety"):
+              assert capability in status, f"Missing native model status: {capability}"
+
+          assert "authentication" in app.chat("hello", [] ).lower()
+          assert "authentication" in app.code("write a function").lower()
+          assert "authentication" in app.research("latest AI research").lower()
+          assert "authentication" in app.vision_compare("placeholder.png", "cat").lower()
+          assert "authentication" in app.three_d_text("a small tree")[0].lower()
+          assert "authentication" in app.analyse(None, "summarize").lower()
+          assert "authentication" in app.voice(None)[0].lower()
+          app.SPACE_AUTH_ENABLED = True
+          assert "not trained" in app.code("write a function").lower()
+          assert ("not trained" in app.research("latest AI research").lower() or "not ready" in app.research("latest AI research").lower())
+          assert "not trained" in app.vision_compare("placeholder.png", "cat").lower()
+          assert "unavailable" in app.three_d_text("a small tree")[0].lower()
+          assert "not trained" in app.voice("placeholder.wav")[0].lower()
+          document_smoke = Path(tempfile.gettempdir()) / "aethrion-space-smoke.pdf"
+          document_smoke.write_bytes(b"%PDF-1.4\n%%EOF")
+          try:
+              assert "not trained" in app.analyse(str(document_smoke), "summarize").lower()
+          finally:
+              document_smoke.unlink(missing_ok=True)
+          app.SPACE_AUTH_ENABLED = False
+          assert app.REMOTE_PROVIDERS_ENABLED is False, "The production Space must remain native-only"
+
+          with tempfile.TemporaryDirectory() as temp:
+              try:
+                  app.make_doc("AETHRION smoke test", "first paragraph\n\nsecond paragraph", "docx")
+              except gr.Error:
+                  pass
+              else:
+                  raise AssertionError("Document creation must fail closed without authentication and released SAFE")
+              message, edited = app.edit_doc("unused.docx", "find", "replace", "docx")
+              assert edited is None and "authentication" in message.lower()
+              raw, filename, mime = create_document(
+                  "AETHRION smoke test", "first paragraph\n\nsecond paragraph", "docx"
+              )
+              source_path = Path(temp) / filename
+              source_path.write_bytes(raw)
+              extracted = app.extract_doc(str(source_path))
+              assert "authentication" in extracted.lower(), "Raw document extraction must not bypass Space authentication"
+
+          print("SPACE_RUNTIME_SMOKE_TEST_OK")
+          PY
+      - name: Launch Space and verify live Gradio endpoints
+        working-directory: ${{ runner.temp }}/aethrion-space
+        env:
+          PYTHONPATH: .
+          PORT: "7860"
+        run: |
+          set -euo pipefail
+          python app.py > /tmp/aethrion-space.log 2>&1 &
+          app_pid=$!
+          cleanup() {
+            kill "$app_pid" 2>/dev/null || true
+            wait "$app_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          for endpoint in / /config /gradio_api/info; do
+            ready=0
+            for attempt in $(seq 1 10); do
+              if ! kill -0 "$app_pid" 2>/dev/null; then
+                cat /tmp/aethrion-space.log
+                echo "Space app process exited while waiting for $endpoint."
+                exit 1
+              fi
+              code=$(curl --connect-timeout 2 --max-time 4 --silent --show-error -o /tmp/aethrion-response.json -w "%{http_code}" "http://127.0.0.1:7860$endpoint" || true)
+              if [ "$code" = "200" ]; then
+                ready=1
+                case "$endpoint" in
+                  /) cp /tmp/aethrion-response.json /tmp/aethrion-root.html ;;
+                  /config) cp /tmp/aethrion-response.json /tmp/aethrion-config.json ;;
+                  /gradio_api/info) cp /tmp/aethrion-response.json /tmp/aethrion-info.json ;;
+                esac
+                break
+              fi
+              sleep 2
+            done
+            if [ "$ready" -ne 1 ]; then
+              echo "Endpoint $endpoint returned HTTP $code."
+              echo "Response body:"
+              cat /tmp/aethrion-response.json 2>/dev/null || true
+              echo "Application log:"
+              cat /tmp/aethrion-space.log
+              exit 1
+            fi
+          done
+          python - <<'PY'
+          import json
+          with open("/tmp/aethrion-config.json", encoding="utf-8") as handle:
+              config = json.load(handle)
+          with open("/tmp/aethrion-info.json", encoding="utf-8") as handle:
+              info = json.load(handle)
+          assert len(config.get("components", [])) >= 20, "Live config is missing UI components"
+          assert isinstance(info, dict), "Live /gradio_api/info response is not a JSON object"
+          print(f"LIVE_CONFIG_COMPONENTS={len(config['components'])}")
+          print("LIVE_INFO_ENDPOINT=PASS")
+          PY
+          echo "SPACE_LIVE_SERVER_TEST_OK"
+      - name: Capture Space failure diagnostics
+        if: failure()
+        run: |
+          set +e
+          {
+            echo "=== Python ==="
+            python --version
+            echo "=== dependency consistency ==="
+            python -m pip check
+            echo "=== Gradio import ==="
+            python -c "import gradio, spaces; print('gradio', gradio.__version__); print('spaces import OK')"
+            echo "=== staged Space application log ==="
+            if [ -f /tmp/aethrion-space.log ]; then cat /tmp/aethrion-space.log; else echo "No application log was created."; fi
+            echo "=== last endpoint response ==="
+            if [ -f /tmp/aethrion-response.json ]; then cat /tmp/aethrion-response.json; else echo "No endpoint response was captured."; fi
+          } > space-diagnostics.log 2>&1
+          cat space-diagnostics.log
+      - name: Upload Space failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aethrion-space-failure-diagnostics
+          path: space-diagnostics.log
+          if-no-files-found: warn
