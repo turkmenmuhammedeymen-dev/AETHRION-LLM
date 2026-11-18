@@ -217,7 +217,7 @@ class CorpusPreparationTests(unittest.TestCase):
             # A valid report signature cannot authorize a changed source manifest.
             entries[0]["license"] = "Changed after review"
             manifest.write_text(json.dumps({"sources": entries}), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "source manifest"):
+            with self.assertRaisesRegex(ValueError, "not bound to the current dataset"):
                 validate_training_approval(
                     dataset_manifest, manifest, root, corpus, report_path
                 )
