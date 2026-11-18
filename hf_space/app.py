@@ -90,7 +90,7 @@ def _gpu_local_chat(prompt, capability):
     output = result.output
     text = output.get("text", str(output)) if isinstance(output, dict) else str(output)
     if result.delegated:
-        return f"[AETHRION-{result.capability.value.upper()}]\\n{text}"
+        return f"[AETHRION-{result.capability.value.upper()}]\n{text}"
     return text
 
 
