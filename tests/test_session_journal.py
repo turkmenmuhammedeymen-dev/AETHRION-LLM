@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from aethrion.session_journal import append_session_event, audit_session_journal
+from aethrion.session_journal import append_session_event, audit_session_journal, audit_session_artifacts
 
 
 class SessionJournalIntegrityTests(unittest.TestCase):
@@ -67,6 +67,34 @@ class SessionJournalIntegrityTests(unittest.TestCase):
                 append_session_event(path, {"event": "model_finished", "session_id": "s-1",
                                             "attempt_id": "a-1", "model_id": "code",
                                             "status": "training_completed_not_released"})
+
+    def test_snapshot_must_match_verified_journal_head_before_recovery(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            journal = root / "session-1.jsonl"
+            append_session_event(journal, {"event": "session_started", "session_id": "session-1"})
+            audit = audit_session_journal(journal, "session-1")
+            snapshot = {
+                "session_id": "session-1", "status": "interrupted",
+                "journal_event_count": audit["event_count"],
+                "journal_last_event_sha256": audit["last_event_sha256"],
+            }
+            (root / "session-1.json").write_text(json.dumps(snapshot), encoding="utf-8")
+            self.assertTrue(audit_session_artifacts(root, "session-1")["valid"])
+            snapshot["journal_last_event_sha256"] = "f" * 64
+            (root / "session-1.json").write_text(json.dumps(snapshot), encoding="utf-8")
+            result = audit_session_artifacts(root, "session-1")
+            self.assertFalse(result["valid"])
+            self.assertEqual(result["reason"], "snapshot_journal_hash_mismatch")
+
+    def test_legacy_unhashed_journal_is_not_claimed_verified(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "legacy.jsonl"
+            path.write_text(json.dumps({"event": "session_started", "session_id": "old"}) + "\\n",
+                            encoding="utf-8")
+            result = audit_session_journal(path, "old")
+            self.assertFalse(result["valid"])
+            self.assertEqual(result["reason"], "hash_chain_mismatch")
 
 
 if __name__ == "__main__":
