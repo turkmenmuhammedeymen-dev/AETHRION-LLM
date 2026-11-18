@@ -360,6 +360,8 @@ def _training_outcome(
         # A crash may damage the latest generation while preserving .previous.
         # Bind the report to the exact generation hash it names.
         candidates = [checkpoint_path, Path(str(checkpoint_path) + ".previous")]
+        if not any(candidate.is_file() for candidate in candidates):
+            return "training_checkpoint_missing_not_released"
         matching = [candidate for candidate in candidates if candidate.is_file()
                     and hmac.compare_digest(expected_hash.lower(), _file_sha256(candidate))]
         if not matching:
