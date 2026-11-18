@@ -52,7 +52,10 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
         )
         arrays = {
             "sample_id": np.asarray([f"{model_id}-{i}" for i in range(n)]),
-            "group_id": np.asarray([f"{model_id}-group-{i}" for i in range(n)]),
+            "group_id": np.asarray([
+                hashlib.sha256(f"{model_id}-group-{i}".encode()).hexdigest()
+                for i in range(n)
+            ]),
             "split": np.asarray(splits),
         }
         ids = rng.integers(1, 255, size=(n, 8), dtype=np.int64)
