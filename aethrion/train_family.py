@@ -308,7 +308,19 @@ def run_family(
             "updated_at_utc": datetime.now(timezone.utc).isoformat(),
             "execute_requested": True,
             "model_count": len(model_ids),
-            "completed_count": sum(row.get("status") not in {"running", "blocked"} for row in rows),
+            "completed_count": sum(
+                row.get("status") in {
+                    "training_completed_not_released",
+                    "instruction_tuning_completed_not_released",
+                    "training_failed_not_released",
+                    "training_interrupted_not_released",
+                    "trainer_exited_without_verified_report",
+                    "training_report_invalid_not_released",
+                    "training_progress_invalid_not_released",
+                    "trainer_report_unrecognized_not_released",
+                }
+                for row in rows
+            ),
             "blocked_count": sum(row.get("status") == "blocked" for row in rows),
             "models": rows,
             "released_count": 0,
@@ -336,7 +348,7 @@ def run_family(
                     rows.append({**plan, "status": "ready_not_started"})
                     continue
 
-                rows.append({**plan, "status": "running"})
+                rows.append({**plan, "status": "running", "process_started": False})
                 persist("running", model_id)
                 _append_session_event(events_path, {
                     "event": "model_started", "session_id": session_id,
@@ -345,6 +357,7 @@ def run_family(
                 })
                 try:
                     _ACTIVE_CHILD = subprocess.Popen(command, cwd=repo)
+                    rows[-1]["process_started"] = True
                     returncode = int(_ACTIVE_CHILD.wait())
                 except KeyboardInterrupt:
                     _STOP_REQUESTED = True
@@ -374,11 +387,16 @@ def run_family(
                 if _STOP_REQUESTED:
                     break
             except Exception as exc:
-                row = {
-                    "model_id": model_id, "ready": False, "status": "blocked",
-                    "reason": f"{type(exc).__name__}: {exc}",
-                }
-                rows.append(row)
+                if rows and rows[-1].get("model_id") == model_id and rows[-1].get("status") == "running":
+                    row = rows[-1]
+                    row["status"] = "blocked"
+                    row["reason"] = f"{type(exc).__name__}: {exc}"
+                else:
+                    row = {
+                        "model_id": model_id, "ready": False, "status": "blocked",
+                        "reason": f"{type(exc).__name__}: {exc}",
+                    }
+                    rows.append(row)
                 if execute:
                     _append_session_event(events_path, {
                         "event": "model_blocked", "session_id": session_id,
@@ -398,13 +416,7 @@ def run_family(
             "ready_count": sum(row.get("ready") is True for row in rows),
             "blocked_count": sum(row.get("status") == "blocked" for row in rows),
             "training_started": bool(execute and any(
-                row.get("status") in {
-                    "running", "training_completed_not_released", "training_failed_not_released",
-                    "training_interrupted_not_released", "trainer_exited_without_verified_report",
-                    "training_report_invalid_not_released", "training_progress_invalid_not_released",
-                    "trainer_report_unrecognized_not_released",
-                    "instruction_tuning_completed_not_released",
-                } for row in rows
+                row.get("process_started") is True for row in rows
             )),
             "released_count": 0,
             "execute_requested": bool(execute),
