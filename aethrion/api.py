@@ -254,10 +254,9 @@ def generate_image(request:dict[str,Any]):
     prompt=request.get("prompt")
     if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>4000:
         raise HTTPException(status_code=400,detail="prompt must contain 1–4000 characters.")
-    try:
-        steps=int(request.get("inference_steps",30))
-    except (TypeError,ValueError) as exc:
-        raise HTTPException(status_code=400,detail="inference_steps must be an integer.") from exc
+    steps=request.get("inference_steps",30)
+    if isinstance(steps,bool) or not isinstance(steps,int):
+        raise HTTPException(status_code=400,detail="inference_steps must be an integer.")
     if not 2 <= steps <= 100:
         raise HTTPException(status_code=400,detail="inference_steps must be between 2 and 100.")
     _require_safety_allow_http(runtime,prompt)
@@ -272,6 +271,8 @@ def generate_image(request:dict[str,Any]):
                                  "Cache-Control":"no-store"})
     except VisualSafetyError as exc:
         raise HTTPException(status_code=503,detail="AETHRION visual safety verifier blocked or could not approve this image.") from exc
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=422,detail=f"Native image generation failed: {type(exc).__name__}") from exc
     finally:
@@ -294,7 +295,9 @@ def generate_3d(request:dict[str,Any]):
     _require_safety_allow_http(runtime, prompt)
     path=None
     try:
-        steps=int(request.get("inference_steps",50))
+        steps=request.get("inference_steps",50)
+        if isinstance(steps,bool) or not isinstance(steps,int):
+            raise HTTPException(status_code=400,detail="inference_steps must be an integer.")
         if not 2 <= steps <= 100:
             raise HTTPException(status_code=400,detail="inference_steps must be between 2 and 100.")
         path=runtime.generate_point_cloud(prompt,inference_steps=steps)
