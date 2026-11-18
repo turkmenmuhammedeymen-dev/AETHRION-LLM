@@ -63,6 +63,7 @@ def load_sources_manifest(path: Path, root: Path) -> list[dict]:
     root = root.resolve()
     approved = []
     seen = set()
+    seen_source_ids = set()
     for entry in entries:
         if not isinstance(entry, dict):
             raise ValueError("Each source entry must be an object.")
@@ -70,6 +71,17 @@ def load_sources_manifest(path: Path, root: Path) -> list[dict]:
         missing = [key for key in required if not entry.get(key)]
         if missing:
             raise ValueError(f"Source entry missing: {', '.join(missing)}")
+        source_id = entry["source_id"]
+        if not isinstance(source_id, str) or not source_id.strip():
+            raise ValueError("Every source_id must be a non-empty string.")
+        if source_id in seen_source_ids:
+            raise ValueError(f"Duplicate source_id in source manifest: {source_id}")
+        seen_source_ids.add(source_id)
+        relative_path = entry["path"]
+        if not isinstance(relative_path, str) or not relative_path.strip():
+            raise ValueError(f"Source path must be a non-empty relative string: {source_id}")
+        if Path(relative_path).is_absolute() or "\\\\" in relative_path or "://" in relative_path:
+            raise ValueError(f"Source path must be a relative local path: {source_id}")
         if entry["allow_training"] is not True:
             raise ValueError(f"Source is not approved for training: {entry['source_id']}")
         if not isinstance(entry["license"], str) or entry["license"].strip().upper() in {
