@@ -49,8 +49,8 @@ def verify_checkpoint(path: str | Path) -> str:
 
 def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
     """Write a checkpoint atomically; retain one verified previous generation."""
-    if not isinstance(payload, dict) or payload.get("format_version") != 3:
-        raise ValueError("Checkpoint payload must use format_version=3.")
+    if not isinstance(payload, dict) or payload.get("format_version") != 4:
+        raise ValueError("Checkpoint payload must use format_version=4.")
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(str(target) + ".tmp")
@@ -117,11 +117,11 @@ def load_checkpoint(
         raise ValueError(
             "Checkpoint could not be safely deserialized; unsafe pickle objects are not accepted."
         ) from exc
-    if not isinstance(state, dict) or state.get("format_version") != 3:
+    if not isinstance(state, dict) or state.get("format_version") != 4:
         raise ValueError("Unsupported or invalid AETHRION checkpoint format.")
     required = {
         "step", "model", "optimizer", "scaler", "model_config",
-        "data_sha256", "tokenizer_sha256", "rng_state",
+        "data_sha256", "tokenizer_sha256", "rng_state", "training_config",
     }
     missing = sorted(required - set(state))
     if missing:
