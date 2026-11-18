@@ -141,6 +141,16 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
             continue
         if runtime.registry.status(capability.value) != "ready":
             continue
+        if capability == Capability.TTS and (
+            runtime.registry.status("vocoder") != "ready"
+            or runtime.registry.status(Capability.ASR.value) != "ready"
+        ):
+            continue
+        if capability == Capability.RESEARCH:
+            try:
+                runtime.validate_research_index()
+            except NativeModelError:
+                continue
         # No capability except the SAFE classifier is exposed until SAFE itself
         # has a verified local release.
         if capability != Capability.SAFETY and not safety_ready:
@@ -153,6 +163,19 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
                 if isinstance(document_path, str) and document_path:
                     _require_safety_allow_chunks(runtime, extract_document_text(document_path))
             result = runtime.handle(selected, request)
+            if selected == Capability.TTS:
+                audio_path = result.get("audio_path") if isinstance(result, dict) else None
+                try:
+                    if not isinstance(audio_path, str) or not audio_path:
+                        raise CapabilityUnavailable("TTS returned no verifiable audio file.")
+                    spoken_text = runtime.transcribe_wav(audio_path)
+                    if not isinstance(spoken_text, str) or not spoken_text.strip():
+                        raise CapabilityUnavailable("Generated speech could not be transcribed for safety review.")
+                    _require_safety_allow_chunks(runtime, spoken_text)
+                except Exception:
+                    if isinstance(audio_path, str):
+                        Path(audio_path).unlink(missing_ok=True)
+                    raise
             if selected != Capability.SAFETY.value:
                 output_text = _text_for_safety(result)
                 if output_text:
@@ -298,7 +321,8 @@ def audio_speech(request:dict[str,Any]):
     _require_safety_allow_chunks_http(runtime, text)
     path=None
     try:
-        path=runtime.synthesize_wav(text)
+        result=router.dispatch(Capability.TTS.value, CapabilityRequest(text, {}))
+        path=Path(result["audio_path"])
         return Response(content=path.read_bytes(),media_type="audio/wav",
                         headers={"Cache-Control":"no-store"})
     except Exception as exc:
