@@ -115,6 +115,7 @@ class SyntheticFamilyFixtureTests(unittest.TestCase):
                         self.assertEqual(arrays["images"].shape[1:], (3, 64, 64))
                     else:
                         self.assertEqual(arrays["points"].shape[1:], (512, 3))
+                        self.assertEqual(arrays["points"].dtype, np.float32)
 
             for model in ("asr", "tts", "vocoder"):
                 result = prepare_audio_dataset(
