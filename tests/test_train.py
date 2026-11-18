@@ -402,8 +402,6 @@ class TrainingUtilityTests(unittest.TestCase):
             self.assertEqual(recovered["step"], 0)
             self.assertTrue(any("safely loaded" in str(item.message) for item in caught))
 
-if __name__ == "__main__":
-    unittest.main()
 
 
     def test_first_checkpoint_save_split_write_fails_closed_without_previous_generation(self):
@@ -454,3 +452,7 @@ if __name__ == "__main__":
             self.assertTrue(sidecar_temporary.is_file())
             self.assertFalse(checkpoint.exists())
             self.assertFalse(Path(str(checkpoint) + ".previous").exists())
+
+
+if __name__ == "__main__":
+    unittest.main()
