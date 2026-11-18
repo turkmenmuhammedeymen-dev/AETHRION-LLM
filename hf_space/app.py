@@ -297,7 +297,24 @@ def make_doc(title,content,fmt):
         raise gr.Error("Document creation failed: "+type(exc).__name__) from exc
 
 def extract_doc(path):
-    return extract_document_text(path) if path else "Upload a document."
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    if not path:
+        return "Upload a document."
+    runtime=providers.get("runtime")
+    if runtime is None:
+        return "Document extraction is unavailable until the local SAFE model is released."
+    source=Path(path)
+    if not source.is_file() or source.is_symlink() or source.stat().st_size>8*1024*1024:
+        return "Document upload must be a regular file no larger than 8 MiB."
+    try:
+        text=extract_document_text(source)
+        _require_safety_allow_chunks_http(runtime,text)
+        return text
+    except HTTPException as exc:
+        return "Document extraction blocked by AETHRION-SAFE: "+str(exc.detail)
+    except Exception as exc:
+        return "Document extraction failed: "+type(exc).__name__
 
 def edit_doc(path,find_text,replacement,fmt):
     if not SPACE_AUTH_ENABLED:
