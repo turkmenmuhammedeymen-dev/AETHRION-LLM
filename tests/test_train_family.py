@@ -68,10 +68,24 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
     def test_output_directory_must_be_explicit_and_non_root(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder).resolve()
-            for invalid in ("", ".", "..", "../outside", str(root / "absolute")):
+            for invalid in ("", ".", "..", "../outside", str(root / "absolute"),
+                            r"artifacts\\models\\code", "C:/outside", "artifacts/./code", "artifacts//code"):
                 with self.subTest(invalid=invalid):
                     with self.assertRaises(FamilyTrainingError):
                         _resolve_output_dir(root, invalid)
+
+    def test_output_directory_rejects_windows_and_ambiguous_relative_paths(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            for invalid in (r"artifacts\\models\\code", "C:/outside", "artifacts/./code", "artifacts//code"):
+                with self.subTest(invalid=invalid):
+                    with self.assertRaises(FamilyTrainingError):
+                        _resolve_output_dir(root, invalid)
+
+    def test_empty_model_selection_does_not_fall_back_to_all_models(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with self.assertRaisesRegex(FamilyTrainingError, "At least one model"):
+                run_family(folder, selected=[])
 
     def test_output_directory_rejects_symlink_escape(self):
         with tempfile.TemporaryDirectory() as folder, tempfile.TemporaryDirectory() as outside:
