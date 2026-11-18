@@ -189,8 +189,30 @@ class NativeModelRuntime:
     ) -> dict[str, Any]:
         if capability not in {"chat", "code"}:
             raise ValueError("Text generation is available only for BASE or CODE.")
+        if not isinstance(prompt, str) or not prompt.strip():
+            raise ValueError("Input text must not be empty.")
+        if isinstance(max_new_tokens, bool) or not isinstance(max_new_tokens, int):
+            raise ValueError("max_new_tokens must be an integer.")
         if not 1 <= max_new_tokens <= 1024:
             raise ValueError("max_new_tokens must be between 1 and 1024.")
+        if (
+            isinstance(temperature, bool)
+            or not isinstance(temperature, (int, float))
+            or not np.isfinite(float(temperature))
+            or float(temperature) <= 0
+        ):
+            raise ValueError("temperature must be a finite number greater than zero.")
+        if top_k is not None and (
+            isinstance(top_k, bool) or not isinstance(top_k, int) or top_k < 1
+        ):
+            raise ValueError("top_k must be None or a positive integer.")
+        if (
+            isinstance(top_p, bool)
+            or not isinstance(top_p, (int, float))
+            or not np.isfinite(float(top_p))
+            or not 0.0 < float(top_p) <= 1.0
+        ):
+            raise ValueError("top_p must be a finite number in (0, 1].")
         model = self.model(capability)
         tokenizer = self.tokenizer(capability)
         context = self._text_context(tokenizer, model, prompt, self.device)
