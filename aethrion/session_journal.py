@@ -62,6 +62,18 @@ def audit_session_journal(path: str | Path, expected_session_id: str | None = No
                             "last_event_sha256": previous, "attempts": attempts,
                             "recovery": "manual_review_required"}
                 kind = event.get("event")
+                if event_count == 0 and kind != "session_started":
+                    return {"valid": False, "reason": "session_start_event_missing",
+                            "event_count": event_count, "last_event_sha256": previous,
+                            "attempts": attempts, "recovery": "manual_review_required"}
+                if event_count > 0 and kind == "session_started":
+                    return {"valid": False, "reason": "duplicate_session_start",
+                            "event_count": event_count, "last_event_sha256": previous,
+                            "attempts": attempts, "recovery": "manual_review_required"}
+                if last_event in {"session_interrupted", "session_completed"}:
+                    return {"valid": False, "reason": "event_after_terminal_session",
+                            "event_count": event_count, "last_event_sha256": previous,
+                            "attempts": attempts, "recovery": "manual_review_required"}
                 attempt_id = event.get("attempt_id")
                 if kind == "model_attempt_started":
                     if not isinstance(attempt_id, str) or not attempt_id or attempt_id in attempts:
