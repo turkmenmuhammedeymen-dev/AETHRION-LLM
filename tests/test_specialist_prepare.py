@@ -23,7 +23,7 @@ class SpecialistPreparationTests(unittest.TestCase):
             self._write_jsonl(source, rows)
             result = prepare_text_dataset(
                 source, model_id="code", output_root=root / "prepared",
-                license_name="Unit test only", permitted_use="CI training fixture only",
+                license_name="Unit test only", permitted_use="Unit-test training fixture only",
                 evidence_uri="unit-test://source", source_uri="unit-test://dataset", max_length=32,
             )
             self.assertTrue(Path(result["dataset"]).is_file())
