@@ -156,6 +156,55 @@ class NativeModelRuntimeTests(unittest.TestCase):
                 runtime.generate_text("chat", "   ")
             self.assertEqual(runtime._models, {})
 
+    def test_handle_does_not_coerce_invalid_text_sampling_options(self):
+        from types import SimpleNamespace
+
+        with tempfile.TemporaryDirectory() as directory:
+            runtime = self._untrained_runtime(Path(directory))
+            invalid_options = [
+                {"max_new_tokens": 2.5},
+                {"max_new_tokens": "2"},
+                {"temperature": True},
+                {"top_p": "0.9"},
+            ]
+            for options in invalid_options:
+                with self.subTest(options=options):
+                    request = SimpleNamespace(prompt="prompt", options=options)
+                    with self.assertRaises(ValueError):
+                        runtime.handle("code", request)
+            self.assertEqual(runtime._models, {})
+
+    def test_handle_rejects_invalid_inference_steps_before_loading(self):
+        from types import SimpleNamespace
+
+        with tempfile.TemporaryDirectory() as directory:
+            runtime = self._untrained_runtime(Path(directory))
+            for steps in (True, 2.5, "10", 1, 101):
+                with self.subTest(steps=steps):
+                    request = SimpleNamespace(prompt="prompt", options={"inference_steps": steps})
+                    with self.assertRaises(ValueError):
+                        runtime.handle("image", request)
+            self.assertEqual(runtime._models, {})
+
+    def test_handle_rejects_non_object_options(self):
+        from types import SimpleNamespace
+
+        with tempfile.TemporaryDirectory() as directory:
+            runtime = self._untrained_runtime(Path(directory))
+            request = SimpleNamespace(prompt="prompt", options=["unexpected"])
+            with self.assertRaises(ValueError):
+                runtime.handle("code", request)
+            self.assertEqual(runtime._models, {})
+
+    def test_research_top_k_rejects_bool_and_non_integer_before_loading(self):
+        with tempfile.TemporaryDirectory() as directory:
+            runtime = self._untrained_runtime(Path(directory))
+            for top_k in (True, 1.5, "5", 0, 21):
+                with self.subTest(top_k=top_k):
+                    with self.assertRaises(ValueError):
+                        runtime.search_research("query", top_k=top_k)
+            self.assertEqual(runtime._models, {})
+
     def test_untrained_model_is_not_loaded_or_substituted(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
