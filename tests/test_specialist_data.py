@@ -351,6 +351,30 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                     with self.assertRaisesRegex(SpecialistDataError, "must explicitly allow training"):
                         validate_specialist_dataset(manifest)
 
+    def test_specialist_sources_reject_test_only_license_labels(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            payload["sources"][0]["license"] = "Synthetic unit-test fixture"
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "test-only"):
+                validate_specialist_dataset(manifest)
+
+    def test_specialist_sources_require_https_rights_evidence_without_credentials(self):
+        for evidence_uri in (
+            "unit-test://evidence",
+            "http://example.invalid/license",
+            "https://user:password@example.invalid/license",
+        ):
+            with self.subTest(evidence_uri=evidence_uri):
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    manifest, payload = self._fixture(root, approved=True)
+                    payload["sources"][0]["evidence_uri"] = evidence_uri
+                    manifest.write_text(json.dumps(payload), encoding="utf-8")
+                    with self.assertRaisesRegex(SpecialistDataError, "evidence must be an HTTPS URL"):
+                        validate_specialist_dataset(manifest)
+
     def test_specialist_sources_reject_remote_third_party_source_uris(self):
         for source_uri in (
             "https://example.invalid/external-dataset",
