@@ -278,13 +278,17 @@ def _training_outcome(
 
     checkpoint_path = checkpoint_path or (output_dir / "checkpoint_last.pt")
     try:
-        if not checkpoint_path.is_file():
-            return "training_checkpoint_missing_not_released"
         expected_hash = report.get("checkpoint_sha256")
         if not isinstance(expected_hash, str) or len(expected_hash) != 64:
             return "training_report_checkpoint_hash_invalid_not_released"
-        if not hmac.compare_digest(expected_hash.lower(), _file_sha256(checkpoint_path)):
+        # A crash may damage the latest generation while preserving .previous.
+        # Bind the report to the exact generation hash it names.
+        candidates = [checkpoint_path, Path(str(checkpoint_path) + ".previous")]
+        matching = [candidate for candidate in candidates if candidate.is_file()
+                    and hmac.compare_digest(expected_hash.lower(), _file_sha256(candidate))]
+        if not matching:
             return "training_checkpoint_hash_mismatch_not_released"
+        checkpoint_path = matching[0]
     except OSError:
         return "training_checkpoint_unreadable_not_released"
 
@@ -317,8 +321,8 @@ def _training_outcome(
 
     try:
         if model_id == "chat":
-            from aethrion.checkpoint import load_checkpoint
-            checkpoint_state = load_checkpoint(checkpoint_path, map_location="cpu")
+            from aethrion.checkpoint import _load_verified_checkpoint
+            checkpoint_state = _load_verified_checkpoint(checkpoint_path, map_location="cpu")
             checkpoint_step = checkpoint_state.get("step")
             if (
                 type(report.get("checkpoint_generation")) is not int
