@@ -140,6 +140,8 @@ def chat(message, history):
         return "AETHRION's own trained checkpoint/tokenizer is not available. No third-party model is silently substituted."
 @spaces.GPU(duration=60)
 def code(prompt):
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
     try:
         r=dispatch(Capability.CODE,prompt[:10000],{"max_tokens":4096,"temperature":0.1})
         return r.get("text",str(r)) if isinstance(r,dict) else str(r)
