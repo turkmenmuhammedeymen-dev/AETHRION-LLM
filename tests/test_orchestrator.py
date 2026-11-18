@@ -5,7 +5,7 @@ from aethrion.orchestrator import (
     AssistantOrchestrator,
     classify_intent,
 )
-from aethrion.routing import Capability, CapabilityRouter
+from aethrion.routing import Capability, CapabilityRouter, CapabilityUnavailable
 
 
 class AssistantOrchestratorTests(unittest.TestCase):
@@ -80,7 +80,7 @@ class AssistantOrchestratorTests(unittest.TestCase):
     def test_unavailable_specialist_does_not_silently_fall_back_to_chat(self):
         router = CapabilityRouter()
         router.register(Capability.CHAT, "chat", lambda request: "chat")
-        with self.assertRaises(Exception):
+        with self.assertRaises(CapabilityUnavailable):
             AssistantOrchestrator(router).dispatch("Write code for me")
 
 
