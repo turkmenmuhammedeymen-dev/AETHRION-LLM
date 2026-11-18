@@ -1,6 +1,6 @@
 # AETHRION dataset governance and human review
 
-Training approval is a separate human decision. Dataset preparation never approves a source and must leave its training flags closed.
+Training approval is a separate human decision. BASE and specialist data-preparation commands may validate, normalize, hash, and split owner-supplied records while approvals are pending. This preparation does not authorize training; all training flags remain closed until the independent approval gate passes.
 
 ## Create a review template
 
@@ -31,4 +31,4 @@ Use roles rather than legal names, account IDs, addresses, or other personal ide
 
 These fields are auditable attestations, not cryptographic proof that a person owns content or that consent was genuinely obtained. A responsible human must inspect the underlying source, rights evidence, privacy impact, quality, and any required consent before changing the template to approved. Keep the review evidence under controlled access. The validator rejects missing, pending, mismatched, or incomplete attestations; it does not manufacture approval.
 
-Even after governance passes, the existing source hashes, dataset integrity checks, group-disjoint train/validation/test splits, modality checks, training reports, evaluation benchmarks, safety gates, and release review remain required.
+Even after governance passes, the existing source hashes, dataset integrity checks, group-disjoint train/validation/test splits, modality checks, training reports, evaluation benchmarks, safety gates, and release review remain required. For BASE, run corpus preparation with the dataset and source manifests still marked pending; only the separate `validate_training_approval` step may authorize a training run.
