@@ -204,10 +204,10 @@ def capabilities():
 def dispatch(request:DispatchRequest):
     # File-bearing operations must use bounded upload endpoints. Never accept a
     # caller-controlled server filesystem path through arbitrary JSON options.
-    if request.capability in {"document", "vision", "asr"}:
+    if request.capability in {"document", "vision", "asr", "image", "3d", "tts"}:
         raise HTTPException(
             status_code=400,
-            detail="Use the dedicated file-upload endpoint for DOCUMENT, VISION and ASR.",
+            detail="Use the dedicated, bounded upload/output endpoint for this file-producing capability.",
         )
     try:
         result=router.dispatch(request.capability,CapabilityRequest(request.prompt,request.options))
