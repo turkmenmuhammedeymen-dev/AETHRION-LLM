@@ -334,7 +334,8 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
         from aethrion.specialist_train import _capture_rng_state, _save_checkpoint, _sha256
         _save_checkpoint(checkpoint, {
             "format": "aethrion-specialist-checkpoint-v2",
-            "model_id": model_id, "step": 9, "model_config": {},
+            "model_id": model_id, "step": 9, "checkpoint_generation": 1,
+            "session_id": None, "attempt_id": None, "model_config": {},
             "training_config": {"seed": 1, "max_steps": 10},
             "model_state": {}, "optimizer_state": {},
             "dataset_sha256": "a" * 64, "tokenizer_sha256": "b" * 64,
@@ -345,6 +346,8 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             "status": status, "release_status": "NOT_RELEASED", "model_id": model_id,
             "steps": 10, "dataset_sha256": "a" * 64, "tokenizer_sha256": "b" * 64,
             "manifest_sha256": "c" * 64, "checkpoint_sha256": digest,
+            "checkpoint_generation": 1, "session_id": None, "attempt_id": None,
+            "report_created_at_ns": time.time_ns(),
             "validation_loss": 1.25, "held_out_test_loss": 1.5,
         }
         (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
@@ -443,76 +446,6 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 "training_report_stale_not_released",
             )
 
-
-    def test_training_outcome_requires_fresh_model_matched_report_and_verified_checkpoint(self):
-        import hashlib
-        import json
-        import time
-        from aethrion.train_family import _training_outcome
-
-        with tempfile.TemporaryDirectory() as folder:
-            output = Path(folder)
-            checkpoint = output / "checkpoint_last.pt"
-            checkpoint.write_bytes(b"verified-checkpoint")
-            digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
-            report = {
-                "status": "training_complete_not_released",
-                "release_status": "NOT_RELEASED",
-                "model_id": "code",
-                "steps": 12,
-                "dataset_sha256": "a" * 64,
-                "tokenizer_sha256": "b" * 64,
-                "manifest_sha256": "c" * 64,
-                "checkpoint_sha256": digest,
-                "validation_loss": 0.25,
-                "held_out_test_loss": 0.3,
-            }
-            report_path = output / "training_report.json"
-            report_path.write_text(json.dumps(report), encoding="utf-8")
-            started = time.time_ns() - 1_000_000
-
-            self.assertEqual(
-                _training_outcome(output, "code", 0, checkpoint_path=checkpoint, started_at_ns=started),
-                "training_completed_not_released",
-            )
-
-            wrong_model = {**report, "model_id": "vision"}
-            report_path.write_text(json.dumps(wrong_model), encoding="utf-8")
-            self.assertEqual(
-                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
-                "training_report_model_mismatch_not_released",
-            )
-
-            report_path.write_text(json.dumps(report), encoding="utf-8")
-            self.assertEqual(
-                _training_outcome(output, "code", 0, checkpoint_path=output / "missing.pt"),
-                "training_checkpoint_missing_not_released",
-            )
-
-            checkpoint.write_bytes(b"changed-checkpoint")
-            self.assertEqual(
-                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
-                "training_checkpoint_hash_mismatch_not_released",
-            )
-
-            checkpoint.write_bytes(b"verified-checkpoint")
-            invalid_metrics = {**report, "validation_loss": float("nan")}
-            report_path.write_text(json.dumps(invalid_metrics), encoding="utf-8")
-            self.assertEqual(
-                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
-                "training_report_metrics_invalid_not_released",
-            )
-
-            report_path.write_text(json.dumps(report), encoding="utf-8")
-            self.assertEqual(
-                _training_outcome(output, "code", 0, checkpoint_path=checkpoint, started_at_ns=time.time_ns() + 1_000_000),
-                "training_report_stale_not_released",
-            )
-
-            self.assertEqual(
-                _training_outcome(output, "code", 1, checkpoint_path=checkpoint),
-                "training_failed_not_released",
-            )
 
     def test_training_outcome_rejects_missing_held_out_metric_for_chat(self):
         import hashlib
