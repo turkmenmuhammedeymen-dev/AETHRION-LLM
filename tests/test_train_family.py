@@ -80,6 +80,35 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             with self.assertRaisesRegex(FamilyTrainingError, "escapes"):
                 _resolve_output_dir(root, "artifacts")
 
+    def test_chat_input_paths_reject_absolute_and_parent_traversal(self):
+        from aethrion.train_family import _resolve_input_file
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            for invalid in ("", "../outside.txt", str(root / "outside.txt")):
+                with self.subTest(invalid=invalid):
+                    with self.assertRaises(FamilyTrainingError):
+                        _resolve_input_file(root, invalid, "data_path")
+
+    def test_chat_input_paths_reject_symlink_escape(self):
+        from aethrion.train_family import _resolve_input_file
+        with tempfile.TemporaryDirectory() as folder, tempfile.TemporaryDirectory() as outside:
+            root = Path(folder).resolve()
+            external = Path(outside) / "corpus.txt"
+            external.write_text("outside", encoding="utf-8")
+            (root / "linked.txt").symlink_to(external)
+            with self.assertRaisesRegex(FamilyTrainingError, "escapes"):
+                _resolve_input_file(root, "linked.txt", "data_path")
+
+    def test_chat_input_path_requires_existing_regular_file(self):
+        from aethrion.train_family import _resolve_input_file
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            with self.assertRaisesRegex(FamilyTrainingError, "regular file"):
+                _resolve_input_file(root, "missing.txt", "tokenizer_path")
+            valid = root / "inside.txt"
+            valid.write_text("local", encoding="utf-8")
+            self.assertEqual(_resolve_input_file(root, "inside.txt", "data_path"), valid)
+
     def test_valid_output_directory_is_resolved_inside_repo(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder).resolve()
