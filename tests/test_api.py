@@ -223,7 +223,7 @@ class SafeRuntimeGateTests(unittest.TestCase):
     def test_safe_chunk_gate_checks_every_segment(self):
         runtime = _FakeSafetyRuntime({"safety": "ready"})
         api._require_safety_allow_chunks(runtime, "x" * 1001, chunk_chars=400)
-        self.assertEqual(len(runtime.reviewed), 3)
+        self.assertEqual(len(runtime.reviewed), 4)
         self.assertEqual([len(item) for item in runtime.reviewed], [400, 400, 400, 185])
 
     def test_safe_chunk_gate_stops_on_first_non_allow_segment(self):
