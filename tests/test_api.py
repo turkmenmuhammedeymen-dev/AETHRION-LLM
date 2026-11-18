@@ -414,6 +414,42 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.assertFalse(Path(observed["temporary_path"]).exists())
         self.assertEqual(observed["prompt"], "Describe this image")
 
+    def test_assistant_upload_routes_audio_and_document_to_matching_specialists(self):
+        observed = {}
+        def asr_handler(request):
+            path = Path(request.options["audio_path"])
+            observed["audio"] = path.read_bytes()
+            observed["audio_cleaned_path"] = str(path)
+            return {"text": "recognized words"}
+        def document_handler(request):
+            path = Path(request.options["document_path"])
+            observed["document"] = path.read_bytes()
+            observed["document_cleaned_path"] = str(path)
+            return {"text": "document summary"}
+        self.router.register(Capability.ASR, "test-asr", asr_handler)
+        self.router.register(Capability.DOCUMENT, "test-document", document_handler)
+
+        audio_response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Transcribe this audio"},
+            files={"file": ("voice.wav", b"RIFF-test-audio", "audio/wav")},
+        )
+        document_response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Analyze this document"},
+            files={"file": ("notes.txt", b"document-body", "text/plain")},
+        )
+        self.assertEqual(audio_response.status_code, 200, audio_response.text)
+        self.assertEqual(audio_response.json()["capability"], "asr")
+        self.assertEqual(document_response.status_code, 200, document_response.text)
+        self.assertEqual(document_response.json()["capability"], "document")
+        self.assertEqual(observed["audio"], b"RIFF-test-audio")
+        self.assertEqual(observed["document"], b"document-body")
+        self.assertFalse(Path(observed["audio_cleaned_path"]).exists())
+        self.assertFalse(Path(observed["document_cleaned_path"]).exists())
+
     def test_assistant_upload_rejects_extension_capability_mismatch(self):
         response = self.client.post(
             "/assistant/upload",
