@@ -11,65 +11,107 @@ import torch
 from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.specialist_train import _build_model, _loss
 
-# Keep in sync with configs/specialists/*.json. These are architecture settings,
-# not data, checkpoints, pretrained weights, or production training parameters.
+
+_REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+_MANIFEST_PATH = _REPOSITORY_ROOT / "models" / "manifest.json"
+
+
+def _load_model_manifest() -> dict[str, Any]:
+    """Read the canonical model configs; never maintain a second config copy."""
+    payload = json.loads(_MANIFEST_PATH.read_text(encoding="utf-8"))
+    models = payload.get("models")
+    if not isinstance(models, dict):
+        raise ValueError("models/manifest.json must contain a models object.")
+    expected = {"chat", "code", "vision", "image", "asr", "tts", "vocoder",
+                "3d", "research", "document", "safety"}
+    if set(models) != expected:
+        raise ValueError(
+            "Native model manifest IDs differ from the required 11-model set: "
+            + ", ".join(sorted(set(models) ^ expected))
+        )
+    for model_id, entry in models.items():
+        if not isinstance(entry, dict) or not isinstance(entry.get("model_config"), dict):
+            raise ValueError(f"Missing model_config for native model {model_id}.")
+    return models
+
+
+# These values are loaded from the same manifest used by model release routing.
+MODEL_MANIFEST = _load_model_manifest()
+MODEL_IDS = tuple(MODEL_MANIFEST.keys())
 SPECIALIST_CONFIGS: dict[str, dict[str, Any]] = {
-    "code": {"vocab_size": 2048, "block_size": 512, "n_layer": 4, "n_head": 4, "n_embd": 128, "dropout": 0.1},
-    "vision": {"image_size": 224, "patch_size": 16, "vocab_size": 2048, "max_text_length": 128, "width": 128, "layers": 4, "heads": 4, "projection_dim": 256, "dropout": 0.1},
-    "image": {"vocab_size": 2048, "image_size": 64, "text_length": 128, "width": 64, "time_dim": 128, "diffusion_steps": 1000},
-    "asr": {"vocab_size": 2048, "n_mels": 80, "width": 128, "layers": 4, "heads": 4, "dropout": 0.1, "blank_id": 0},
-    "tts": {"vocab_size": 2048, "mel_bins": 80, "width": 128, "layers": 4, "heads": 4, "dropout": 0.1},
-    "vocoder": {"mel_bins": 80, "channels": 128, "hop_length": 256},
-    "3d": {"vocab_size": 2048, "width": 128, "points": 512, "layers": 4, "heads": 4, "diffusion_steps": 1000},
-    "research": {"vocab_size": 2048, "max_length": 512, "width": 128, "layers": 4, "heads": 4, "embedding_dim": 256},
-    "document": {"vocab_size": 4096, "layout_vocab_size": 32, "max_length": 512, "width": 128, "layers": 4, "heads": 4, "tag_classes": 32},
-    "safety": {"vocab_size": 4096, "max_length": 512, "width": 128, "layers": 4, "heads": 4, "reason_classes": 16, "decisions": 3},
+    model_id: entry["model_config"]
+    for model_id, entry in MODEL_MANIFEST.items()
+    if model_id != "chat"
 }
-MODEL_IDS = ("chat", *SPECIALIST_CONFIGS.keys())
 
 
 def _synthetic_batch(model_id: str, device: torch.device) -> dict[str, torch.Tensor]:
     """Create tiny, disposable tensors solely to exercise one model loss."""
-    def ids(shape, vocab=2048):
-        return torch.randint(0, vocab, shape, device=device, dtype=torch.long)
+    config = MODEL_MANIFEST[model_id]["model_config"]
+
+    def ids(shape, vocab=None):
+        size = int(vocab or config.get("vocab_size", 2048))
+        return torch.randint(0, size, shape, device=device, dtype=torch.long)
 
     if model_id == "code":
         return {"token_ids": ids((1, 16))}
     if model_id == "vision":
-        return {"images": torch.randn(1, 3, 224, 224, device=device), "token_ids": ids((1, 8))}
+        size = config["image_size"]
+        return {"images": torch.randn(1, 3, size, size, device=device), "token_ids": ids((1, 8))}
     if model_id == "image":
-        return {"images": torch.randn(1, 3, 64, 64, device=device), "token_ids": ids((1, 8))}
+        size = config["image_size"]
+        return {"images": torch.randn(1, 3, size, size, device=device), "token_ids": ids((1, 8))}
     if model_id == "asr":
-        return {"features": torch.randn(1, 16, 80, device=device), "input_lengths": torch.tensor([16], device=device),
-                "targets": torch.randint(1, 2048, (1, 2), device=device, dtype=torch.long), "target_lengths": torch.tensor([2], device=device)}
+        return {
+            "features": torch.randn(1, 16, config["n_mels"], device=device),
+            "input_lengths": torch.tensor([16], device=device),
+            "targets": torch.randint(1, config["vocab_size"], (1, 2), device=device, dtype=torch.long),
+            "target_lengths": torch.tensor([2], device=device),
+        }
     if model_id == "tts":
-        return {"token_ids": ids((1, 4)), "frame_to_token": torch.tensor([[0, 0, 1, 1, 2, 2, 3, 3]], device=device),
-                "target_mels": torch.randn(1, 8, 80, device=device), "durations": torch.tensor([[2, 2, 2, 2]], device=device),
-                "frame_mask": torch.ones(1, 8, dtype=torch.bool, device=device),
-                "token_mask": torch.ones(1, 4, dtype=torch.bool, device=device)}
+        return {
+            "token_ids": ids((1, 4)),
+            "frame_to_token": torch.tensor([[0, 0, 1, 1, 2, 2, 3, 3]], device=device),
+            "target_mels": torch.randn(1, 8, config["mel_bins"], device=device),
+            "durations": torch.tensor([[2, 2, 2, 2]], device=device),
+            "frame_mask": torch.ones(1, 8, dtype=torch.bool, device=device),
+            "token_mask": torch.ones(1, 4, dtype=torch.bool, device=device),
+        }
     if model_id == "vocoder":
-        return {"target_mels": torch.randn(1, 8, 80, device=device),
-                "target_waveforms": torch.randn(1, 8 * 256, device=device),
-                "waveform_mask": torch.ones(1, 8 * 256, dtype=torch.bool, device=device)}
+        frames = 8
+        samples = frames * config["hop_length"]
+        return {
+            "target_mels": torch.randn(1, frames, config["mel_bins"], device=device),
+            "target_waveforms": torch.randn(1, samples, device=device),
+            "waveform_mask": torch.ones(1, samples, dtype=torch.bool, device=device),
+        }
     if model_id == "3d":
-        return {"points": torch.randn(1, 512, 3, device=device), "token_ids": ids((1, 8))}
+        return {"points": torch.randn(1, config["points"], 3, device=device), "token_ids": ids((1, 8))}
     if model_id == "research":
         return {"query_ids": ids((1, 8)), "passage_ids": ids((1, 8))}
     if model_id == "document":
-        return {"token_ids": ids((1, 8), 4096), "boxes": torch.rand(1, 8, 4, device=device),
-                "layout_ids": ids((1, 8), 32), "tag_labels": ids((1, 8), 32)}
+        return {
+            "token_ids": ids((1, 8)),
+            "boxes": torch.rand(1, 8, 4, device=device),
+            "layout_ids": ids((1, 8), config["layout_vocab_size"]),
+            "tag_labels": ids((1, 8), config["tag_classes"]),
+        }
     if model_id == "safety":
-        return {"token_ids": ids((1, 8), 4096), "decision_labels": torch.tensor([1], device=device),
-                "reason_labels": torch.zeros(1, 16, device=device)}
+        return {
+            "token_ids": ids((1, 8)),
+            "decision_labels": torch.tensor([1], device=device),
+            "reason_labels": torch.zeros(1, config["reason_classes"], device=device),
+        }
     raise ValueError(f"Unknown model: {model_id}")
 
 
 def _build_preflight_model(model_id: str, device: torch.device) -> torch.nn.Module:
     """Construct each native architecture directly on the allocated test device."""
+    config = dict(MODEL_MANIFEST[model_id]["model_config"])
     if model_id == "chat":
-        model = AETHRIONLM(ModelConfig(vocab_size=2048, block_size=256, n_layer=4, n_head=4, n_embd=256, dropout=0.1))
+        model = AETHRIONLM(ModelConfig(**config))
     else:
-        model = _build_model(model_id, SPECIALIST_CONFIGS[model_id])
+        model = _build_model(model_id, config)
     return model.to(device)
 
 
@@ -86,12 +128,11 @@ def run_zero_gpu_preflight() -> dict[str, Any]:
         try:
             model = _build_preflight_model(model_id, device)
             if model_id == "chat":
-                token_ids = torch.randint(0, 2048, (1, 16), device=device)
-                targets = token_ids.clone()
-                _, loss = model(token_ids, targets)
+                vocab_size = int(MODEL_MANIFEST[model_id]["model_config"]["vocab_size"])
+                token_ids = torch.randint(0, vocab_size, (1, 16), device=device)
+                _, loss = model(token_ids, token_ids.clone())
             else:
-                batch = _synthetic_batch(model_id, device)
-                loss = _loss(model, model_id, batch)
+                loss = _loss(model, model_id, _synthetic_batch(model_id, device))
             if loss is None or loss.ndim != 0 or not torch.isfinite(loss).item():
                 raise RuntimeError("Model returned a missing, non-scalar, or non-finite loss.")
             loss.backward()
