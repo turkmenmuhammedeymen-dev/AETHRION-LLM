@@ -9,6 +9,8 @@ from typing import Any
 
 import numpy as np
 
+from aethrion.data_governance import GovernanceError, validate_governance_record
+
 FORMAT = "aethrion-specialist-dataset-v1"
 MODEL_MODALITIES = {
     "chat": "text",
@@ -204,6 +206,11 @@ def validate_specialist_dataset(
         payload["training_allowed"] is not True or payload["owner_approval"] is not True
     ):
         raise SpecialistDataError("Training blocked: specialist dataset and owner approvals are not true.")
+    if require_training_approval:
+        try:
+            validate_governance_record(payload.get("governance"), model_id=model_id)
+        except GovernanceError as exc:
+            raise SpecialistDataError(str(exc)) from exc
     if payload.get("privacy_reviewed") is not True:
         raise SpecialistDataError("Training blocked: privacy review is not approved.")
     if model_id in AUDIO_MODELS and payload.get("speaker_consent_reviewed") is not True:
