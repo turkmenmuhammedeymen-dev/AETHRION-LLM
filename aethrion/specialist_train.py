@@ -330,8 +330,11 @@ def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
                     _fsync_file(previous_checksum_tmp)
                     os.replace(previous_tmp, previous)
                     os.replace(previous_checksum_tmp, previous_checksum)
+                    # Persist the complete backup pair before replacing the live pair.
+                    _fsync_directory(path.parent)
         os.replace(tmp, path)
         os.replace(checksum_tmp, checksum_path)
+        # If a crash splits these two renames, the durable previous pair survives.
         _fsync_directory(path.parent)
         return digest
     finally:
