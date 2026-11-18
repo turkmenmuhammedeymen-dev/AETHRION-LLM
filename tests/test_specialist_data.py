@@ -118,14 +118,24 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                 validate_specialist_dataset(manifest)
 
     def test_negative_training_permission_blocks_training(self):
-        with tempfile.TemporaryDirectory() as directory:
-            manifest, payload = self._fixture(Path(directory), approved=True)
-            payload["sources"][0]["license"] = "CC0-1.0"
-            payload["sources"][0]["permitted_use"] = "Not for training; evaluation only"
-            payload["sources"][0]["evidence_uri"] = "https://example.invalid/license-fixture"
-            manifest.write_text(json.dumps(payload), encoding="utf-8")
-            with self.assertRaisesRegex(SpecialistDataError, "excludes model training"):
-                validate_specialist_dataset(manifest)
+        denied_terms = (
+            "Not for training; evaluation only",
+            "Training is not authorized",
+            "Not authorized to train machine-learning models",
+            "Model development is prohibited",
+            "Without permission for training",
+            "Testing only",
+        )
+        for permitted_use in denied_terms:
+            with self.subTest(permitted_use=permitted_use):
+                with tempfile.TemporaryDirectory() as directory:
+                    manifest, payload = self._fixture(Path(directory), approved=True)
+                    payload["sources"][0]["license"] = "CC0-1.0"
+                    payload["sources"][0]["permitted_use"] = permitted_use
+                    payload["sources"][0]["evidence_uri"] = "https://example.invalid/license-fixture"
+                    manifest.write_text(json.dumps(payload), encoding="utf-8")
+                    with self.assertRaisesRegex(SpecialistDataError, "excludes model training"):
+                        validate_specialist_dataset(manifest)
 
     def test_non_https_source_evidence_blocks_training(self):
         with tempfile.TemporaryDirectory() as directory:
