@@ -354,16 +354,17 @@ def validate_specialist_dataset(
                 "Training blocked: remote third-party source URIs are disabled; "
                 "specialist training requires first-party owner-authored local sources."
             )
-        evidence = urlsplit(source["evidence_uri"].strip())
-        if (
-            evidence.scheme != "https"
-            or not evidence.hostname
-            or evidence.username is not None
-            or evidence.password is not None
-        ):
-            raise SpecialistDataError(
-                "Training blocked: specialist source rights evidence must be an HTTPS URL without embedded credentials."
-            )
+        if require_training_approval:
+            evidence = urlsplit(source["evidence_uri"].strip())
+            if (
+                evidence.scheme != "https"
+                or not evidence.hostname
+                or evidence.username is not None
+                or evidence.password is not None
+            ):
+                raise SpecialistDataError(
+                    "Training blocked: specialist source rights evidence must be an HTTPS URL without embedded credentials."
+                )
         if source_id in seen_source_ids:
             raise SpecialistDataError(f"Duplicate specialist source_id: {source_id}")
         if source_path_value in seen_source_paths:
