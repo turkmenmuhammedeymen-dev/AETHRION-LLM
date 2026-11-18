@@ -15,6 +15,8 @@ MAX_FILE_BYTES=512*1024
 MAX_PROJECT_TEXT=180_000
 
 def _safe_name(name):
+    if not isinstance(name, str) or not name or "\\x00" in name:
+        raise WorkspaceError("Archive paths must be non-empty UTF-8 strings without NUL bytes.")
     path=PurePosixPath(name.replace("\\", "/"))
     if path.is_absolute() or not path.parts or any(p in {"",".",".."} for p in path.parts):
         raise WorkspaceError("Unsafe archive path.")
@@ -74,17 +76,28 @@ def read_project_zip(raw):
 def _validate(changes, originals):
     if not isinstance(changes,dict) or not changes or len(changes)>MAX_FILES:
         raise WorkspaceError("Agent returned an invalid files object.")
-    out={}
+    if not isinstance(originals, dict):
+        raise WorkspaceError("Original project inventory is invalid.")
+    out={}; total_bytes=0
     for raw_name, content in changes.items():
         name=_safe_name(raw_name)
+        if name in out:
+            raise WorkspaceError(f"Duplicate normalized project path is not accepted: {name}.")
         if name not in originals and len(out)+len(originals)>=MAX_FILES:
             raise WorkspaceError("Agent exceeded file-count limit.")
-        if not isinstance(content,str) or len(content.encode("utf-8"))>MAX_FILE_BYTES:
+        if not isinstance(content,str):
             raise WorkspaceError(f"Invalid or oversized file: {name}.")
-        if name.endswith(".json"):
+        encoded=content.encode("utf-8")
+        if len(encoded)>MAX_FILE_BYTES:
+            raise WorkspaceError(f"Invalid or oversized file: {name}.")
+        total_bytes += len(encoded)
+        if total_bytes > MAX_PROJECT_TEXT:
+            raise WorkspaceError("Updated project exceeds the total text budget.")
+        suffix=PurePosixPath(name).suffix.lower()
+        if suffix==".json":
             try: json.loads(content)
             except json.JSONDecodeError as exc: raise WorkspaceError(f"Invalid JSON: {name}.") from exc
-        if name.endswith(".py"):
+        if suffix==".py":
             try: ast.parse(content,filename=name)
             except SyntaxError as exc: raise WorkspaceError(f"Invalid Python syntax in {name}: {exc.msg}.") from exc
         out[name]=content
