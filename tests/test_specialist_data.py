@@ -60,9 +60,9 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                 "source_uri": "unit-test://synthetic-fixture",
                 "source_path": "source.txt",
                 "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-                "license": "CC0-1.0",
-                "permitted_use": "Unit-test training only; not for production use",
-                "evidence_uri": "https://example.invalid/license-fixture",
+                "license": "CC0-1.0" if approved else "SYNTHETIC_UNIT_TEST_FIXTURE",
+                "permitted_use": "Unit-test training only; not for production use" if approved else "Unit tests only; no production training",
+                "evidence_uri": "https://example.invalid/license-fixture" if approved else "unit-test://license-fixture",
                 "allow_training": approved,
                 "privacy_reviewed": approved,
             }],
@@ -95,6 +95,16 @@ class SpecialistDataApprovalTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             manifest, _ = self._fixture(Path(directory), approved=True)
             result = validate_specialist_dataset(manifest)
+            self.assertEqual(result["model_id"], "code")
+            self.assertEqual(result["sample_count"], 6)
+            self.assertEqual(result["split_counts"], {"train": 2, "validation": 2, "test": 2})
+
+    def test_synthetic_fixture_integrity_mode_does_not_require_training_approval(self):
+        with tempfile.TemporaryDirectory() as directory:
+            manifest, payload = self._fixture(Path(directory), approved=False)
+            self.assertFalse(payload["training_allowed"])
+            self.assertFalse(payload["privacy_reviewed"])
+            result = validate_specialist_dataset(manifest, require_training_approval=False)
             self.assertEqual(result["model_id"], "code")
             self.assertEqual(result["sample_count"], 6)
             self.assertEqual(result["split_counts"], {"train": 2, "validation": 2, "test": 2})
