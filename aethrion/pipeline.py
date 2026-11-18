@@ -21,7 +21,7 @@ from aethrion.data_governance import GovernanceError, validate_governance_record
 
 ROOT = Path(__file__).resolve().parents[1]
 DATASET_MANIFEST = ROOT / "data/processed/corpus_manifest.json"
-RAW_DIR = ROOT / "data/raw/cosmos"
+RAW_DIR = ROOT / "data/raw/owner_authored"
 SOURCE_MANIFEST = RAW_DIR / "sources.json"
 SOURCE_REVIEW = ROOT / "data/processed/privacy_review/source_review_template.csv"
 CORPUS = ROOT / "data/processed/corpus.txt"
@@ -74,7 +74,7 @@ def import_if_missing(enabled: bool, max_records: int) -> None:
     if enabled:
         raise RuntimeError(
             "External dataset import is disabled by the first-party-only data policy. "
-            "Create data/raw/cosmos/sources.json from owner-authored records and reviewed local assets."
+            "Create data/raw/owner_authored/sources.json from owner-authored records and reviewed local assets."
         )
     print("No owner-authored source manifest found. Add first-party records; external imports are disabled.")
 
