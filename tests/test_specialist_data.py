@@ -35,6 +35,21 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             "training_allowed": approved,
             "owner_approval": approved,
             "privacy_reviewed": approved,
+            "governance": {
+                "schema": "aethrion-human-review-v1",
+                "model_id": "code",
+                "approval_status": "approved",
+                "author_role": "unit-test author",
+                "authorship_attested": True,
+                "rights_holder_role": "unit-test rights holder",
+                "rights_attested": True,
+                "source_rights_reviewed": True,
+                "privacy_reviewed": True,
+                "quality_reviewed": True,
+                "reviewer_role": "unit-test reviewer",
+                "reviewed_at": "2026-01-01T00:00:00Z",
+                "evidence_uri": "unit-test://human-review",
+            },
             "dataset_path": "dataset.npz",
             "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
             "tokenizer_path": "tokenizer.json",
@@ -68,6 +83,24 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             self.assertEqual(result["model_id"], "code")
             self.assertEqual(result["sample_count"], 6)
             self.assertEqual(result["split_counts"], {"train": 2, "validation": 2, "test": 2})
+
+    def test_duplicate_specialist_source_ids_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            payload["sources"].append(dict(payload["sources"][0], source_path="source.txt"))
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "Duplicate specialist source_id"):
+                validate_specialist_dataset(manifest)
+
+    def test_duplicate_specialist_source_paths_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest, payload = self._fixture(root, approved=True)
+            payload["sources"].append(dict(payload["sources"][0], source_id="second-source"))
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(SpecialistDataError, "Duplicate specialist source_path"):
+                validate_specialist_dataset(manifest)
 
     def test_source_hash_mismatch_blocks_training(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -161,6 +194,22 @@ class SpecialistDataApprovalTests(unittest.TestCase):
             "training_allowed": True,
             "owner_approval": True,
             "privacy_reviewed": True,
+            "governance": {
+                "schema": "aethrion-human-review-v1",
+                "model_id": "safety",
+                "approval_status": "approved",
+                "author_role": "unit-test author",
+                "authorship_attested": True,
+                "rights_holder_role": "unit-test rights holder",
+                "rights_attested": True,
+                "source_rights_reviewed": True,
+                "privacy_reviewed": True,
+                "quality_reviewed": True,
+                "reviewer_role": "unit-test reviewer",
+                "reviewed_at": "2026-01-01T00:00:00Z",
+                "evidence_uri": "unit-test://human-review",
+                "safety_reviewed": True,
+            },
             "safety_min_per_class": 25,
             "dataset_path": "safety.npz",
             "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),

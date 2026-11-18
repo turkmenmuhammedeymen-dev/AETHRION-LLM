@@ -55,8 +55,14 @@ def _resolve_asset(root: Path, value: Any, row_id: str) -> Path:
     if not isinstance(value, str) or not value.strip():
         raise VisualPreparationError(f"Record {row_id!r} requires an asset path.")
     path = Path(value)
-    if path.is_absolute():
-        raise VisualPreparationError("Asset paths must be relative to the JSONL source folder.")
+    if (
+        path.is_absolute()
+        or "\\" in value
+        or "://" in value
+        or re.match(r"^[A-Za-z]:", value)
+        or any(part in {"", ".", ".."} for part in value.split("/"))
+    ):
+        raise VisualPreparationError("Asset paths must be safe relative local paths.")
     resolved = (root / path).resolve()
     try:
         resolved.relative_to(root.resolve())

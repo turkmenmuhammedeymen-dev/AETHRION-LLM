@@ -6,7 +6,7 @@ import wave
 
 import numpy as np
 
-from aethrion.specialist_prepare_audio import prepare_audio_dataset
+from aethrion.specialist_prepare_audio import AudioPreparationError, _local_audio, prepare_audio_dataset
 
 
 class AudioPreparationTests(unittest.TestCase):
@@ -43,6 +43,28 @@ class AudioPreparationTests(unittest.TestCase):
             "evidence_uri": "unit-test://audio-source",
             "source_uri": "unit-test://audio-fixture",
         }
+
+    def test_audio_asset_paths_reject_urls_windows_paths_and_traversal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            for value in ("../outside.wav", "https://example.org/audio.wav", r"C:\audio\sample.wav", r"folder\sample.wav"):
+                with self.subTest(value=value):
+                    with self.assertRaises(AudioPreparationError):
+                        _local_audio(root, value, "sample")
+
+    def test_audio_asset_symlink_cannot_escape_source_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "inside"
+            root.mkdir()
+            outside = Path(directory) / "outside.wav"
+            outside.write_bytes(b"not audio")
+            link = root / "linked.wav"
+            try:
+                link.symlink_to(outside)
+            except (OSError, NotImplementedError):
+                self.skipTest("Symlinks are unavailable on this runner.")
+            with self.assertRaisesRegex(AudioPreparationError, "escapes"):
+                _local_audio(root, "linked.wav", "sample")
 
     def test_asr_wav_to_logmel_ctc_arrays_keeps_approval_closed(self):
         with tempfile.TemporaryDirectory() as directory:

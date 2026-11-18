@@ -21,6 +21,21 @@ class CorpusPreparationTests(unittest.TestCase):
             json.dumps({
                 "project": "AETHRION-LLM-tests",
                 "training_allowed": allowed,
+                "governance": {
+                    "schema": "aethrion-human-review-v1",
+                    "model_id": "base",
+                    "approval_status": "approved",
+                    "author_role": "unit-test author",
+                    "authorship_attested": True,
+                    "rights_holder_role": "unit-test rights holder",
+                    "rights_attested": True,
+                    "source_rights_reviewed": True,
+                    "privacy_reviewed": True,
+                    "quality_reviewed": True,
+                    "reviewer_role": "unit-test reviewer",
+                    "reviewed_at": "2026-01-01T00:00:00Z",
+                    "evidence_uri": "unit-test://human-review",
+                },
             }),
             encoding="utf-8",
         )
@@ -48,21 +63,21 @@ class CorpusPreparationTests(unittest.TestCase):
                 {"source_id": "unit-a", "path": "source-a.txt",
                  "license": "Synthetic unit-test fixture",
                  "permitted_uses": "training permitted for unit-test fixture only",
-                 "allow_training": True},
+                 "allow_training": False},
                 {"source_id": "unit-b", "path": "source-b.txt",
                  "license": "Synthetic unit-test fixture",
                  "permitted_uses": "training permitted for unit-test fixture only",
-                 "allow_training": True},
+                 "allow_training": False},
                 {"source_id": "unit-c", "path": "source-c.txt",
                  "license": "Synthetic unit-test fixture",
                  "permitted_uses": "training permitted for unit-test fixture only",
-                 "allow_training": True},
+                 "allow_training": False},
             ]}), encoding="utf-8")
             output = root / "out/corpus.txt"
             report_path = root / "out/report.json"
             report = build_corpus(
                 root, manifest, output, report_path, seed=7, min_chars=10,
-                min_records=1, dataset_manifest_path=self._write_dataset_manifest(root),
+                min_records=1, dataset_manifest_path=self._write_dataset_manifest(root, allowed=False),
             )
             self.assertEqual(report["totals"]["records_kept"], 3)
             self.assertEqual(report["totals"]["duplicates"], 1)
@@ -292,15 +307,25 @@ class CorpusPreparationTests(unittest.TestCase):
         }]}), encoding="utf-8")
         return source, manifest
 
-    def test_url_records_require_domain_review(self):
+    def test_url_records_can_be_prepared_but_training_requires_domain_review(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             self._write_url_source(root)
+            dataset_manifest = self._write_dataset_manifest(root)
+            corpus = root / "out/corpus.txt"
+            report_path = root / "out/report.json"
+            report = build_corpus(
+                root, root / "sources.json", corpus,
+                report_path, min_chars=10, min_records=1,
+                dataset_manifest_path=dataset_manifest,
+            )
+            self.assertEqual(
+                {item["review_status"] for item in report["domain_review"]},
+                {"PENDING"},
+            )
             with self.assertRaisesRegex(ValueError, "--source-review"):
-                build_corpus(
-                    root, root / "sources.json", root / "out/corpus.txt",
-                    root / "out/report.json", min_chars=10, min_records=1,
-                    dataset_manifest_path=self._write_dataset_manifest(root),
+                validate_training_approval(
+                    dataset_manifest, root / "sources.json", root, corpus, report_path
                 )
 
     def test_pending_domain_review_blocks_training(self):
@@ -323,12 +348,19 @@ class CorpusPreparationTests(unittest.TestCase):
                     "attribution_required": "UNKNOWN",
                     "review_status": "PENDING",
                 })
-            with self.assertRaisesRegex(ValueError, "Training blocked"):
-                build_corpus(
-                    root, root / "sources.json", root / "out/corpus.txt",
-                    root / "out/report.json", min_chars=10, min_records=1,
-                    source_review_path=review,
-                    dataset_manifest_path=self._write_dataset_manifest(root),
+            dataset_manifest = self._write_dataset_manifest(root)
+            corpus = root / "out/corpus.txt"
+            report_path = root / "out/report.json"
+            build_corpus(
+                root, root / "sources.json", corpus,
+                report_path, min_chars=10, min_records=1,
+                source_review_path=review,
+                dataset_manifest_path=dataset_manifest,
+            )
+            with self.assertRaisesRegex(ValueError, "unapproved domains"):
+                validate_training_approval(
+                    dataset_manifest, root / "sources.json", root, corpus,
+                    report_path, source_review_path=review,
                 )
 
     def test_evidence_backed_domain_approval_allows_reviewed_record(self):
@@ -388,12 +420,37 @@ class CorpusPreparationTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         require_training_enabled(path)
 
+    def test_dataset_manifest_rejects_true_without_human_review(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "unreviewed.json"
+            path.write_text(json.dumps({
+                "project": "AETHRION-LLM-tests",
+                "training_allowed": True,
+            }), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "human-review-v1"):
+                require_training_enabled(path)
+
     def test_dataset_manifest_accepts_exact_boolean_true(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "approved.json"
             payload = {
                 "project": "AETHRION-LLM-tests",
                 "training_allowed": True,
+                "governance": {
+                    "schema": "aethrion-human-review-v1",
+                    "model_id": "base",
+                    "approval_status": "approved",
+                    "author_role": "unit-test author",
+                    "authorship_attested": True,
+                    "rights_holder_role": "unit-test rights holder",
+                    "rights_attested": True,
+                    "source_rights_reviewed": True,
+                    "privacy_reviewed": True,
+                    "quality_reviewed": True,
+                    "reviewer_role": "unit-test reviewer",
+                    "reviewed_at": "2026-01-01T00:00:00Z",
+                    "evidence_uri": "unit-test://human-review",
+                },
             }
             path.write_text(json.dumps(payload), encoding="utf-8")
 
