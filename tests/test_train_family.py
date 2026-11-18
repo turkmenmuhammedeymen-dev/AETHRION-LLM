@@ -455,6 +455,23 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 "training_report_attempt_mismatch_not_released",
             )
 
+    def test_training_outcome_rejects_report_timestamp_from_prior_attempt(self):
+        from aethrion.train_family import _training_outcome
+        import time
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(Path(folder))
+            report["report_created_at_ns"] = time.time_ns() - 10_000_000_000
+            import json
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    started_at_ns=time.time_ns(),
+                ),
+                "training_report_timestamp_invalid_not_released",
+            )
+
     def test_training_outcome_rejects_checkpoint_generation_mismatch(self):
         from aethrion.train_family import _training_outcome
         import json
