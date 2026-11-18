@@ -66,6 +66,17 @@ def _require_safety_allow_http(runtime: Any, text: str) -> dict[str, Any]:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
+def _visual_input_verifier_ready(runtime: Any) -> bool:
+    status = getattr(runtime, "visual_input_safety_status", None)
+    review = getattr(runtime, "review_visual_input", None)
+    if not callable(status) or not callable(review):
+        return False
+    try:
+        return status() == "ready"
+    except Exception:
+        return False
+
+
 def _require_visual_input_allow(runtime: Any, path: str | Path) -> dict[str, Any]:
     """Require a separately released semantic verifier for uploaded image content."""
     artifact = Path(path)
@@ -73,20 +84,21 @@ def _require_visual_input_allow(runtime: Any, path: str | Path) -> dict[str, Any
         raise CapabilityUnavailable("VISION input must be a regular, non-symlink file.")
     if artifact.stat().st_size < 1 or artifact.stat().st_size > 20 * 1024 * 1024:
         raise CapabilityUnavailable("VISION input exceeds the 20 MiB safety bound.")
-    status = getattr(runtime, "visual_input_safety_status", None)
-    review = getattr(runtime, "review_visual_input", None)
-    if not callable(status) or not callable(review) or status() != "ready":
+    if not _visual_input_verifier_ready(runtime):
         raise CapabilityUnavailable("AETHRION visual-input safety verifier is not trained and released.")
     try:
         from PIL import Image
         with Image.open(artifact) as image:
             if image.format not in {"PNG", "JPEG", "WEBP"}:
                 raise CapabilityUnavailable("Unsupported VISION input image format.")
+            image_format = image.format
             width, height = image.size
             if not (1 <= width <= 4096 and 1 <= height <= 4096 and width * height <= 16_000_000):
                 raise CapabilityUnavailable("VISION input dimensions exceed safety bounds.")
             image.verify()
-        verdict = review(str(artifact), {"format": image.format, "width": width, "height": height})
+        verdict = runtime.review_visual_input(
+            str(artifact), {"format": image_format, "width": width, "height": height}
+        )
     except CapabilityUnavailable:
         raise
     except Exception as exc:
@@ -179,9 +191,7 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
         if capability in visual_output_capabilities:
             continue
         if capability == Capability.VISION and (
-            not callable(getattr(runtime, "visual_input_safety_status", None))
-            or not callable(getattr(runtime, "review_visual_input", None))
-            or runtime.visual_input_safety_status() != "ready"
+            not _visual_input_verifier_ready(runtime)
         ):
             continue
         if runtime.registry.status(capability.value) != "ready":
