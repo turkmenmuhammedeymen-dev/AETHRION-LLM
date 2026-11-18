@@ -241,13 +241,13 @@ def _validate_upload_payload(suffix: str, raw: bytes) -> None:
     if not raw:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
     signatures = {
-        ".png": raw.startswith(b"\\x89PNG\\r\\n\\x1a\\n"),
-        ".jpg": raw.startswith(b"\\xff\\xd8\\xff"),
-        ".jpeg": raw.startswith(b"\\xff\\xd8\\xff"),
+        ".png": raw.startswith(b"\x89PNG\r\n\x1a\n"),
+        ".jpg": raw.startswith(b"\xff\\xd8\xff"),
+        ".jpeg": raw.startswith(b"\xff\\xd8\xff"),
         ".webp": len(raw) >= 12 and raw[:4] == b"RIFF" and raw[8:12] == b"WEBP",
         ".wav": len(raw) >= 12 and raw[:4] == b"RIFF" and raw[8:12] == b"WAVE",
         ".pdf": raw.startswith(b"%PDF-"),
-        ".docx": raw.startswith(b"PK\\x03\\x04"),
+        ".docx": raw.startswith(b"PK\x03\\x04"),
     }
     if suffix in signatures:
         if not signatures[suffix]:
