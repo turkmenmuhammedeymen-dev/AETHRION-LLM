@@ -1,8 +1,8 @@
 """Human-review attestations required before any AETHRION dataset can train.
 
-This validates a documented review record; it cannot independently prove authorship,
-copyright ownership, consent, or reviewer identity. Evidence must be retained and
-checked by a responsible human before an approval is entered.
+This validates documented human attestations; it cannot independently prove authorship,
+rights ownership, consent, or reviewer identity. Evidence must be retained and checked
+by a responsible human before an approval is entered.
 """
 from __future__ import annotations
 
@@ -28,6 +28,7 @@ def review_template(model_id: str) -> dict[str, Any]:
         "approval_status": "pending",
         "author_role": "",
         "authorship_attested": False,
+        "first_party_origin_attested": False,
         "rights_holder_role": "",
         "rights_attested": False,
         "source_rights_reviewed": False,
@@ -42,7 +43,7 @@ def review_template(model_id: str) -> dict[str, Any]:
 
 
 def validate_governance_record(record: Any, *, model_id: str) -> dict[str, Any]:
-    """Require explicit, timestamped, role-attributed human review for a model dataset."""
+    """Require explicit, timestamped human review and first-party origin attestation."""
     if not isinstance(record, dict) or record.get("schema") != SCHEMA:
         raise GovernanceError("Training blocked: aethrion-human-review-v1 governance record is required.")
     if record.get("model_id") != model_id:
@@ -55,8 +56,8 @@ def validate_governance_record(record: Any, *, model_id: str) -> dict[str, Any]:
         if not isinstance(value, str) or not value.strip():
             raise GovernanceError(f"Training blocked: governance field {key} is required.")
     for key in (
-        "authorship_attested", "rights_attested", "source_rights_reviewed",
-        "privacy_reviewed", "quality_reviewed",
+        "authorship_attested", "first_party_origin_attested", "rights_attested",
+        "source_rights_reviewed", "privacy_reviewed", "quality_reviewed",
     ):
         if record.get(key) is not True:
             raise GovernanceError(f"Training blocked: governance review {key} must be true.")
