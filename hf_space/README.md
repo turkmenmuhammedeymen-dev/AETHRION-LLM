@@ -31,8 +31,9 @@ it is not OCR, image captioning, or visual question answering. The current DOC
 adapter extracts existing text and uses placeholder page geometry; it is not
 an OCR engine. AETHRION-3D generates vertex-only point clouds, not textured
 watertight meshes. Image-to-3D conditioning and video generation are not
-implemented. Image output safety also requires a dedicated, validated visual
-safety review path before that capability can be released.
+implemented. Image and 3D file-producing capabilities remain unregistered in the
+local router until a dedicated visual/geometry output safety verifier is
+implemented, tested and release-gated. Text SAFE alone cannot review those files.
 
 Deterministic document creation and text extraction are available as software
 utilities; they are not a trained document-understanding model. Uploaded
