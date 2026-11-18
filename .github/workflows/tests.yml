@@ -1,7 +1,7 @@
 name: tests
 on:
   push:
-    branches: ["main", "hardening/**", "feature/**", "feat/**"]
+    branches: ["main", "hardening/**", "feature/**", "feat/**", "audit/**", "security/**"]
   pull_request:
     branches: ["main"]
 permissions:
@@ -35,6 +35,14 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Synthetic end-to-end smoke test
         run: python -m aethrion.smoke_test
+      - name: Audit actual eleven-model training and release readiness
+        run: python -m aethrion.family_audit --output family-readiness-report.json
+      - name: Preserve family readiness report
+        uses: actions/upload-artifact@v4
+        with:
+          name: aethrion-family-readiness-${{ matrix.python-version }}
+          path: family-readiness-report.json
+          if-no-files-found: error
 
   space-runtime:
     name: Hugging Face Space runtime smoke test
@@ -124,7 +132,7 @@ jobs:
 
           with tempfile.TemporaryDirectory() as temp:
               try:
-                  app.make_doc("AETHRION smoke test", "first paragraph\n\nsecond paragraph", "docx")
+                  app.make_doc("AETHRION smoke test", "first paragraph\\n\\nsecond paragraph", "docx")
               except gr.Error:
                   pass
               else:
@@ -132,7 +140,7 @@ jobs:
               message, edited = app.edit_doc("unused.docx", "find", "replace", "docx")
               assert edited is None and "authentication" in message.lower()
               raw, filename, mime = create_document(
-                  "AETHRION smoke test", "first paragraph\n\nsecond paragraph", "docx"
+                  "AETHRION smoke test", "first paragraph\\n\\nsecond paragraph", "docx"
               )
               source_path = Path(temp) / filename
               source_path.write_bytes(raw)
