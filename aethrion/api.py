@@ -179,6 +179,13 @@ def capabilities():
 
 @app.post("/dispatch", dependencies=[Depends(require_api_token)])
 def dispatch(request:DispatchRequest):
+    # File-bearing operations must use bounded upload endpoints. Never accept a
+    # caller-controlled server filesystem path through arbitrary JSON options.
+    if request.capability in {"document", "vision", "asr"}:
+        raise HTTPException(
+            status_code=400,
+            detail="Use the dedicated file-upload endpoint for DOCUMENT, VISION and ASR.",
+        )
     try:
         result=router.dispatch(request.capability,CapabilityRequest(request.prompt,request.options))
         return {"capability":result.capability.value,"provider":result.provider,"result":result.output}
