@@ -232,6 +232,25 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertEqual(state["status"], "interrupted")
             self.assertEqual(state["released_count"], 0)
 
+    def test_failed_process_spawn_is_blocked_not_reported_as_training_started(self):
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            plan = {
+                "model_id": "chat", "ready": True,
+                "command": ["python", "-m", "aethrion.train"],
+                "checkpoint": "artifacts/chat/checkpoint_last.pt",
+                "output_dir": "artifacts/chat",
+            }
+            with patch("aethrion.train_family.preflight_model", return_value=plan), \\
+                 patch("aethrion.train_family.subprocess.Popen", side_effect=OSError("runner unavailable")):
+                report = run_family(root, selected=["chat"], execute=True)
+
+            self.assertFalse(report["training_started"])
+            self.assertEqual(len(report["models"]), 1)
+            self.assertEqual(report["models"][0]["status"], "blocked")
+
     def test_specialist_config_preflight_checks_architecture_and_training_fields(self):
         from aethrion.train_family import _validate_specialist_config
 
