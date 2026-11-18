@@ -103,12 +103,20 @@ created during the current process attempt, matching the selected model ID and
 the explicit `NOT_RELEASED` release state. A completion report must also point
 to an existing final checkpoint whose bytes match the report's SHA-256 digest.
 
-The supervisor validates the model-specific report contract:
+The supervisor validates the model-specific report contract and opens
+the checkpoint with the same safe, verified loader used by the trainer:
 
-- CHAT: final step, finite train/validation metrics, finite held-out test loss,
-  dataset hash and tokenizer hash.
-- Specialist models: positive completed step count, finite validation and
-  held-out test losses, plus dataset, tokenizer and manifest hashes.
+- CHAT: report `step` must exactly equal the checkpoint's zero-based step.
+- Specialist models: report `steps` must equal checkpoint step plus one, and
+  the checkpoint model ID must match the selected specialist.
+- Both families: report dataset/tokenizer hashes must match the checkpoint;
+  specialist manifest hash must also match. Metrics must be finite, and held-out
+  test loss is mandatory for completed (not interrupted) reports.
+
+
+A report/checkpoint step or provenance mismatch is a non-success outcome even
+when the checkpoint file hash matches. This catches stale reports, mismatched
+artifacts and incomplete session handoffs before a family result is recorded.
 
 Missing, stale, malformed, wrong-model, incomplete-metric, missing-checkpoint
 and checksum-mismatched reports are recorded as non-success outcomes. A valid
