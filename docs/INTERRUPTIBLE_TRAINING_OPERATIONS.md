@@ -140,3 +140,18 @@ state and checkpoint digest before recording the pause. Specialist interruption
 reports follow the same checkpoint-digest requirement. If the report or
 checkpoint cannot be verified, the family outcome remains an error state; a
 stop signal alone is not proof that a safe checkpoint was written.
+
+
+## Hash-chained session journal and crash recovery audit
+
+New sessions use a SHA-256 hash chain in every JSONL event. Each record binds the canonical event payload to the previous event digest. The auditor checks the full chain, one session ID, unique attempt IDs and the lifecycle order (attempt prepared -> process started -> verified terminal event). It refuses to append to a damaged or legacy unhashed journal. A truncated final line is preserved and reported as corruption; it is never silently discarded.
+
+The atomic session snapshot records the verified journal event count and final digest. The final run report carries the same values. Before recovery, both files must agree with the journal. Use this read-only command:
+
+```bash
+python -m aethrion.train_family --root . --audit-session SESSION_ID
+```
+
+A valid audit does not itself start training. `checkpoint_verification_required` means a process-start event has no terminal event: inspect the model's current and previous checkpoint generations and their report/session/attempt metadata before any resume. `safe_to_requeue_after_preflight` means an attempt was prepared but the child process did not start. `safe_to_resume_after_preflight` means the supervisor recorded a graceful interruption. Every case must still pass the ordinary data, provenance, configuration and governance preflight. An invalid chain, legacy unhashed journal, missing snapshot or snapshot/hash mismatch requires manual review and must not be auto-repaired or resumed.
+
+This audit reconstructs verified session state; it does not claim that an interrupted optimizer step was completed, and it never changes production training approvals or release state.
