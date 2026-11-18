@@ -342,7 +342,20 @@ def validate_specialist_dataset(
             permitted_use = source["permitted_use"].strip().casefold()
             if not re.search(r"\b(training|train|machine learning|model development)\b", permitted_use):
                 raise SpecialistDataError("Training blocked: source permitted_use does not explicitly authorize model training.")
-            if re.search(r"\b(not for training|no training|training prohibited|training not permitted|evaluation only|testing only|unit tests only)\b", permitted_use):
+            negative_training_grant = (
+                re.search(
+                    r"\b(?:not|no|never|prohibited|forbidden|disallow(?:ed)?|excluded|without)\b"
+                    r".{0,48}\b(?:training|train|machine learning|model development)\b",
+                    permitted_use,
+                )
+                or re.search(
+                    r"\b(?:training|train|machine learning|model development)\b"
+                    r".{0,48}\b(?:not allowed|not permitted|prohibited|forbidden|disallowed|excluded)\b",
+                    permitted_use,
+                )
+                or re.search(r"\b(?:evaluation|testing|unit tests)\s+only\b", permitted_use)
+            )
+            if negative_training_grant:
                 raise SpecialistDataError("Training blocked: source permitted_use excludes model training.")
             evidence = urlsplit(source["evidence_uri"].strip())
             if evidence.scheme != "https" or not evidence.hostname or evidence.username or evidence.password:
