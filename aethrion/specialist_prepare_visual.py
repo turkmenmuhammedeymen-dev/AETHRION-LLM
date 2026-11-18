@@ -15,7 +15,7 @@ from typing import Any
 
 import numpy as np
 
-from aethrion.specialist_prepare import _group_id, _split
+from aethrion.specialist_prepare import _group_hash, _group_id, _split
 from aethrion.tokenizer import ByteBPETokenizer
 
 
