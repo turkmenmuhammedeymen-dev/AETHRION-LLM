@@ -163,6 +163,85 @@ def _loss(model: nn.Module, model_id: str, batch: dict[str, torch.Tensor]) -> to
     raise ValueError(f"No training objective registered for {model_id}")
 
 
+
+def _validate_model_data_compatibility(
+    model_id: str, arrays: dict[str, np.ndarray], config: dict[str, Any]
+) -> None:
+    """Reject config/data shape mismatches before model and optimizer allocation."""
+    if model_id == "code":
+        ids = arrays["token_ids"]
+        if ids.shape[1] - 1 > config["block_size"]:
+            raise ValueError("Code token sequence exceeds configured block_size.")
+    elif model_id in {"vision", "image"}:
+        images, ids = arrays["images"], arrays["token_ids"]
+        expected_size = config["image_size"]
+        if images.dtype != np.uint8:
+            raise ValueError("Image training arrays must use uint8 pixels in [0,255].")
+        if images.shape[2:] != (expected_size, expected_size):
+            raise ValueError("Image dimensions do not match the model image_size.")
+        text_limit = config["max_text_length"] if model_id == "vision" else config["text_length"]
+        if ids.shape[1] > text_limit:
+            raise ValueError("Image/text conditioning sequence exceeds the configured text limit.")
+    elif model_id == "asr":
+        features = arrays["features"]
+        if features.shape[1] < 4 or features.shape[2] != config["n_mels"]:
+            raise ValueError("ASR feature dimensions do not match n_mels or minimum frame requirements.")
+        lengths = (arrays["input_lengths"] + 3) // 4
+        targets, target_lengths = arrays["targets"], arrays["target_lengths"]
+        if np.any(target_lengths > lengths):
+            raise ValueError("ASR target length exceeds the encoded acoustic sequence.")
+        for row, length in zip(targets, target_lengths):
+            valid = row[:int(length)]
+            if np.any(valid == config["blank_id"]):
+                raise ValueError("ASR CTC targets must not contain the blank token.")
+            repeats = int(np.count_nonzero(valid[1:] == valid[:-1]))
+            if int(length) + repeats > int((arrays["input_lengths"][0] + 3) // 4):
+                # Per-sample check below handles each input length independently.
+                pass
+        for index, (row, target_length, input_length) in enumerate(
+            zip(targets, target_lengths, arrays["input_lengths"])
+        ):
+            valid = row[:int(target_length)]
+            minimum_frames = int(target_length) + int(np.count_nonzero(valid[1:] == valid[:-1]))
+            encoded_frames = int((int(input_length) + 3) // 4)
+            if minimum_frames > encoded_frames:
+                raise ValueError(f"ASR sample {index} cannot satisfy CTC alignment constraints.")
+    elif model_id == "tts":
+        if arrays["target_mels"].shape[2] != config["mel_bins"]:
+            raise ValueError("TTS mel feature dimension does not match configured mel_bins.")
+    elif model_id == "vocoder":
+        mels, waveforms = arrays["target_mels"], arrays["target_waveforms"]
+        if mels.shape[2] != config["mel_bins"]:
+            raise ValueError("Vocoder mel feature dimension does not match configured mel_bins.")
+        expected_samples = mels.shape[1] * config["hop_length"]
+        if waveforms.shape[1] != expected_samples:
+            raise ValueError("Vocoder waveform length must equal padded mel frames times hop_length.")
+        lengths = arrays["frame_lengths"] * config["hop_length"]
+        expected_mask = np.arange(waveforms.shape[1])[None, :] < lengths[:, None]
+        if not np.array_equal(arrays["waveform_mask"].astype(bool), expected_mask):
+            raise ValueError("Vocoder waveform_mask must match frame_lengths and hop_length.")
+    elif model_id == "3d":
+        if arrays["points"].shape[1:] != (config["points"], 3):
+            raise ValueError("3D point-cloud shape does not match configured points.")
+    elif model_id == "research":
+        if max(arrays["query_ids"].shape[1], arrays["passage_ids"].shape[1]) > config["max_length"]:
+            raise ValueError("Research sequence exceeds configured max_length.")
+    elif model_id == "document":
+        ids, layouts, tags = arrays["token_ids"], arrays["layout_ids"], arrays["tag_labels"]
+        if ids.shape[1] > config["max_length"]:
+            raise ValueError("Document sequence exceeds configured max_length.")
+        if np.any(layouts < 0) or np.any(layouts >= config["layout_vocab_size"]):
+            raise ValueError("Document layout IDs are outside the configured vocabulary.")
+        if np.any((tags < -100) | (tags >= config["tag_classes"])):
+            raise ValueError("Document tag labels are outside the configured classes.")
+    elif model_id == "safety":
+        if arrays["token_ids"].shape[1] > config["max_length"]:
+            raise ValueError("SAFE sequence exceeds configured max_length.")
+        if arrays["reason_labels"].shape[1] != config["reason_classes"]:
+            raise ValueError("SAFE reason label width does not match reason_classes.")
+
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
