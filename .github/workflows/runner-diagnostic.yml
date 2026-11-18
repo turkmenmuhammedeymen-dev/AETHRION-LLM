@@ -1,0 +1,31 @@
+name: runner-diagnostic
+on:
+  push:
+    branches: ["data/**"]
+  pull_request:
+    branches: ["main"]
+permissions:
+  contents: read
+jobs:
+  runner-probe:
+    name: Minimal GitHub-hosted runner probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Record runner startup evidence
+        run: |
+          {
+            echo "AETHRION_RUNNER_DIAGNOSTIC_STARTED"
+            date -u
+            uname -a
+            python3 --version
+            echo "AETHRION_RUNNER_DIAGNOSTIC_COMPLETED"
+          } > runner-diagnostic.log 2>&1
+          cat runner-diagnostic.log
+      - name: Preserve runner diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aethrion-runner-diagnostic-${{ github.run_id }}
+          path: runner-diagnostic.log
+          if-no-files-found: error
