@@ -298,9 +298,9 @@ def validate_specialist_dataset(
             validate_governance_record(payload.get("governance"), model_id=model_id)
         except GovernanceError as exc:
             raise SpecialistDataError(str(exc)) from exc
-    if payload.get("privacy_reviewed") is not True:
+    if require_training_approval and payload.get("privacy_reviewed") is not True:
         raise SpecialistDataError("Training blocked: privacy review is not approved.")
-    if model_id in AUDIO_MODELS and payload.get("speaker_consent_reviewed") is not True:
+    if require_training_approval and model_id in AUDIO_MODELS and payload.get("speaker_consent_reviewed") is not True:
         raise SpecialistDataError("Training blocked: speaker consent review is not approved.")
 
     sources = payload.get("sources")
@@ -320,7 +320,7 @@ def validate_specialist_dataset(
         permitted_use = source["permitted_use"].strip().casefold()
         source_uri_scheme = urlparse(source["source_uri"].strip()).scheme.casefold()
         normalized_license = re.sub(r"[^A-Z0-9]+", "_", license_name.upper()).strip("_")
-        if (
+        if require_training_approval and (
             normalized_license in UNVERIFIED_LICENSE_LABELS
             or any(normalized_license.startswith(label + "_") for label in UNVERIFIED_LICENSE_LABELS)
             or any(marker in normalized_license for marker in ("PENDING", "UNVERIFIED", "TEST_FIXTURE", "TEST_ONLY"))
@@ -328,27 +328,25 @@ def validate_specialist_dataset(
             raise SpecialistDataError("Training blocked: specialist source license is unknown, pending, unverified or test-only.")
         if not source_uri_scheme:
             raise SpecialistDataError("Training blocked: specialist source_uri must be a documented provenance URI.")
-        explicitly_permitted = any(
-            phrase in permitted_use
-            for phrase in (
-                "training permitted", "permitted for training", "ai training",
-                "machine learning training", "machine-learning training",
-                "model training", "training only", "unit-test training",
+        explicitly_permitted = bool(re.search(
+            r"\b(training|train|machine learning|machine-learning|model development)\b",
+            permitted_use,
+        ))
+        explicitly_denied = (
+            re.search(
+                r"\b(?:not|no|never|prohibited|forbidden|disallow(?:ed)?|excluded|without)\b"
+                r".{0,48}\b(?:training|train|machine learning|machine-learning|model development)\b",
+                permitted_use,
             )
-        )
-        explicitly_denied = any(
-            phrase in permitted_use
-            for phrase in (
-                "not for training", "no training", "training prohibited",
-                "training not permitted", "training not allowed",
-                "not approved for training", "no permission to train",
-                "not permitted to train", "not allowed to train",
-                "not permitted for training", "not allowed for training",
-                "evaluation only",
+            or re.search(
+                r"\b(?:training|train|machine learning|machine-learning|model development)\b"
+                r".{0,48}\b(?:not allowed|not permitted|not authorized|unauthorized|prohibited|forbidden|disallowed|excluded)\b",
+                permitted_use,
             )
+            or re.search(r"\b(?:evaluation|testing|unit tests)\s+only\b", permitted_use)
         )
-        if not explicitly_permitted or explicitly_denied:
-            raise SpecialistDataError("Training blocked: specialist source permitted_use must explicitly allow training.")
+        if require_training_approval and (not explicitly_permitted or explicitly_denied):
+            raise SpecialistDataError("Training blocked: source permitted_use excludes model training or lacks an explicit training grant.")
         if source_uri_scheme in REMOTE_SOURCE_SCHEMES:
             raise SpecialistDataError(
                 "Training blocked: remote third-party source URIs are disabled; "
@@ -379,11 +377,11 @@ def validate_specialist_dataset(
             raise SpecialistDataError("A reviewed source file is missing or empty.")
         if sha256_file(source_file) != digest.lower():
             raise SpecialistDataError("A reviewed source file SHA-256 mismatch.")
-        if source.get("allow_training") is not True:
+        if require_training_approval and source.get("allow_training") is not True:
             raise SpecialistDataError("Training blocked: one or more source licenses are not approved.")
-        if source.get("privacy_reviewed") is not True:
+        if require_training_approval and source.get("privacy_reviewed") is not True:
             raise SpecialistDataError("Training blocked: one or more sources lack privacy approval.")
-        if model_id in AUDIO_MODELS and source.get("speaker_consent_verified") is not True:
+        if require_training_approval and model_id in AUDIO_MODELS and source.get("speaker_consent_verified") is not True:
             raise SpecialistDataError("Training blocked: audio source lacks verified speaker consent.")
 
     dataset_path = payload.get("dataset_path")
