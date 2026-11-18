@@ -37,8 +37,8 @@ not itself evidence of real authorship or rights.
 For owner-authored plain text or JSONL, use a manifest that documents each
 source and records its actual authorship and rights review. Do not add third-party
 URL-attributed records. BASE splitting is provenance-disjoint: each
-plain-text source file forms its own group, URL-attributed records are grouped by
-exact hostname, and JSONL may provide an explicit `group_id`. At least three
+plain-text source file forms its own group, and owner-authored JSONL may provide
+an explicit `group_id`. At least three
 independent groups are required so train, validation and test each receive whole
 groups. Keep unrelated sources in separate files or give records explicit group IDs.
 
@@ -53,29 +53,14 @@ coverage, source balance, duplication, spelling, encoding, privacy, and license 
 
 ## Train and evaluate
 
-~~~bash
-python -m aethrion.tokenizer --train data/processed/corpus-train.txt \
-  --corpus data/processed/corpus.txt \
-  --output artifacts/tokenizer.json --vocab-size 512 \
-  --dataset-manifest data/processed/corpus_manifest.json \
-  --source-manifest data/raw/cosmos/sources.json \
-  --source-root data/raw/cosmos \
-  --corpus-report data/processed/corpus-report.json \
-  --source-review data/processed/privacy_review/source_review_template.csv
-python -m aethrion.train --config configs/turkish_pilot.json \
-  --dataset-manifest data/processed/corpus_manifest.json \
-  --source-manifest data/raw/cosmos/sources.json \
-  --source-root data/raw/cosmos \
-  --corpus-report data/processed/corpus-report.json \
-  --source-review data/processed/privacy_review/source_review_template.csv
-python -m aethrion.evaluate --checkpoint artifacts/turkish_pilot/checkpoint_last.pt \
-  --tokenizer artifacts/tokenizer.json --data data/heldout/approved-eval.txt
-~~~
-
-Keep evaluation text disjoint from training data. Build a human-reviewed benchmark
-for grammar, reading comprehension, summarization, reasoning, instruction following,
-factuality, dialect/register variation, and safety. Record corpus hashes, model and
-tokenizer versions, hardware, training steps, and evaluation results.
+Do not use legacy Cosmos paths or the old `turkish_pilot` command sequence.
+Follow the current, evidence-first procedure in
+[BASE_TRAINING_READINESS.md](BASE_TRAINING_READINESS.md). It uses a private
+owner-authored source directory, validates the signed corpus report and
+train/validation/test partitions, and keeps training blocked until genuine
+human approval has been recorded. After approval, use the exact tokenizer and
+BASE training commands documented there. Keep held-out evaluation data
+separate and independently reviewed.
 
 ## Scale and limitations
 
