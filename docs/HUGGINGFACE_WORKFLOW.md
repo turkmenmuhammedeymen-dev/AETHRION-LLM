@@ -11,8 +11,6 @@
 - **Existing Space ZeroGPU:** short, GPU-decorated application requests and
   hardware diagnostics. It is not a persistent GPU notebook, durable training
   worker, or guaranteed long-running training allocation.
-- **Codespaces:** optional fallback for a shell-based task that cannot be
-  completed with GitHub's web editor, Actions and the Space.
 
 ## Normal development without Codespaces
 
@@ -47,15 +45,11 @@ requests.
 
 The current repository has eleven independent model entries. Their
 architectures and training/evaluation scaffolding are not trained model
-weights. Each capability remains unavailable until its own licensed data,
+weights. Each capability remains unavailable until its own owner-authored first-party data,
 processor/tokenizer, trained checkpoint, SHA-256 integrity record, training
 report, held-out benchmark, safety review and human release approval exist.
 
-The global corpus gate currently remains `training_allowed: false`; all
-candidate datasets remain unapproved for training. The project-owner approval
-covers public-source review and non-destructive preparation planning only. It
-does not grant third-party rights, approve gated datasets, verify speaker
-consent, or authorize accepting provider terms. Do not bypass these gates.
+The global corpus gate currently remains `training_allowed: false`. All external third-party dataset candidates are prohibited under the current first-party-only policy. The project-owner approval applies only to owner-authored first-party data after documented authorship, rights, privacy, quality and human review. It does not create data, establish speaker consent or authorize provider terms. Do not bypass these gates.
 
 ZeroGPU requests are short-lived and may be reclaimed. A training process
 must never depend on the Space process filesystem for its only copy of a
@@ -65,9 +59,9 @@ resume state, hashes, interruption recovery and an independent evaluation
 report. Keep those artifacts outside Git.
 
 Do not launch paid Hugging Face Jobs, change Space hardware, or create paid
-storage without a separate explicit compute/budget approval. The current
-ZeroGPU allocation is not a basis for promising that all eleven models can be
-trained today.
+storage. The current ZeroGPU allocation is not a basis for promising that all
+eleven models can be trained today. Kaggle, Colab and Codespaces are outside
+the current authorized project scope.
 
 ## Current capability truth
 
@@ -85,9 +79,3 @@ Audio sections. A visible tab is not a released capability:
 - Uploaded project code is not executed.
 - No external model provider fallback is permitted.
 
-## When Codespaces is justified
-
-Use Codespaces only when a specific task needs a persistent interactive shell,
-local dependency debugging, a local Space preview, or a bounded preprocessing
-operation that is unsuitable for GitHub Actions. Its current dev container is
-CPU-only. It is not a substitute for a training GPU.
