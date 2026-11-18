@@ -28,6 +28,29 @@ def _sidecar(path: Path) -> Path:
     return Path(str(path) + ".sha256")
 
 
+def _fsync_directory(path: Path) -> None:
+    """Persist directory-entry replacements where the platform supports it."""
+    flags = getattr(os, "O_DIRECTORY", 0) | os.O_RDONLY
+    try:
+        descriptor = os.open(str(path), flags)
+    except (OSError, AttributeError):
+        return
+    try:
+        os.fsync(descriptor)
+    except OSError:
+        # Some filesystems/platforms do not expose directory fsync.
+        pass
+    finally:
+        os.close(descriptor)
+
+
+def _write_text_fsync(path: Path, content: str, encoding: str) -> None:
+    with path.open("w", encoding=encoding, newline="\\n") as handle:
+        handle.write(content)
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
 def verify_checkpoint(path: str | Path) -> str:
     """Verify a checkpoint against its adjacent checksum file."""
     target = Path(path)
@@ -41,7 +64,11 @@ def verify_checkpoint(path: str | Path) -> str:
         raise ValueError(f"Checkpoint integrity file is empty: {sidecar}")
     expected = fields[0]
     actual = sha256_file(target)
-    if len(expected) != 64 or not hmac.compare_digest(expected.lower(), actual):
+    if (
+        len(expected) != 64
+        or any(character not in "0123456789abcdefABCDEF" for character in expected)
+        or not hmac.compare_digest(expected.lower(), actual)
+    ):
         raise ValueError(f"Checkpoint SHA-256 verification failed: {target}")
     return actual
 
@@ -84,6 +111,7 @@ def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
 
         os.replace(temporary, target)
         os.replace(sidecar_temporary, sidecar)
+        _fsync_directory(target.parent)
         return checksum
     finally:
         temporary.unlink(missing_ok=True)
@@ -151,5 +179,6 @@ def write_json_atomic(payload: dict[str, Any], path: str | Path) -> None:
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, target)
+        _fsync_directory(target.parent)
     finally:
         temporary.unlink(missing_ok=True)
