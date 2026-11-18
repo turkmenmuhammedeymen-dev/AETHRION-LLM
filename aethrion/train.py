@@ -277,13 +277,14 @@ def validate_base_training_config(cfg: dict) -> None:
     if not isinstance(cfg, dict):
         raise ValueError("BASE training config must be a JSON object.")
     integer_fields = {
-        "seed": 0, "vocab_size": 256, "block_size": 8, "n_layer": 1,
+        "vocab_size": 256, "block_size": 8, "n_layer": 1,
         "n_head": 1, "n_embd": 8, "batch_size": 1,
         "gradient_accumulation_steps": 1, "max_steps": 1, "warmup_steps": 0,
         "eval_interval": 1, "eval_batches": 1, "save_interval": 1,
     }
     for name, minimum in integer_fields.items():
-        require_int(cfg.get(name), name, minimum=minimum)
+        maximum = 2**32 - 1 if name == "seed" else None
+        require_int(cfg.get(name), name, minimum=minimum, maximum=maximum)
     require_finite_number(cfg.get("learning_rate"), "learning_rate", minimum=0, minimum_inclusive=False)
     require_finite_number(cfg.get("min_learning_rate"), "min_learning_rate", minimum=0)
     require_finite_number(cfg.get("weight_decay"), "weight_decay", minimum=0)
