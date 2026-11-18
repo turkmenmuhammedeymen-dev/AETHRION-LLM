@@ -170,7 +170,7 @@ def prepare_audio_dataset(
 
     arrays: dict[str, np.ndarray] = {
         "sample_id": np.asarray([str(row["id"]) for row in rows], dtype=np.str_),
-        "group_id": np.asarray(group_ids, dtype=np.str_),
+        "group_id": np.asarray([_group_hash(value) for value in group_ids], dtype=np.str_),
         "split": np.asarray(split_names, dtype=np.str_),
     }
     if any(name not in split_names for name in ("train", "validation", "test")):
