@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 from typing import Any
+from urllib.parse import urlparse
 
 import numpy as np
 
@@ -40,6 +41,8 @@ REQUIRED_ARRAYS = {
     "safety": {"sample_id", "group_id", "split", "token_ids", "decision_labels", "reason_labels"},
 }
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
+UNVERIFIED_LICENSE_LABELS = frozenset({"UNKNOWN", "PENDING", "PENDING_HUMAN_REVIEW", "UNVERIFIED", "TBD"})
+REMOTE_SOURCE_SCHEMES = frozenset({"http", "https", "ftp", "ftps", "s3", "gs", "hf", "ipfs", "git", "ssh"})
 
 
 INPUT_FINGERPRINT_FIELDS = {
@@ -313,6 +316,22 @@ def validate_specialist_dataset(
             raise SpecialistDataError("Each source requires an ID, URI, path, license, permitted use and evidence.")
         source_id = source["source_id"].strip()
         source_path_value = source["source_path"].strip()
+        license_name = source["license"].strip()
+        permitted_use = source["permitted_use"].strip().casefold()
+        source_uri_scheme = urlparse(source["source_uri"].strip()).scheme.casefold()
+        if license_name.upper() in UNVERIFIED_LICENSE_LABELS:
+            raise SpecialistDataError("Training blocked: specialist source license is unknown or pending human review.")
+        if "train" not in permitted_use or any(
+            phrase in permitted_use
+            for phrase in ("not for training", "no training", "training prohibited",
+                           "training not permitted", "training not allowed", "evaluation only")
+        ):
+            raise SpecialistDataError("Training blocked: specialist source permitted_use must explicitly allow training.")
+        if source_uri_scheme in REMOTE_SOURCE_SCHEMES:
+            raise SpecialistDataError(
+                "Training blocked: remote third-party source URIs are disabled; "
+                "specialist training requires first-party owner-authored local sources."
+            )
         if source_id in seen_source_ids:
             raise SpecialistDataError(f"Duplicate specialist source_id: {source_id}")
         if source_path_value in seen_source_paths:
