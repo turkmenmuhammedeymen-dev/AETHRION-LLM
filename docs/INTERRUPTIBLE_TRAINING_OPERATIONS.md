@@ -118,6 +118,16 @@ A report/checkpoint step or provenance mismatch is a non-success outcome even
 when the checkpoint file hash matches. This catches stale reports, mismatched
 artifacts and incomplete session handoffs before a family result is recorded.
 
+Each family child process receives the parent session ID and a unique per-model
+attempt ID. Both identifiers are written into every checkpoint generation and
+trainer report. Reports also carry a creation timestamp and checkpoint-generation
+counter. The family supervisor requires exact session/attempt identity and
+generation equality between report and checkpoint, and rejects report timestamps
+older than the current process attempt. The append-only JSONL journal records
+attempt start and, after successful verification, the report timestamp,
+checkpoint generation and checkpoint digest. This binds the session snapshot,
+event history, report and checkpoint to one execution attempt.
+
 Missing, stale, malformed, wrong-model, incomplete-metric, missing-checkpoint
 and checksum-mismatched reports are recorded as non-success outcomes. A valid
 training completion is still `training_completed_not_released`, never a
