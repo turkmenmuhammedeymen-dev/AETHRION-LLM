@@ -326,15 +326,26 @@ def validate_specialist_dataset(
             raise SpecialistDataError("Training blocked: specialist source license is unknown or pending human review.")
         if not source_uri_scheme:
             raise SpecialistDataError("Training blocked: specialist source_uri must be a documented provenance URI.")
-        if "train" not in permitted_use or any(
+        explicitly_permitted = any(
+            phrase in permitted_use
+            for phrase in (
+                "training permitted", "permitted for training", "ai training",
+                "machine learning training", "machine-learning training",
+                "model training", "training only", "unit-test training",
+            )
+        )
+        explicitly_denied = any(
             phrase in permitted_use
             for phrase in (
                 "not for training", "no training", "training prohibited",
                 "training not permitted", "training not allowed",
                 "not approved for training", "no permission to train",
-                "not permitted to train", "not allowed to train", "evaluation only",
+                "not permitted to train", "not allowed to train",
+                "not permitted for training", "not allowed for training",
+                "evaluation only",
             )
-        ):
+        )
+        if not explicitly_permitted or explicitly_denied:
             raise SpecialistDataError("Training blocked: specialist source permitted_use must explicitly allow training.")
         if source_uri_scheme in REMOTE_SOURCE_SCHEMES:
             raise SpecialistDataError(
