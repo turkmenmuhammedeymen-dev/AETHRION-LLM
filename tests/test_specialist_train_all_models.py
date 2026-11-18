@@ -196,7 +196,7 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
                         "reviewed_at":"2026-01-01T00:00:00Z",
                         "evidence_uri":"unit-test://human-review",
                         "speaker_consent_reviewed":audio,
-                        "safety_reviewed":model_id == "safety",
+                        "safety_reviewed":True,
                     },
                     "safety_min_per_class":25 if model_id == "safety" else None,
                     "dataset_path":dataset.name,
