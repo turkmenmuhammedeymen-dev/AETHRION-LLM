@@ -307,15 +307,25 @@ class CorpusPreparationTests(unittest.TestCase):
         }]}), encoding="utf-8")
         return source, manifest
 
-    def test_url_records_require_domain_review(self):
+    def test_url_records_can_be_prepared_but_training_requires_domain_review(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             self._write_url_source(root)
-            with self.assertRaisesRegex(ValueError, "--source-review"):
-                build_corpus(
-                    root, root / "sources.json", root / "out/corpus.txt",
-                    root / "out/report.json", min_chars=10, min_records=1,
-                    dataset_manifest_path=self._write_dataset_manifest(root),
+            dataset_manifest = self._write_dataset_manifest(root, allowed=False)
+            corpus = root / "out/corpus.txt"
+            report_path = root / "out/report.json"
+            report = build_corpus(
+                root, root / "sources.json", corpus,
+                report_path, min_chars=10, min_records=1,
+                dataset_manifest_path=dataset_manifest,
+            )
+            self.assertEqual(
+                {item["review_status"] for item in report["domain_review"]},
+                {"PENDING"},
+            )
+            with self.assertRaisesRegex(ValueError, "training_allowed to true"):
+                validate_training_approval(
+                    dataset_manifest, root / "sources.json", root, corpus, report_path
                 )
 
     def test_pending_domain_review_blocks_training(self):
@@ -338,12 +348,19 @@ class CorpusPreparationTests(unittest.TestCase):
                     "attribution_required": "UNKNOWN",
                     "review_status": "PENDING",
                 })
-            with self.assertRaisesRegex(ValueError, "Training blocked"):
-                build_corpus(
-                    root, root / "sources.json", root / "out/corpus.txt",
-                    root / "out/report.json", min_chars=10, min_records=1,
-                    source_review_path=review,
-                    dataset_manifest_path=self._write_dataset_manifest(root),
+            dataset_manifest = self._write_dataset_manifest(root)
+            corpus = root / "out/corpus.txt"
+            report_path = root / "out/report.json"
+            build_corpus(
+                root, root / "sources.json", corpus,
+                report_path, min_chars=10, min_records=1,
+                source_review_path=review,
+                dataset_manifest_path=dataset_manifest,
+            )
+            with self.assertRaisesRegex(ValueError, "unapproved domains"):
+                validate_training_approval(
+                    dataset_manifest, root / "sources.json", root, corpus,
+                    report_path, source_review_path=review,
                 )
 
     def test_evidence_backed_domain_approval_allows_reviewed_record(self):
