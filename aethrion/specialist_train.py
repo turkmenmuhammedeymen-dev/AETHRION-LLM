@@ -265,8 +265,9 @@ def train_specialist(
     missing = required - set(config)
     if missing:
         raise ValueError("Missing specialist training keys: " + ", ".join(sorted(missing)))
-    for key in ("max_steps", "batch_size", "eval_interval", "save_interval", "seed"):
-        require_int(config[key], key, minimum=1 if key != "seed" else 0)
+    for key in ("max_steps", "batch_size", "eval_interval", "save_interval"):
+        require_int(config[key], key, minimum=1)
+    require_int(config["seed"], "seed", minimum=0, maximum=2**32 - 1)
     require_finite_number(config["learning_rate"], "learning_rate", minimum=0, minimum_inclusive=False)
     require_finite_number(config["weight_decay"], "weight_decay", minimum=0)
     require_finite_number(config["grad_clip"], "grad_clip", minimum=0, minimum_inclusive=False)
