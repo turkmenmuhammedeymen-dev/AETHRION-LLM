@@ -132,7 +132,13 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
         Capability.DOCUMENT, Capability.SAFETY,
     )
     safety_ready = runtime.registry.status(Capability.SAFETY.value) == "ready"
+    # Text SAFE can review prompts and text results, but cannot inspect image/3D
+    # artifacts. Never expose file-producing visual models until an independent
+    # local visual-output safety verifier is implemented and release-gated.
+    visual_output_capabilities = {Capability.IMAGE, Capability.THREE_D}
     for capability in supported:
+        if capability in visual_output_capabilities:
+            continue
         if runtime.registry.status(capability.value) != "ready":
             continue
         # No capability except the SAFE classifier is exposed until SAFE itself
@@ -216,7 +222,7 @@ def get_3d_task(task_id:str):
 def generate_3d(request:dict[str,Any]):
     runtime=providers.get("runtime")
     if runtime is None or Capability.THREE_D.value not in router.available():
-        raise HTTPException(status_code=503,detail="AETHRION-3D is not trained and released.")
+        raise HTTPException(status_code=503,detail="AETHRION-3D is unavailable until local 3D-output safety screening is implemented and released.")
     prompt=request.get("prompt")
     if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>4000:
         raise HTTPException(status_code=400,detail="prompt must contain 1–4000 characters.")
