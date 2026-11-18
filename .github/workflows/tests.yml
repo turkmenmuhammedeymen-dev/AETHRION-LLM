@@ -1,7 +1,7 @@
 name: tests
 on:
   push:
-    branches: ["main", "hardening/**", "feature/**", "feat/**", "audit/**", "security/**"]
+    branches: ["main", "hardening/**", "feature/**", "feat/**", "audit/**", "security/**", "data/**", "training/**"]
   pull_request:
     branches: ["main"]
 permissions:
