@@ -201,7 +201,10 @@ def capabilities():
     except Exception as exc:
         model_status = {"registry": f"error:{type(exc).__name__}"}
     return {"available":available,"unavailable":[n for n in all_names if n not in available],
-            "model_status":model_status,"execution_policy":"local_only","credentials_exposed":False}
+            "model_status":model_status,"execution_policy":"local_only","credentials_exposed":False,
+            "assistant_entrypoint":"/assistant","default_model":"chat",
+            "routing_mode":"deterministic_high_precision_with_chat_fallback",
+            "internal_dependencies":{"tts":["vocoder","asr"],"specialist_text_io":["safety"]}}
 
 @app.post("/assistant", dependencies=[Depends(require_api_token)])
 def assistant(request: DispatchRequest):
