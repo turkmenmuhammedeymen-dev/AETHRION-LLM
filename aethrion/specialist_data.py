@@ -329,21 +329,21 @@ def validate_specialist_dataset(
         if not source_uri_scheme:
             raise SpecialistDataError("Training blocked: specialist source_uri must be a documented provenance URI.")
         explicitly_permitted = bool(re.search(
-            r"\\b(training|train|machine learning|machine-learning|model development)\\b",
+            r"\b(training|train|machine learning|machine-learning|model development)\b",
             permitted_use,
         ))
         explicitly_denied = (
             re.search(
-                r"\\b(?:not|no|never|prohibited|forbidden|disallow(?:ed)?|excluded|without)\\b"
-                r".{0,48}\\b(?:training|train|machine learning|machine-learning|model development)\\b",
+                r"\b(?:not|no|never|prohibited|forbidden|disallow(?:ed)?|excluded|without)\b"
+                r".{0,48}\b(?:training|train|machine learning|machine-learning|model development)\b",
                 permitted_use,
             )
             or re.search(
-                r"\\b(?:training|train|machine learning|machine-learning|model development)\\b"
-                r".{0,48}\\b(?:not allowed|not permitted|not authorized|unauthorized|prohibited|forbidden|disallowed|excluded)\\b",
+                r"\b(?:training|train|machine learning|machine-learning|model development)\b"
+                r".{0,48}\b(?:not allowed|not permitted|not authorized|unauthorized|prohibited|forbidden|disallowed|excluded)\b",
                 permitted_use,
             )
-            or re.search(r"\\b(?:evaluation|testing|unit tests)\\s+only\\b", permitted_use)
+            or re.search(r"\b(?:evaluation|testing|unit tests)\s+only\b", permitted_use)
         )
         if require_training_approval and (not explicitly_permitted or explicitly_denied):
             raise SpecialistDataError("Training blocked: source permitted_use excludes model training or lacks an explicit training grant.")
