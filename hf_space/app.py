@@ -365,17 +365,13 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             )
         with gr.Tab("3D Studio"):
             gr.Markdown(
-                "3D generation is disabled until local geometry-output safety screening "
-                "is implemented, tested and released."
+                "3D generation, image-to-3D conversion and asset downloads are disabled. "
+                "They will remain unavailable until local geometry-output safety screening "
+                "and a server-owned, access-controlled artifact store are implemented, "
+                "tested and released."
             )
-            task_msg=gr.Markdown()
-            task_ref=gr.Textbox(label="Local OBJ file path")
             gr.Button("Create from text — unavailable", interactive=False)
-            image_ref=gr.Image(type="filepath",sources=["upload"],label="Image-to-3D reference")
-            texture=gr.Textbox(label="Optional texture prompt")
-            gr.Button("Image-to-3D unavailable — not implemented", interactive=False)
-            task_status=gr.Markdown();model_file=gr.File(label="Generated OBJ point cloud (vertices only)")
-            gr.Button("Check / download OBJ point cloud").click(three_d_poll,inputs=task_ref,outputs=[task_status,model_file])
+            gr.Button("Image-to-3D — unavailable", interactive=False)
         with gr.Tab("Research"):
             q=gr.Textbox(lines=3,label="Research question");o=gr.Markdown()
             gr.Button("Search").click(research,inputs=q,outputs=o)
