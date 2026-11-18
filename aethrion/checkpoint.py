@@ -118,9 +118,14 @@ def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
                 _fsync_file(previous_sidecar_tmp)
                 os.replace(previous_tmp, previous)
                 os.replace(previous_sidecar_tmp, previous_sidecar)
+                # Make the complete backup pair durable before touching the live pair.
+                _fsync_directory(target.parent)
 
         os.replace(temporary, target)
         os.replace(sidecar_temporary, sidecar)
+        # The checkpoint and sidecar are separate renames: a crash between them
+        # may invalidate the live pair, so the already-durable previous pair is
+        # the recovery boundary.
         _fsync_directory(target.parent)
         return checksum
     finally:
