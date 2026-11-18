@@ -461,7 +461,7 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.assertIn("content does not match", response.json()["detail"])
 
     def test_upload_payload_validator_checks_modality_signatures_and_text_encoding(self):
-        api._validate_upload_payload(".png", b"\\x89PNG\\r\\n\\x1a\\nbody")
+        api._validate_upload_payload(".png", b"\x89PNG\r\n\x1a\nbody")
         api._validate_upload_payload(".wav", b"RIFF\x00\x00\x00\x00WAVEdata")
         api._validate_upload_payload(".pdf", b"%PDF-1.7")
         api._validate_upload_payload(".txt", "Merhaba".encode("utf-8"))
