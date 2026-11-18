@@ -35,17 +35,24 @@ def _read_config(path: Path) -> dict[str, Any]:
 
 
 def _resolve_repo_input(repo: Path, raw_value: Any, field_name: str) -> Path:
-    """Resolve a configured input only when it stays inside the repository."""
+    """Resolve an existing regular input file confined to the repository."""
     if not isinstance(raw_value, str) or not raw_value.strip():
         raise FamilyTrainingError(f"A non-empty relative {field_name} is required.")
     configured = Path(raw_value)
-    if configured.is_absolute() or any(part == ".." for part in configured.parts):
+    if (
+        configured.is_absolute()
+        or "\\" in raw_value
+        or (len(raw_value) >= 2 and raw_value[1] == ":")
+        or any(part in {"", ".", ".."} for part in raw_value.split("/"))
+    ):
         raise FamilyTrainingError(f"{field_name} must be a safe relative path.")
     resolved = (repo / configured).resolve()
     try:
         resolved.relative_to(repo)
     except ValueError as exc:
         raise FamilyTrainingError(f"Configured {field_name} escapes the repository root.") from exc
+    if not resolved.is_file():
+        raise FamilyTrainingError(f"Configured {field_name} does not exist as a regular file: {raw_value}")
     return resolved
 
 def _resolve_output_dir(repo: Path, raw_value: Any) -> Path:
