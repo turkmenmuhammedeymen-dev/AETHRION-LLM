@@ -443,8 +443,6 @@ class SpecialistTrainingTests(unittest.TestCase):
                 _load_checkpoint(checkpoint, torch.device("cpu"))
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
     def test_specialist_first_checkpoint_split_write_fails_closed_without_previous(self):
@@ -499,3 +497,7 @@ if __name__ == "__main__":
             self.assertTrue(sidecar_temporary.is_file())
             self.assertFalse(checkpoint.exists())
             self.assertFalse(Path(str(checkpoint) + ".previous").exists())
+
+
+if __name__ == "__main__":
+    unittest.main()
