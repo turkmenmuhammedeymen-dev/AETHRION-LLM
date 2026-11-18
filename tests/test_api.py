@@ -527,4 +527,15 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.assertEqual(invalid_json.exception.status_code, 400)
 
 
+class HealthEndpointContractTests(unittest.TestCase):
+    def test_health_version_matches_openapi_application_version(self):
+        client = TestClient(api.app)
+        health = client.get("/health")
+        openapi = client.get("/openapi.json")
+        self.assertEqual(health.status_code, 200, health.text)
+        self.assertEqual(openapi.status_code, 200, openapi.text)
+        self.assertEqual(health.json()["version"], api.app.version)
+        self.assertEqual(openapi.json()["info"]["version"], api.app.version)
+
+
 if __name__=="__main__": unittest.main()
