@@ -363,18 +363,18 @@ def build_corpus(
     _write_records(output_path, ordered_split_records)
 
     domain_report = []
-    if domain_reviews is not None:
-        for domain, count in sorted(domain_counts.items()):
-            review = domain_reviews[domain]
-            domain_report.append({
-                "domain": domain,
-                "records": count,
-                "license_name": review["license_name"] if review else None,
-                "license_evidence_url": review["license_evidence_url"] if review else None,
-                "rights_holder": review["rights_holder"] if review else None,
-                "attribution_required": review["attribution_required"] if review else None,
-                "review_status": review["review_status"] if review else "PENDING",
-            })
+    for domain, count in sorted(domain_counts.items()):
+        review = domain_reviews.get(domain) if domain_reviews is not None else None
+        domain_report.append({
+            "domain": domain,
+            "records": count,
+            "license_name": review["license_name"] if review else None,
+            "license_evidence_url": review["license_evidence_url"] if review else None,
+            "rights_holder": review["rights_holder"] if review else None,
+            "attribution_required": review["attribution_required"] if review else None,
+            "review_status": review["review_status"] if review else "PENDING",
+            "approved": bool(review and review["approved"]),
+        })
 
     report = {
         "format": "aethrion-corpus-report-v2",
@@ -398,8 +398,9 @@ def build_corpus(
         "splits": split_report,
         "sources": stats,
         "warning": (
-            "Automated checks do not replace human license, privacy, or quality review. "
-            "URL-attributed records require an approved exact-host review."
+            "Corpus preparation is not training authorization. Pending source or domain reviews "
+            "must pass validate_training_approval before any model training. Automated checks "
+            "do not replace human rights, privacy, quality, or consent review."
         ),
     }
     report_path.parent.mkdir(parents=True, exist_ok=True)
