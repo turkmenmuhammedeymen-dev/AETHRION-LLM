@@ -8,9 +8,9 @@ or start training by itself.
 
 From the repository root:
 
-\`\`\`bash
+```bash
 python -m aethrion.train_family
-\`\`\`
+```
 
 The default is preflight-only. It validates the exact model-specific dataset
 and governance gates. A blocked model is not queued and no optimizer is
@@ -18,17 +18,17 @@ initialized. Do not set approval fields merely to make preflight pass.
 
 ## Execute only after every relevant approval is complete
 
-\`\`\`bash
+```bash
 python -m aethrion.train_family --execute --report artifacts/family-report.json
-\`\`\`
+```
 
 The orchestrator runs models sequentially and revalidates each model immediately
 before its trainer starts. Each trainer writes its own checkpoint and metrics.
 The family supervisor also records:
 
-- \`artifacts/training_sessions/<session-id>.json\`: atomic latest session
+- `artifacts/training_sessions/<session-id>.json`: atomic latest session
   snapshot, current model, per-model outcome and release count (always zero).
-- \`artifacts/training_sessions/<session-id>.jsonl\`: append-only event journal
+- `artifacts/training_sessions/<session-id>.jsonl`: append-only event journal
   with a flushed and fsynced record for session/model start, finish, block and
   final session outcome.
 
@@ -45,39 +45,39 @@ contains model/optimizer/scaler state where applicable, RNG state, data hashes,
 tokenizer/provenance hashes and the training configuration.
 
 Run the same family command again after the environment is available. Each
-model preflight detects its existing \`checkpoint_last.pt\` and passes
-\`--resume\` to the relevant trainer. Resume is refused if the approved dataset,
+model preflight detects its existing `checkpoint_last.pt` and passes
+`--resume` to the relevant trainer. Resume is refused if the approved dataset,
 tokenizer, source/approval manifest, model configuration or fixed optimizer
 settings have changed. Increasing the configured step horizon is supported;
 shortening it is not.
 
 A sudden power loss, kernel kill, machine crash or forced termination cannot
 run a signal handler. In that case, the last atomically written checkpoint
-(and its verified \`.previous\` generation) is the recovery point. The family
-journal may remain marked \`running\`; inspect it together with each model's
-\`training_report.json\` and checkpoint checksum before resuming.
+(and its verified `.previous` generation) is the recovery point. The family
+journal may remain marked `running`; inspect it together with each model's
+`training_report.json` and checkpoint checksum before resuming.
 
 ## Artifact integrity and portability
 
-Checkpoint payloads are loaded with PyTorch \`weights_only=True\`; SHA-256
+Checkpoint payloads are loaded with PyTorch `weights_only=True`; SHA-256
 sidecars are checked before deserialization. Checkpoint and JSON snapshots are
 written through temporary files, fsynced, then atomically replaced. Directory
 entries are fsynced where the operating system/filesystem supports it. The
 specialist and base trainers retain their own previous verified checkpoint
 generation.
 
-Keep the entire \`artifacts/\` directory on persistent storage. A temporary
+Keep the entire `artifacts/` directory on persistent storage. A temporary
 Kaggle/Colab runtime disk is not a backup: copy artifacts to durable storage
 before closing or deleting the runtime. Do not commit large checkpoints,
 private datasets or credentials to Git.
 
 ## Status interpretation
 
-- \`blocked\`: governance, dataset, provenance or configuration gate did not pass.
-- \`training_interrupted_not_released\`: paused at a checkpoint; eligible to
+- `blocked`: governance, dataset, provenance or configuration gate did not pass.
+- `training_interrupted_not_released`: paused at a checkpoint; eligible to
   resume only after the same integrity and approval checks pass again.
-- \`training_completed_not_released\`: optimizer finished; model is not released.
-- \`released_count: 0\`: no model release is implied by this training workflow.
+- `training_completed_not_released`: optimizer finished; model is not released.
+- `released_count: 0`: no model release is implied by this training workflow.
 
 Independent held-out evaluation, safety/security review and explicit human
 release approval remain mandatory. Development fixtures are for tests only and
