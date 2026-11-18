@@ -6,6 +6,8 @@ import sys
 import tempfile
 import unittest
 
+import numpy as np
+
 from aethrion.specialist_prepare_visual import prepare_visual_dataset
 
 MODEL_IDS = ("chat","code","vision","image","asr","tts","3d","research","document","safety","vocoder")
@@ -84,7 +86,7 @@ class DevFixtureGeneratorTests(unittest.TestCase):
                     self.assertEqual(manifest["preparation"]["split_counts"], {
                         "train": 1, "validation": 1, "test": 1,
                     })
-                    with __import__("numpy").load(result["dataset"], allow_pickle=False) as arrays:
+                    with np.load(result["dataset"], allow_pickle=False) as arrays:
                         self.assertEqual(len(arrays["sample_id"]), 3)
                         self.assertEqual(set(arrays["split"].tolist()), {"train", "validation", "test"})
                         if model_id == "3d":
