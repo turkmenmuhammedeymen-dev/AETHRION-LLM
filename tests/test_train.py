@@ -53,7 +53,7 @@ class TrainingUtilityTests(unittest.TestCase):
 
         class UnsafePayload:
             def __reduce__(self):
-                return (str, ("unsafe",))
+                return (eval, ("1 + 1",))
 
         with tempfile.TemporaryDirectory() as directory:
             checkpoint = Path(directory) / "unsafe.pt"
@@ -70,7 +70,7 @@ class TrainingUtilityTests(unittest.TestCase):
                 "extra": UnsafePayload(),
             }, checkpoint)
             digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
-            Path(str(checkpoint) + ".sha256").write_text(digest + "\\n", encoding="ascii")
+            Path(str(checkpoint) + ".sha256").write_text(digest + "\n", encoding="ascii")
             with self.assertRaisesRegex(ValueError, "safely deserialized"):
                 load_checkpoint(checkpoint, map_location="cpu")
 
