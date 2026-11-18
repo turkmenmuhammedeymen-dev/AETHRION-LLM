@@ -301,6 +301,7 @@ class ApiHttpIntegrationTests(unittest.TestCase):
     def test_health_endpoint_remains_public(self):
         response=self.client.get("/health")
         self.assertEqual(response.status_code,200)
+        self.assertEqual(response.json()["version"], api.app.version)
 
     def test_every_non_health_api_route_requires_bearer_token(self):
         from fastapi.routing import APIRoute
