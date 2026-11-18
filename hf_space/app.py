@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from aethrion.api import build_router, get_native_model_statuses, _require_safety_allow_http, _require_safety_allow_chunks_http
 from aethrion.document_tools import create_document, extract_document_text, replace_document_text
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
-from aethrion.orchestrator import AssistantOrchestrator, AssistantInputRequired
+from aethrion.orchestrator import AssistantOrchestrator, AssistantInputRequired, classify_intent
 from aethrion.workspace_agent import MAX_ARCHIVE_BYTES, ProjectWorkspaceAgent, WorkspaceError, read_project_zip
 from aethrion.zerogpu_preflight import run_zero_gpu_preflight
 from aethrion.space_auth import space_auth_required
@@ -81,11 +81,11 @@ def gpu_diagnostics():
 
 
 @spaces.GPU(duration=60)
-def _gpu_local_chat(prompt):
-    # The main assistant orchestrator delegates clear tasks to native specialists;
-    # ordinary or ambiguous conversation falls back to AETHRION-CHAT.
+def _gpu_local_chat(prompt, capability):
+    # Intent is classified from the latest user turn, not quoted conversation history.
+    # The complete history is retained only when the selected route is CHAT.
     result = AssistantOrchestrator(router).dispatch(
-        prompt, {"max_new_tokens": 256}
+        prompt, {"max_new_tokens": 256, "capability": capability}
     )
     output = result.output
     text = output.get("text", str(output)) if isinstance(output, dict) else str(output)
@@ -141,9 +141,10 @@ def chat(message, history):
     for item in (history or [])[-8:]:
         if isinstance(item, dict) and isinstance(item.get("content"), str):
             context.append(str(item.get("role", "user")) + ": " + item["content"][:1500])
+    intent = classify_intent(message[:4000])
     prompt = "\n".join(context + ["user: " + message[:4000], "assistant:"])
     try:
-        return _gpu_local_chat(prompt)
+        return _gpu_local_chat(prompt, intent.capability.value)
     except AssistantInputRequired as exc:
         return str(exc)
     except CapabilityUnavailable as exc:
