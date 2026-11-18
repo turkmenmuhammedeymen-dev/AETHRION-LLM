@@ -113,7 +113,12 @@ jobs:
           assert "not trained" in app.vision_compare("placeholder.png", "cat").lower()
           assert "unavailable" in app.three_d_text("a small tree")[0].lower()
           assert "not trained" in app.voice("placeholder.wav")[0].lower()
-          assert "not trained" in app.analyse("placeholder.pdf", "summarize").lower()
+          document_smoke = Path(tempfile.gettempdir()) / "aethrion-space-smoke.pdf"
+          document_smoke.write_bytes(b"%PDF-1.4\\n%%EOF")
+          try:
+              assert "not trained" in app.analyse(str(document_smoke), "summarize").lower()
+          finally:
+              document_smoke.unlink(missing_ok=True)
           app.SPACE_AUTH_ENABLED = False
           assert app.REMOTE_PROVIDERS_ENABLED is False, "The production Space must remain native-only"
 
