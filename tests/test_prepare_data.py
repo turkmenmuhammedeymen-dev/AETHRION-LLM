@@ -135,7 +135,7 @@ class CorpusPreparationTests(unittest.TestCase):
             report["output"]["sha256"] = hashlib.sha256(combined).hexdigest()
             report["output"]["bytes"] = len(combined)
             report_path.write_text(json.dumps(report), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "does not reproduce from reviewed source records"):
+            with self.assertRaisesRegex(ValueError, "signature verification failed"):
                 validate_training_approval(
                     dataset_manifest, manifest, root, corpus, report_path
                 )
