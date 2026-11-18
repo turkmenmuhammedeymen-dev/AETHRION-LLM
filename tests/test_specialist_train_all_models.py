@@ -114,6 +114,30 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
             })
         return arrays
 
+    def test_model_data_config_compatibility_is_checked_for_all_specialists(self):
+        from aethrion.specialist_train import _validate_model_data_compatibility
+
+        mismatches = {
+            "code": {"block_size": 1},
+            "vision": {"image_size": 64},
+            "image": {"image_size": 64},
+            "asr": {"n_mels": 80},
+            "tts": {"mel_bins": 80},
+            "vocoder": {"hop_length": 8},
+            "3d": {"points": 32},
+            "research": {"max_length": 4},
+            "document": {"max_length": 2},
+            "safety": {"max_length": 2},
+        }
+        for model_id, model_config in MODEL_CONFIGS.items():
+            with self.subTest(model_id=model_id):
+                arrays = self._arrays(model_id)
+                _validate_model_data_compatibility(model_id, arrays, model_config)
+                invalid = dict(model_config)
+                invalid.update(mismatches[model_id])
+                with self.assertRaises(ValueError):
+                    _validate_model_data_compatibility(model_id, arrays, invalid)
+
     def test_each_specialist_completes_one_temporary_smoke_step_from_random_init(self):
         for model_id in MODEL_CONFIGS:
             with self.subTest(model_id=model_id), tempfile.TemporaryDirectory() as tmp:
