@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 from PIL import Image
 
-from aethrion.specialist_prepare_visual import prepare_visual_dataset
+from aethrion.specialist_prepare_visual import VisualPreparationError, _resolve_asset, prepare_visual_dataset
 
 
 class VisualPreparationTests(unittest.TestCase):
@@ -34,6 +34,28 @@ class VisualPreparationTests(unittest.TestCase):
         source = root / f"{model_id}.jsonl"
         source.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
         return source
+
+    def test_visual_asset_paths_reject_urls_windows_paths_and_traversal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            for value in ("../outside.png", "https://example.org/image.png", r"C:\\images\\sample.png", r"folder\\sample.png"):
+                with self.subTest(value=value):
+                    with self.assertRaises(VisualPreparationError):
+                        _resolve_asset(root, value, "sample")
+
+    def test_visual_asset_symlink_cannot_escape_source_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "inside"
+            root.mkdir()
+            outside = Path(directory) / "outside.png"
+            outside.write_bytes(b"not an image")
+            link = root / "linked.png"
+            try:
+                link.symlink_to(outside)
+            except (OSError, NotImplementedError):
+                self.skipTest("Symlinks are unavailable on this runner.")
+            with self.assertRaisesRegex(VisualPreparationError, "escapes"):
+                _resolve_asset(root, "linked.png", "sample")
 
     def test_vision_and_image_assets_are_resized_and_normalized_to_uint8_nchw(self):
         for model_id, size in (("vision", 224), ("image", 64)):
