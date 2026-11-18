@@ -11,25 +11,21 @@ runtime.
 
 This does not mean the software stack has zero dependencies. Python, PyTorch,
 CUDA/ROCm or CPU kernels, file-format libraries, operating systems, and
-hardware are execution infrastructure, not pretrained AI models. Training
-data must have documented rights that permit the intended training use.
-Network access may be used for ordinary source-code collaboration and
-documented data acquisition only when separately approved; model inference
-must not depend on a remote service.
+hardware are execution infrastructure, not pretrained AI models. Training data must be first-party and owner-authored, with documented authorship, rights, privacy and human review. Third-party dataset downloads and training are not permitted under the current project policy. Network access is for source-code collaboration only; model inference must not depend on a remote service.
 
 ## Model family (separate weights and training objectives)
 
 | Capability | First-party model to build | Training objective / data |
 |---|---|---|
-| Chat and multilingual reasoning | AETHRION-BASE | Decoder-only causal LM; licensed multilingual text, instruction tuning, preference/safety evaluation |
-| Code | AETHRION-CODE | Separate decoder-only model; permissively licensed source code, tests, explanations, repair pairs |
-| Image understanding | AETHRION-VISION | Vision encoder plus language connector / multimodal decoder; licensed image-text pairs and visual QA |
-| Image generation | AETHRION-IMAGE | Latent or pixel diffusion/flow model; licensed image-caption pairs, text-image alignment and safety |
-| Speech recognition | AETHRION-ASR | Audio encoder and sequence decoder; licensed speech/audio-text pairs |
-| Speech generation | AETHRION-TTS | Text/audio acoustic model plus vocoder; licensed speaker-consented recordings |
-| 3D understanding/generation | AETHRION-3D | 3D representation encoder/decoder (mesh/point/voxel or hybrid); licensed text/image/3D asset triples |
-| Research | AETHRION-RESEARCH | Native retriever/reranker and local index; approved local corpora, citations and provenance; no hosted search API |
-| File intelligence | AETHRION-DOC | Document-layout encoder and task model; licensed document/OCR/layout datasets |
+| Chat and multilingual reasoning | AETHRION-BASE | Decoder-only causal LM; owner-authored multilingual text, instruction tuning, preference/safety evaluation |
+| Code | AETHRION-CODE | Separate decoder-only model; owner-authored source code, tests, explanations, repair pairs |
+| Image understanding | AETHRION-VISION | Vision encoder plus language connector / multimodal decoder; owner-authored image-text pairs and visual QA |
+| Image generation | AETHRION-IMAGE | Latent or pixel diffusion/flow model; owner-authored image-caption pairs, text-image alignment and safety |
+| Speech recognition | AETHRION-ASR | Audio encoder and sequence decoder; consented owner-authored speech/audio-text pairs |
+| Speech generation | AETHRION-TTS | Text/audio acoustic model plus vocoder; owner-authored speaker-consented recordings |
+| 3D understanding/generation | AETHRION-3D | 3D representation encoder/decoder (mesh/point/voxel or hybrid); owner-authored text/image/3D asset triples |
+| Research | AETHRION-RESEARCH | Native retriever/reranker and local index; approved owner-authored local corpora, citations and provenance; no hosted search API |
+| File intelligence | AETHRION-DOC | Document-layout encoder and task model; owner-authored document/OCR/layout data |
 | Safety | AETHRION-SAFE | Separate classifier/reviewer plus policy training and adversarial evaluation; not a substitute for runtime controls |
 
 These are independent model programs, not claims that the weights or training
@@ -64,9 +60,7 @@ specialists, but it must not be presented as an image, speech, or 3D generator.
 A small randomly initialized Transformer is useful for validating a training
 pipeline, but it is not competitive with frontier systems. Each specialist
 requires substantial licensed data, compute, engineering, and evaluation.
-The current repository's small pilot configuration and previously available
-Kaggle T4 runtime are development resources only; they cannot establish
-frontier-level quality across all modalities. Do not inflate model size beyond
+The current repository's small pilot configuration and GitHub Actions CPU tests are development resources only; Hugging Face ZeroGPU requests are short-lived architecture/inference checks, not a persistent training worker. No approved long-running training compute environment is currently configured. Do not inflate model size beyond
 available memory or start expensive/long training without an approved data
 manifest and an explicit compute plan.
 
