@@ -203,11 +203,6 @@ def three_d_text(prompt):
 def three_d_image(path,texture_prompt):
     return "Current AETHRION-3D release architecture supports text-conditioned point clouds only; image-conditioned 3D is not implemented.", ""
 
-def three_d_poll(asset_path):
-    if asset_path and Path(asset_path).is_file():
-        return "Local OBJ point cloud is ready. It contains vertices only; no faces or textures.", asset_path
-    return "No local OBJ asset found. Generate a text-conditioned point cloud first.", None
-
 @spaces.GPU(duration=60)
 def research(query):
     if not SPACE_AUTH_ENABLED:
@@ -288,7 +283,7 @@ def make_doc(title,content,fmt):
     if len(title)+len(content)>20000:
         raise gr.Error("Document text exceeds the 20,000-character review limit.")
     try:
-        review_text=title+"\\n"+content
+        review_text=title+"\n"+content
         _require_safety_allow_http(runtime,review_text)
         _require_safety_allow_chunks_http(runtime,review_text)
         raw,name,mime=create_document(title,content,fmt)
