@@ -29,14 +29,21 @@ def _sha256(path: Path) -> str:
 
 
 def _safe_path(root: Path, relative: str) -> Path:
+    """Resolve a repository-relative source while rejecting symlinks in every path component."""
     candidate = Path(relative)
     if candidate.is_absolute() or chr(92) in relative or "://" in relative:
         raise ResearchIndexError("Only relative local research source paths are accepted.")
     if any(part in {"", ".", ".."} for part in relative.split("/")):
         raise ResearchIndexError("Research source path contains unsafe components.")
-    resolved = (root / candidate).resolve()
+    approved_root = root.resolve()
+    unresolved = approved_root
+    for part in candidate.parts:
+        unresolved = unresolved / part
+        if unresolved.is_symlink():
+            raise ResearchIndexError("Research source paths cannot contain symbolic links.")
+    resolved = unresolved.resolve()
     try:
-        resolved.relative_to(root.resolve())
+        resolved.relative_to(approved_root)
     except ValueError as exc:
         raise ResearchIndexError("Research source path escapes the approved data root.") from exc
     return resolved
