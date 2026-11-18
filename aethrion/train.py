@@ -126,6 +126,8 @@ def main() -> None:
                         help="Audit report produced by prepare_data for the exact training corpus.")
     parser.add_argument("--source-review", default=None,
                         help="Evidence-backed per-domain approval CSV for URL-attributed records.")
+    parser.add_argument("--session-id", required=False, default=None)
+    parser.add_argument("--attempt-id", required=False, default=None)
     args = parser.parse_args()
     cfg = json.loads(Path(args.config).read_text(encoding="utf-8"))
     required = (
@@ -169,6 +171,7 @@ def main() -> None:
     data_hash, tokenizer_hash = sha256_file(data_path), sha256_file(tokenizer_path)
     split_hashes = {name: split_info[name]["sha256"] for name in ("train", "validation", "test")}
     start_step = 0
+    checkpoint_generation = 0
     schedule_max_steps = cfg["max_steps"]
     if args.resume:
         checkpoint = load_checkpoint(args.resume, map_location=device)
@@ -201,6 +204,9 @@ def main() -> None:
             or schedule_max_steps > saved_training_config["max_steps"]
         ):
             raise ValueError("Resume checkpoint learning-rate schedule horizon is invalid.")
+        checkpoint_generation = checkpoint.get("checkpoint_generation", 0)
+        if type(checkpoint_generation) is not int or checkpoint_generation < 0:
+            raise ValueError("Checkpoint generation is invalid.")
         checkpoint_step = checkpoint.get("step")
         if type(checkpoint_step) is not int or checkpoint_step < 0:
             raise ValueError("Checkpoint step is invalid.")
@@ -273,9 +279,13 @@ def main() -> None:
             or _STOP_REQUESTED
         )
         if should_save:
+            checkpoint_generation += 1
             payload = {
                 "format_version": 4,
                 "step": step,
+                "checkpoint_generation": checkpoint_generation,
+                "session_id": args.session_id,
+                "attempt_id": args.attempt_id,
                 "model": model.state_dict(),
                 "optimizer": optimizer.state_dict(),
                 "scaler": scaler.state_dict(),
@@ -308,6 +318,10 @@ def main() -> None:
                 "status": "training_interrupted_not_released",
                 "release_status": "NOT_RELEASED",
                 "model_id": "chat",
+                "session_id": args.session_id,
+                "attempt_id": args.attempt_id,
+                "checkpoint_generation": checkpoint_generation,
+                "report_created_at_ns": time.time_ns(),
                 "step": step,
                 "dataset_sha256": data_hash,
                 "tokenizer_sha256": tokenizer_hash,
@@ -341,6 +355,10 @@ def main() -> None:
             "status": "training_complete_not_released",
             "release_status": "NOT_RELEASED",
             "model_id": "chat",
+            "session_id": args.session_id,
+            "attempt_id": args.attempt_id,
+            "checkpoint_generation": checkpoint_generation,
+            "report_created_at_ns": time.time_ns(),
             "step": final_step,
             "dataset_sha256": data_hash,
             "split_sha256": split_hashes,
