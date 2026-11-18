@@ -407,6 +407,7 @@ if __name__ == "__main__":
 
 
     def test_first_checkpoint_save_split_write_fails_closed_without_previous_generation(self):
+        from unittest.mock import patch
         import aethrion.checkpoint as checkpoint_module
         from aethrion.checkpoint import load_checkpoint, save_checkpoint
 
