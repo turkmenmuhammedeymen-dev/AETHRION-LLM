@@ -279,6 +279,13 @@ def _restore_rng_state(state: dict[str, Any]) -> None:
 
 def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
     """Atomically save a checkpoint and retain the previous verified generation."""
+    if (
+        not isinstance(payload, dict)
+        or payload.get("format") != "aethrion-specialist-checkpoint-v2"
+        or not isinstance(payload.get("training_config"), dict)
+        or not payload["training_config"]
+    ):
+        raise ValueError("Specialist checkpoint v2 requires a non-empty training_config object.")
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = Path(str(path) + ".tmp")
     checksum_path = Path(str(path) + ".sha256")
@@ -342,10 +349,12 @@ def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
             raise ValueError(
                 "Specialist checkpoint could not be safely deserialized; unsafe pickle objects are rejected."
             ) from exc
-        if not isinstance(payload, dict) or payload.get("format") != "aethrion-specialist-checkpoint-v1":
+        if not isinstance(payload, dict) or payload.get("format") != "aethrion-specialist-checkpoint-v2":
             raise ValueError("Unsupported specialist checkpoint format.")
         if required - set(payload):
             raise ValueError("Specialist checkpoint is missing required resume fields.")
+        if not isinstance(payload["training_config"], dict) or not payload["training_config"]:
+            raise ValueError("Specialist checkpoint training_config must be a non-empty object.")
         if type(payload.get("step")) is not int or payload["step"] < 0:
             raise ValueError("Specialist checkpoint step is invalid.")
         return payload
@@ -528,7 +537,7 @@ def train_specialist(
 
         if step % config["save_interval"] == 0 or step == config["max_steps"] - 1 or _STOP_REQUESTED:
             checkpoint_hash = _save_checkpoint(checkpoint_path, {
-                "format": "aethrion-specialist-checkpoint-v1",
+                "format": "aethrion-specialist-checkpoint-v2",
                 "model_id": model_id, "step": step,
                 "model_config": config["model_config"],
                 "training_config": _resume_training_config(config),
