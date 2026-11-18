@@ -149,7 +149,8 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
         if capability == Capability.RESEARCH:
             try:
                 runtime.validate_research_index()
-            except NativeModelError:
+            except Exception:
+                # Missing, stale, malformed or unreadable local indexes fail closed.
                 continue
         # No capability except the SAFE classifier is exposed until SAFE itself
         # has a verified local release.
