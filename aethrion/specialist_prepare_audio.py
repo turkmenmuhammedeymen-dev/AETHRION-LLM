@@ -17,7 +17,7 @@ import numpy as np
 import torch
 
 from aethrion.audio_features import log_mel_spectrogram, read_wav
-from aethrion.specialist_prepare import _group_id, _split
+from aethrion.specialist_prepare import _group_hash, _group_id, _split
 from aethrion.specialist_data import AUDIO_MODELS
 from aethrion.tokenizer import ByteBPETokenizer
 
