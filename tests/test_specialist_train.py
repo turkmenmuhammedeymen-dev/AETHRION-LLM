@@ -20,7 +20,7 @@ class SpecialistTrainingTests(unittest.TestCase):
         np.savez(
             dataset,
             sample_id=np.asarray(["s1", "s2", "s3", "s4", "s5", "s6"]),
-            group_id=np.asarray(["g1", "g2", "g3", "g4", "g5", "g6"]),
+            group_id=np.asarray([hashlib.sha256(x.encode()).hexdigest() for x in ("g1", "g2", "g3", "g4", "g5", "g6")]),
             split=np.asarray(["train", "train", "validation", "validation", "test", "test"]),
             token_ids=np.random.default_rng(42).integers(0, 256, size=(6, 12), dtype=np.int64),
         )
