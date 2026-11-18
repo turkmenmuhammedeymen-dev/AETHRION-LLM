@@ -36,9 +36,10 @@ application and its existing ZeroGPU allocation is used only for bounded,
 GPU-decorated inference/diagnostic requests. See the
 [Hugging Face-first workflow](docs/HUGGINGFACE_WORKFLOW.md).
 
-Codespaces is optional: use it only when a local shell, dependency debugging
-or a task that cannot be completed through GitHub's repository interface and
-CI is genuinely needed. It is CPU-only in this project.
+Kaggle, Colab and Codespaces are outside the current authorized scope. Use
+GitHub Actions for CPU CI and the designated Hugging Face Space for short
+request-scoped inference and architecture checks; neither is a persistent
+training worker.
 
 ZeroGPU is not a persistent training machine and does not make a full model
 family trainable by itself. Do not start paid HF Jobs or change Space hardware
