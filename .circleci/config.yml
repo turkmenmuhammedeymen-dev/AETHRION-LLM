@@ -31,7 +31,7 @@ jobs:
       - run:
           name: Upload curated Space runtime and latest native package
           command: |
-            python -c "import os; from huggingface_hub import HfApi; token=os.environ.get('HF_TOKEN'); assert token, 'HF_TOKEN is missing from the aethrion-deploy CircleCI context'; HfApi(token=token).upload_folder(folder_path='hf_space', repo_id='vizyon2027/AETHRION-LLM', repo_type='space', commit_message='Deploy AETHRION-LLM from CircleCI', ignore_patterns=['**/__pycache__/**', '**/*.pyc', '.DS_Store']); print('AETHRION-LLM Space files uploaded successfully.')"
+            python -c "import os; from huggingface_hub import HfApi; token=os.environ.get('HF_TOKEN'); assert token, 'HF_TOKEN is missing from the aethrion-deploy CircleCI context'; HfApi(token=token).upload_folder(folder_path='hf_space', repo_id='vizyon2027/AETHRION-LLM', repo_type='space', commit_message='Deploy AETHRION-LLM from CircleCI', ignore_patterns=['README.md', '**/__pycache__/**', '**/*.pyc', '.DS_Store']); print('AETHRION-LLM Space files uploaded successfully.')"
 
 workflows:
   aethrion-ci:
