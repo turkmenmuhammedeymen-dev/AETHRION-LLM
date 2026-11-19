@@ -116,6 +116,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/small.json")
     parser.add_argument("--resume", default=None)
+    parser.add_argument("--session-steps", type=int, default=None,
+                        help="Pause safely after this many optimizer steps; resume with the same config.")
     parser.add_argument("--dataset-manifest", required=True,
                         help="Dataset manifest; training_allowed must be explicitly true.")
     parser.add_argument("--source-manifest", required=True,
@@ -127,6 +129,8 @@ def main() -> None:
     parser.add_argument("--source-review", default=None,
                         help="Evidence-backed per-domain approval CSV for URL-attributed records.")
     args = parser.parse_args()
+    if args.session_steps is not None and args.session_steps < 1:
+        parser.error("--session-steps must be a positive integer")
     cfg = json.loads(Path(args.config).read_text(encoding="utf-8"))
     required = (
         "seed", "data_path", "tokenizer_path", "output_dir", "vocab_size",
@@ -245,7 +249,12 @@ def main() -> None:
         if not torch.isfinite(grad_norm).item():
             raise FloatingPointError(f"Non-finite BASE gradient norm at step {step}.")
         scaler.step(optimizer); scaler.update()
-        if step % cfg["eval_interval"] == 0:
+        session_limit_reached = (
+            args.session_steps is not None
+            and (step - start_step + 1) >= args.session_steps
+            and step < cfg["max_steps"] - 1
+        )
+        if step % cfg["eval_interval"] == 0 or session_limit_reached:
             last_metrics = estimate_loss(model, train_data, val_data, cfg, device)
             elapsed = max(time.perf_counter() - started, 1e-9)
             tokens_processed = (step + 1) * cfg["batch_size"] * cfg["block_size"] * cfg["gradient_accumulation_steps"]
@@ -271,6 +280,7 @@ def main() -> None:
             step % cfg["save_interval"] == 0
             or step == cfg["max_steps"] - 1
             or _STOP_REQUESTED
+            or session_limit_reached
         )
         if should_save:
             payload = {
@@ -293,7 +303,7 @@ def main() -> None:
             checksum = save_checkpoint(payload, target)
             print(f"Checkpoint saved at step {step} | sha256={checksum}", flush=True)
 
-        if _STOP_REQUESTED:
+        if _STOP_REQUESTED or session_limit_reached:
             elapsed = max(time.perf_counter() - started, 1e-9)
             write_json_atomic({
                 "status": "interrupted",
