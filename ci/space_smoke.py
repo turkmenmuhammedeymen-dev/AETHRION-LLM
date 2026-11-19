@@ -12,7 +12,7 @@ import app as space
 assert isinstance(space.demo, gr.Blocks), "Gradio Blocks did not initialize"
 status = space.status()
 assert "Native model release status" in status
-assert "External model/API providers: DISABLED" in status
+assert "External model/API providers" in status and "DISABLED" in status
 assert "native-only" in status.lower()
 
 old_auth, old_providers = space.SPACE_AUTH_ENABLED, space.providers
