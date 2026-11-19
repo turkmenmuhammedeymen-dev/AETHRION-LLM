@@ -12,8 +12,9 @@
 
 On `main` and `circleci-project-setup`:
 
-1. `build-and-test` checks out the repository, installs `.[api,visual,documents,space,data]` from `pyproject.toml`, installs pytest and runs `python -m pytest -q`.
-2. `deploy-to-hugging-face` runs only after the test job succeeds.
+1. `build-and-test` checks out the repository, installs `.[api,visual,documents,space,data]` from `pyproject.toml` plus pytest, and runs `python -m pytest -q`.
+2. The same job then runs `python ci/space_smoke.py` to import the Gradio Space and exercise its safe no-secret runtime/document paths.
+3. `deploy-to-hugging-face` runs only after both test commands succeed.
 3. The deployment stages the current root `aethrion/` package and the `configs/`, `docs/`, `tests/`, `data/`, `ci/` and `scripts/` directories into `hf_space/`.
 4. It also stages `pyproject.toml` and `models/manifest.example.json`, copies the repository README to `docs/REPOSITORY_README.md`, removes the private owner-review authorization document, and uploads `hf_space/` to the Space.
 
@@ -30,7 +31,7 @@ The CircleCI context `aethrion-deploy` supplies `HF_TOKEN`. Keep credentials in 
 5. After merge, confirm the `deploy-to-hugging-face` job succeeds.
 6. Verify the resulting files in `vizyon2027/AETHRION-LLM` and inspect the Space build/runtime logs.
 
-A green unit-test job proves software tests passed; it does not prove the Space is currently healthy, that a GPU was allocated, or that any model has been trained. The separate `ci/space_smoke.py` script is a diagnostic utility; it is not invoked by the current CircleCI config.
+A green `build-and-test` job proves the unit tests and the Space runtime smoke test passed in CircleCI; it does not prove the live Space is currently healthy, that a GPU was allocated, or that any model has been trained. The smoke test imports the Gradio app and exercises selected no-secret runtime paths; it is not a live Hugging Face deployment health check.
 
 Do not edit the separate Vizyon2027 product website/repository as part of this process. The Hugging Face Space named above is the AETHRION-LLM deployment target.
 
