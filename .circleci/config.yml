@@ -38,6 +38,7 @@ jobs:
             cp pyproject.toml hf_space/pyproject.toml
             cp models/manifest.example.json hf_space/models/manifest.example.json
             rm -f hf_space/docs/OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md
+            cp README.md hf_space/docs/REPOSITORY_README.md
       - run:
           name: Upload complete AETHRION Space project
           command: |
