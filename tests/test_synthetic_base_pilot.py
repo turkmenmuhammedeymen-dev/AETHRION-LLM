@@ -44,6 +44,19 @@ class SyntheticBasePilotTests(unittest.TestCase):
 
             self.assertGreaterEqual(total, 100)
 
+            # The normal training-source loader must reject this pilot by default.
+            sys.path.insert(0, str(root))
+            try:
+                from aethrion.prepare_data import load_sources_manifest
+
+                with self.assertRaisesRegex(
+                    ValueError, "Source is not approved for training"
+                ):
+                    load_sources_manifest(output / "sources.json", output)
+            finally:
+                if str(root) in sys.path:
+                    sys.path.remove(str(root))
+
 
 if __name__ == "__main__":
     unittest.main()
