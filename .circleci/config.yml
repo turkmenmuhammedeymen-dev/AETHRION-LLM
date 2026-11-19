@@ -1,0 +1,58 @@
+version: 2.1
+
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+      - run:
+          name: Install AETHRION-LLM from pyproject.toml
+          command: |
+            python -m pip install --upgrade pip
+            python -m pip install -e ".[api,visual,documents,space,data]" pytest
+      - run:
+          name: Run unit tests
+          command: python -m pytest -q
+
+  deploy-to-hugging-face:
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+      - run:
+          name: Install Hugging Face deployment client
+          command: python -m pip install --upgrade "huggingface-hub>=0.30,<1.0"
+      - run:
+          name: Stage the latest native AETHRION package
+          command: |
+            rm -rf hf_space/aethrion
+            cp -R aethrion hf_space/aethrion
+      - run:
+          name: Stage complete safe project support files
+          command: |
+            for directory in configs docs tests data ci scripts; do
+              rm -rf "hf_space/$directory"
+              cp -R "$directory" "hf_space/$directory"
+            done
+            cp pyproject.toml hf_space/pyproject.toml
+            cp models/manifest.example.json hf_space/models/manifest.example.json
+            rm -f hf_space/docs/OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md
+            cp README.md hf_space/docs/REPOSITORY_README.md
+      - run:
+          name: Upload complete AETHRION Space project
+          command: |
+            python -c "import os; from huggingface_hub import HfApi; token=os.environ.get('HF_TOKEN'); assert token, 'HF_TOKEN is missing from the aethrion-deploy CircleCI context'; HfApi(token=token).upload_folder(folder_path='hf_space', repo_id='vizyon2027/AETHRION-LLM', repo_type='space', commit_message='Deploy complete AETHRION-LLM source, configs, docs, data governance and tests', ignore_patterns=['README.md', '**/__pycache__/**', '**/*.pyc', '.DS_Store']); print('AETHRION-LLM complete safe project uploaded successfully.')"
+
+workflows:
+  aethrion-ci:
+    jobs:
+      - build-and-test
+      - deploy-to-hugging-face:
+          requires:
+            - build-and-test
+          context:
+            - aethrion-deploy
+          filters:
+            branches:
+              only: [main, circleci-project-setup]
