@@ -9,6 +9,7 @@ from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailabl
 from aethrion.workspace_agent import MAX_ARCHIVE_BYTES, ProjectWorkspaceAgent, WorkspaceError, read_project_zip
 from aethrion.zerogpu_preflight import run_zero_gpu_preflight
 from aethrion.space_auth import space_auth_required
+from huggingface_hub import HfApi
 
 def _resolve_space_auth(environ=None):
     env = os.environ if environ is None else environ
@@ -400,6 +401,29 @@ def edit_project(path,task):
 
 with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.themes.Soft()) as demo:
     gr.Markdown("# AETHRION-LLM\n### Intelligence Without Limits")
+    gr.Markdown("#### Hugging Face repository access")
+    gr.LoginButton()
+    gr.LogoutButton()
+    oauth_status = gr.Markdown("OAuth session has not been checked.")
+    demo.load(hf_oauth_status, inputs=None, outputs=oauth_status)
+    gr.Markdown("Upload a reviewed file to open a pull request. Direct writes to the default branch are disabled.")
+    hf_file = gr.File(label="Reviewed file", type="filepath")
+    hf_target = gr.Dropdown(
+        choices=["app.py", "README.md", "requirements.txt"],
+        value="app.py",
+        label="Allowed Space path",
+    )
+    hf_message = gr.Textbox(
+        label="Commit message",
+        value="Propose reviewed AETHRION Space update",
+        max_lines=1,
+    )
+    hf_result = gr.Markdown()
+    gr.Button("Create Hugging Face pull request").click(
+        propose_hf_space_file,
+        inputs=[hf_file, hf_target, hf_message],
+        outputs=hf_result,
+    )
     _zero_gpu_registration = gr.Button(visible=False, interactive=False)
     _zero_gpu_registration.click(
         fn=_zerogpu_registration_noop,
@@ -468,7 +492,7 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             a=gr.Audio(sources=["microphone","upload"],type="filepath")
             text=gr.Markdown();spoken=gr.Audio(type="filepath")
             gr.Button("Recognize and respond").click(voice,inputs=a,outputs=[text,spoken])
-    gr.Markdown("---\nCredentials stay in Space Secrets. Uploaded project code is never executed. Training is not started from this interface.")
+    gr.Markdown("---\nCredentials stay in Space Secrets or short-lived OAuth sessions. Repository publishing is owner-only, allowlisted and PR-only. Uploaded project code is never executed. Training is not started from this interface.")
 
 if __name__ == "__main__":
     demo.queue(default_concurrency_limit=2, max_size=20).launch(

@@ -7,6 +7,11 @@ sdk: gradio
 sdk_version: 5.49.1
 app_file: app.py
 pinned: false
+hf_oauth: true
+hf_oauth_expiration_minutes: 480
+hf_oauth_scopes:
+  - read-repos
+  - write-repos
 ---
 
 # AETHRION-LLM
@@ -49,3 +54,10 @@ See the [native-only model-family specification](https://github.com/turkmenmuham
 for model-family status and completion criteria. Dataset approval remains
 fail-closed until source rights, privacy, provenance and quality checks are
 completed.
+
+
+Hugging Face OAuth is used for owner-only repository publishing. The Space
+accepts uploads only for app.py, README.md and requirements.txt, and always
+creates a pull request rather than writing directly to the default branch.
+The OAuth token is never displayed or logged. GitHub publishing remains a
+separate GitHub-authorized workflow.
