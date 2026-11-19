@@ -174,9 +174,12 @@ def run_family(
     selected: list[str] | None = None,
     execute: bool = False,
     python_executable: str | None = None,
+    session_steps: int | None = None,
 ) -> dict[str, Any]:
     """Preflight or sequentially execute every selected, fully approved model."""
     repo = Path(root).resolve()
+    if session_steps is not None and (type(session_steps) is not int or session_steps < 1):
+        raise FamilyTrainingError("session_steps must be a positive integer.")
     model_ids = selected or list(MODEL_IDS)
     if len(set(model_ids)) != len(model_ids):
         raise FamilyTrainingError("Duplicate model IDs are not allowed.")
@@ -191,6 +194,8 @@ def run_family(
             command = list(plan["command"])
             if python_executable:
                 command[0] = python_executable
+            if session_steps is not None:
+                command.extend(["--session-steps", str(session_steps)])
             if not execute:
                 rows.append({**plan, "status": "ready_not_started"})
                 continue
@@ -249,11 +254,13 @@ def main() -> int:
         help="Actually run each model trainer after its complete data gate passes.",
     )
     parser.add_argument("--python", default=None, help="Python executable for child trainers.")
+    parser.add_argument("--session-steps", type=int, default=None,
+                        help="Maximum optimizer steps per model in this invocation; saves and pauses for resume.")
     parser.add_argument("--report", default=None, help="Optional JSON report output path.")
     args = parser.parse_args()
     report = run_family(
         args.root, selected=args.models, execute=args.execute,
-        python_executable=args.python,
+        python_executable=args.python, session_steps=args.session_steps,
     )
     rendered = json.dumps(report, ensure_ascii=False, indent=2)
     print(rendered)
