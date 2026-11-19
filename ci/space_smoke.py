@@ -1,14 +1,21 @@
 """Runtime-level smoke tests for the Hugging Face Gradio Space (no provider secrets)."""
 from __future__ import annotations
 
+import shutil
 import tempfile
 import zipfile
 from pathlib import Path
 import sys
 
-# The Space entrypoint lives under hf_space/, not the repository root.
-# Add it explicitly because this script is executed as `python ci/space_smoke.py`.
-SPACE_ROOT = Path(__file__).resolve().parents[1] / "hf_space"
+# Mirror the deployment job: the root package is the source of truth, while
+# hf_space/aethrion may be a stale checked-in snapshot. Stage the exact package
+# that deployment uploads before importing the Space entrypoint.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SPACE_ROOT = REPO_ROOT / "hf_space"
+SPACE_PACKAGE = SPACE_ROOT / "aethrion"
+if SPACE_PACKAGE.exists():
+    shutil.rmtree(SPACE_PACKAGE)
+shutil.copytree(REPO_ROOT / "aethrion", SPACE_PACKAGE)
 sys.path.insert(0, str(SPACE_ROOT))
 
 import gradio as gr
