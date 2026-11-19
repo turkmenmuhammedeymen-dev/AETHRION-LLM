@@ -297,5 +297,25 @@ class SpecialistTrainingTests(unittest.TestCase):
             self.assertEqual(second["release_status"], "NOT_RELEASED")
 
 
+    def test_specialist_bounded_session_saves_and_resumes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            config["max_steps"] = 2
+            paused = train_specialist(config, manifest, session_steps=1)
+            self.assertEqual(paused["status"], "training_interrupted_not_released")
+            checkpoint = root / "artifacts" / "checkpoint_last.pt"
+            self.assertTrue(checkpoint.is_file())
+            self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
+
+            resumed = train_specialist(
+                config, manifest, resume=checkpoint, session_steps=1
+            )
+            self.assertEqual(resumed["status"], "training_complete_not_released")
+            self.assertEqual(resumed["steps"], 2)
+            self.assertEqual(resumed["release_status"], "NOT_RELEASED")
+
+
 if __name__ == "__main__":
     unittest.main()
