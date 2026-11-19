@@ -40,12 +40,56 @@ jobs:
             done
             cp pyproject.toml hf_space/pyproject.toml
             cp models/manifest.example.json hf_space/models/manifest.example.json
+            cp models/manifest.json hf_space/models/manifest.json
             rm -f hf_space/docs/OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md
             cp README.md hf_space/docs/REPOSITORY_README.md
       - run:
           name: Upload complete AETHRION Space project
           command: |
-            python -c "import os; from huggingface_hub import HfApi; token=os.environ.get('HF_TOKEN'); assert token, 'HF_TOKEN is missing from the aethrion-deploy CircleCI context'; HfApi(token=token).upload_folder(folder_path='hf_space', repo_id='vizyon2027/AETHRION-LLM', repo_type='space', commit_message='Deploy complete AETHRION-LLM source, configs, docs, data governance and tests', ignore_patterns=['README.md', '**/__pycache__/**', '**/*.pyc', '.DS_Store']); print('AETHRION-LLM complete safe project uploaded successfully.')"
+            python - <<'PY'
+            import hashlib
+            import os
+            from pathlib import Path
+            from huggingface_hub import HfApi, hf_hub_download
+
+            token = os.environ.get("HF_TOKEN")
+            if not token:
+                raise RuntimeError("HF_TOKEN is missing from the aethrion-deploy CircleCI context")
+            repo_id = "vizyon2027/AETHRION-LLM"
+            api = HfApi(token=token)
+            commit = api.upload_folder(
+                folder_path="hf_space",
+                repo_id=repo_id,
+                repo_type="space",
+                commit_message="Deploy complete AETHRION-LLM source, configs, docs, data governance and tests",
+                ignore_patterns=["README.md", "**/__pycache__/**", "**/*.pyc", ".DS_Store"],
+            )
+            revision = getattr(commit, "oid", None)
+            if not revision:
+                raise RuntimeError("Hugging Face upload did not return a verifiable commit SHA")
+
+            required_files = [
+                "aethrion/prepare_data.py",
+                "data/base_sources.template.json",
+                "data/processed/corpus_manifest.json",
+                "models/manifest.json",
+            ]
+            for relative_path in required_files:
+                local_path = Path("hf_space") / relative_path
+                remote_path = Path(hf_hub_download(
+                    repo_id=repo_id,
+                    filename=relative_path,
+                    repo_type="space",
+                    revision=revision,
+                    token=token,
+                ))
+                local_hash = hashlib.sha256(local_path.read_bytes()).hexdigest()
+                remote_hash = hashlib.sha256(remote_path.read_bytes()).hexdigest()
+                if local_hash != remote_hash:
+                    raise RuntimeError(f"Hugging Face read-back SHA-256 mismatch: {relative_path}")
+                print(f"Verified deployed file: {relative_path} ({remote_hash})")
+            print(f"AETHRION-LLM deployment verified at Hugging Face commit {revision}.")
+            PY
 
 workflows:
   aethrion-ci:
