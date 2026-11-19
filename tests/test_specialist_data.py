@@ -61,7 +61,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                 "source_path": "source.txt",
                 "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                 "license": "CC0-1.0",
-                "permitted_use": "Training and evaluation permitted under CC0-1.0 for this synthetic test fixture",
+                "permitted_use": "Training permitted under CC0-1.0; evaluation is also permitted for this synthetic test fixture",
                 "evidence_uri": "https://example.invalid/license-fixture",
                 "allow_training": approved,
                 "privacy_reviewed": approved,
