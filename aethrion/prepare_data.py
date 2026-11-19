@@ -205,7 +205,12 @@ def load_sources_manifest(
     path: Path, root: Path, *, require_training_approval: bool = True
 ) -> list[dict]:
     payload = json.loads(path.read_text(encoding="utf-8"))
-    entries = payload.get("sources") if isinstance(payload, dict) else None
+    if not isinstance(payload, dict):
+        raise ValueError("Source manifest must be a JSON object.")
+    declared_model = payload.get("model")
+    if declared_model is not None and declared_model != "base":
+        raise ValueError("Source manifest model must equal base for BASE corpus preparation.")
+    entries = payload.get("sources")
     if not isinstance(entries, list) or not entries:
         raise ValueError("Manifest must contain a non-empty sources list.")
 
