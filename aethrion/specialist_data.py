@@ -325,7 +325,7 @@ def validate_specialist_dataset(
             or any(normalized_license.startswith(label + "_") for label in UNVERIFIED_LICENSE_LABELS)
             or any(marker in normalized_license for marker in ("PENDING", "UNVERIFIED", "TEST_FIXTURE", "TEST_ONLY"))
         ):
-            raise SpecialistDataError("Training blocked: specialist source license is unknown, pending, unverified or test-only.")
+            raise SpecialistDataError("Training blocked: specialist source license is unknown or pending, unverified, or test-only.")
         if not source_uri_scheme:
             raise SpecialistDataError("Training blocked: specialist source_uri must be a documented provenance URI.")
         explicitly_permitted = any(
