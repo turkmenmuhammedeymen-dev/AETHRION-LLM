@@ -54,7 +54,7 @@ class SpecialistPreparationTests(unittest.TestCase):
             ByteBPETokenizer().save(base_tokenizer)
             result = prepare_text_dataset(
                 source, model_id="chat", output_root=root / "prepared",
-                license_name="Unit test only", permitted_use="CI fixture only",
+                license_name="CC0-1.0", permitted_use="Training and evaluation permitted under CC0-1.0 for this synthetic test fixture",
                 evidence_uri="unit-test://source", source_uri="unit-test://dataset",
                 max_length=64, tokenizer_source_path=base_tokenizer,
             )
