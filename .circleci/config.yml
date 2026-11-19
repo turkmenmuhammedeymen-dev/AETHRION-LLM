@@ -26,23 +26,7 @@ jobs:
       - run:
           name: Upload curated Space files
           command: |
-            python - <<'PY'
-            import os
-            from huggingface_hub import HfApi
-
-            token = os.environ.get("HF_TOKEN")
-            if not token:
-                raise SystemExit("HF_TOKEN is missing from the aethrion-deploy CircleCI context.")
-
-            HfApi(token=token).upload_folder(
-                folder_path="hf_space",
-                repo_id="vizyon2027/AETHRION-LLM",
-                repo_type="space",
-                commit_message="Deploy AETHRION-LLM from CircleCI",
-                ignore_patterns=["**/__pycache__/**", "**/*.pyc", ".DS_Store"],
-            )
-            print("AETHRION-LLM Space files uploaded successfully.")
-            PY
+            python -c "import os; from huggingface_hub import HfApi; token=os.environ.get('HF_TOKEN'); assert token, 'HF_TOKEN is missing from the aethrion-deploy CircleCI context'; HfApi(token=token).upload_folder(folder_path='hf_space', repo_id='vizyon2027/AETHRION-LLM', repo_type='space', commit_message='Deploy AETHRION-LLM from CircleCI', ignore_patterns=['**/__pycache__/**', '**/*.pyc', '.DS_Store']); print('AETHRION-LLM Space files uploaded successfully.')"
 
 workflows:
   aethrion-ci:
