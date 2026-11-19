@@ -4,6 +4,12 @@ from __future__ import annotations
 import tempfile
 import zipfile
 from pathlib import Path
+import sys
+
+# The Space entrypoint lives under hf_space/, not the repository root.
+# Add it explicitly because this script is executed as `python ci/space_smoke.py`.
+SPACE_ROOT = Path(__file__).resolve().parents[1] / "hf_space"
+sys.path.insert(0, str(SPACE_ROOT))
 
 import gradio as gr
 import app as space
