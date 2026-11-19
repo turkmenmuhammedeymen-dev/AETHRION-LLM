@@ -24,7 +24,12 @@ jobs:
           name: Install Hugging Face deployment client
           command: python -m pip install --upgrade "huggingface-hub>=0.30,<1.0"
       - run:
-          name: Upload curated Space files
+          name: Stage the latest native AETHRION package
+          command: |
+            rm -rf hf_space/aethrion
+            cp -R aethrion hf_space/aethrion
+      - run:
+          name: Upload curated Space runtime and latest native package
           command: |
             python -c "import os; from huggingface_hub import HfApi; token=os.environ.get('HF_TOKEN'); assert token, 'HF_TOKEN is missing from the aethrion-deploy CircleCI context'; HfApi(token=token).upload_folder(folder_path='hf_space', repo_id='vizyon2027/AETHRION-LLM', repo_type='space', commit_message='Deploy AETHRION-LLM from CircleCI', ignore_patterns=['**/__pycache__/**', '**/*.pyc', '.DS_Store']); print('AETHRION-LLM Space files uploaded successfully.')"
 
@@ -39,4 +44,4 @@ workflows:
             - aethrion-deploy
           filters:
             branches:
-              only: main
+              only: [main, circleci-project-setup]
