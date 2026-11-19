@@ -1,6 +1,6 @@
 {
   "format": "aethrion-source-manifest-v1",
-  "model": "chat",
+  "model": "base",
   "dataset_id": "BASE_DATASET_ID_PENDING_REVIEW",
   "sources": []
 }
