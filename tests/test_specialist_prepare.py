@@ -29,6 +29,7 @@ class SpecialistPreparationTests(unittest.TestCase):
             self.assertTrue(Path(result["dataset"]).is_file())
             self.assertTrue(Path(result["tokenizer"]).is_file())
             manifest = json.loads(Path(result["manifest"]).read_text(encoding="utf-8"))
+            self.assertEqual(manifest["governance"]["approval_status"], "pending")
             self.assertFalse(manifest["training_allowed"])
             self.assertFalse(manifest["owner_approval"])
             self.assertFalse(manifest["sources"][0]["allow_training"])

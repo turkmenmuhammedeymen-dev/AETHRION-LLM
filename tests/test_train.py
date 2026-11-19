@@ -6,7 +6,7 @@ import unittest
 import warnings
 from pathlib import Path
 import torch
-from aethrion.train import get_batch
+from aethrion.train import get_batch, capture_rng_state
 from aethrion.tokenizer import ByteBPETokenizer
 from aethrion.prepare_data import build_corpus
 from aethrion.checkpoint import load_checkpoint
@@ -47,6 +47,92 @@ class TrainingUtilityTests(unittest.TestCase):
             with self.subTest(key=key, value=value):
                 with self.assertRaises(ValueError):
                     validate_base_training_config(candidate)
+
+    def test_checkpoint_rejects_malformed_sha256_sidecar(self):
+        from aethrion.checkpoint import verify_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            checkpoint.write_bytes(b"checkpoint-bytes")
+            Path(str(checkpoint) + ".sha256").write_text("not-a-sha256-value\\n", encoding="ascii")
+            with self.assertRaisesRegex(ValueError, "SHA-256 verification failed"):
+                verify_checkpoint(checkpoint)
+
+    def test_checkpoint_sidecar_replace_crash_recovers_durable_previous_generation(self):
+        from unittest.mock import patch
+        import aethrion.checkpoint as checkpoint_module
+        from aethrion.checkpoint import load_checkpoint, save_checkpoint
+        from aethrion.train import capture_rng_state
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            base = {
+                "format_version": 4, "step": 0, "model": {}, "optimizer": {},
+                "scaler": {}, "model_config": {}, "data_sha256": "0" * 64,
+                "tokenizer_sha256": "1" * 64, "rng_state": capture_rng_state(),
+                "training_config": {"seed": 7},
+            }
+            save_checkpoint(base, checkpoint)
+            original_replace = checkpoint_module.os.replace
+            sidecar = Path(str(checkpoint) + ".sha256")
+
+            def fail_live_sidecar(source, destination):
+                if Path(destination) == sidecar:
+                    raise OSError("simulated interruption before live sidecar promotion")
+                return original_replace(source, destination)
+
+            with patch("aethrion.checkpoint.os.replace", side_effect=fail_live_sidecar):
+                with self.assertRaisesRegex(OSError, "simulated interruption"):
+                    save_checkpoint({**base, "step": 1}, checkpoint)
+
+            # The live checkpoint/sidecar pair is split, but the previous pair
+            # was made durable before either live file was replaced.
+            recovered = load_checkpoint(checkpoint, map_location="cpu")
+            self.assertEqual(recovered["step"], 0)
+            previous = Path(str(checkpoint) + ".previous")
+            self.assertEqual(
+                checkpoint_module.verify_checkpoint(previous),
+                checkpoint_module.sha256_file(previous),
+            )
+
+    def test_checkpoint_preserves_live_generation_at_each_precommit_crash_boundary(self):
+        from unittest.mock import patch
+        import aethrion.checkpoint as checkpoint_module
+        from aethrion.checkpoint import load_checkpoint, save_checkpoint
+
+        failure_targets = ("checkpoint.pt.previous", "checkpoint.pt.previous.sha256", "checkpoint.pt")
+        for target_name in failure_targets:
+            with self.subTest(target=target_name), tempfile.TemporaryDirectory() as directory:
+                checkpoint = Path(directory) / "checkpoint.pt"
+                base = {
+                    "format_version": 4, "step": 0, "model": {}, "optimizer": {},
+                    "scaler": {}, "model_config": {}, "data_sha256": "0" * 64,
+                    "tokenizer_sha256": "1" * 64, "rng_state": capture_rng_state(),
+                    "training_config": {"seed": 7},
+                }
+                save_checkpoint(base, checkpoint)
+                original_replace = checkpoint_module.os.replace
+                target = Path(directory) / target_name
+
+                def fail_at_boundary(source, destination):
+                    if Path(destination) == target:
+                        raise OSError("simulated checkpoint promotion interruption")
+                    return original_replace(source, destination)
+
+                with patch("aethrion.checkpoint.os.replace", side_effect=fail_at_boundary):
+                    with self.assertRaisesRegex(OSError, "simulated checkpoint promotion"):
+                        save_checkpoint({**base, "step": 1}, checkpoint)
+
+                # Until the new live pair is committed, the old live generation
+                # must remain readable. If backup promotion completed, it too
+                # must be independently checksum-verifiable.
+                self.assertEqual(load_checkpoint(checkpoint, map_location="cpu")["step"], 0)
+                previous = Path(str(checkpoint) + ".previous")
+                if previous.is_file():
+                    self.assertEqual(
+                        checkpoint_module.verify_checkpoint(previous),
+                        checkpoint_module.sha256_file(previous),
+                    )
 
     def test_checkpoint_rejects_unsafe_pickle_objects(self):
         import hashlib
@@ -253,6 +339,30 @@ class TrainingUtilityTests(unittest.TestCase):
             self.assertIn("prepared corpus SHA-256", tampered.stdout + tampered.stderr)
 
 
+    def test_checkpoint_recovers_previous_generation_when_rng_snapshot_is_malformed(self):
+        import hashlib
+        from aethrion.checkpoint import save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            payload = {
+                "format_version": 4, "step": 0, "model": {}, "optimizer": {},
+                "scaler": {}, "model_config": {}, "data_sha256": "0" * 64,
+                "tokenizer_sha256": "1" * 64, "rng_state": capture_rng_state(),
+                "training_config": {"stage": "test-fixture"},
+            }
+            save_checkpoint(payload, checkpoint)
+            save_checkpoint({**payload, "step": 1}, checkpoint)
+            malformed = {**payload, "step": 2, "rng_state": {}}
+            torch.save(malformed, checkpoint)
+            digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+            Path(str(checkpoint) + ".sha256").write_text(digest + "\n", encoding="ascii")
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                recovered = load_checkpoint(checkpoint, map_location="cpu")
+            self.assertEqual(recovered["step"], 0)
+            self.assertTrue(any("recovering from" in str(item.message) for item in caught))
+
     def test_checkpoint_recovers_previous_generation_when_latest_safe_load_fails(self):
         import hashlib
         from aethrion.checkpoint import save_checkpoint
@@ -272,7 +382,7 @@ class TrainingUtilityTests(unittest.TestCase):
                 "model_config": {},
                 "data_sha256": "0" * 64,
                 "tokenizer_sha256": "1" * 64,
-                "rng_state": {},
+                "rng_state": capture_rng_state(),
                 "training_config": {"stage": "test-fixture"},
             }
             save_checkpoint(base, checkpoint)
@@ -291,6 +401,58 @@ class TrainingUtilityTests(unittest.TestCase):
 
             self.assertEqual(recovered["step"], 0)
             self.assertTrue(any("safely loaded" in str(item.message) for item in caught))
+
+
+
+    def test_first_checkpoint_save_split_write_fails_closed_without_previous_generation(self):
+        from unittest.mock import patch
+        import aethrion.checkpoint as checkpoint_module
+        from aethrion.checkpoint import load_checkpoint, save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            payload = {
+                "format_version": 4, "step": 0, "model": {}, "optimizer": {},
+                "scaler": {}, "model_config": {}, "data_sha256": "0" * 64,
+                "tokenizer_sha256": "1" * 64, "rng_state": capture_rng_state(),
+                "training_config": {"seed": 7},
+            }
+            sidecar = Path(str(checkpoint) + ".sha256")
+            original_replace = checkpoint_module.os.replace
+
+            def fail_first_live_sidecar(source, destination):
+                if Path(destination) == sidecar:
+                    raise OSError("simulated first-generation sidecar interruption")
+                return original_replace(source, destination)
+
+            with patch("aethrion.checkpoint.os.replace", side_effect=fail_first_live_sidecar):
+                with self.assertRaisesRegex(OSError, "first-generation sidecar interruption"):
+                    save_checkpoint(payload, checkpoint)
+
+            self.assertTrue(checkpoint.is_file())
+            self.assertFalse(sidecar.exists())
+            self.assertFalse(Path(str(checkpoint) + ".previous").exists())
+            with self.assertRaisesRegex(ValueError, "integrity file is missing"):
+                load_checkpoint(checkpoint, map_location="cpu")
+
+    def test_checkpoint_loader_never_promotes_orphaned_temp_files_after_crash(self):
+        from aethrion.checkpoint import load_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            temporary = Path(str(checkpoint) + ".tmp")
+            sidecar_temporary = Path(str(checkpoint) + ".sha256.tmp")
+            temporary.write_bytes(b"partial checkpoint from terminated writer")
+            sidecar_temporary.write_text("0" * 64 + "\n", encoding="ascii")
+
+            with self.assertRaisesRegex(ValueError, "Checkpoint does not exist"):
+                load_checkpoint(checkpoint, map_location="cpu")
+
+            self.assertTrue(temporary.is_file())
+            self.assertTrue(sidecar_temporary.is_file())
+            self.assertFalse(checkpoint.exists())
+            self.assertFalse(Path(str(checkpoint) + ".previous").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

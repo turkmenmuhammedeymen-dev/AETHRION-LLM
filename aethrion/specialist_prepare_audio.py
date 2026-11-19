@@ -19,6 +19,7 @@ import torch
 from aethrion.audio_features import log_mel_spectrogram, read_wav
 from aethrion.specialist_prepare import _group_hash, _group_id, _split
 from aethrion.specialist_data import AUDIO_MODELS
+from aethrion.data_governance import review_template
 from aethrion.tokenizer import ByteBPETokenizer
 
 
@@ -283,6 +284,7 @@ def prepare_audio_dataset(
         "owner_approval": False,
         "privacy_reviewed": False,
         "speaker_consent_reviewed": False,
+        "governance": review_template(model_id),
         "dataset_path": f"{model_id}/dataset.npz",
         "dataset_sha256": _sha256(dataset),
         "sources": manifest_sources,

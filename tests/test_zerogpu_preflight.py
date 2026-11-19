@@ -31,6 +31,10 @@ class ZeroGPUPreflightTests(unittest.TestCase):
                 self.assertTrue(batch)
                 self.assertTrue(all(isinstance(value, torch.Tensor) for value in batch.values()))
                 self.assertTrue(all(value.device.type == "cpu" for value in batch.values()))
+                if model_id == "asr":
+                    self.assertEqual(batch["targets"].ndim, 2)
+                    self.assertEqual(batch["targets"].shape[0], 1)
+                    self.assertEqual(batch["target_lengths"].tolist(), [2])
 
 
 if __name__ == "__main__":

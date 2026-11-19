@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from aethrion.api import build_router, get_native_model_statuses, _require_safety_allow_http, _require_safety_allow_chunks_http
 from aethrion.document_tools import create_document, extract_document_text, replace_document_text
 from aethrion.routing import Capability, CapabilityRequest, CapabilityUnavailable
+from aethrion.orchestrator import AssistantOrchestrator, AssistantInputRequired, classify_intent
 from aethrion.workspace_agent import MAX_ARCHIVE_BYTES, ProjectWorkspaceAgent, WorkspaceError, read_project_zip
 from aethrion.zerogpu_preflight import run_zero_gpu_preflight
 from aethrion.space_auth import space_auth_required
@@ -80,9 +81,17 @@ def gpu_diagnostics():
 
 
 @spaces.GPU(duration=60)
-def _gpu_local_chat(prompt):
-    result = dispatch(Capability.CHAT, prompt, {"max_new_tokens": 256})
-    return result.get("text", str(result)) if isinstance(result, dict) else str(result)
+def _gpu_local_chat(prompt, capability):
+    # Intent is classified from the latest user turn, not quoted conversation history.
+    # The complete history is retained only when the selected route is CHAT.
+    result = AssistantOrchestrator(router).dispatch(
+        prompt, {"max_new_tokens": 256, "capability": capability}
+    )
+    output = result.output
+    text = output.get("text", str(output)) if isinstance(output, dict) else str(output)
+    if result.delegated:
+        return f"[AETHRION-{result.capability.value.upper()}]\n{text}"
+    return text
 
 
 @spaces.GPU(duration=60)
@@ -122,23 +131,79 @@ def status():
     rows = [f"- **{name}**: {state.upper()}" for name, state in model_status.items()]
     if not SPACE_AUTH_ENABLED:
         rows.append("- **Local model access**: DISABLED — Space authentication is not configured")
+    rows.append("- **Main assistant routing**: CHAT default; clear tasks delegate to native specialists")
+    rows.append("- **Internal dependencies**: TTS requires VOCODER and ASR; specialist text I/O requires SAFE")
     rows.append("- **External model/API providers**: DISABLED — native-only policy")
     return "### Native model release status\n" + "\n".join(rows)
 
 def chat(message, history):
     if not SPACE_AUTH_ENABLED:
         return _auth_required_message()
-    if Capability.CHAT.value not in router.available():
-        return "AETHRION's own trained checkpoint/tokenizer is not loaded. No third-party model is silently substituted."
     context = []
     for item in (history or [])[-8:]:
         if isinstance(item, dict) and isinstance(item.get("content"), str):
             context.append(str(item.get("role", "user")) + ": " + item["content"][:1500])
+    intent = classify_intent(message[:4000])
     prompt = "\n".join(context + ["user: " + message[:4000], "assistant:"])
     try:
-        return _gpu_local_chat(prompt)
-    except CapabilityUnavailable:
-        return "AETHRION's own trained checkpoint/tokenizer is not available. No third-party model is silently substituted."
+        return _gpu_local_chat(prompt, intent.capability.value)
+    except AssistantInputRequired as exc:
+        return str(exc)
+    except CapabilityUnavailable as exc:
+        return "AETHRION could not complete this task: " + str(exc)
+@spaces.GPU(duration=60)
+def assistant_file(file_path, prompt, requested_capability):
+    """Main assistant upload route for image, audio and document inputs."""
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    if not file_path:
+        return "Upload one image, WAV audio file or supported document."
+    if not isinstance(prompt, str) or not prompt.strip():
+        return "Enter a task prompt."
+    try:
+        options = (
+            {"capability": requested_capability.lower()}
+            if requested_capability and requested_capability != "Auto"
+            else None
+        )
+        intent = classify_intent(prompt[:12000], options)
+        contracts = {
+            Capability.VISION: ({".png", ".jpg", ".jpeg", ".webp"}, 20 * 1024 * 1024, "image_path"),
+            Capability.ASR: ({".wav"}, 25 * 1024 * 1024, "audio_path"),
+            Capability.DOCUMENT: (
+                {".pdf", ".docx", ".txt", ".md", ".json", ".csv", ".log"},
+                8 * 1024 * 1024,
+                "document_path",
+            ),
+        }
+        contract = contracts.get(intent.capability)
+        if contract is None:
+            return "Uploaded input is supported for VISION, ASR or DOCUMENT tasks. Choose a matching task."
+        allowed, max_bytes, option_key = contract
+        source = Path(file_path)
+        if source.is_symlink() or not source.is_file():
+            return "Upload must resolve to a regular file."
+        if source.suffix.lower() not in allowed:
+            return "File type does not match the selected specialist."
+        if source.stat().st_size <= 0 or source.stat().st_size > max_bytes:
+            return f"File must be between 1 byte and {max_bytes // (1024 * 1024)} MiB."
+        result = AssistantOrchestrator(router).dispatch(
+            prompt[:12000],
+            {"capability": intent.capability.value, option_key: str(source)},
+        )
+        output = result.output
+        rendered = output.get("text", str(output)) if isinstance(output, dict) else str(output)
+        return f"**AETHRION-{result.capability.value.upper()}**\n\n{rendered}"
+    except AssistantInputRequired as exc:
+        return str(exc)
+    except CapabilityUnavailable as exc:
+        return "AETHRION could not complete this task: " + str(exc)
+    except (ValueError, TypeError) as exc:
+        return "Invalid upload request: " + str(exc)
+    except Exception as exc:
+        return "Assistant file processing failed: " + type(exc).__name__
+
+
 @spaces.GPU(duration=60)
 def code(prompt):
     if space_auth_required(SPACE_AUTH_ENABLED):
@@ -415,6 +480,28 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
     with gr.Tabs():
         with gr.Tab("AI Chat"):
             gr.ChatInterface(chat,type="messages",chatbot=gr.Chatbot(type="messages",height=420))
+        with gr.Tab("Assistant + Upload"):
+            assistant_file_input = gr.File(
+                type="filepath",
+                label="Upload image, PCM WAV or document",
+                file_types=[".png", ".jpg", ".jpeg", ".webp", ".wav", ".pdf", ".docx", ".txt", ".md", ".json", ".csv", ".log"],
+            )
+            assistant_file_prompt = gr.Textbox(
+                lines=3,
+                label="What should AETHRION do with this file?",
+                placeholder="Describe this image / Transcribe this audio / Analyze this document",
+            )
+            assistant_file_capability = gr.Dropdown(
+                ["Auto", "VISION", "ASR", "DOCUMENT"],
+                value="Auto",
+                label="Specialist selection",
+            )
+            assistant_file_result = gr.Markdown()
+            gr.Button("Send to AETHRION").click(
+                assistant_file,
+                inputs=[assistant_file_input, assistant_file_prompt, assistant_file_capability],
+                outputs=assistant_file_result,
+            )
         with gr.Tab("Code & Project"):
             p=gr.Textbox(lines=4,label="Code task");o=gr.Code(label="Generated code")
             gr.Button("Generate").click(code,inputs=p,outputs=o)

@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 from typing import Any
 from aethrion.routing import Capability,CapabilityRequest,CapabilityRouter,CapabilityUnavailable
+from aethrion.orchestrator import AssistantOrchestrator, AssistantInputRequired, classify_intent
 from aethrion.native_registry import NativeModelRegistry,NativeModelUnavailable,NativeModelError
 from aethrion.native_runtime import NativeModelRuntime
 from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError, read_project_zip
@@ -23,6 +24,14 @@ class DispatchRequest(BaseModel):
     capability:str
     prompt:str=Field(min_length=1,max_length=12000)
     options:dict[str,Any]=Field(default_factory=dict)
+
+
+class AssistantRequest(BaseModel):
+    """Automatic-routing request; callers do not have to choose a capability."""
+    prompt:str=Field(min_length=1,max_length=12000)
+    options:dict[str,Any]=Field(default_factory=dict)
+
+
 class FileRequest(BaseModel):
     filename:str=Field(min_length=1,max_length=255)
     content_base64:str=Field(min_length=1,max_length=12_000_000)
@@ -63,6 +72,55 @@ def _require_safety_allow_http(runtime: Any, text: str) -> dict[str, Any]:
         return _require_safety_allow(runtime, text)
     except CapabilityUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+def _visual_input_verifier_ready(runtime: Any) -> bool:
+    status = getattr(runtime, "visual_input_safety_status", None)
+    review = getattr(runtime, "review_visual_input", None)
+    if not callable(status) or not callable(review):
+        return False
+    try:
+        return status() == "ready"
+    except Exception:
+        return False
+
+
+def _require_visual_input_allow(runtime: Any, path: str | Path) -> dict[str, Any]:
+    """Require a separately released semantic verifier for uploaded image content."""
+    artifact = Path(path)
+    if not artifact.is_file() or artifact.is_symlink():
+        raise CapabilityUnavailable("VISION input must be a regular, non-symlink file.")
+    if artifact.stat().st_size < 1 or artifact.stat().st_size > 20 * 1024 * 1024:
+        raise CapabilityUnavailable("VISION input exceeds the 20 MiB safety bound.")
+    if not _visual_input_verifier_ready(runtime):
+        raise CapabilityUnavailable("AETHRION visual-input safety verifier is not trained and released.")
+    try:
+        from PIL import Image
+        with Image.open(artifact) as image:
+            if image.format not in {"PNG", "JPEG", "WEBP"}:
+                raise CapabilityUnavailable("Unsupported VISION input image format.")
+            image_format = image.format
+            width, height = image.size
+            if not (1 <= width <= 4096 and 1 <= height <= 4096 and width * height <= 16_000_000):
+                raise CapabilityUnavailable("VISION input dimensions exceed safety bounds.")
+            image.verify()
+        verdict = runtime.review_visual_input(
+            str(artifact), {"format": image_format, "width": width, "height": height}
+        )
+    except CapabilityUnavailable:
+        raise
+    except Exception as exc:
+        raise CapabilityUnavailable("VISION input integrity or semantic safety review failed.") from exc
+    confidence = verdict.get("confidence") if isinstance(verdict, dict) else None
+    if (
+        not isinstance(verdict, dict)
+        or verdict.get("decision") != "ALLOW"
+        or not isinstance(confidence, (int, float))
+        or not math.isfinite(float(confidence))
+        or not 0.90 <= float(confidence) <= 1.0
+    ):
+        raise CapabilityUnavailable("VISION input was not approved by the local visual safety verifier.")
+    return verdict
 
 
 
@@ -140,6 +198,10 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
     for capability in supported:
         if capability in visual_output_capabilities:
             continue
+        if capability == Capability.VISION and (
+            not _visual_input_verifier_ready(runtime)
+        ):
+            continue
         if runtime.registry.status(capability.value) != "ready":
             continue
         if capability == Capability.TTS and (
@@ -160,6 +222,8 @@ def build_router(*, allow_remote_providers: bool = False, allow_local_model: boo
         def handler(request: CapabilityRequest, selected=capability.value):
             if selected != Capability.SAFETY.value:
                 _require_safety_allow_chunks(runtime, request.prompt)
+            if selected == Capability.VISION.value:
+                _require_visual_input_allow(runtime, request.options.get("image_path", ""))
             if selected == Capability.DOCUMENT.value:
                 document_path = request.options.get("document_path")
                 if isinstance(document_path, str) and document_path:
@@ -190,7 +254,7 @@ app=FastAPI(title="AETHRION-LLM API",version="0.4.0")
 router,providers=build_router()
 
 @app.get("/health")
-def health(): return {"status":"ok","service":"AETHRION-LLM","version":"0.3.0"}
+def health(): return {"status":"ok","service":"AETHRION-LLM","version":app.version}
 
 @app.get("/capabilities", dependencies=[Depends(require_api_token)])
 def capabilities():
@@ -200,7 +264,136 @@ def capabilities():
     except Exception as exc:
         model_status = {"registry": f"error:{type(exc).__name__}"}
     return {"available":available,"unavailable":[n for n in all_names if n not in available],
-            "model_status":model_status,"execution_policy":"local_only","credentials_exposed":False}
+            "model_status":model_status,"execution_policy":"local_only","credentials_exposed":False,
+            "assistant_entrypoint":"/assistant","default_model":"chat",
+            "routing_mode":"deterministic_high_precision_with_chat_fallback",
+            "internal_dependencies":{"tts":["vocoder","asr"],"specialist_text_io":["safety"]}}
+
+@app.post("/assistant", dependencies=[Depends(require_api_token)])
+def assistant(request: AssistantRequest):
+    """Main text entry point: delegate clear tasks, otherwise use native CHAT."""
+    # Never accept caller-controlled server paths through this general text route.
+    forbidden = {"image_path", "audio_path", "document_path", "file_path"}
+    if forbidden.intersection(request.options):
+        raise HTTPException(status_code=400, detail="Use the dedicated bounded upload endpoint for file inputs.")
+    allowed_options = {"max_new_tokens", "temperature", "top_k", "top_p", "capability"}
+    unknown = set(request.options) - allowed_options
+    if unknown:
+        raise HTTPException(status_code=400, detail="Unsupported assistant options: " + ", ".join(sorted(unknown)))
+    try:
+        result = AssistantOrchestrator(router).dispatch(request.prompt, request.options)
+        return {
+            "capability": result.capability.value,
+            "delegated": result.delegated,
+            "reason": result.reason,
+            "provider": result.provider,
+            "result": result.output,
+        }
+    except AssistantInputRequired as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except CapabilityUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Assistant orchestration failed: {type(exc).__name__}") from exc
+
+
+def _validate_upload_payload(suffix: str, raw: bytes) -> None:
+    """Reject filename-only modality spoofing before a specialist reads bytes."""
+    if not raw:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    signatures = {
+        ".png": raw.startswith(b"\x89PNG\r\n\x1a\n"),
+        ".jpg": raw.startswith(b"\xff\xd8\xff"),
+        ".jpeg": raw.startswith(b"\xff\xd8\xff"),
+        ".webp": len(raw) >= 12 and raw[:4] == b"RIFF" and raw[8:12] == b"WEBP",
+        ".wav": len(raw) >= 12 and raw[:4] == b"RIFF" and raw[8:12] == b"WAVE",
+        ".pdf": raw.startswith(b"%PDF-"),
+        ".docx": raw.startswith(b"PK\x03\x04"),
+    }
+    if suffix in signatures:
+        if not signatures[suffix]:
+            raise HTTPException(status_code=400, detail="File content does not match its declared extension.")
+        return
+    if suffix in {".txt", ".md", ".json", ".csv", ".log"}:
+        try:
+            decoded = raw.decode("utf-8-sig")
+            if suffix == ".json":
+                import json
+                json.loads(decoded)
+        except (UnicodeDecodeError, ValueError) as exc:
+            raise HTTPException(status_code=400, detail="Text upload is not valid UTF-8 or JSON.") from exc
+        return
+    raise HTTPException(status_code=400, detail="Unsupported uploaded file type.")
+
+
+@app.post("/assistant/upload", dependencies=[Depends(require_api_token)])
+async def assistant_upload(
+    file: UploadFile = File(...),
+    prompt: str = Form(..., min_length=1, max_length=12000),
+    capability: str | None = Form(default=None),
+):
+    """Route one bounded uploaded file through CHAT's specialist intent path."""
+    path = None
+    try:
+        try:
+            selected = classify_intent(
+                prompt,
+                {"capability": capability} if capability else None,
+            ).capability
+        except (ValueError, TypeError) as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+        file_contracts = {
+            Capability.VISION: ({".png", ".jpg", ".jpeg", ".webp"}, 20 * 1024 * 1024, "image_path"),
+            Capability.ASR: ({".wav"}, 25 * 1024 * 1024, "audio_path"),
+            Capability.DOCUMENT: (
+                {".pdf", ".docx", ".txt", ".md", ".json", ".csv", ".log"},
+                8 * 1024 * 1024,
+                "document_path",
+            ),
+        }
+        contract = file_contracts.get(selected)
+        if contract is None:
+            raise HTTPException(
+                status_code=400,
+                detail="Uploaded files are supported only for VISION, ASR or DOCUMENT tasks.",
+            )
+        allowed_suffixes, max_bytes, option_key = contract
+        suffix = Path(file.filename or "").suffix.lower()
+        if suffix not in allowed_suffixes:
+            raise HTTPException(status_code=400, detail=f"Unsupported file type for {selected.value}.")
+        raw = await file.read(max_bytes + 1)
+        if len(raw) > max_bytes:
+            raise HTTPException(status_code=413, detail=f"Uploaded file exceeds {max_bytes // (1024 * 1024)} MiB.")
+        _validate_upload_payload(suffix, raw)
+
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as handle:
+            handle.write(raw)
+            path = Path(handle.name)
+        result = AssistantOrchestrator(router).dispatch(
+            prompt,
+            {"capability": selected.value, option_key: str(path)},
+        )
+        return {
+            "capability": result.capability.value,
+            "delegated": result.delegated,
+            "reason": result.reason,
+            "provider": result.provider,
+            "result": result.output,
+        }
+    except AssistantInputRequired as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except CapabilityUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    finally:
+        await file.close()
+        if path is not None:
+            path.unlink(missing_ok=True)
+
 
 @app.post("/dispatch", dependencies=[Depends(require_api_token)])
 def dispatch(request:DispatchRequest):

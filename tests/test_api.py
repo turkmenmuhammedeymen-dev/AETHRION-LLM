@@ -152,6 +152,18 @@ class SafeRuntimeGateTests(unittest.TestCase):
             router, _ = build_router(allow_remote_providers=False)
         self.assertNotIn("research", router.available())
 
+    def test_vision_stays_unavailable_without_semantic_visual_input_safety(self):
+        router, _, _ = self._build({"vision": "ready", "safety": "ready"})
+        self.assertNotIn("vision", router.available())
+
+    def test_visual_input_gate_fails_closed_without_dedicated_verifier(self):
+        runtime = _FakeSafetyRuntime({"vision": "ready", "safety": "ready"})
+        with tempfile.TemporaryDirectory() as folder:
+            image_path = Path(folder) / "input.png"
+            image_path.write_bytes(b"placeholder")
+            with self.assertRaises(CapabilityUnavailable):
+                api._require_visual_input_allow(runtime, image_path)
+
     def test_image_and_3d_output_models_stay_unavailable_without_visual_output_safety(self):
         router, _, _ = self._build({
             "safety": "ready", "image": "ready", "3d": "ready",
@@ -277,6 +289,7 @@ class ApiHttpIntegrationTests(unittest.TestCase):
     def setUp(self):
         self.router=CapabilityRouter()
         self.router.register(Capability.CODE,"test-code",lambda req:{"text":"generated code"})
+        self.router.register(Capability.CHAT,"test-chat",lambda req:{"text":"chat reply"})
         self.client=TestClient(api.app)
         self.env_patch=patch.dict("os.environ", {"AETHRION_API_TOKEN": "test-api-token"})
         self.env_patch.start()
@@ -340,8 +353,11 @@ class ApiHttpIntegrationTests(unittest.TestCase):
     def test_capabilities_endpoint_reports_registered_handlers(self):
         response=self.client.get("/capabilities",headers=self.auth)
         self.assertEqual(response.status_code,200)
-        self.assertEqual(response.json()["available"],{"code":"test-code"})
+        self.assertEqual(response.json()["available"],{"code":"test-code","chat":"test-chat"})
         self.assertIn("image",response.json()["unavailable"])
+        self.assertEqual(response.json()["assistant_entrypoint"], "/assistant")
+        self.assertEqual(response.json()["default_model"], "chat")
+        self.assertEqual(response.json()["internal_dependencies"]["tts"], ["vocoder", "asr"])
     def test_dispatch_endpoint_routes_selected_capability(self):
         response=self.client.post("/dispatch",json={"capability":"code","prompt":"write a function"},headers=self.auth)
         self.assertEqual(response.status_code,200)
@@ -351,8 +367,160 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.assertEqual(response.status_code,400)
         self.assertIn("dedicated",response.json()["detail"])
 
+    def test_assistant_endpoint_delegates_clear_code_tasks(self):
+        response = self.client.post(
+            "/assistant", headers=self.auth,
+            json={"prompt": "Write a Python function to sort records."},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["capability"], "code")
+        self.assertTrue(response.json()["delegated"])
+        self.assertEqual(response.json()["result"]["text"], "generated code")
+
+    def test_assistant_endpoint_uses_chat_for_general_conversation(self):
+        response = self.client.post(
+            "/assistant", headers=self.auth,
+            json={"prompt": "Explain why the sky looks blue."},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["capability"], "chat")
+        self.assertFalse(response.json()["delegated"])
+        self.assertEqual(response.json()["result"]["text"], "chat reply")
+
+    def test_assistant_endpoint_rejects_server_paths(self):
+        response = self.client.post(
+            "/assistant", headers=self.auth,
+            json={"prompt": "Describe this image", "options": {"image_path": "/etc/passwd"}},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_assistant_endpoint_requires_attachment_for_vision(self):
+        response = self.client.post(
+            "/assistant", headers=self.auth,
+            json={"prompt": "Describe this image"},
+        )
+        self.assertEqual(response.status_code, 422)
+        self.assertIn("image_path", response.json()["detail"])
+
+    def test_assistant_upload_routes_image_to_vision_with_bounded_temp_file(self):
+        observed = {}
+        def vision_handler(request):
+            path = Path(request.options["image_path"])
+            observed["bytes"] = path.read_bytes()
+            observed["prompt"] = request.prompt
+            observed["exists_during_dispatch"] = path.is_file()
+            observed["temporary_path"] = str(path)
+            return {"similarity": 0.75}
+        self.router.register(Capability.VISION, "test-vision", vision_handler)
+        response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Describe this image"},
+            files={"file": ("scene.png", b"\x89PNG\r\n\x1a\nPNG-test-data", "image/png")},
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["capability"], "vision")
+        self.assertTrue(response.json()["delegated"])
+        self.assertEqual(observed["bytes"], b"\x89PNG\r\n\x1a\nPNG-test-data")
+        self.assertTrue(observed["exists_during_dispatch"])
+        self.assertFalse(Path(observed["temporary_path"]).exists())
+        self.assertEqual(observed["prompt"], "Describe this image")
+
+    def test_assistant_upload_routes_audio_and_document_to_matching_specialists(self):
+        observed = {}
+        def asr_handler(request):
+            path = Path(request.options["audio_path"])
+            observed["audio"] = path.read_bytes()
+            observed["audio_cleaned_path"] = str(path)
+            return {"text": "recognized words"}
+        def document_handler(request):
+            path = Path(request.options["document_path"])
+            observed["document"] = path.read_bytes()
+            observed["document_cleaned_path"] = str(path)
+            return {"text": "document summary"}
+        self.router.register(Capability.ASR, "test-asr", asr_handler)
+        self.router.register(Capability.DOCUMENT, "test-document", document_handler)
+
+        audio_response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Transcribe this audio"},
+            files={"file": ("voice.wav", b"RIFF\x00\x00\x00\x00WAVEdata", "audio/wav")},
+        )
+        document_response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Analyze this document"},
+            files={"file": ("notes.txt", b"document-body", "text/plain")},
+        )
+        self.assertEqual(audio_response.status_code, 200, audio_response.text)
+        self.assertEqual(audio_response.json()["capability"], "asr")
+        self.assertEqual(document_response.status_code, 200, document_response.text)
+        self.assertEqual(document_response.json()["capability"], "document")
+        self.assertEqual(observed["audio"], b"RIFF\x00\x00\x00\x00WAVEdata")
+        self.assertEqual(observed["document"], b"document-body")
+        self.assertFalse(Path(observed["audio_cleaned_path"]).exists())
+        self.assertFalse(Path(observed["document_cleaned_path"]).exists())
+
+    def test_assistant_upload_rejects_filename_only_image_spoofing(self):
+        response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Describe this image"},
+            files={"file": ("scene.png", b"not an image", "image/png")},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("content does not match", response.json()["detail"])
+
+    def test_upload_payload_validator_checks_modality_signatures_and_text_encoding(self):
+        api._validate_upload_payload(".png", b"\x89PNG\r\n\x1a\nbody")
+        api._validate_upload_payload(".wav", b"RIFF\x00\x00\x00\x00WAVEdata")
+        api._validate_upload_payload(".pdf", b"%PDF-1.7")
+        api._validate_upload_payload(".txt", "Merhaba".encode("utf-8"))
+        with self.assertRaises(api.HTTPException):
+            api._validate_upload_payload(".png", b"plain text")
+        with self.assertRaises(api.HTTPException):
+            api._validate_upload_payload(".json", b"{invalid")
+
+    def test_assistant_upload_rejects_extension_capability_mismatch(self):
+        response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Transcribe this audio"},
+            files={"file": ("notes.txt", b"not audio", "text/plain")},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_assistant_upload_rejects_non_file_intent(self):
+        response = self.client.post(
+            "/assistant/upload",
+            headers=self.auth,
+            data={"prompt": "Write a Python function"},
+            files={"file": ("code.txt", b"code", "text/plain")},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_assistant_upload_requires_authentication(self):
+        response = self.client.post(
+            "/assistant/upload",
+            data={"prompt": "Describe this image"},
+            files={"file": ("scene.png", b"\x89PNG\r\n\x1a\nPNG-test-data", "image/png")},
+        )
+        self.assertEqual(response.status_code, 401)
+
     def test_dispatch_unconfigured_text_capability_returns_503(self):
         response=self.client.post("/dispatch",json={"capability":"research","prompt":"summarize"},headers=self.auth)
         self.assertEqual(response.status_code,503)
+
+class HealthEndpointContractTests(unittest.TestCase):
+    def test_health_version_matches_openapi_application_version(self):
+        client = TestClient(api.app)
+        health = client.get("/health")
+        openapi = client.get("/openapi.json")
+        self.assertEqual(health.status_code, 200, health.text)
+        self.assertEqual(openapi.status_code, 200, openapi.text)
+        self.assertEqual(health.json()["version"], api.app.version)
+        self.assertEqual(openapi.json()["info"]["version"], api.app.version)
+
 
 if __name__=="__main__": unittest.main()

@@ -6,7 +6,7 @@ fall back to pretrained third-party models or hosted inference/search APIs.
 
 ## Independent model family
 
-- **AETHRION-BASE:** multilingual causal language model; separate pretraining
+- **AETHRION-CHAT:** multilingual causal language model; separate pretraining
   and response-only instruction tuning.
 - **AETHRION-CODE:** independent causal model for code completion, generation
   and repair.
@@ -76,3 +76,46 @@ architectures, distributed/mixed-precision training validation, model-specific
 held-out benchmarks, calibration, OCR/layout tooling, mesh topology and
 texturing, trained research retrieval/reranking and citation validation,
 complete local modality inference adapters and a production end-to-end release review.
+
+## Main assistant and specialist delegation
+
+The user-facing assistant entry point is **AETHRION-CHAT**. A separate
+`AssistantOrchestrator` runs before the CHAT model: it classifies the latest
+user turn using conservative, deterministic task cues and delegates a clear
+single-purpose request to the matching native specialist. General, uncertain,
+or multi-intent requests remain with CHAT. A specialist that is not registered
+as a verified release returns an unavailable error; the orchestrator never
+silently substitutes CHAT for a failed specialist.
+
+| Model | Responsibility in the routed system |
+|---|---|
+| CHAT | Default conversation, explanation and ambiguous requests |
+| CODE | Code generation, debugging and repair |
+| VISION | Image/text representation and comparison; requires an uploaded image |
+| IMAGE | Text-to-image generation |
+| ASR | Audio transcription; requires an uploaded audio file |
+| TTS | Text-to-speech synthesis; requires a text payload and both TTS + VOCODER releases |
+| VOCODER | Internal TTS dependency: converts predicted mel features to waveform; not a user-facing route |
+| 3D | Text-conditioned point-cloud generation |
+| RESEARCH | Retrieval over the approved local research index |
+| DOCUMENT | Uploaded document analysis; requires a bounded document upload |
+| SAFE | Mandatory ALLOW/REVIEW/BLOCK policy gate before and after specialist text operations; not a user-selectable task |
+
+The same orchestration is exposed through the protected `POST /assistant` API
+and the Hugging Face Space's main chat interface. Explicit specialist endpoints
+remain available for file-bearing workflows. The general assistant endpoint
+rejects caller-supplied filesystem paths; image/audio/document inputs must use
+their dedicated bounded upload interfaces.
+
+The current classifier is deliberately rule-based rather than asking CHAT to
+emit routing JSON. This is a temporary reliability choice: the CHAT checkpoint
+is not yet trained/released, and an untrained language model cannot safely be
+trusted to select tools. Once CHAT is trained, an optional model-assisted
+classifier may propose a route, but deterministic validation, capability
+availability checks, SAFE gates and explicit user confirmation for ambiguous
+or consequential actions must remain authoritative.
+
+**Current limitation:** this is implemented orchestration software, not proof
+that any specialist is ready. The production model manifest still marks all
+11 models `not_trained`; therefore requests will stop at the availability
+gate until the relevant native model(s) are trained, evaluated and released.

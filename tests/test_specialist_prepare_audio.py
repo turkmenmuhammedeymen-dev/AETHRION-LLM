@@ -76,6 +76,7 @@ class AudioPreparationTests(unittest.TestCase):
                 self.assertEqual(arrays["targets"].shape[1], 1)
                 self.assertTrue(np.all(arrays["input_lengths"] >= 4))
             manifest = json.loads(Path(result["manifest"]).read_text(encoding="utf-8"))
+            self.assertEqual(manifest["governance"]["approval_status"], "pending")
             self.assertFalse(manifest["training_allowed"])
             self.assertFalse(manifest["speaker_consent_reviewed"])
             self.assertTrue(all(not item["speaker_consent_verified"] for item in manifest["sources"]))

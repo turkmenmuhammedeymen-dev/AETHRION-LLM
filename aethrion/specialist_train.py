@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import random
@@ -22,7 +23,7 @@ import torch
 import torch.nn as nn
 
 from aethrion.specialist_data import validate_specialist_dataset
-from aethrion.checkpoint import write_json_atomic
+from aethrion.checkpoint import _fsync_directory, _fsync_file, _write_text_fsync, write_json_atomic
 from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
 
 
@@ -300,16 +301,41 @@ def _save_checkpoint(path: Path, payload: dict[str, Any]) -> str:
             handle.flush()
             os.fsync(handle.fileno())
         digest = _sha256(tmp)
-        checksum_tmp.write_text(digest + "\n", encoding="ascii")
+        _write_text_fsync(checksum_tmp, digest + "\n", "ascii")
         if path.is_file() and checksum_path.is_file():
             expected = checksum_path.read_text(encoding="ascii").strip().split()
-            if expected and _sha256(path) == expected[0]:
-                shutil.copy2(path, previous_tmp)
-                shutil.copy2(checksum_path, previous_checksum_tmp)
-                os.replace(previous_tmp, previous)
-                os.replace(previous_checksum_tmp, previous_checksum)
+            if expected and len(expected[0]) == 64 and _sha256(path) == expected[0].lower():
+                try:
+                    existing = torch.load(path, map_location="cpu", weights_only=True)
+                    if (
+                        not isinstance(existing, dict)
+                        or existing.get("format") != "aethrion-specialist-checkpoint-v2"
+                        or not isinstance(existing.get("training_config"), dict)
+                        or type(existing.get("step")) is not int
+                        or existing["step"] < 0
+                    ):
+                        raise ValueError("Existing specialist checkpoint structure is invalid.")
+                    _validate_specialist_rng_state(existing.get("rng_state"))
+                    for key in ("dataset_sha256", "tokenizer_sha256", "manifest_sha256"):
+                        value = existing.get(key)
+                        if not isinstance(value, str) or len(value) != 64:
+                            raise ValueError(f"Existing specialist checkpoint {key} is invalid.")
+                except Exception:
+                    # Never promote a checksum-valid but semantically invalid generation.
+                    pass
+                else:
+                    shutil.copy2(path, previous_tmp)
+                    shutil.copy2(checksum_path, previous_checksum_tmp)
+                    _fsync_file(previous_tmp)
+                    _fsync_file(previous_checksum_tmp)
+                    os.replace(previous_tmp, previous)
+                    os.replace(previous_checksum_tmp, previous_checksum)
+                    # Persist the complete backup pair before replacing the live pair.
+                    _fsync_directory(path.parent)
         os.replace(tmp, path)
         os.replace(checksum_tmp, checksum_path)
+        # If a crash splits these two renames, the durable previous pair survives.
+        _fsync_directory(path.parent)
         return digest
     finally:
         for candidate in (tmp, checksum_tmp, previous_tmp, previous_checksum_tmp):
@@ -330,6 +356,44 @@ def _resume_training_config(config: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _validate_specialist_rng_state(state: Any) -> None:
+    """Validate every RNG component before treating a checkpoint generation as recoverable."""
+    if not isinstance(state, dict) or not {"python", "numpy", "torch"} <= set(state):
+        raise ValueError("Specialist checkpoint RNG state is incomplete.")
+    py = state["python"]
+    if not isinstance(py, dict) or not {"version", "state", "gauss"} <= set(py):
+        raise ValueError("Specialist Python RNG state is invalid.")
+    values = py["state"]
+    if (
+        type(py["version"]) is not int or py["version"] != 3
+        or not isinstance(values, list) or len(values) != 625
+        or any(type(value) is not int or value < 0 or value > 0xFFFFFFFF for value in values)
+        or (py["gauss"] is not None and (type(py["gauss"]) not in (int, float) or not math.isfinite(float(py["gauss"]))))
+    ):
+        raise ValueError("Specialist Python RNG state is invalid.")
+    ns = state["numpy"]
+    if not isinstance(ns, dict) or not {"algorithm", "keys", "position", "has_gauss", "cached_gaussian"} <= set(ns):
+        raise ValueError("Specialist NumPy RNG state is invalid.")
+    if (
+        ns["algorithm"] != "MT19937" or not isinstance(ns["keys"], list) or len(ns["keys"]) != 624
+        or any(type(value) is not int or value < 0 or value > 0xFFFFFFFF for value in ns["keys"])
+        or type(ns["position"]) is not int or not 0 <= ns["position"] <= 624
+        or type(ns["has_gauss"]) is not int or ns["has_gauss"] not in (0, 1)
+        or type(ns["cached_gaussian"]) not in (int, float)
+        or not math.isfinite(float(ns["cached_gaussian"]))
+    ):
+        raise ValueError("Specialist NumPy RNG state is invalid.")
+    torch_state = state["torch"]
+    if not isinstance(torch_state, torch.Tensor) or torch_state.dtype != torch.uint8 or torch_state.ndim != 1:
+        raise ValueError("Specialist Torch RNG state is invalid.")
+    cuda_states = state.get("cuda", [])
+    if not isinstance(cuda_states, list) or any(
+        not isinstance(item, torch.Tensor) or item.dtype != torch.uint8 or item.ndim != 1
+        for item in cuda_states
+    ):
+        raise ValueError("Specialist CUDA RNG state is invalid.")
+
+
 def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
     """Verify and safely load the newest generation, recovering from the previous one."""
     required = {"model_id", "step", "model_config", "model_state", "optimizer_state",
@@ -341,7 +405,11 @@ def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
         if not candidate.is_file() or not sidecar.is_file():
             raise ValueError(f"Checkpoint generation is missing: {candidate}")
         expected = sidecar.read_text(encoding="ascii").strip().split()
-        if not expected or _sha256(candidate) != expected[0]:
+        if (
+            not expected or len(expected[0]) != 64
+            or any(character not in "0123456789abcdefABCDEF" for character in expected[0])
+            or _sha256(candidate) != expected[0].lower()
+        ):
             raise ValueError(f"Checkpoint integrity verification failed: {candidate}")
         try:
             payload = torch.load(candidate, map_location=device, weights_only=True)
@@ -357,6 +425,15 @@ def _load_checkpoint(path: Path, device: torch.device) -> dict[str, Any]:
             raise ValueError("Specialist checkpoint training_config must be a non-empty object.")
         if type(payload.get("step")) is not int or payload["step"] < 0:
             raise ValueError("Specialist checkpoint step is invalid.")
+        for key in ("dataset_sha256", "tokenizer_sha256", "manifest_sha256"):
+            value = payload[key]
+            if not isinstance(value, str) or len(value) != 64 or any(ch not in "0123456789abcdef" for ch in value.lower()):
+                raise ValueError(f"Specialist checkpoint {key} is invalid.")
+        if not isinstance(payload["model_state"], dict) or not isinstance(payload["optimizer_state"], dict):
+            raise ValueError("Specialist checkpoint model or optimizer state is invalid.")
+        if not isinstance(payload["model_config"], dict):
+            raise ValueError("Specialist checkpoint model configuration is invalid.")
+        _validate_specialist_rng_state(payload["rng_state"])
         return payload
 
     try:
@@ -399,6 +476,8 @@ def train_specialist(
     manifest_path: str | Path,
     *,
     resume: str | Path | None = None,
+    session_id: str | None = None,
+    attempt_id: str | None = None,
 ) -> dict[str, Any]:
     """Train one independent specialist using a licensed, approved local NPZ dataset."""
     global _STOP_REQUESTED
@@ -465,6 +544,7 @@ def train_specialist(
     output.mkdir(parents=True, exist_ok=True)
     checkpoint_path = output / "checkpoint_last.pt"
     start_step = 0
+    checkpoint_generation = 0
     if resume is not None:
         state = _load_checkpoint(Path(resume), device)
         if state.get("model_id") != model_id or state.get("dataset_sha256") != approval["dataset_sha256"]:
@@ -493,6 +573,9 @@ def train_specialist(
         model.load_state_dict(state["model_state"])
         optimizer.load_state_dict(state["optimizer_state"])
         _restore_rng_state(state["rng_state"])
+        checkpoint_generation = state.get("checkpoint_generation", 0)
+        if type(checkpoint_generation) is not int or checkpoint_generation < 0:
+            raise ValueError("Resume checkpoint generation is invalid.")
         checkpoint_step = state.get("step")
         if type(checkpoint_step) is not int or checkpoint_step < 0:
             raise ValueError("Resume checkpoint step is invalid.")
@@ -536,9 +619,12 @@ def train_specialist(
             print(json.dumps(record, ensure_ascii=False), flush=True)
 
         if step % config["save_interval"] == 0 or step == config["max_steps"] - 1 or _STOP_REQUESTED:
+            checkpoint_generation += 1
             checkpoint_hash = _save_checkpoint(checkpoint_path, {
                 "format": "aethrion-specialist-checkpoint-v2",
                 "model_id": model_id, "step": step,
+                "checkpoint_generation": checkpoint_generation,
+                "session_id": session_id, "attempt_id": attempt_id,
                 "model_config": config["model_config"],
                 "training_config": _resume_training_config(config),
                 "model_state": model.state_dict(),
@@ -552,6 +638,9 @@ def train_specialist(
                 "status": "training_in_progress_not_released",
                 "release_status": "NOT_RELEASED",
                 "model_id": model_id, "step": step,
+                "session_id": session_id, "attempt_id": attempt_id,
+                "checkpoint_generation": checkpoint_generation,
+                "report_created_at_ns": time.time_ns(),
                 "dataset_sha256": approval["dataset_sha256"],
                 "tokenizer_sha256": approval["tokenizer_sha256"],
                 "manifest_sha256": manifest_hash,
@@ -565,6 +654,9 @@ def train_specialist(
                 "status": "training_interrupted_not_released",
                 "release_status": "NOT_RELEASED",
                 "model_id": model_id,
+                "session_id": session_id, "attempt_id": attempt_id,
+                "checkpoint_generation": checkpoint_generation,
+                "report_created_at_ns": time.time_ns(),
                 "steps": step + 1,
                 "dataset_sha256": approval["dataset_sha256"],
                 "tokenizer_sha256": approval["tokenizer_sha256"],
@@ -583,6 +675,9 @@ def train_specialist(
         "status": "training_complete_not_released",
         "release_status": "NOT_RELEASED",
         "model_id": model_id,
+        "session_id": session_id, "attempt_id": attempt_id,
+        "checkpoint_generation": checkpoint_generation,
+        "report_created_at_ns": time.time_ns(),
         "steps": config["max_steps"],
         "dataset_sha256": approval["dataset_sha256"],
         "tokenizer_sha256": approval["tokenizer_sha256"],
@@ -604,6 +699,8 @@ def main():
     parser.add_argument("--config", required=True, help="JSON model and optimizer configuration.")
     parser.add_argument("--manifest", required=True, help="Approved specialist dataset manifest.")
     parser.add_argument("--resume", default=None, help="Optional SHA-256 verified checkpoint.")
+    parser.add_argument("--session-id", default=None)
+    parser.add_argument("--attempt-id", default=None)
     args = parser.parse_args()
     config = json.loads(Path(args.config).read_text(encoding="utf-8"))
     global _STOP_REQUESTED
@@ -612,7 +709,10 @@ def main():
     for stop_signal in (signal.SIGINT, signal.SIGTERM):
         previous_handlers[stop_signal] = signal.signal(stop_signal, _request_stop)
     try:
-        report = train_specialist(config, args.manifest, resume=args.resume)
+        report = train_specialist(
+            config, args.manifest, resume=args.resume,
+            session_id=args.session_id, attempt_id=args.attempt_id,
+        )
     finally:
         for stop_signal, previous_handler in previous_handlers.items():
             signal.signal(stop_signal, previous_handler)

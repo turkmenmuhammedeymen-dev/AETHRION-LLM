@@ -7,6 +7,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import math
 import os
 import shutil
 import warnings
@@ -28,6 +29,36 @@ def _sidecar(path: Path) -> Path:
     return Path(str(path) + ".sha256")
 
 
+def _fsync_file(path: Path) -> None:
+    """Flush copied artifact bytes before promoting a backup generation."""
+    with path.open("rb+") as handle:
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def _fsync_directory(path: Path) -> None:
+    """Persist directory-entry replacements where the platform supports it."""
+    flags = getattr(os, "O_DIRECTORY", 0) | os.O_RDONLY
+    try:
+        descriptor = os.open(str(path), flags)
+    except (OSError, AttributeError):
+        return
+    try:
+        os.fsync(descriptor)
+    except OSError:
+        # Some filesystems/platforms do not expose directory fsync.
+        pass
+    finally:
+        os.close(descriptor)
+
+
+def _write_text_fsync(path: Path, content: str, encoding: str) -> None:
+    with path.open("w", encoding=encoding, newline="\n") as handle:
+        handle.write(content)
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
 def verify_checkpoint(path: str | Path) -> str:
     """Verify a checkpoint against its adjacent checksum file."""
     target = Path(path)
@@ -41,7 +72,11 @@ def verify_checkpoint(path: str | Path) -> str:
         raise ValueError(f"Checkpoint integrity file is empty: {sidecar}")
     expected = fields[0]
     actual = sha256_file(target)
-    if len(expected) != 64 or not hmac.compare_digest(expected.lower(), actual):
+    if (
+        len(expected) != 64
+        or any(character not in "0123456789abcdefABCDEF" for character in expected)
+        or not hmac.compare_digest(expected.lower(), actual)
+    ):
         raise ValueError(f"Checkpoint SHA-256 verification failed: {target}")
     return actual
 
@@ -66,28 +101,74 @@ def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
             handle.flush()
             os.fsync(handle.fileno())
         checksum = sha256_file(temporary)
-        sidecar_temporary.write_text(checksum + "\n", encoding="ascii")
+        _write_text_fsync(sidecar_temporary, checksum + "\n", "ascii")
 
         # Preserve the last known-good generation before replacing either file.
         if target.is_file() and sidecar.is_file():
             try:
-                verify_checkpoint(target)
-            except ValueError:
+                _load_verified_checkpoint(target, "cpu")
+            except Exception:
                 pass
             else:
                 previous_tmp = Path(str(previous) + ".tmp")
                 previous_sidecar_tmp = Path(str(previous_sidecar) + ".tmp")
                 shutil.copy2(target, previous_tmp)
                 shutil.copy2(sidecar, previous_sidecar_tmp)
+                _fsync_file(previous_tmp)
+                _fsync_file(previous_sidecar_tmp)
                 os.replace(previous_tmp, previous)
                 os.replace(previous_sidecar_tmp, previous_sidecar)
+                # Make the complete backup pair durable before touching the live pair.
+                _fsync_directory(target.parent)
 
         os.replace(temporary, target)
         os.replace(sidecar_temporary, sidecar)
+        # The checkpoint and sidecar are separate renames: a crash between them
+        # may invalidate the live pair, so the already-durable previous pair is
+        # the recovery boundary.
+        _fsync_directory(target.parent)
         return checksum
     finally:
         temporary.unlink(missing_ok=True)
         sidecar_temporary.unlink(missing_ok=True)
+
+
+def _validate_rng_state(state: Any) -> None:
+    """Reject structurally invalid RNG snapshots before choosing a generation."""
+    if not isinstance(state, dict) or not {"python", "numpy", "torch"} <= set(state):
+        raise ValueError("Checkpoint RNG state is incomplete.")
+    py = state["python"]
+    if not isinstance(py, dict) or not {"version", "state", "gauss"} <= set(py):
+        raise ValueError("Checkpoint Python RNG state is invalid.")
+    py_values = py["state"]
+    if (
+        type(py["version"]) is not int or py["version"] != 3
+        or not isinstance(py_values, list) or len(py_values) != 625
+        or any(type(value) is not int or value < 0 or value > 0xFFFFFFFF for value in py_values)
+        or (py["gauss"] is not None and (type(py["gauss"]) not in (int, float) or not math.isfinite(float(py["gauss"]))))
+    ):
+        raise ValueError("Checkpoint Python RNG state is invalid.")
+    ns = state["numpy"]
+    if not isinstance(ns, dict) or not {"algorithm", "keys", "position", "has_gauss", "cached_gaussian"} <= set(ns):
+        raise ValueError("Checkpoint NumPy RNG state is invalid.")
+    if (
+        ns["algorithm"] != "MT19937" or not isinstance(ns["keys"], list) or len(ns["keys"]) != 624
+        or any(type(value) is not int or value < 0 or value > 0xFFFFFFFF for value in ns["keys"])
+        or type(ns["position"]) is not int or not 0 <= ns["position"] <= 624
+        or type(ns["has_gauss"]) is not int or ns["has_gauss"] not in (0, 1)
+        or type(ns["cached_gaussian"]) not in (int, float)
+        or not math.isfinite(float(ns["cached_gaussian"]))
+    ):
+        raise ValueError("Checkpoint NumPy RNG state is invalid.")
+    torch_state = state["torch"]
+    if not isinstance(torch_state, torch.Tensor) or torch_state.dtype != torch.uint8 or torch_state.ndim != 1:
+        raise ValueError("Checkpoint Torch RNG state is invalid.")
+    cuda_states = state.get("cuda", [])
+    if not isinstance(cuda_states, list) or any(
+        not isinstance(item, torch.Tensor) or item.dtype != torch.uint8 or item.ndim != 1
+        for item in cuda_states
+    ):
+        raise ValueError("Checkpoint CUDA RNG state is invalid.")
 
 
 def _load_verified_checkpoint(
@@ -113,6 +194,17 @@ def _load_verified_checkpoint(
         raise ValueError("Checkpoint is missing required fields: " + ", ".join(missing))
     if not isinstance(state["training_config"], dict) or not state["training_config"]:
         raise ValueError("Checkpoint training_config must be a non-empty object.")
+    if type(state["step"]) is not int or state["step"] < 0:
+        raise ValueError("Checkpoint step is invalid.")
+    for key in ("data_sha256", "tokenizer_sha256"):
+        value = state[key]
+        if not isinstance(value, str) or len(value) != 64 or any(ch not in "0123456789abcdef" for ch in value.lower()):
+            raise ValueError(f"Checkpoint {key} is invalid.")
+    if not isinstance(state["model"], dict) or not isinstance(state["optimizer"], dict):
+        raise ValueError("Checkpoint model or optimizer state is invalid.")
+    if not isinstance(state["scaler"], dict) or not isinstance(state["model_config"], dict):
+        raise ValueError("Checkpoint scaler or model configuration is invalid.")
+    _validate_rng_state(state["rng_state"])
     return state
 
 
@@ -151,5 +243,6 @@ def write_json_atomic(payload: dict[str, Any], path: str | Path) -> None:
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, target)
+        _fsync_directory(target.parent)
     finally:
         temporary.unlink(missing_ok=True)

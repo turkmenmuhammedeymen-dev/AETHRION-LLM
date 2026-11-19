@@ -208,7 +208,7 @@ class SpecialistTrainingTests(unittest.TestCase):
                 "model_id": "code", "step": 0, "model_config": {},
                 "model_state": {}, "optimizer_state": {},
                 "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
-                "manifest_sha256": "2" * 64, "rng_state": {},
+                "manifest_sha256": "2" * 64, "rng_state": specialist_train._capture_rng_state(),
                 "training_config": {
                     "seed": 11, "batch_size": 2, "learning_rate": 0.001,
                     "weight_decay": 0.0, "grad_clip": 1.0,
@@ -237,6 +237,83 @@ class SpecialistTrainingTests(unittest.TestCase):
             report = train_specialist(self._config(root), manifest)
             self.assertEqual(report["status"], "training_complete_not_released")
             self.assertFalse(specialist_train._STOP_REQUESTED)
+
+    def test_specialist_sidecar_replace_crash_recovers_durable_previous_generation(self):
+        from unittest.mock import patch
+        from aethrion.specialist_train import _capture_rng_state, _load_checkpoint, _save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            base = {
+                "format": "aethrion-specialist-checkpoint-v2",
+                "model_id": "code", "step": 0, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": _capture_rng_state(),
+                "training_config": {"seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                                    "weight_decay": 0.0, "grad_clip": 1.0,
+                                    "eval_interval": 1, "save_interval": 1, "max_steps": 2},
+            }
+            _save_checkpoint(checkpoint, base)
+            original_replace = specialist_train.os.replace
+            sidecar = Path(str(checkpoint) + ".sha256")
+
+            def fail_live_sidecar(source, destination):
+                if Path(destination) == sidecar:
+                    raise OSError("simulated interruption before live sidecar promotion")
+                return original_replace(source, destination)
+
+            with patch("aethrion.specialist_train.os.replace", side_effect=fail_live_sidecar):
+                with self.assertRaisesRegex(OSError, "simulated interruption"):
+                    _save_checkpoint(checkpoint, {**base, "step": 1})
+
+            recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
+            self.assertEqual(recovered["step"], 0)
+            previous = Path(str(checkpoint) + ".previous")
+            previous_sidecar = Path(str(previous) + ".sha256")
+            self.assertEqual(
+                hashlib.sha256(previous.read_bytes()).hexdigest(),
+                previous_sidecar.read_text(encoding="ascii").strip(),
+            )
+
+    def test_specialist_preserves_live_generation_at_each_precommit_crash_boundary(self):
+        from aethrion.specialist_train import _capture_rng_state, _load_checkpoint, _save_checkpoint
+
+        failure_targets = ("checkpoint_last.pt.previous", "checkpoint_last.pt.previous.sha256", "checkpoint_last.pt")
+        for target_name in failure_targets:
+            with self.subTest(target=target_name), tempfile.TemporaryDirectory() as directory:
+                checkpoint = Path(directory) / "checkpoint_last.pt"
+                base = {
+                    "format": "aethrion-specialist-checkpoint-v2",
+                    "model_id": "code", "step": 0, "model_config": {},
+                    "model_state": {}, "optimizer_state": {},
+                    "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                    "manifest_sha256": "2" * 64, "rng_state": _capture_rng_state(),
+                    "training_config": {"seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                                        "weight_decay": 0.0, "grad_clip": 1.0,
+                                        "eval_interval": 1, "save_interval": 1, "max_steps": 2},
+                }
+                _save_checkpoint(checkpoint, base)
+                original_replace = specialist_train.os.replace
+                target = Path(directory) / target_name
+
+                def fail_at_boundary(source, destination):
+                    if Path(destination) == target:
+                        raise OSError("simulated specialist promotion interruption")
+                    return original_replace(source, destination)
+
+                with patch("aethrion.specialist_train.os.replace", side_effect=fail_at_boundary):
+                    with self.assertRaisesRegex(OSError, "simulated specialist promotion"):
+                        _save_checkpoint(checkpoint, {**base, "step": 1})
+
+                self.assertEqual(_load_checkpoint(checkpoint, torch.device("cpu"))["step"], 0)
+                previous = Path(str(checkpoint) + ".previous")
+                previous_sidecar = Path(str(previous) + ".sha256")
+                if previous.is_file() and previous_sidecar.is_file():
+                    self.assertEqual(
+                        hashlib.sha256(previous.read_bytes()).hexdigest(),
+                        previous_sidecar.read_text(encoding="ascii").strip(),
+                    )
 
     def test_training_resumes_and_preserves_verified_previous_checkpoint(self):
         from aethrion.specialist_train import _load_checkpoint
@@ -295,6 +372,131 @@ class SpecialistTrainingTests(unittest.TestCase):
             self.assertEqual(second["steps"], 2)
             self.assertEqual(second["dataset_sha256"], first["dataset_sha256"])
             self.assertEqual(second["release_status"], "NOT_RELEASED")
+
+
+    def test_resume_rejects_changed_source_and_approval_manifest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = self._fixture(root, approved=True)
+            config = self._config(root)
+            config["max_steps"] = 2
+            train_specialist(config, manifest)
+            checkpoint = root / "artifacts" / "checkpoint_last.pt"
+
+            payload = json.loads(manifest.read_text(encoding="utf-8"))
+            payload["sources"][0]["permitted_use"] = (
+                "Changed after checkpoint creation; resume must be rejected."
+            )
+            manifest.write_text(json.dumps(payload), encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "manifest changed"):
+                train_specialist(config, manifest, resume=checkpoint)
+
+    def test_specialist_checkpoint_recovers_when_latest_rng_snapshot_is_malformed(self):
+        from aethrion.specialist_train import _capture_rng_state, _load_checkpoint, _save_checkpoint, _sha256
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            payload = {
+                "format": "aethrion-specialist-checkpoint-v2",
+                "model_id": "code", "step": 0, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": _capture_rng_state(),
+                "training_config": {
+                    "seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                    "weight_decay": 0.0, "grad_clip": 1.0,
+                    "eval_interval": 1, "save_interval": 1, "max_steps": 2,
+                },
+            }
+            _save_checkpoint(checkpoint, payload)
+            _save_checkpoint(checkpoint, {**payload, "step": 1})
+            torch.save({**payload, "step": 2, "rng_state": {}}, checkpoint)
+            Path(str(checkpoint) + ".sha256").write_text(_sha256(checkpoint) + "\n", encoding="ascii")
+
+            with self.assertWarnsRegex(RuntimeWarning, "recovering from"):
+                recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
+            self.assertEqual(recovered["step"], 0)
+            self.assertEqual(recovered["model_id"], "code")
+
+    def test_checkpoint_with_invalid_checksum_and_no_backup_fails_closed(self):
+        from aethrion.specialist_train import _load_checkpoint, _save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            payload = {
+                "format": "aethrion-specialist-checkpoint-v2",
+                "model_id": "code", "step": 0, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": {},
+                "training_config": {
+                    "seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                    "weight_decay": 0.0, "grad_clip": 1.0,
+                    "eval_interval": 1, "save_interval": 1, "max_steps": 2,
+                },
+            }
+            _save_checkpoint(checkpoint, payload)
+            Path(str(checkpoint) + ".sha256").write_text("f" * 64 + "\n", encoding="ascii")
+
+            with self.assertRaisesRegex(ValueError, "integrity verification failed"):
+                _load_checkpoint(checkpoint, torch.device("cpu"))
+
+
+
+
+    def test_specialist_first_checkpoint_split_write_fails_closed_without_previous(self):
+        from aethrion.specialist_train import _capture_rng_state, _load_checkpoint, _save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            payload = {
+                "format": "aethrion-specialist-checkpoint-v2",
+                "model_id": "code", "step": 0, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": _capture_rng_state(),
+                "training_config": {
+                    "seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                    "weight_decay": 0.0, "grad_clip": 1.0,
+                    "eval_interval": 1, "save_interval": 1, "max_steps": 2,
+                },
+            }
+            sidecar = Path(str(checkpoint) + ".sha256")
+            original_replace = specialist_train.os.replace
+
+            def fail_first_live_sidecar(source, destination):
+                if Path(destination) == sidecar:
+                    raise OSError("simulated specialist first-generation sidecar interruption")
+                return original_replace(source, destination)
+
+            with patch("aethrion.specialist_train.os.replace", side_effect=fail_first_live_sidecar):
+                with self.assertRaisesRegex(OSError, "first-generation sidecar interruption"):
+                    _save_checkpoint(checkpoint, payload)
+
+            self.assertTrue(checkpoint.is_file())
+            self.assertFalse(sidecar.exists())
+            self.assertFalse(Path(str(checkpoint) + ".previous").exists())
+            with self.assertRaisesRegex(ValueError, "Checkpoint generation is missing"):
+                _load_checkpoint(checkpoint, torch.device("cpu"))
+
+    def test_specialist_loader_never_promotes_orphaned_temp_files_after_crash(self):
+        from aethrion.specialist_train import _load_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            temporary = Path(str(checkpoint) + ".tmp")
+            sidecar_temporary = Path(str(checkpoint) + ".sha256.tmp")
+            temporary.write_bytes(b"partial specialist checkpoint from terminated writer")
+            sidecar_temporary.write_text("0" * 64 + "\n", encoding="ascii")
+
+            with self.assertRaisesRegex(ValueError, "Checkpoint generation is missing"):
+                _load_checkpoint(checkpoint, torch.device("cpu"))
+
+            self.assertTrue(temporary.is_file())
+            self.assertTrue(sidecar_temporary.is_file())
+            self.assertFalse(checkpoint.exists())
+            self.assertFalse(Path(str(checkpoint) + ".previous").exists())
 
 
 if __name__ == "__main__":

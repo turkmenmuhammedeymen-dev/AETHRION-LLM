@@ -68,10 +68,24 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
     def test_output_directory_must_be_explicit_and_non_root(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder).resolve()
-            for invalid in ("", ".", "..", "../outside", str(root / "absolute")):
+            for invalid in ("", ".", "..", "../outside", str(root / "absolute"),
+                            r"artifacts\\models\\code", "C:/outside", "artifacts/./code", "artifacts//code"):
                 with self.subTest(invalid=invalid):
                     with self.assertRaises(FamilyTrainingError):
                         _resolve_output_dir(root, invalid)
+
+    def test_output_directory_rejects_windows_and_ambiguous_relative_paths(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            for invalid in (r"artifacts\\models\\code", "C:/outside", "artifacts/./code", "artifacts//code"):
+                with self.subTest(invalid=invalid):
+                    with self.assertRaises(FamilyTrainingError):
+                        _resolve_output_dir(root, invalid)
+
+    def test_empty_model_selection_does_not_fall_back_to_all_models(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with self.assertRaisesRegex(FamilyTrainingError, "At least one model"):
+                run_family(folder, selected=[])
 
     def test_output_directory_rejects_symlink_escape(self):
         with tempfile.TemporaryDirectory() as folder, tempfile.TemporaryDirectory() as outside:
@@ -154,6 +168,480 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(FamilyTrainingError, "model_id"):
                 preflight_model(root, "code")
+
+
+    def test_execute_writes_durable_session_snapshot_and_event_journal(self):
+        import json
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            plan = {
+                "model_id": "chat", "ready": True,
+                "command": ["python", "-m", "aethrion.train"],
+                "checkpoint": "artifacts/chat/checkpoint_last.pt",
+                "output_dir": "artifacts/chat",
+            }
+            with patch("aethrion.train_family.preflight_model", return_value=plan), \
+                 patch("aethrion.train_family.subprocess.Popen") as popen, \
+                 patch("aethrion.train_family._training_outcome", return_value="training_completed_not_released"):
+                popen.return_value.wait.return_value = 0
+                popen.return_value.poll.return_value = 0
+                report = run_family(root, selected=["chat"], execute=True)
+
+            self.assertTrue(report["training_started"])
+            self.assertEqual(report["models"][0]["status"], "training_completed_not_released")
+            session_dir = root / "artifacts" / "training_sessions"
+            snapshots = list(session_dir.glob("*.json"))
+            journals = list(session_dir.glob("*.jsonl"))
+            self.assertEqual(len(snapshots), 1)
+            self.assertEqual(len(journals), 1)
+            snapshot = json.loads(snapshots[0].read_text(encoding="utf-8"))
+            events = [json.loads(line) for line in journals[0].read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(snapshot["status"], "completed")
+            self.assertEqual(snapshot["released_count"], 0)
+            self.assertEqual(
+                [event["event"] for event in events],
+                ["session_started", "model_started", "model_finished", "session_completed"],
+            )
+
+    def test_keyboard_interrupt_persists_interrupted_family_session(self):
+        import json
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            plan = {
+                "model_id": "chat", "ready": True,
+                "command": ["python", "-m", "aethrion.train"],
+                "checkpoint": "artifacts/chat/checkpoint_last.pt",
+                "output_dir": "artifacts/chat",
+            }
+            with patch("aethrion.train_family.preflight_model", return_value=plan), \
+                 patch("aethrion.train_family.subprocess.Popen") as popen, \
+                 patch("aethrion.train_family._training_outcome", return_value="training_completed_not_released"):
+                popen.return_value.wait.side_effect = [KeyboardInterrupt, -2]
+                popen.return_value.poll.return_value = None
+                report = run_family(root, selected=["chat"], execute=True)
+
+            popen.return_value.send_signal.assert_called_once()
+            self.assertTrue(report["training_started"])
+
+            self.assertTrue(report["interrupted"])
+            self.assertEqual(report["models"][0]["status"], "training_interrupted_not_released")
+            snapshot = next((root / "artifacts" / "training_sessions").glob("*.json"))
+            state = json.loads(snapshot.read_text(encoding="utf-8"))
+            self.assertEqual(state["status"], "interrupted")
+            self.assertEqual(state["released_count"], 0)
+
+    def test_failed_process_spawn_is_blocked_not_reported_as_training_started(self):
+        import json
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            plan = {
+                "model_id": "chat", "ready": True,
+                "command": ["python", "-m", "aethrion.train"],
+                "checkpoint": "artifacts/chat/checkpoint_last.pt",
+                "output_dir": "artifacts/chat",
+            }
+            with patch("aethrion.train_family.preflight_model", return_value=plan), \\
+                 patch("aethrion.train_family.subprocess.Popen", side_effect=OSError("runner unavailable")):
+                report = run_family(root, selected=["chat"], execute=True)
+
+            self.assertFalse(report["training_started"])
+            self.assertEqual(len(report["models"]), 1)
+            self.assertEqual(report["models"][0]["status"], "blocked")
+            journal = next((root / "artifacts" / "training_sessions").glob("*.jsonl"))
+            events = [json.loads(line)["event"] for line in journal.read_text(encoding="utf-8").splitlines()]
+            self.assertNotIn("model_started", events)
+            self.assertIn("model_blocked", events)
+
+    def test_family_passes_resume_when_only_previous_checkpoint_exists(self):
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            previous = root / "artifacts" / "chat" / "checkpoint_last.pt.previous"
+            previous.parent.mkdir(parents=True)
+            previous.write_bytes(b"previous-generation")
+            plan = {
+                "model_id": "chat", "ready": True,
+                "command": ["python", "-m", "aethrion.train"],
+                "checkpoint": "artifacts/chat/checkpoint_last.pt",
+                "output_dir": "artifacts/chat",
+            }
+            with patch("aethrion.train_family.preflight_model", return_value=plan), \\
+                 patch("aethrion.train_family.subprocess.Popen") as popen, \\
+                 patch("aethrion.train_family._training_outcome", return_value="training_interrupted_not_released"):
+                popen.return_value.wait.return_value = 0
+                popen.return_value.poll.return_value = 0
+                run_family(root, selected=["chat"], execute=True)
+
+            command = popen.call_args.args[0]
+            self.assertIn("--resume", command)
+            self.assertEqual(command[command.index("--resume") + 1], "artifacts/chat/checkpoint_last.pt")
+
+    def test_specialist_config_preflight_checks_architecture_and_training_fields(self):
+        from aethrion.train_family import _validate_specialist_config
+
+        valid = {
+            "seed": 42, "max_steps": 10, "batch_size": 2,
+            "learning_rate": 0.001, "weight_decay": 0.01,
+            "grad_clip": 1.0, "eval_interval": 2, "save_interval": 2,
+            "model_config": {
+                "vocab_size": 2048, "n_mels": 80, "width": 128,
+                "layers": 4, "heads": 4, "blank_id": 0,
+            },
+        }
+        _validate_specialist_config("asr", valid)
+        invalid = {**valid, "model_config": {**valid["model_config"]}}
+        invalid["model_config"].pop("n_mels")
+        with self.assertRaisesRegex(FamilyTrainingError, "n_mels"):
+            _validate_specialist_config("asr", invalid)
+
+    def test_specialist_config_preflight_rejects_invalid_optimizer_settings(self):
+        from aethrion.train_family import _validate_specialist_config
+
+        config = {
+            "seed": 42, "max_steps": 10, "batch_size": 2,
+            "learning_rate": 0, "weight_decay": 0.01,
+            "grad_clip": 1.0, "eval_interval": 2, "save_interval": 2,
+            "model_config": {
+                "vocab_size": 2048, "block_size": 512, "n_layer": 4,
+                "n_head": 4, "n_embd": 128,
+            },
+        }
+        with self.assertRaisesRegex(ValueError, "learning_rate"):
+            _validate_specialist_config("code", config)
+
+    def test_preflight_only_does_not_create_training_session_artifacts(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            self._empty_repo(root)
+            report = run_family(root, execute=False)
+            self.assertFalse(report["training_started"])
+            self.assertFalse((root / "artifacts" / "training_sessions").exists())
+
+
+    def _write_verified_report_fixture(self, root: Path, *, model_id="code", status="training_complete_not_released", session_id=None, attempt_id=None):
+        import hashlib
+        import json
+        import time
+
+        output = root / "artifacts" / "models" / model_id
+        output.mkdir(parents=True)
+        checkpoint = output / "checkpoint_last.pt"
+        from aethrion.specialist_train import _capture_rng_state, _save_checkpoint, _sha256
+        _save_checkpoint(checkpoint, {
+            "format": "aethrion-specialist-checkpoint-v2",
+            "model_id": model_id, "step": 9, "checkpoint_generation": 1,
+            "session_id": session_id, "attempt_id": attempt_id, "model_config": {},
+            "training_config": {"seed": 1, "max_steps": 10},
+            "model_state": {}, "optimizer_state": {},
+            "dataset_sha256": "a" * 64, "tokenizer_sha256": "b" * 64,
+            "manifest_sha256": "c" * 64, "rng_state": _capture_rng_state(),
+        })
+        digest = _sha256(checkpoint)
+        report = {
+            "status": status, "release_status": "NOT_RELEASED", "model_id": model_id,
+            "steps": 10, "dataset_sha256": "a" * 64, "tokenizer_sha256": "b" * 64,
+            "manifest_sha256": "c" * 64, "checkpoint_sha256": digest,
+            "checkpoint_generation": 1, "session_id": session_id, "attempt_id": attempt_id,
+            "report_created_at_ns": time.time_ns(),
+            "validation_loss": 1.25, "held_out_test_loss": 1.5,
+        }
+        (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+        return output, checkpoint, report
+
+    def test_training_outcome_accepts_only_fresh_report_with_matching_checkpoint(self):
+        from aethrion.train_family import _training_outcome
+        import time
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, _ = self._write_verified_report_fixture(Path(folder))
+            outcome = _training_outcome(
+                output, "code", 0, checkpoint_path=checkpoint,
+                started_at_ns=time.time_ns() - 1_000_000_000,
+            )
+            self.assertEqual(outcome, "training_completed_not_released")
+
+    def test_training_outcome_rejects_wrong_model_and_missing_checkpoint(self):
+        from aethrion.train_family import _training_outcome
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, _ = self._write_verified_report_fixture(Path(folder))
+            self.assertEqual(
+                _training_outcome(output, "vision", 0, checkpoint_path=checkpoint),
+                "training_report_model_mismatch_not_released",
+            )
+            checkpoint.unlink()
+            self.assertEqual(
+                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
+                "training_checkpoint_missing_not_released",
+            )
+
+    def test_training_outcome_rejects_checkpoint_hash_mismatch(self):
+        from aethrion.train_family import _training_outcome
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(Path(folder))
+            report["checkpoint_sha256"] = "0" * 64
+            import json
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
+                "training_checkpoint_hash_mismatch_not_released",
+            )
+
+
+    def test_training_outcome_recovers_exact_previous_generation_named_by_report(self):
+        import hashlib
+        import shutil
+        from aethrion.train_family import _training_outcome
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(
+                Path(folder), session_id="session-prev", attempt_id="attempt-prev"
+            )
+            previous = Path(str(checkpoint) + ".previous")
+            shutil.copy2(checkpoint, previous)
+            previous_hash = hashlib.sha256(previous.read_bytes()).hexdigest()
+            Path(str(previous) + ".sha256").write_text(previous_hash + "\\n", encoding="ascii")
+            checkpoint.write_bytes(b"interrupted replacement / corrupt latest generation")
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    session_id="session-prev", attempt_id="attempt-prev",
+                ),
+                "training_completed_not_released",
+            )
+
+
+    def test_attempt_checkpoint_binding_finds_reported_previous_generation(self):
+        import hashlib
+        import shutil
+        from aethrion.train_family import _verify_attempt_checkpoint_binding
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(
+                Path(folder), session_id="session-prev", attempt_id="attempt-prev"
+            )
+            previous = Path(str(checkpoint) + ".previous")
+            shutil.copy2(checkpoint, previous)
+            previous_hash = hashlib.sha256(previous.read_bytes()).hexdigest()
+            Path(str(previous) + ".sha256").write_text(previous_hash + "\\n", encoding="ascii")
+            checkpoint.write_bytes(b"damaged-new-generation")
+            result = _verify_attempt_checkpoint_binding(
+                output, "code", "session-prev", "attempt-prev",
+                {
+                    "state": "terminal_recorded",
+                    "checkpoint_generation": report["checkpoint_generation"],
+                    "checkpoint_sha256": report["checkpoint_sha256"],
+                    "report_created_at_ns": report["report_created_at_ns"],
+                    "terminal_status": "training_completed_not_released",
+                },
+            )
+            self.assertTrue(result["verified"])
+            self.assertEqual(result["checkpoint_source"], "previous")
+
+    def test_attempt_checkpoint_binding_rejects_journal_generation_mismatch(self):
+        from aethrion.train_family import _verify_attempt_checkpoint_binding
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, _, report = self._write_verified_report_fixture(
+                Path(folder), session_id="session-audit", attempt_id="attempt-audit"
+            )
+            journal_attempt = {
+                "state": "terminal_recorded",
+                "checkpoint_generation": report["checkpoint_generation"] + 1,
+                "checkpoint_sha256": report["checkpoint_sha256"],
+                "report_created_at_ns": report["report_created_at_ns"],
+            }
+            result = _verify_attempt_checkpoint_binding(
+                output, "code", "session-audit", "attempt-audit", journal_attempt,
+            )
+            self.assertFalse(result["verified"])
+            self.assertEqual(result["reason"], "journal_report_checkpoint_mismatch")
+
+    def test_attempt_checkpoint_binding_accepts_exact_lineage_and_digest(self):
+        from aethrion.train_family import _verify_attempt_checkpoint_binding
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, _, report = self._write_verified_report_fixture(
+                Path(folder), session_id="session-audit", attempt_id="attempt-audit"
+            )
+            journal_attempt = {
+                "state": "terminal_recorded",
+                "checkpoint_generation": report["checkpoint_generation"],
+                "checkpoint_sha256": report["checkpoint_sha256"],
+                "report_created_at_ns": report["report_created_at_ns"],
+            }
+            result = _verify_attempt_checkpoint_binding(
+                output, "code", "session-audit", "attempt-audit", journal_attempt,
+            )
+            self.assertTrue(result["verified"])
+            self.assertEqual(result["checkpoint_source"], "latest")
+
+    def test_training_outcome_rejects_missing_or_nonfinite_metrics(self):
+        from aethrion.train_family import _training_outcome
+        import json
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(Path(folder))
+            report["held_out_test_loss"] = float("nan")
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
+                "training_report_metrics_invalid_not_released",
+            )
+
+    def test_training_outcome_rejects_report_checkpoint_step_mismatch(self):
+        from aethrion.train_family import _training_outcome
+        import json
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(Path(folder))
+            report["steps"] = 11
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
+                "training_report_checkpoint_step_mismatch_not_released",
+            )
+
+    def test_training_outcome_rejects_checkpoint_provenance_mismatch(self):
+        from aethrion.train_family import _training_outcome
+        import json
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(Path(folder))
+            report["dataset_sha256"] = "d" * 64
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(output, "code", 0, checkpoint_path=checkpoint),
+                "training_report_checkpoint_provenance_mismatch_not_released",
+            )
+
+    def test_training_outcome_requires_matching_session_and_attempt(self):
+        from aethrion.train_family import _training_outcome
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, _ = self._write_verified_report_fixture(
+                Path(folder), session_id="session-a", attempt_id="attempt-a"
+            )
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    session_id="session-b", attempt_id="attempt-a",
+                ),
+                "training_report_session_mismatch_not_released",
+            )
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    session_id="session-a", attempt_id="attempt-b",
+                ),
+                "training_report_attempt_mismatch_not_released",
+            )
+
+    def test_training_outcome_rejects_report_timestamp_from_prior_attempt(self):
+        from aethrion.train_family import _training_outcome
+        import time
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(Path(folder))
+            report["report_created_at_ns"] = time.time_ns() - 10_000_000_000
+            import json
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    started_at_ns=time.time_ns(),
+                ),
+                "training_report_timestamp_invalid_not_released",
+            )
+
+    def test_training_outcome_rejects_checkpoint_generation_mismatch(self):
+        from aethrion.train_family import _training_outcome
+        import json
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, report = self._write_verified_report_fixture(
+                Path(folder), session_id="session-a", attempt_id="attempt-a"
+            )
+            report["checkpoint_generation"] = 2
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    session_id="session-a", attempt_id="attempt-a",
+                ),
+                "training_checkpoint_session_generation_mismatch_not_released",
+            )
+
+    def test_training_outcome_rejects_stale_report(self):
+        from aethrion.train_family import _training_outcome
+        import time
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, _ = self._write_verified_report_fixture(Path(folder))
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", 0, checkpoint_path=checkpoint,
+                    started_at_ns=time.time_ns() + 1_000_000_000,
+                ),
+                "training_report_stale_not_released",
+            )
+
+
+    def test_training_outcome_rejects_missing_held_out_metric_for_chat(self):
+        import hashlib
+        import json
+        from aethrion.train_family import _training_outcome
+
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder)
+            checkpoint = output / "checkpoint_last.pt"
+            checkpoint.write_bytes(b"chat-checkpoint")
+            report = {
+                "status": "training_complete_not_released",
+                "release_status": "NOT_RELEASED",
+                "model_id": "chat",
+                "step": 9,
+                "dataset_sha256": "a" * 64,
+                "tokenizer_sha256": "b" * 64,
+                "checkpoint_sha256": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+                "metrics": {"train": 1.2, "val": 1.1},
+            }
+            (output / "training_report.json").write_text(json.dumps(report), encoding="utf-8")
+            self.assertEqual(
+                _training_outcome(output, "chat", 0, checkpoint_path=checkpoint),
+                "training_report_metrics_invalid_not_released",
+            )
+
+
+    def test_interrupted_report_still_requires_matching_checkpoint_hash(self):
+        from aethrion.train_family import _training_outcome
+
+        with tempfile.TemporaryDirectory() as folder:
+            output, checkpoint, _ = self._write_verified_report_fixture(
+                Path(folder), status="training_interrupted_not_released"
+            )
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", -2, checkpoint_path=checkpoint,
+                    allow_interrupted=True,
+                ),
+                "training_interrupted_not_released",
+            )
+            checkpoint.write_bytes(b"tampered-after-report")
+            self.assertEqual(
+                _training_outcome(
+                    output, "code", -2, checkpoint_path=checkpoint,
+                    allow_interrupted=True,
+                ),
+                "training_checkpoint_hash_mismatch_not_released",
+            )
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 name: tests
 on:
+  workflow_dispatch:
   push:
     branches: ["main", "hardening/**", "feature/**", "feat/**", "audit/**", "security/**"]
   pull_request:
@@ -43,6 +44,34 @@ jobs:
           name: aethrion-family-readiness-${{ matrix.python-version }}
           path: family-readiness-report.json
           if-no-files-found: error
+
+
+      - name: Capture failure diagnostics
+        if: failure()
+        run: |
+          set +e
+          {
+            echo "=== Python ==="
+            python --version
+            echo "=== pip ==="
+            python -m pip --version
+            echo "=== dependency consistency ==="
+            python -m pip check
+            echo "=== unit tests (diagnostic rerun) ==="
+            python -m unittest discover -s tests -v
+            echo "=== synthetic smoke test (diagnostic rerun) ==="
+            python -m aethrion.smoke_test
+            echo "=== family audit (diagnostic rerun) ==="
+            python -m aethrion.family_audit --output /tmp/aethrion-family-readiness-diagnostics.json
+          } > ci-diagnostics.log 2>&1
+          cat ci-diagnostics.log
+      - name: Upload failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aethrion-ci-diagnostics-${{ matrix.python-version }}
+          path: ci-diagnostics.log
+          if-no-files-found: warn
 
   space-runtime:
     name: Hugging Face Space runtime smoke test
@@ -204,3 +233,27 @@ jobs:
           print("LIVE_INFO_ENDPOINT=PASS")
           PY
           echo "SPACE_LIVE_SERVER_TEST_OK"
+      - name: Capture Space failure diagnostics
+        if: failure()
+        run: |
+          set +e
+          {
+            echo "=== Python ==="
+            python --version
+            echo "=== dependency consistency ==="
+            python -m pip check
+            echo "=== Gradio import ==="
+            python -c "import gradio, spaces; print('gradio', gradio.__version__); print('spaces import OK')"
+            echo "=== staged Space application log ==="
+            if [ -f /tmp/aethrion-space.log ]; then cat /tmp/aethrion-space.log; else echo "No application log was created."; fi
+            echo "=== last endpoint response ==="
+            if [ -f /tmp/aethrion-response.json ]; then cat /tmp/aethrion-response.json; else echo "No endpoint response was captured."; fi
+          } > space-diagnostics.log 2>&1
+          cat space-diagnostics.log
+      - name: Upload Space failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aethrion-space-failure-diagnostics
+          path: space-diagnostics.log
+          if-no-files-found: warn
