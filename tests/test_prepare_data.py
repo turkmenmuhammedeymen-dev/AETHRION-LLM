@@ -598,5 +598,25 @@ class CorpusPreparationTests(unittest.TestCase):
 
 
 
+    def test_source_manifest_rejects_explicit_non_base_model(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source = root / "source.txt"
+            source.write_text("This is a sufficiently long synthetic test record.", encoding="utf-8")
+            manifest = root / "sources.json"
+            manifest.write_text(json.dumps({
+                "model": "chat",
+                "sources": [{
+                    "source_id": "wrong-model",
+                    "path": source.name,
+                    "license": "Synthetic unit-test fixture",
+                    "permitted_uses": "training permitted for unit-test fixture only",
+                    "allow_training": False,
+                }],
+            }), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "model must equal base"):
+                load_sources_manifest(manifest, root, require_training_approval=False)
+
+
 if __name__ == "__main__":
     unittest.main()
