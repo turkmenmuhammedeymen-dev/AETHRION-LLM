@@ -7,13 +7,16 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install AETHRION-LLM from pyproject.toml
+          name: Install AETHRION-LLM and Hugging Face Space runtime dependencies
           command: |
             python -m pip install --upgrade pip
             python -m pip install -e ".[api,visual,documents,space,data]" pytest
       - run:
           name: Run unit tests
           command: python -m pytest -q
+      - run:
+          name: Run Hugging Face Space runtime smoke tests
+          command: python ci/space_smoke.py
 
   deploy-to-hugging-face:
     docker:
