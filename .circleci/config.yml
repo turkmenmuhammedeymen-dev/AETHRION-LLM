@@ -17,6 +17,12 @@ jobs:
       - run:
           name: Run Hugging Face Space runtime smoke tests
           command: python ci/space_smoke.py
+      - run:
+          name: Audit all eleven native models without starting training
+          command: python ci/run_model_family_audit.py --output /tmp/aethrion-model-family-readiness.json
+      - store_artifacts:
+          path: /tmp/aethrion-model-family-readiness.json
+          destination: reports/aethrion-model-family-readiness.json
 
   deploy-to-hugging-face:
     docker:
