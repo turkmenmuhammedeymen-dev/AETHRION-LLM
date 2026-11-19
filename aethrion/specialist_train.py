@@ -399,10 +399,13 @@ def train_specialist(
     manifest_path: str | Path,
     *,
     resume: str | Path | None = None,
+    session_steps: int | None = None,
 ) -> dict[str, Any]:
     """Train one independent specialist using a licensed, approved local NPZ dataset."""
     global _STOP_REQUESTED
     _STOP_REQUESTED = False
+    if session_steps is not None and (type(session_steps) is not int or session_steps < 1):
+        raise ValueError("session_steps must be a positive integer when supplied.")
     if not isinstance(config, dict):
         raise TypeError("Training config must be a JSON object.")
     required = {"model_id", "model_config", "output_dir", "seed", "max_steps",
@@ -519,8 +522,14 @@ def train_specialist(
         if not torch.isfinite(grad_norm).item():
             raise FloatingPointError(f"Non-finite {model_id} gradient norm at step {step}.")
         optimizer.step()
+        session_limit_reached = (
+            session_steps is not None
+            and (step - start_step + 1) >= session_steps
+            and step < config["max_steps"] - 1
+        )
+        pause_requested = _STOP_REQUESTED or session_limit_reached
 
-        if step % config["eval_interval"] == 0 or step == config["max_steps"] - 1 or _STOP_REQUESTED:
+        if step % config["eval_interval"] == 0 or step == config["max_steps"] - 1 or pause_requested:
             last_validation = _evaluate(
                 model, model_id, arrays, keys, val_idx, device, config["batch_size"]
             )
@@ -535,7 +544,7 @@ def train_specialist(
                 os.fsync(handle.fileno())
             print(json.dumps(record, ensure_ascii=False), flush=True)
 
-        if step % config["save_interval"] == 0 or step == config["max_steps"] - 1 or _STOP_REQUESTED:
+        if step % config["save_interval"] == 0 or step == config["max_steps"] - 1 or pause_requested:
             checkpoint_hash = _save_checkpoint(checkpoint_path, {
                 "format": "aethrion-specialist-checkpoint-v2",
                 "model_id": model_id, "step": step,
@@ -560,7 +569,7 @@ def train_specialist(
                 "note": "Training alone does not authorize registry status=trained; run independent quality and safety evaluation."
             }, output / "training_report.json")
 
-        if _STOP_REQUESTED and step < config["max_steps"] - 1:
+        if pause_requested and step < config["max_steps"] - 1:
             interrupted_report = {
                 "status": "training_interrupted_not_released",
                 "release_status": "NOT_RELEASED",
@@ -604,6 +613,8 @@ def main():
     parser.add_argument("--config", required=True, help="JSON model and optimizer configuration.")
     parser.add_argument("--manifest", required=True, help="Approved specialist dataset manifest.")
     parser.add_argument("--resume", default=None, help="Optional SHA-256 verified checkpoint.")
+    parser.add_argument("--session-steps", type=int, default=None,
+                        help="Pause safely after this many optimizer steps; resume with the same config.")
     args = parser.parse_args()
     config = json.loads(Path(args.config).read_text(encoding="utf-8"))
     global _STOP_REQUESTED
@@ -612,7 +623,9 @@ def main():
     for stop_signal in (signal.SIGINT, signal.SIGTERM):
         previous_handlers[stop_signal] = signal.signal(stop_signal, _request_stop)
     try:
-        report = train_specialist(config, args.manifest, resume=args.resume)
+        report = train_specialist(
+            config, args.manifest, resume=args.resume, session_steps=args.session_steps
+        )
     finally:
         for stop_signal, previous_handler in previous_handlers.items():
             signal.signal(stop_signal, previous_handler)
