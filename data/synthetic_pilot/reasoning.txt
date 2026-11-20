@@ -1,0 +1,20 @@
+Bir iddiayı değerlendirirken kanıtları ve varsayımları birbirinden ayırmak gerekir.
+Bir deneyde tek değişkeni değiştirmek, etkinin kaynağını anlamayı kolaylaştırır.
+Korelasyon, iki değişkenin birlikte değiştiğini gösterir; tek başına nedensellik kanıtlamaz.
+Bir hipotez, gözlem veya deney yoluyla sınanabilecek açık bir önerme olmalıdır.
+Bir grafiği yorumlamadan önce eksenleri, birimleri ve veri aralığını incelemek gerekir.
+Ortalama tek başına dağılımı açıklamaz; medyan ve yayılım da incelenebilir.
+Yanlı örneklem, büyük veri kümelerinde bile hatalı genellemelere neden olabilir.
+Eğitim ve test verisinin ayrılması, genelleme başarısını ölçmeye yardımcı olur.
+Veri sızıntısı, test bilgisinin eğitim sürecine karışmasıyla ölçümü yanıltır.
+Bir sonuç beklenenden farklıysa önce veri ve yöntem kontrol edilmelidir.
+Bir teknik rapor, yöntemin tekrar edilebilmesine yetecek ayrıntı içermelidir.
+Bir tahminin belirsizliği, kullanılan yöntem ve veri sınırlamalarıyla açıklanmalıdır.
+Bir karşılaştırmada aynı ölçütleri kullanmak daha adil değerlendirme sağlar.
+Bir problemin sınırlarını tanımlamak, gereksiz çözüm yollarını elemekte yararlıdır.
+Bir çözümün doğruluğu kadar maliyeti ve sürdürülebilirliği de önemlidir.
+Bir kaynak değerlendirilirken yazar, tarih ve dayanaklar kontrol edilmelidir.
+Eksik bilgi, tahminle doldurulmak yerine belirsizlik olarak belirtilmelidir.
+Bir süreçte darboğazı bulmak için aşamaların süreleri ayrı ölçülmelidir.
+Bir ölçüt iyileşirken diğeri kötüleşiyorsa bu ödünleşim raporlanmalıdır.
+Bir başarısız deney de doğru kaydedildiğinde öğrenme sağlayabilir.
