@@ -267,5 +267,27 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
                     )
 
 
+    def test_specialist_value_and_label_contracts_reject_invalid_data(self):
+        from aethrion.specialist_train import _validate_model_data_compatibility
+
+        cases = [
+            ("vision", "uint8 pixels", lambda a, c: a.__setitem__("images", a["images"].astype(np.float32))),
+            ("image", "uint8 pixels", lambda a, c: a.__setitem__("images", a["images"].astype(np.float32))),
+            ("asr", "blank token", lambda a, c: a["targets"].__setitem__((0, 0), c["blank_id"])),
+            ("vocoder", "contiguous valid prefix", lambda a, c: (a["waveform_mask"][0].__setitem__(4, False), a["waveform_mask"][0].__setitem__(5, True))),
+            ("document", "layout IDs", lambda a, c: a["layout_ids"].__setitem__((0, 0), c["layout_vocab_size"])),
+            ("document", "tag labels", lambda a, c: a["tag_labels"].__setitem__((0, 0), c["tag_classes"])),
+            ("safety", "reason label width", lambda a, c: a.__setitem__("reason_labels", a["reason_labels"][:, :-1])),
+        ]
+
+        for model_id, expected_message, invalidate in cases:
+            with self.subTest(model_id=model_id, expected_message=expected_message):
+                arrays = self._arrays(model_id)
+                config = dict(MODEL_CONFIGS[model_id])
+                invalidate(arrays, config)
+                with self.assertRaisesRegex(ValueError, expected_message):
+                    _validate_model_data_compatibility(model_id, arrays, config)
+
+
 if __name__ == "__main__":
     unittest.main()
