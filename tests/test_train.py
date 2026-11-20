@@ -48,6 +48,77 @@ class TrainingUtilityTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     validate_base_training_config(candidate)
 
+    def test_base_training_config_rejects_missing_fields_and_invalid_types(self):
+        from aethrion.train import validate_base_training_config
+
+        valid = {
+            "seed": 1337, "data_path": "corpus.txt", "tokenizer_path": "tokenizer.json",
+            "output_dir": "artifacts", "vocab_size": 256, "block_size": 8,
+            "n_layer": 1, "n_head": 2, "n_embd": 16, "dropout": 0.1,
+            "batch_size": 2, "gradient_accumulation_steps": 1,
+            "learning_rate": 0.001, "min_learning_rate": 0.0001,
+            "weight_decay": 0.0, "max_steps": 10, "warmup_steps": 2,
+            "eval_interval": 1, "eval_batches": 1, "save_interval": 1,
+            "grad_clip": 1.0, "amp": False,
+        }
+        for field in valid:
+            candidate = dict(valid)
+            del candidate[field]
+            with self.subTest(missing=field):
+                with self.assertRaises(ValueError):
+                    validate_base_training_config(candidate)
+
+        integer_fields = (
+            "vocab_size", "block_size", "n_layer", "n_head", "n_embd",
+            "batch_size", "gradient_accumulation_steps", "max_steps",
+            "warmup_steps", "eval_interval", "eval_batches", "save_interval", "seed",
+        )
+        for field in integer_fields:
+            for invalid in (True, 1.5, "2"):
+                candidate = dict(valid)
+                candidate[field] = invalid
+                with self.subTest(field=field, invalid=invalid):
+                    with self.assertRaises(ValueError):
+                        validate_base_training_config(candidate)
+
+    def test_base_training_config_enforces_architecture_and_path_boundaries(self):
+        from aethrion.train import validate_base_training_config
+
+        valid = {
+            "seed": 1337, "data_path": "corpus.txt", "tokenizer_path": "tokenizer.json",
+            "output_dir": "artifacts", "vocab_size": 256, "block_size": 8,
+            "n_layer": 1, "n_head": 2, "n_embd": 16, "dropout": 0.1,
+            "batch_size": 2, "gradient_accumulation_steps": 1,
+            "learning_rate": 0.001, "min_learning_rate": 0.0001,
+            "weight_decay": 0.0, "max_steps": 10, "warmup_steps": 2,
+            "eval_interval": 1, "eval_batches": 1, "save_interval": 1,
+            "grad_clip": 1.0, "amp": False,
+        }
+        invalid_cases = (
+            ("vocab_size", 255), ("vocab_size", 262145),
+            ("block_size", 7), ("block_size", 16385),
+            ("n_layer", 0), ("n_layer", 257),
+            ("n_head", 0), ("n_head", 257),
+            ("n_embd", 7), ("n_embd", 16385),
+            ("batch_size", 0), ("batch_size", 4097),
+            ("gradient_accumulation_steps", 0),
+            ("gradient_accumulation_steps", 4097),
+            ("max_steps", 0), ("max_steps", 10_000_001),
+            ("warmup_steps", -1), ("warmup_steps", 10_000_001),
+            ("eval_interval", 0), ("eval_batches", 0), ("save_interval", 0),
+            ("dropout", -0.01), ("dropout", 1.0),
+            ("learning_rate", 0.0), ("min_learning_rate", -0.01),
+            ("weight_decay", -0.01), ("grad_clip", 0.0),
+            ("data_path", ""), ("tokenizer_path", "  "), ("output_dir", None),
+            ("amp", 0),
+        )
+        for field, invalid in invalid_cases:
+            candidate = dict(valid)
+            candidate[field] = invalid
+            with self.subTest(field=field, invalid=invalid):
+                with self.assertRaises(ValueError):
+                    validate_base_training_config(candidate)
+
     def test_checkpoint_rejects_unsafe_pickle_objects(self):
         import hashlib
 
