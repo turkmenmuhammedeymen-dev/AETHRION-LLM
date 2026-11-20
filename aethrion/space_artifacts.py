@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -157,12 +158,19 @@ def restore_checkpoint(model_id: str, destination: str | Path, *, environ=None) 
         target = Path(destination)
         target.parent.mkdir(parents=True, exist_ok=True)
         temporary = target.with_name(target.name + ".download.tmp")
-        temporary.write_bytes(source.read_bytes())
-        if _digest(temporary) != actual:
+        sidecar = target.with_name(target.name + ".sha256")
+        sidecar_tmp = sidecar.with_name(sidecar.name + ".tmp")
+        try:
+            # Stream large model files instead of materializing the entire checkpoint in RAM.
+            shutil.copyfile(source, temporary)
+            if _digest(temporary) != actual:
+                raise ArtifactStoreError("Restored checkpoint failed local read-back verification.")
+            sidecar_tmp.write_text(actual + "\n", encoding="ascii")
+            os.replace(temporary, target)
+            os.replace(sidecar_tmp, sidecar)
+        finally:
             temporary.unlink(missing_ok=True)
-            raise ArtifactStoreError("Restored checkpoint failed local read-back verification.")
-        os.replace(temporary, target)
-        target.with_name(target.name + ".sha256").write_text(actual + "\n", encoding="ascii")
+            sidecar_tmp.unlink(missing_ok=True)
         return {"model_id": model, "sha256": actual, "status": "restored_verified"}
     except ArtifactStoreError:
         raise
