@@ -4,6 +4,7 @@ import io
 import json
 import unittest
 from types import SimpleNamespace
+from urllib.error import HTTPError
 
 from ci.hf_runtime import (
     SpaceRuntimeVerificationError,
@@ -67,6 +68,15 @@ class RuntimeVerificationTests(unittest.TestCase):
             "vizyon2027/AETHRION-LLM", timeout_seconds=5, open_url=open_url
         )
         self.assertEqual(config["components"], payload["components"])
+
+    def test_accepts_auth_challenge_as_live_protected_app(self):
+        def open_url(_request, **_kwargs):
+            raise HTTPError("https://example.hf.space/config", 401, "Unauthorized", None, None)
+
+        result = probe_gradio_config(
+            "vizyon2027/AETHRION-LLM", open_url=open_url
+        )
+        self.assertEqual(result, {"auth_required": True})
 
     def test_rejects_non_gradio_response(self):
         class Response:
