@@ -94,3 +94,55 @@ class ContinuousTrainingRecoveryContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_real_sigterm_delivery_in_child_process_saves_checkpoint(self):
+        import os
+        import subprocess
+        import sys
+        import time
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(__file__).resolve().parents[1]
+            ready = Path(folder) / "ready"
+            checkpoint = Path(folder) / "signal-stop.pt"
+            child_code = """
+import signal
+import sys
+import time
+from pathlib import Path
+from aethrion import train
+from aethrion.checkpoint import save_checkpoint
+ready, checkpoint = Path(sys.argv[1]), Path(sys.argv[2])
+train._STOP_REQUESTED = False
+signal.signal(signal.SIGTERM, train._request_stop)
+ready.write_text("ready", encoding="utf-8")
+while not train._STOP_REQUESTED:
+    time.sleep(0.01)
+save_checkpoint({
+    "format_version": 4, "step": 11, "model": {}, "optimizer": {},
+    "scaler": {}, "model_config": {}, "data_sha256": "0" * 64,
+    "tokenizer_sha256": "1" * 64, "rng_state": {},
+    "training_config": {"stage": "isolated-signal-test"},
+}, checkpoint)
+"""
+            process = subprocess.Popen(
+                [sys.executable, "-c", child_code, str(ready), str(checkpoint)],
+                cwd=root,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            try:
+                deadline = time.monotonic() + 10
+                while not ready.exists() and process.poll() is None and time.monotonic() < deadline:
+                    time.sleep(0.02)
+                self.assertTrue(ready.exists(), "child process did not install its SIGTERM handler")
+                os.kill(process.pid, signal.SIGTERM)
+                stdout, stderr = process.communicate(timeout=10)
+                self.assertEqual(process.returncode, 0, msg=f"stdout={stdout} stderr={stderr}")
+                self.assertEqual(load_checkpoint(checkpoint)["step"], 11)
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=5)
+
