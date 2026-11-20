@@ -186,6 +186,8 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
     else:
         registry_error = None
 
+    from aethrion.artifact_semantics import audit_model_artifact_semantics
+
     rows = []
     for model_id in EXPECTED_MODELS:
         entry = models[model_id]
@@ -221,6 +223,8 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
             sources = live_payload.get("sources", [])
             source_count = len(sources) if isinstance(sources, list) else None
             source_manifest_present = isinstance(sources, list) and bool(sources)
+
+        semantic_audit = audit_model_artifact_semantics(repo, model_id, entry)
 
         preflight_ok = False
         preflight_reason = None
@@ -287,6 +291,7 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
             "evaluation_report_present": artifact_presence["evaluation_report"],
             "model_card_present": artifact_presence["model_card"],
             "artifact_audit": artifact_audit,
+            "semantic_artifact_audit": semantic_audit,
             "artifact_integrity_ok": artifact_integrity_ok,
             "artifact_integrity_failure_count": sum(
                 item["integrity_status"] not in {"verified", "not_registered", "missing_optional"}
@@ -297,7 +302,7 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
         })
 
     return {
-        "format": "aethrion-family-readiness-audit-v4",
+        "format": "aethrion-family-readiness-audit-v5",
         "execution_policy": "local_only",
         "model_count": len(rows),
         "trained_count": sum(row["registry_status"] == "trained" for row in rows),
@@ -313,6 +318,8 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
             "Specialist templates are reported separately and can never count as live datasets, approvals, or training readiness.",
             "Artifact integrity is checked independently using registered SHA-256 values or checkpoint/tokenizer sidecars; file presence alone is never called verified.",
             "A missing registered hash is reported as hash_not_registered and never treated as verified.",
+            "Training/evaluation report identity and provenance, tokenizer/processor structure, and checkpoint tensor keys, shapes and finite values are audited read-only.",
+            "Semantic artifact verification never changes registry status and never independently authorizes a trained or released claim.",
             "Release readiness is based on the native registry's complete artifact, hash, benchmark, safety and human-evidence checks.",
             "The audit never downloads, approves, prepares, or trains on a dataset.",
         ],
