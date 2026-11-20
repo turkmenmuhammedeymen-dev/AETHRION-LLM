@@ -243,6 +243,27 @@ def run_family(
     }
 
 
+FAILED_TRAINING_STATUSES = frozenset({
+    "training_failed_not_released",
+    "training_report_invalid_not_released",
+    "training_progress_invalid_not_released",
+    "trainer_exited_without_verified_report",
+    "trainer_report_unrecognized_not_released",
+})
+
+
+def report_exit_code(report: dict[str, Any]) -> int:
+    """Return non-zero when a requested training run failed or any model is blocked."""
+    rows = report.get("models", [])
+    if isinstance(rows, list) and any(
+        isinstance(row, dict) and row.get("status") in FAILED_TRAINING_STATUSES
+        for row in rows
+    ):
+        return 3
+    if report.get("blocked_count", 0) > 0:
+        return 2
+    return 0
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Preflight or sequentially train approved first-party AETHRION models."
@@ -270,7 +291,7 @@ def main() -> int:
         temporary = Path(str(target) + ".tmp")
         temporary.write_text(rendered + "\n", encoding="utf-8")
         temporary.replace(target)
-    return 0 if report["blocked_count"] == 0 else 2
+    return report_exit_code(report)
 
 
 if __name__ == "__main__":
