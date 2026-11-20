@@ -67,3 +67,17 @@ Each model still requires held-out evaluation, integrity verification,
 model-specific safety review, a model card, and explicit human release
 approval. Dataset/source rights, privacy, provenance, quality and applicable
 speaker-consent gates remain mandatory before the first optimizer step.
+
+
+## Space readiness panel
+
+The authenticated Hugging Face Space includes an **11-model training readiness**
+panel. It calls the family orchestrator with `execute=False` and displays the
+actual preflight result and blocker reason for each model. The panel is
+read-only: it cannot invoke an optimizer, write a checkpoint, alter a manifest,
+or change an approval flag. A READY result means only that preflight passed;
+it is not a trained or released model.
+
+The Space smoke test checks both sides of the authentication boundary and
+verifies that the authenticated report contains eleven model rows while
+explicitly reporting that training did not start and no checkpoint was written.
