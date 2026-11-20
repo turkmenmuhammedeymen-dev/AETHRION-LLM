@@ -58,6 +58,32 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertEqual(report["blocked_count"], 11)
             self.assertFalse(report["training_started"])
 
+    def test_one_blocked_model_prevents_partial_family_training(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ready_plan = {
+                "model_id": "chat",
+                "ready": True,
+                "command": ["python", "-m", "aethrion.train"],
+                "checkpoint": "artifacts/checkpoint_last.pt",
+                "output_dir": "artifacts",
+            }
+            with (
+                patch("aethrion.train_family.preflight_model",
+                      side_effect=[ready_plan, FamilyTrainingError("code data not approved")]) as preflight,
+                patch("aethrion.train_family.subprocess.run") as run,
+            ):
+                report = run_family(tmp, selected=["chat", "code"], execute=True)
+            self.assertEqual(preflight.call_count, 2)
+            run.assert_not_called()
+            self.assertEqual(report["ready_count"], 1)
+            self.assertEqual(report["blocked_count"], 1)
+            self.assertTrue(report["execution_blocked_by_family_preflight"])
+            self.assertFalse(report["training_started"])
+            self.assertEqual(
+                report["models"][0]["status"],
+                "not_started_family_preflight_blocked",
+            )
+
     def test_unknown_or_duplicate_model_selection_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(ValueError):
