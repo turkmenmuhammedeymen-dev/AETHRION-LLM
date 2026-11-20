@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -103,6 +104,46 @@ class FamilyAuditTests(unittest.TestCase):
             self.assertEqual(code["template_manifest_status"], "invalid_template")
             self.assertEqual(report["template_count"], 9)
             self.assertFalse(code["training_ready"])
+
+
+    def test_artifact_hash_is_verified_and_tampering_is_detected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._repo(root)
+            artifact = root / "artifacts" / "chat" / "checkpoint.pt"
+            artifact.parent.mkdir(parents=True)
+            artifact.write_bytes(b"checkpoint-bytes")
+            digest = hashlib.sha256(b"checkpoint-bytes").hexdigest()
+            manifest_path = root / "models" / "manifest.json"
+            payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+            payload["models"]["chat"]["checkpoint_sha256"] = digest
+            manifest_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            report = audit_model_family(root)
+            chat = next(row for row in report["models"] if row["model_id"] == "chat")
+            self.assertEqual(chat["artifact_integrity"]["checkpoint"]["status"], "verified")
+            self.assertEqual(chat["artifact_integrity"]["checkpoint"]["sha256"], digest)
+
+            artifact.write_bytes(b"tampered-checkpoint")
+            report = audit_model_family(root)
+            chat = next(row for row in report["models"] if row["model_id"] == "chat")
+            self.assertEqual(chat["artifact_integrity"]["checkpoint"]["status"], "hash_mismatch")
+            self.assertFalse(chat["required_artifact_integrity_ok"])
+
+    def test_present_artifact_without_registered_hash_is_not_verified(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._repo(root)
+            artifact = root / "artifacts" / "chat" / "checkpoint.pt"
+            artifact.parent.mkdir(parents=True)
+            artifact.write_bytes(b"checkpoint-bytes")
+            report = audit_model_family(root)
+            chat = next(row for row in report["models"] if row["model_id"] == "chat")
+            self.assertEqual(
+                chat["artifact_integrity"]["checkpoint"]["status"], "hash_unregistered"
+            )
+            self.assertTrue(chat["checkpoint_present"])
+            self.assertFalse(chat["required_artifact_integrity_ok"])
 
     def test_refuses_non_local_execution_policy(self):
         with tempfile.TemporaryDirectory() as tmp:
