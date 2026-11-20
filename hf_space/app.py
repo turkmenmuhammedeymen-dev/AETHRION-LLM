@@ -116,9 +116,7 @@ def gpu_model_preflight():
 
 
 def training_readiness():
-    """Show the real 11-model data gates; this function never starts training."""
-    if not SPACE_AUTH_ENABLED:
-        return _auth_required_message()
+    """Expose non-sensitive, read-only data-gate status without model access."""
     try:
         return render_training_readiness(Path(__file__).resolve())
     except Exception as exc:
