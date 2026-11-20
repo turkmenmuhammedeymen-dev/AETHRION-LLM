@@ -192,7 +192,7 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 "source_uri": "unit-test://synthetic",
                 "source_path": source.name,
                 "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-                "license": "Synthetic test fixture",
+                "license": "CC0-1.0",
                 "permitted_use": "Unit-test training fixture only; not production training data",
                 "evidence_uri": "https://example.invalid/fixture-license",
                 "allow_training": True,
