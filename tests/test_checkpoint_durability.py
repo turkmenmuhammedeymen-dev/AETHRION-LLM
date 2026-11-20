@@ -1,4 +1,5 @@
 """Durability guarantees for checkpoint and progress-file publication."""
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -34,8 +35,8 @@ class CheckpointDurabilityTests(unittest.TestCase):
 
             self.assertGreaterEqual(sync_directory.call_count, 3)
             self.assertEqual(checkpoint.verify_checkpoint(target), checkpoint.sha256_file(target))
-            self.assertEqual(checkpoint.verify_checkpoint(Path(str(target) + ".previous")),
-                             checkpoint.sha256_file(Path(str(target) + ".previous")))
+            previous = Path(str(target) + ".previous")
+            self.assertEqual(checkpoint.verify_checkpoint(previous), checkpoint.sha256_file(previous))
             self.assertFalse(Path(str(target) + ".tmp").exists())
             self.assertFalse(Path(str(target) + ".sha256.tmp").exists())
 
@@ -48,10 +49,10 @@ class CheckpointDurabilityTests(unittest.TestCase):
             ) as sync_directory:
                 checkpoint.write_json_atomic({"step": 17, "status": "interrupted"}, target)
 
-            self.assertEqual(checkpoint.json.loads(target.read_text(encoding="utf-8"))
-                             if hasattr(checkpoint, "json") else
-                             __import__("json").loads(target.read_text(encoding="utf-8")),
-                             {"step": 17, "status": "interrupted"})
+            self.assertEqual(
+                json.loads(target.read_text(encoding="utf-8")),
+                {"step": 17, "status": "interrupted"},
+            )
             sync_directory.assert_called_once_with(target.parent)
             self.assertFalse(Path(str(target) + ".tmp").exists())
 
