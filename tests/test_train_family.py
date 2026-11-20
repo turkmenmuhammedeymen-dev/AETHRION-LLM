@@ -58,6 +58,13 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             self.assertEqual(report["blocked_count"], 11)
             self.assertFalse(report["training_started"])
 
+    def test_training_cli_exit_code_reports_failed_runs_and_blocked_models(self):
+        from aethrion.train_family import report_exit_code
+        self.assertEqual(report_exit_code({"blocked_count": 0, "models": [{"status": "training_completed_not_released"}]}), 0)
+        self.assertEqual(report_exit_code({"blocked_count": 0, "models": [{"status": "training_interrupted_not_released"}]}), 0)
+        self.assertEqual(report_exit_code({"blocked_count": 1, "models": [{"status": "blocked"}]}), 2)
+        self.assertEqual(report_exit_code({"blocked_count": 0, "models": [{"status": "training_failed_not_released"}]}), 3)
+        self.assertEqual(report_exit_code({"blocked_count": 0, "models": [{"status": "trainer_exited_without_verified_report"}]}), 3)
     def test_unknown_or_duplicate_model_selection_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(ValueError):
