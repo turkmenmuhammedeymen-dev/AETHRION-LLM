@@ -6,7 +6,9 @@ It never downloads data, approves rights, starts training, or marks a model rele
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -64,6 +66,70 @@ def _local_file(root: Path, relative: str) -> Path:
         raise FamilyAuditError(f"Repository path escapes root: {relative}") from exc
     return resolved
 
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _audit_artifact(
+    root: Path, entry: dict[str, Any], key: str, *, required: bool
+) -> dict[str, Any]:
+    """Check artifact presence, non-empty content and any registered/on-disk digest."""
+    relative = entry.get(key)
+    if not relative:
+        return {
+            "path": None, "required": required, "present": False,
+            "size_bytes": 0, "sha256": None,
+            "integrity_status": "unregistered_required" if required else "not_registered",
+        }
+    try:
+        path = _local_file(root, relative)
+    except FamilyAuditError:
+        return {
+            "path": relative, "required": required, "present": False,
+            "size_bytes": 0, "sha256": None, "integrity_status": "invalid_path",
+        }
+    if not path.is_file():
+        return {
+            "path": relative, "required": required, "present": False,
+            "size_bytes": 0, "sha256": None,
+            "integrity_status": "missing_required" if required else "missing_optional",
+        }
+    size = path.stat().st_size
+    if size == 0:
+        return {
+            "path": relative, "required": required, "present": True,
+            "size_bytes": 0, "sha256": None, "integrity_status": "empty",
+        }
+    actual = _sha256(path)
+    expected = entry.get(f"{key}_sha256")
+    if expected is not None:
+        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", expected):
+            status = "invalid_registered_hash"
+        else:
+            status = "verified" if actual == expected.lower() else "hash_mismatch"
+    else:
+        sidecar = Path(str(path) + ".sha256")
+        if sidecar.is_file():
+            try:
+                sidecar_hash = sidecar.read_text(encoding="ascii").strip().split()[0].lower()
+            except (OSError, UnicodeError, IndexError):
+                sidecar_hash = ""
+            status = (
+                "verified" if re.fullmatch(r"[0-9a-f]{64}", sidecar_hash)
+                and actual == sidecar_hash else "sidecar_invalid_or_mismatch"
+            )
+        else:
+            status = "hash_not_registered"
+    return {
+        "path": relative, "required": required, "present": True,
+        "size_bytes": size, "sha256": actual, "integrity_status": status,
+    }
 
 def _audit_template(path: Path, model_id: str) -> tuple[str, bool]:
     """Classify a template without treating it as an approved training manifest."""
@@ -176,13 +242,18 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
         if model_id in PROCESSOR_REQUIRED:
             required_artifacts.add("processor")
 
-        artifact_presence: dict[str, bool] = {}
+        artifact_audit: dict[str, dict[str, Any]] = {}
         for key in artifact_keys:
-            relative = entry.get(key)
-            if not relative:
-                artifact_presence[key] = key not in required_artifacts
-            else:
-                artifact_presence[key] = _local_file(repo, relative).is_file()
+            artifact_audit[key] = _audit_artifact(
+                repo, entry, key, required=key in required_artifacts
+            )
+        artifact_presence = {
+            key: value["present"] for key, value in artifact_audit.items()
+        }
+        artifact_integrity_ok = all(
+            (not item["required"]) or item["integrity_status"] == "verified"
+            for item in artifact_audit.values()
+        )
 
         registry_status = entry.get("status", "missing")
         if registry is None:
@@ -213,12 +284,18 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
             "training_report_present": artifact_presence["training_report"],
             "evaluation_report_present": artifact_presence["evaluation_report"],
             "model_card_present": artifact_presence["model_card"],
+            "artifact_audit": artifact_audit,
+            "artifact_integrity_ok": artifact_integrity_ok,
+            "artifact_integrity_failure_count": sum(
+                item["integrity_status"] not in {"verified", "not_registered", "missing_optional"}
+                for item in artifact_audit.values()
+            ),
             "required_artifacts": sorted(required_artifacts),
             "release_ready": verified_registry_status == "ready",
         })
 
     return {
-        "format": "aethrion-family-readiness-audit-v3",
+        "format": "aethrion-family-readiness-audit-v4",
         "execution_policy": "local_only",
         "model_count": len(rows),
         "trained_count": sum(row["registry_status"] == "trained" for row in rows),
@@ -232,6 +309,8 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
         "notes": [
             "Training readiness is based on the production train_family preflight, including local paths, source provenance, dataset hashes, tokenizer integrity and human approval gates.",
             "Specialist templates are reported separately and can never count as live datasets, approvals, or training readiness.",
+            "Artifact integrity is checked independently using registered SHA-256 values or checkpoint/tokenizer sidecars; file presence alone is never called verified.",
+            "A missing registered hash is reported as hash_not_registered and never treated as verified.",
             "Release readiness is based on the native registry's complete artifact, hash, benchmark, safety and human-evidence checks.",
             "The audit never downloads, approves, prepares, or trains on a dataset.",
         ],
