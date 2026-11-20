@@ -122,7 +122,7 @@ def training_readiness():
     try:
         return render_training_readiness(Path(__file__).resolve())
     except Exception as exc:
-        return "### Training readiness unavailable\\n- " + type(exc).__name__ + ": " + str(exc)[:240]
+        return "### Training readiness unavailable\n- " + type(exc).__name__ + ": " + str(exc)[:240]
 
 
 def status():
