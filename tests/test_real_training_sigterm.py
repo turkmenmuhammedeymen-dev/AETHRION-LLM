@@ -235,6 +235,8 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 checkpoint = output / "checkpoint_last.pt"
                 state = load_checkpoint(checkpoint, map_location="cpu")
                 stopped_step = state["step"]
+                self.assertEqual(progress_data["step"], stopped_step)
+                self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
                 self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
 
                 resumed = subprocess.run(
@@ -268,7 +270,9 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 state = _load_checkpoint(checkpoint, torch.device("cpu"))
                 stopped_step = state["step"]
                 report = json.loads((output / "training_report.json").read_text(encoding="utf-8"))
+                self.assertEqual(report["steps"], stopped_step + 1)
                 self.assertEqual(report["status"], "training_interrupted_not_released")
+                self.assertEqual(report["checkpoint_sha256"], hashlib.sha256(checkpoint.read_bytes()).hexdigest())
                 self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
 
                 resumed = subprocess.run(
