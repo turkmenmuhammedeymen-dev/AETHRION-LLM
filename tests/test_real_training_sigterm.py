@@ -291,5 +291,73 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                     process.wait(timeout=5)
 
 
+    def test_real_base_trainer_recovers_after_ungraceful_process_kill(self):
+        repo_root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as folder:
+            command, output, _ = self._base_fixture(Path(folder))
+            process = subprocess.Popen(
+                command, cwd=repo_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True,
+            )
+            try:
+                checkpoint = output / "checkpoint_last.pt"
+                checksum = Path(str(checkpoint) + ".sha256")
+                _wait_for_file(checksum, process)
+                os.kill(process.pid, signal.SIGKILL)
+                stdout, stderr = process.communicate(timeout=30)
+                self.assertNotEqual(process.returncode, 0, stdout + stderr)
+
+                crashed_state = load_checkpoint(checkpoint, map_location="cpu")
+                crashed_step = crashed_state["step"]
+                resumed = subprocess.run(
+                    command + ["--resume", str(checkpoint), "--session-steps", "1"],
+                    cwd=repo_root, capture_output=True, text=True, timeout=120,
+                )
+                self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
+                recovered_state = load_checkpoint(checkpoint, map_location="cpu")
+                self.assertGreater(recovered_state["step"], crashed_step)
+                self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=5)
+
+    def test_real_specialist_trainer_recovers_after_ungraceful_process_kill(self):
+        repo_root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as folder:
+            command, output = self._specialist_fixture(Path(folder))
+            process = subprocess.Popen(
+                command, cwd=repo_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True,
+            )
+            try:
+                checkpoint = output / "checkpoint_last.pt"
+                checksum = Path(str(checkpoint) + ".sha256")
+                _wait_for_file(checksum, process)
+                os.kill(process.pid, signal.SIGKILL)
+                stdout, stderr = process.communicate(timeout=30)
+                self.assertNotEqual(process.returncode, 0, stdout + stderr)
+
+                crashed_state = _load_checkpoint(checkpoint, torch.device("cpu"))
+                crashed_step = crashed_state["step"]
+                resumed = subprocess.run(
+                    command + ["--resume", str(checkpoint), "--session-steps", "1"],
+                    cwd=repo_root, capture_output=True, text=True, timeout=120,
+                )
+                self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
+                recovered_state = _load_checkpoint(checkpoint, torch.device("cpu"))
+                self.assertGreater(recovered_state["step"], crashed_step)
+                report = json.loads(
+                    (output / "training_report.json").read_text(encoding="utf-8")
+                )
+                self.assertEqual(report["status"], "training_interrupted_not_released")
+                self.assertEqual(report["release_status"], "NOT_RELEASED")
+                self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=5)
+
+
 if __name__ == "__main__":
     unittest.main()
