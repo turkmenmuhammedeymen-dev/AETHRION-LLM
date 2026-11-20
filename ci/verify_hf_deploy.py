@@ -1,6 +1,14 @@
 import hashlib
 import os
+import sys
 from pathlib import Path
+
+# Running `python ci/verify_hf_deploy.py` puts ci/ rather than the
+# repository root on sys.path. Add the checkout root so `ci.hf_runtime`
+# resolves consistently in CircleCI and in the staged Space project.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from huggingface_hub import HfApi, hf_hub_download
 
