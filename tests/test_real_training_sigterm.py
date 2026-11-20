@@ -237,7 +237,6 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 stopped_step = state["step"]
                 self.assertEqual(progress_data["step"], stopped_step)
                 self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
-                self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
 
                 resumed = subprocess.run(
                     command + ["--resume", str(checkpoint), "--session-steps", "1"],
@@ -250,10 +249,8 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 self.assertEqual(resumed_progress["status"], "interrupted")
                 self.assertEqual(resumed_progress["step"], resumed_state["step"])
                 self.assertEqual(
-                    resumed_progress["step"],
-                    json.loads((output / "training_report.json").read_text(encoding="utf-8"))["step"]
-                    if (output / "training_report.json").is_file()
-                    else resumed_state["step"],
+                    Path(str(checkpoint) + ".sha256").read_text(encoding="ascii").strip(),
+                    hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
                 )
             finally:
                 if process.poll() is None:
