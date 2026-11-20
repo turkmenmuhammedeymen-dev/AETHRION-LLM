@@ -122,8 +122,7 @@ def training_readiness():
     try:
         return render_training_readiness(Path(__file__).resolve())
     except Exception as exc:
-        return "### Training readiness unavailable\n- " + type(exc).__name__ + ": " + str(exc)[:240]
-
+        return "### Training readiness unavailable\\n- " + type(exc).__name__ + ": " + str(exc)[:240]
 
 def status():
     try:
@@ -159,6 +158,7 @@ def code(prompt):
         return r.get("text",str(r)) if isinstance(r,dict) else str(r)
     except CapabilityUnavailable:
         return _auth_required_message() if not SPACE_AUTH_ENABLED else "AETHRION-CODE is not trained or installed. No external code model is used."
+
 @spaces.GPU(duration=60)
 def vision_compare(image_path, text):
     if not SPACE_AUTH_ENABLED:
@@ -327,7 +327,8 @@ def extract_doc(path):
         text=extract_document_text(source)
         _require_safety_allow_chunks_http(runtime,text)
         return text
-    except HTTPException as exc:        return "Document extraction blocked by AETHRION-SAFE: "+str(exc.detail)
+    except HTTPException as exc:
+        return "Document extraction blocked by AETHRION-SAFE: "+str(exc.detail)
     except Exception as exc:
         return "Document extraction failed: "+type(exc).__name__
 
@@ -447,3 +448,54 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
                 "is implemented, tested and released."
             )
             gr.Button("Generate image — unavailable", interactive=False)
+        with gr.Tab("Vision"):
+            vision_image=gr.Image(type="filepath",sources=["upload"],label="Upload image")
+            vision_text=gr.Textbox(lines=2,label="Text to compare with the image")
+            vision_result=gr.Markdown()
+            gr.Button("Compare image and text").click(
+                vision_compare,inputs=[vision_image,vision_text],outputs=vision_result
+            )
+        with gr.Tab("3D Studio"):
+            gr.Markdown(
+                "3D generation, image-to-3D conversion and asset downloads are disabled. "
+                "They will remain unavailable until local geometry-output safety screening "
+                "and a server-owned, access-controlled artifact store are implemented, "
+                "tested and released."
+            )
+            gr.Button("Create from text — unavailable", interactive=False)
+            gr.Button("Image-to-3D — unavailable", interactive=False)
+        with gr.Tab("Research"):
+            q=gr.Textbox(lines=3,label="Research question");o=gr.Markdown()
+            gr.Button("Search").click(research,inputs=q,outputs=o)
+        with gr.Tab("Files & Documents"):
+            f=gr.File(type="filepath",label="TXT / MD / JSON / CSV / LOG / PDF / DOCX")
+            q=gr.Textbox(label="Analysis request",value="Summarize and list key points.")
+            o=gr.Markdown();gr.Button("Analyse").click(analyse,inputs=[f,q],outputs=o)
+            gr.Markdown("#### Create document")
+            title=gr.Textbox(label="Title");content=gr.Textbox(lines=8,label="Content")
+            fmt=gr.Dropdown(["docx","pdf","txt","md","json","csv"],value="docx")
+            out=gr.File();gr.Button("Create").click(make_doc,inputs=[title,content,fmt],outputs=out)
+            src=gr.File(type="filepath",label="Extract document")
+            extracted=gr.Textbox(lines=8);gr.Button("Extract").click(extract_doc,inputs=src,outputs=extracted)
+            gr.Markdown("#### Edit text in an existing document")
+            source_edit=gr.File(type="filepath",label="Source document")
+            find_text=gr.Textbox(label="Find exact text")
+            replacement=gr.Textbox(label="Replace with")
+            edit_fmt=gr.Dropdown(["docx","pdf","txt","md","json","csv"],value="docx",label="Edited copy format")
+            edit_status=gr.Markdown();edit_download=gr.File(label="Edited copy")
+            gr.Button("Create edited copy").click(edit_doc,inputs=[source_edit,find_text,replacement,edit_fmt],outputs=[edit_status,edit_download])
+        with gr.Tab("Audio"):
+            a=gr.Audio(sources=["microphone","upload"],type="filepath")
+            text=gr.Markdown();spoken=gr.Audio(type="filepath")
+            gr.Button("Recognize and respond").click(voice,inputs=a,outputs=[text,spoken])
+    gr.Markdown("---\nCredentials stay in Space Secrets. Uploaded project code is never executed. Training is not started from this interface.")
+
+if __name__ == "__main__":
+    demo.queue(default_concurrency_limit=2, max_size=20).launch(
+        server_name="0.0.0.0",
+        server_port=int(os.environ.get("PORT", "7860")),
+        prevent_thread_lock=False,
+        ssr_mode=False,
+        auth=SPACE_AUTH,
+        show_error=True,
+    )
