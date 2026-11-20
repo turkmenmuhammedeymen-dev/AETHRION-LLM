@@ -4,6 +4,8 @@ from pathlib import Path
 
 from huggingface_hub import HfApi, hf_hub_download
 
+from ci.hf_runtime import probe_gradio_config, wait_for_space_running
+
 
 def main() -> None:
     token = os.environ.get("HF_TOKEN")
@@ -87,9 +89,33 @@ def main() -> None:
             )
         print(f"Verified deployed file: {relative_path} ({remote_hash})")
 
+    # File read-back proves upload integrity, not that the Space actually starts.
+    # Verify the Hub HEAD, wait for the runtime, then hit Gradio's real config API.
+    info = api.repo_info(repo_id=repo_id, repo_type="space")
+    if getattr(info, "sha", None) != revision:
+        raise RuntimeError(
+            "Hugging Face Space HEAD does not match the uploaded deployment commit."
+        )
+    print(f"Verified Hugging Face Space HEAD: {revision}", flush=True)
+
+    wait_for_space_running(api, repo_id, timeout_seconds=480, poll_interval=10)
+    config = probe_gradio_config(repo_id)
+    if config.get("auth_required"):
+        print(
+            "GRADIO_LIVE_HEALTH=PASS auth=protected "
+            "(Space login is enabled; public config is correctly restricted)",
+            flush=True,
+        )
+    else:
+        print(
+            "GRADIO_LIVE_HEALTH=PASS "
+            f"components={len(config['components'])} "
+            f"dependencies={len(config['dependencies'])}",
+            flush=True,
+        )
     print(
-        "AETHRION-LLM deployment verified at Hugging Face commit "
-        f"{revision}."
+        "AETHRION-LLM deployment and live Space runtime verified at "
+        f"Hugging Face commit {revision}."
     )
 
 
