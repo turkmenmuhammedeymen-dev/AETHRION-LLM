@@ -100,12 +100,19 @@ def main() -> None:
 
     wait_for_space_running(api, repo_id, timeout_seconds=480, poll_interval=10)
     config = probe_gradio_config(repo_id)
-    print(
-        "GRADIO_LIVE_HEALTH=PASS "
-        f"components={len(config['components'])} "
-        f"dependencies={len(config['dependencies'])}",
-        flush=True,
-    )
+    if config.get("auth_required"):
+        print(
+            "GRADIO_LIVE_HEALTH=PASS auth=protected "
+            "(Space login is enabled; public config is correctly restricted)",
+            flush=True,
+        )
+    else:
+        print(
+            "GRADIO_LIVE_HEALTH=PASS "
+            f"components={len(config['components'])} "
+            f"dependencies={len(config['dependencies'])}",
+            flush=True,
+        )
     print(
         "AETHRION-LLM deployment and live Space runtime verified at "
         f"Hugging Face commit {revision}."
