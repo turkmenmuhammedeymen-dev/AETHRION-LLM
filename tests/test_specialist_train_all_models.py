@@ -243,7 +243,7 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
             "image": lambda a: a.__setitem__("images", a["images"][:, :2]),
             "asr": lambda a: a["input_lengths"].__setitem__(0, 0),
             "tts": lambda a: a["frame_to_token"].__setitem__((0, 0), 99),
-            "vocoder": lambda a: a["waveform_mask"].__setitem__((0, 0), 2),
+            "vocoder": lambda a: a.__setitem__(\n                "waveform_mask", a["waveform_mask"].astype(np.int8)\n            ) or a["waveform_mask"].__setitem__((0, 0), 2),
             "3d": lambda a: a.__setitem__("points", a["points"][:, :, :2]),
             "research": lambda a: a.__setitem__("query_ids", a["query_ids"].astype(np.float32)),
             "document": lambda a: a.__setitem__("boxes", a["boxes"][:, :, :3]),
