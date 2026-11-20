@@ -69,6 +69,59 @@ class RuntimeVerificationTests(unittest.TestCase):
         )
         self.assertEqual(config["components"], payload["components"])
 
+    def test_falls_back_to_root_html_when_config_endpoint_is_404(self):
+        payload = {"components": [{"id": 7}], "dependencies": [{"id": 1}]}
+        html = (
+            "<html><script>window.gradio_config = "
+            + json.dumps(payload)
+            + ";</script></html>"
+        )
+        calls = []
+
+        class Response:
+            status = 200
+
+            def __init__(self, body):
+                self.body = body
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def read(self, _limit):
+                return self.body
+
+        def open_url(request, **_kwargs):
+            calls.append(request.full_url)
+            if request.full_url.endswith("/config"):
+                raise HTTPError(request.full_url, 404, "Not Found", None, None)
+            return Response(html.encode("utf-8"))
+
+        config = probe_gradio_config(
+            "vizyon2027/AETHRION-LLM", open_url=open_url
+        )
+        self.assertEqual(config, payload)
+        self.assertEqual(
+            calls,
+            [
+                "https://vizyon2027-aethrion-llm.hf.space/config",
+                "https://vizyon2027-aethrion-llm.hf.space/",
+            ],
+        )
+
+    def test_reports_root_404_after_config_404(self):
+        def open_url(request, **_kwargs):
+            raise HTTPError(request.full_url, 404, "Not Found", None, None)
+
+        with self.assertRaisesRegex(
+            SpaceRuntimeVerificationError, "root endpoint returned HTTP 404"
+        ):
+            probe_gradio_config(
+                "vizyon2027/AETHRION-LLM", open_url=open_url
+            )
+
     def test_accepts_auth_challenge_as_live_protected_app(self):
         def open_url(_request, **_kwargs):
             raise HTTPError("https://example.hf.space/config", 401, "Unauthorized", None, None)
