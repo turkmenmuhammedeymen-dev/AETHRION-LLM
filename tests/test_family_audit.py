@@ -7,6 +7,7 @@ from aethrion.family_audit import (
     EXPECTED_MODELS,
     FamilyAuditError,
     audit_model_family,
+    _audit_artifact,
 )
 from aethrion.specialist_data import MODEL_MODALITIES
 
@@ -103,6 +104,49 @@ class FamilyAuditTests(unittest.TestCase):
             self.assertEqual(code["template_manifest_status"], "invalid_template")
             self.assertEqual(report["template_count"], 9)
             self.assertFalse(code["training_ready"])
+
+    def test_artifact_integrity_requires_matching_registered_hash(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            artifact = root / "checkpoint.pt"
+            artifact.write_bytes(b"checkpoint-bytes")
+            import hashlib
+            digest = hashlib.sha256(b"checkpoint-bytes").hexdigest()
+            verified = _audit_artifact(
+                root, {"checkpoint": "checkpoint.pt", "checkpoint_sha256": digest},
+                "checkpoint", required=True,
+            )
+            self.assertEqual(verified["integrity_status"], "verified")
+            tampered = _audit_artifact(
+                root, {"checkpoint": "checkpoint.pt", "checkpoint_sha256": "0" * 64},
+                "checkpoint", required=True,
+            )
+            self.assertEqual(tampered["integrity_status"], "hash_mismatch")
+
+    def test_artifact_integrity_distinguishes_missing_empty_and_unhashed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "empty.pt").write_bytes(b"")
+            missing = _audit_artifact(root, {}, "checkpoint", required=True)
+            empty = _audit_artifact(
+                root, {"checkpoint": "empty.pt"}, "checkpoint", required=True
+            )
+            unhashed = root / "unhashed.pt"
+            unhashed.write_bytes(b"present-but-unverified")
+            no_hash = _audit_artifact(
+                root, {"checkpoint": "unhashed.pt"}, "checkpoint", required=True
+            )
+            self.assertEqual(missing["integrity_status"], "unregistered_required")
+            self.assertEqual(empty["integrity_status"], "empty")
+            self.assertEqual(no_hash["integrity_status"], "hash_not_registered")
+
+    def test_artifact_audit_rejects_paths_outside_repository(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result = _audit_artifact(
+                root, {"checkpoint": "../outside.pt"}, "checkpoint", required=True
+            )
+            self.assertEqual(result["integrity_status"], "invalid_path")
 
     def test_refuses_non_local_execution_policy(self):
         with tempfile.TemporaryDirectory() as tmp:
