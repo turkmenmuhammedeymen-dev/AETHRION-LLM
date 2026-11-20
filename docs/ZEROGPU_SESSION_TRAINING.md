@@ -71,13 +71,15 @@ speaker-consent gates remain mandatory before the first optimizer step.
 
 ## Space readiness panel
 
-The authenticated Hugging Face Space includes an **11-model training readiness**
+The Hugging Face Space includes a **public, read-only 11-model training readiness**
 panel. It calls the family orchestrator with `execute=False` and displays the
-actual preflight result and blocker reason for each model. The panel is
-read-only: it cannot invoke an optimizer, write a checkpoint, alter a manifest,
-or change an approval flag. A READY result means only that preflight passed;
-it is not a trained or released model.
+actual preflight result and blocker reason for each model. The report contains
+only repository-level gate status; it does not expose private datasets,
+credentials or model artifacts. The panel cannot invoke an optimizer, write a
+checkpoint, alter a manifest, or change an approval flag. A READY result means
+only that preflight passed; it is not a trained or released model.
 
-The Space smoke test checks both sides of the authentication boundary and
-verifies that the authenticated report contains eleven model rows while
-explicitly reporting that training did not start and no checkpoint was written.
+Inference remains separately protected by Space authentication. The Space smoke
+test verifies that training readiness works without inference credentials,
+contains eleven model rows, and explicitly reports that training did not start
+and no checkpoint was written.

@@ -1,0 +1,13 @@
+{
+  "format": "aethrion-first-party-source-manifest-v1",
+  "project": "AETHRION-LLM",
+  "dataset_status": "awaiting_owner_authored_sources_and_human_review",
+  "training_allowed": false,
+  "first_party_origin_attested": false,
+  "sources": [],
+  "notes": [
+    "Empty inventory template. Add only owner-authored local source files.",
+    "For every source, document author/rights-holder role, exact local path, SHA-256, provenance and permitted use.",
+    "A source record is not approved by being added here; independent human rights, privacy and quality review is required."
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "format": "aethrion-specialist-dataset-v1",
+  "dataset_id": "aethrion-3d-dataset-pending",
+  "model_id": "3d",
+  "modality": "3d",
+  "dataset_status": "awaiting_owner_authored_data_and_human_review",
+  "training_allowed": false,
+  "owner_approval": false,
+  "privacy_reviewed": false,
+  "governance": {
+    "schema": "aethrion-human-review-v1",
+    "model_id": "3d",
+    "approval_status": "pending",
+    "author_role": "",
+    "authorship_attested": false,
+    "first_party_origin_attested": false,
+    "rights_holder_role": "",
+    "rights_attested": false,
+    "source_rights_reviewed": false,
+    "privacy_reviewed": false,
+    "quality_reviewed": false,
+    "reviewer_role": "",
+    "reviewed_at": "",
+    "evidence_uri": ""
+  },
+  "dataset_path": "datasets/3d.npz",
+  "dataset_sha256": "",
+  "sources": [],
+  "notes": [
+    "EMPTY TEMPLATE ONLY — no training records or source approvals are included.",
+    "Do not change training_allowed or owner_approval to true until the exact local data, authorship, rights, privacy, quality and provenance evidence have been reviewed by the responsible human."
+  ]
+}

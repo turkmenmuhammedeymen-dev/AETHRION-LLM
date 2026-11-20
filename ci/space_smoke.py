@@ -55,7 +55,12 @@ try:
     # third-party provider credentials.
     space.SPACE_AUTH_ENABLED = False
     disabled = space._auth_required_message()
-    assert disabled == space.training_readiness()
+    public_readiness = space.training_readiness()
+    assert "11-model training readiness" in public_readiness
+    assert "Models checked:** 11" in public_readiness
+    assert "Training started:** NO" in public_readiness
+    assert "Checkpoints written:** NO" in public_readiness
+    assert public_readiness.count(" | BLOCKED | ") + public_readiness.count(" | READY — NOT STARTED | ") == 11
 
     assert "authentication" in disabled.lower()
     assert disabled == space.chat("hello", [])
