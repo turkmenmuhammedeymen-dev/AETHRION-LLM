@@ -217,8 +217,13 @@ def audit_model_artifact_semantics(root: str | Path, model_id: str,
         if checkpoint_dataset_hash and training.get("dataset_sha256") != checkpoint_dataset_hash:
             problems.append("training_report_dataset_hash_mismatch")
         checkpoint_step = output["checkpoint"].get("step")
-        report_step = training.get("step", training.get("steps"))
-        if checkpoint_step is not None and report_step is not None and checkpoint_step != report_step:
+        report_step = training.get("step")
+        if report_step is None and "steps" in training:
+            report_step = training.get("steps")
+            expected_report_step = checkpoint_step + 1 if checkpoint_step is not None else None
+        else:
+            expected_report_step = checkpoint_step
+        if expected_report_step is not None and report_step is not None and expected_report_step != report_step:
             problems.append("training_report_step_mismatch")
         if training.get("release_status") not in {None, "NOT_RELEASED"}:
             problems.append("unexpected_training_report_release_status")
