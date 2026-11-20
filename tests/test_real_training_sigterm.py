@@ -417,5 +417,47 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
             self.assertEqual(report["release_status"], "NOT_RELEASED")
             self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
 
+    def test_real_base_cli_fails_closed_when_both_checkpoint_generations_are_corrupt(self):
+        repo_root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as folder:
+            command, output, _ = self._base_fixture(Path(folder))
+            for _ in range(2):
+                run = subprocess.run(
+                    command + (["--session-steps", "1"] if not (output / "checkpoint_last.pt").exists()
+                               else ["--resume", str(output / "checkpoint_last.pt"), "--session-steps", "1"]),
+                    cwd=repo_root, capture_output=True, text=True, timeout=120,
+                )
+                self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+            checkpoint = output / "checkpoint_last.pt"
+            previous = Path(str(checkpoint) + ".previous")
+            checkpoint.write_bytes(b"corrupt latest")
+            previous.write_bytes(b"corrupt previous")
+            failed = subprocess.run(
+                command + ["--resume", str(checkpoint)],
+                cwd=repo_root, capture_output=True, text=True, timeout=120,
+            )
+            self.assertNotEqual(failed.returncode, 0)
+            self.assertIn("checkpoint", (failed.stdout + failed.stderr).lower())
+
+    def test_real_specialist_cli_fails_closed_when_both_checkpoint_generations_are_corrupt(self):
+        repo_root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as folder:
+            command, output = self._specialist_fixture(Path(folder))
+            for _ in range(2):
+                args = command + (["--session-steps", "1"] if not (output / "checkpoint_last.pt").exists()
+                                  else ["--resume", str(output / "checkpoint_last.pt"), "--session-steps", "1"])
+                run = subprocess.run(args, cwd=repo_root, capture_output=True, text=True, timeout=120)
+                self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+            checkpoint = output / "checkpoint_last.pt"
+            previous = Path(str(checkpoint) + ".previous")
+            checkpoint.write_bytes(b"corrupt latest")
+            previous.write_bytes(b"corrupt previous")
+            failed = subprocess.run(
+                command + ["--resume", str(checkpoint)],
+                cwd=repo_root, capture_output=True, text=True, timeout=120,
+            )
+            self.assertNotEqual(failed.returncode, 0)
+            self.assertIn("checkpoint", (failed.stdout + failed.stderr).lower())
+
 if __name__ == "__main__":
     unittest.main()
