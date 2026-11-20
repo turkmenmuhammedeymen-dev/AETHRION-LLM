@@ -6,6 +6,7 @@ It never downloads data, approves rights, starts training, or marks a model rele
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -88,6 +89,46 @@ def _audit_template(path: Path, model_id: str) -> tuple[str, bool]:
     except (FamilyAuditError, KeyError, ImportError):
         valid = False
     return ("non_executable_template" if valid else "invalid_template"), valid
+
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _audit_artifact(root: Path, entry: dict[str, Any], key: str,
+                    required: bool) -> dict[str, Any]:
+    """Report file presence and hash integrity without trusting registry status."""
+    relative = entry.get(key)
+    if not relative:
+        return {"status": "unregistered" if required else "not_required",
+                "present": False, "sha256": None}
+    try:
+        path = _local_file(root, relative)
+    except FamilyAuditError:
+        return {"status": "invalid_path", "present": False, "sha256": None}
+    if not path.is_file():
+        return {"status": "missing", "present": False, "sha256": None}
+    if path.stat().st_size == 0:
+        return {"status": "empty", "present": True, "sha256": None}
+    actual = _sha256_file(path)
+    hash_key = f"{key}_sha256"
+    expected = entry.get(hash_key)
+    if expected is None:
+        status = "hash_unregistered"
+    elif not isinstance(expected, str) or len(expected) != 64 or any(
+        char not in "0123456789abcdefABCDEF" for char in expected
+    ):
+        status = "invalid_expected_hash"
+    elif actual != expected.lower():
+        status = "hash_mismatch"
+    else:
+        status = "verified"
+    return {"status": status, "present": True, "sha256": actual}
 
 
 def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
@@ -176,13 +217,17 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
         if model_id in PROCESSOR_REQUIRED:
             required_artifacts.add("processor")
 
-        artifact_presence: dict[str, bool] = {}
-        for key in artifact_keys:
-            relative = entry.get(key)
-            if not relative:
-                artifact_presence[key] = key not in required_artifacts
-            else:
-                artifact_presence[key] = _local_file(repo, relative).is_file()
+        artifact_integrity = {
+            key: _audit_artifact(repo, entry, key, key in required_artifacts)
+            for key in artifact_keys
+        }
+        artifact_presence = {
+            key: details["present"] for key, details in artifact_integrity.items()
+        }
+        required_integrity_ok = all(
+            artifact_integrity[key]["status"] == "verified"
+            for key in required_artifacts
+        )
 
         registry_status = entry.get("status", "missing")
         if registry is None:
@@ -213,18 +258,26 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
             "training_report_present": artifact_presence["training_report"],
             "evaluation_report_present": artifact_presence["evaluation_report"],
             "model_card_present": artifact_presence["model_card"],
+            "artifact_integrity": artifact_integrity,
+            "required_artifact_integrity_ok": required_integrity_ok,
+            "artifact_integrity_issue_count": sum(
+                details["status"] not in {"verified", "not_required"}
+                for details in artifact_integrity.values()
+            ),
             "required_artifacts": sorted(required_artifacts),
             "release_ready": verified_registry_status == "ready",
         })
 
     return {
-        "format": "aethrion-family-readiness-audit-v3",
+        "format": "aethrion-family-readiness-audit-v4",
         "execution_policy": "local_only",
         "model_count": len(rows),
         "trained_count": sum(row["registry_status"] == "trained" for row in rows),
         "training_ready_count": sum(row["training_ready"] for row in rows),
         "release_ready_count": sum(row["release_ready"] for row in rows),
         "template_count": sum(row["template_manifest_valid"] for row in rows),
+        "artifact_integrity_ok_count": sum(row["required_artifact_integrity_ok"] for row in rows),
+        "artifact_integrity_issue_count": sum(row["artifact_integrity_issue_count"] for row in rows),
         "training_started": False,
         "automatic_approval": False,
         "registry_error": registry_error,
@@ -232,6 +285,7 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
         "notes": [
             "Training readiness is based on the production train_family preflight, including local paths, source provenance, dataset hashes, tokenizer integrity and human approval gates.",
             "Specialist templates are reported separately and can never count as live datasets, approvals, or training readiness.",
+            "Artifact integrity reports distinguish missing, empty, unregistered, mismatched and SHA-256-verified files; presence alone is never treated as integrity.",
             "Release readiness is based on the native registry's complete artifact, hash, benchmark, safety and human-evidence checks.",
             "The audit never downloads, approves, prepares, or trains on a dataset.",
         ],
