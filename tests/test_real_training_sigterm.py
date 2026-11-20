@@ -236,6 +236,14 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 state = load_checkpoint(checkpoint, map_location="cpu")
                 stopped_step = state["step"]
                 self.assertEqual(progress_data["step"], stopped_step)
+                metrics_path = output / "metrics.jsonl"
+                metrics = [
+                    json.loads(line)
+                    for line in metrics_path.read_text(encoding="utf-8").splitlines()
+                    if line.strip()
+                ]
+                self.assertTrue(metrics, "SIGTERM stop must persist a final validation metric")
+                self.assertEqual(metrics[-1]["step"], stopped_step)
                 self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
 
                 resumed = subprocess.run(
