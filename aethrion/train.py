@@ -381,6 +381,8 @@ def validate_base_training_config(cfg: dict) -> None:
         raise ValueError("min_learning_rate must not exceed learning_rate.")
     if cfg["warmup_steps"] > cfg["max_steps"]:
         raise ValueError("warmup_steps must not exceed max_steps.")
+    if cfg["n_embd"] % cfg["n_head"] != 0:
+        raise ValueError("n_embd must be divisible by n_head for the BASE attention heads.")
     if type(cfg.get("amp")) is not bool:
         raise ValueError("amp must be a JSON boolean.")
     for name in ("data_path", "tokenizer_path", "output_dir"):
