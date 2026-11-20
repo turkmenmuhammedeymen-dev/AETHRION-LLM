@@ -1,13 +1,6 @@
 name: Deploy AETHRION-LLM to Hugging Face Space
 on:
   workflow_dispatch:
-  push:
-    branches: ["main"]
-    paths:
-      - "hf_space/**"
-      - "aethrion/**"
-      - "models/manifest.json"
-      - ".github/workflows/deploy-hf-space.yml"
 permissions:
   contents: read
 jobs:
