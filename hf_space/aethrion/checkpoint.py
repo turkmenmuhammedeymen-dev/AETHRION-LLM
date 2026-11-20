@@ -1,7 +1,6 @@
 """Atomic checkpoint persistence with SHA-256 verification and recovery fallback.
 
-Only load checkpoints produced by this project or another trusted source:
-PyTorch optimizer/RNG checkpoints use pickle-backed serialization.
+Checkpoint deserialization is restricted to PyTorch's weights-only loader.
 """
 from __future__ import annotations
 
@@ -27,6 +26,23 @@ def sha256_file(path: str | Path) -> str:
 
 def _sidecar(path: Path) -> Path:
     return Path(str(path) + ".sha256")
+
+
+def _fsync_file(path: Path) -> None:
+    """Flush file contents and metadata before publishing the file."""
+    with Path(path).open("rb") as handle:
+        os.fsync(handle.fileno())
+
+
+def _fsync_directory(path: Path) -> None:
+    """Persist directory-entry replacements on platforms supporting directory fsync."""
+    if not hasattr(os, "O_DIRECTORY"):
+        return
+    descriptor = os.open(str(path), os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
 
 
 def verify_checkpoint(path: str | Path) -> str:
@@ -63,11 +79,12 @@ def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
 
     try:
         torch.save(payload, temporary)
-        with temporary.open("rb+") as handle:
+        _fsync_file(temporary)
+        checksum = sha256_file(temporary)
+        with sidecar_temporary.open("w", encoding="ascii", newline="\n") as handle:
+            handle.write(checksum + "\n")
             handle.flush()
             os.fsync(handle.fileno())
-        checksum = sha256_file(temporary)
-        sidecar_temporary.write_text(checksum + "\n", encoding="ascii")
 
         # Preserve the last known-good generation before replacing either file.
         if target.is_file() and sidecar.is_file():
@@ -78,43 +95,35 @@ def save_checkpoint(payload: dict[str, Any], path: str | Path) -> str:
             else:
                 previous_tmp = Path(str(previous) + ".tmp")
                 previous_sidecar_tmp = Path(str(previous_sidecar) + ".tmp")
-                shutil.copy2(target, previous_tmp)
-                shutil.copy2(sidecar, previous_sidecar_tmp)
-                os.replace(previous_tmp, previous)
-                os.replace(previous_sidecar_tmp, previous_sidecar)
+                try:
+                    shutil.copy2(target, previous_tmp)
+                    shutil.copy2(sidecar, previous_sidecar_tmp)
+                    _fsync_file(previous_tmp)
+                    _fsync_file(previous_sidecar_tmp)
+                    os.replace(previous_tmp, previous)
+                    os.replace(previous_sidecar_tmp, previous_sidecar)
+                    _fsync_directory(target.parent)
+                finally:
+                    previous_tmp.unlink(missing_ok=True)
+                    previous_sidecar_tmp.unlink(missing_ok=True)
 
         os.replace(temporary, target)
         os.replace(sidecar_temporary, sidecar)
+        _fsync_directory(target.parent)
         return checksum
     finally:
         temporary.unlink(missing_ok=True)
         sidecar_temporary.unlink(missing_ok=True)
 
 
-def load_checkpoint(
-    path: str | Path,
-    map_location: str | torch.device = "cpu",
+def _load_verified_checkpoint(
+    path: Path,
+    map_location: str | torch.device,
 ) -> dict[str, Any]:
-    """Load only after checksum validation; recover from one corrupt latest save."""
-    target = Path(path)
-    load_path = target
+    """Verify, safely deserialize and validate one checkpoint generation."""
+    verify_checkpoint(path)
     try:
-        verify_checkpoint(target)
-    except ValueError as primary_error:
-        previous = Path(str(target) + ".previous")
-        try:
-            verify_checkpoint(previous)
-        except ValueError:
-            raise primary_error
-        warnings.warn(
-            f"Latest checkpoint failed integrity verification; recovering from {previous}.",
-            RuntimeWarning,
-            stacklevel=2,
-        )
-        load_path = previous
-
-    try:
-        state = torch.load(load_path, map_location=map_location, weights_only=True)
+        state = torch.load(path, map_location=map_location, weights_only=True)
     except Exception as exc:
         raise ValueError(
             "Checkpoint could not be safely deserialized; unsafe pickle objects are not accepted."
@@ -133,18 +142,38 @@ def load_checkpoint(
     return state
 
 
+def load_checkpoint(
+    path: str | Path,
+    map_location: str | torch.device = "cpu",
+) -> dict[str, Any]:
+    """Load the latest safe generation, falling back if integrity or loading fails."""
+    target = Path(path)
+    previous = Path(str(target) + ".previous")
+    try:
+        return _load_verified_checkpoint(target, map_location)
+    except Exception as primary_error:
+        try:
+            recovered = _load_verified_checkpoint(previous, map_location)
+        except Exception:
+            raise primary_error
+        warnings.warn(
+            f"Latest checkpoint could not be verified and safely loaded; recovering from {previous}.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return recovered
+
+
 def write_json_atomic(payload: dict[str, Any], path: str | Path) -> None:
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(str(target) + ".tmp")
     try:
-        temporary.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
-        with temporary.open("rb+") as handle:
+        with temporary.open("w", encoding="utf-8", newline="\n") as handle:
+            handle.write(json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, target)
+        _fsync_directory(target.parent)
     finally:
         temporary.unlink(missing_ok=True)
