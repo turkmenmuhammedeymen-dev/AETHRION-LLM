@@ -205,6 +205,10 @@ def run_family(
         raise FamilyTrainingError("Unknown model IDs: " + ", ".join(unknown))
 
     rows: list[dict[str, Any]] = []
+    plans: list[dict[str, Any] | None] = []
+    # Phase 1: validate every selected model before starting any trainer.
+    # This prevents a partially approved family request from training a subset
+    # merely because its blocked member appears later in the list.
     for model_id in model_ids:
         try:
             plan = preflight_model(repo, model_id)
@@ -213,25 +217,38 @@ def run_family(
                 command[0] = python_executable
             if session_steps is not None:
                 command.extend(["--session-steps", str(session_steps)])
-            if not execute:
-                rows.append({**plan, "status": "ready_not_started"})
-                continue
-            completed = subprocess.run(command, cwd=repo, check=False)
-            rows.append({
-                **plan,
-                "command": command,
-                "status": _training_outcome(
-                    repo / plan["output_dir"], model_id, int(completed.returncode)
-                ),
-                "returncode": int(completed.returncode),
-            })
+            plans.append({**plan, "command": command})
+            rows.append({**plan, "command": command, "status": "ready_not_started"})
         except Exception as exc:
+            plans.append(None)
             rows.append({
                 "model_id": model_id,
                 "ready": False,
                 "status": "blocked",
                 "reason": f"{type(exc).__name__}: {exc}",
             })
+
+    family_preflight_blocked = any(plan is None for plan in plans)
+    if execute and family_preflight_blocked:
+        # No subprocess is allowed to start until the entire requested family
+        # has passed preflight. Keep the individual ready/blocked diagnostics.
+        for row in rows:
+            if row.get("ready") is True:
+                row["status"] = "not_started_family_preflight_blocked"
+                row["reason"] = "At least one selected model failed preflight; no model was started."
+    elif execute:
+        # Phase 2: all selected models are ready; now execute in the requested order.
+        for row, plan in zip(rows, plans):
+            assert plan is not None
+            try:
+                completed = subprocess.run(plan["command"], cwd=repo, check=False)
+                row["status"] = _training_outcome(
+                    repo / plan["output_dir"], row["model_id"], int(completed.returncode)
+                )
+                row["returncode"] = int(completed.returncode)
+            except Exception as exc:
+                row["status"] = "training_launch_failed_not_released"
+                row["reason"] = f"{type(exc).__name__}: {exc}"
 
     started = execute and any(
         row.get("status") in {
@@ -252,6 +269,7 @@ def run_family(
         "training_started": bool(started),
         "released_count": 0,
         "execute_requested": bool(execute),
+        "execution_blocked_by_family_preflight": bool(execute and family_preflight_blocked),
         "models": rows,
         "note": (
             "A successful training process is not a release. Independent held-out "
