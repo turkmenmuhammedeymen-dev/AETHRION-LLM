@@ -28,6 +28,7 @@ REQUIRED_FILES = {
         model_id: {
             "config": f"configs/specialists/{model_id}.json",
             "dataset_manifest": f"data/specialists/manifests/{model_id}.json",
+            "template_manifest": f"data/specialists/manifests/templates/{model_id}.template.json",
         }
         for model_id in SPECIALISTS
     },
@@ -52,7 +53,7 @@ def _local_file(root: Path, relative: str) -> Path:
     if not isinstance(relative, str) or not relative.strip():
         raise FamilyAuditError("Repository artifact paths must be non-empty strings.")
     candidate = Path(relative)
-    if candidate.is_absolute() or "\\" in relative or "://" in relative:
+    if candidate.is_absolute() or "\\\\" in relative or "://" in relative:
         raise FamilyAuditError(f"Unsafe non-local repository path: {relative}")
     if any(part in {"", ".", ".."} for part in relative.split("/")):
         raise FamilyAuditError(f"Unsafe repository path: {relative}")
@@ -62,6 +63,31 @@ def _local_file(root: Path, relative: str) -> Path:
     except ValueError as exc:
         raise FamilyAuditError(f"Repository path escapes root: {relative}") from exc
     return resolved
+
+
+def _audit_template(path: Path, model_id: str) -> tuple[str, bool]:
+    """Classify a template without treating it as an approved training manifest."""
+    if not path.is_file():
+        return "missing", False
+    try:
+        payload = _read_json(path, f"{model_id} template")
+        from aethrion.specialist_data import MODEL_MODALITIES
+        valid = (
+            payload.get("format") == "aethrion-specialist-dataset-v1"
+            and payload.get("model_id") == model_id
+            and payload.get("modality") == MODEL_MODALITIES[model_id]
+            and payload.get("training_allowed") is False
+            and payload.get("owner_approval") is False
+            and payload.get("privacy_reviewed") is False
+            and payload.get("sources") == []
+            and isinstance(payload.get("_template_notice"), str)
+            and bool(payload.get("_template_notice", "").strip())
+        )
+        if model_id in {"asr", "tts", "vocoder"}:
+            valid = valid and payload.get("speaker_consent_reviewed") is False
+    except (FamilyAuditError, KeyError, ImportError):
+        valid = False
+    return ("non_executable_template" if valid else "invalid_template"), valid
 
 
 def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
@@ -106,6 +132,27 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
         dataset_exists = dataset_path.is_file()
         config = _read_json(config_path, f"{model_id} config") if config_ok else {}
 
+        template_status = "not_applicable"
+        template_valid = False
+        if model_id in SPECIALISTS:
+            template_path = _local_file(repo, required["template_manifest"])
+            template_status, template_valid = _audit_template(template_path, model_id)
+
+        source_manifest_present = False
+        source_count = None
+        if model_id == "chat":
+            source_path = _local_file(repo, required["source_manifest"])
+            source_manifest_present = source_path.is_file()
+            if source_manifest_present:
+                source_payload = _read_json(source_path, "Chat source manifest")
+                sources = source_payload.get("sources", [])
+                source_count = len(sources) if isinstance(sources, list) else None
+        elif dataset_exists:
+            live_payload = _read_json(dataset_path, f"{model_id} dataset manifest")
+            sources = live_payload.get("sources", [])
+            source_count = len(sources) if isinstance(sources, list) else None
+            source_manifest_present = isinstance(sources, list) and bool(sources)
+
         preflight_ok = False
         preflight_reason = None
         try:
@@ -147,7 +194,14 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
             "verified_registry_status": verified_registry_status,
             "config_present": config_ok and bool(config),
             "dataset_manifest_present": dataset_exists,
+            "dataset_manifest_status": "present" if dataset_exists else "missing",
+            "source_manifest_present": source_manifest_present,
+            "source_count": source_count,
+            "template_manifest_present": template_status != "missing" if model_id in SPECIALISTS else False,
+            "template_manifest_valid": template_valid,
+            "template_manifest_status": template_status,
             "training_data_approved": preflight_ok,
+            "training_preflight_passed": preflight_ok,
             "training_ready": preflight_ok,
             "training_block_reason": preflight_reason,
             "checkpoint_present": artifact_presence["checkpoint"],
@@ -161,18 +215,20 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
         })
 
     return {
-        "format": "aethrion-family-readiness-audit-v2",
+        "format": "aethrion-family-readiness-audit-v3",
         "execution_policy": "local_only",
         "model_count": len(rows),
         "trained_count": sum(row["registry_status"] == "trained" for row in rows),
         "training_ready_count": sum(row["training_ready"] for row in rows),
         "release_ready_count": sum(row["release_ready"] for row in rows),
+        "template_count": sum(row["template_manifest_valid"] for row in rows),
         "training_started": False,
         "automatic_approval": False,
         "registry_error": registry_error,
         "models": rows,
         "notes": [
             "Training readiness is based on the production train_family preflight, including local paths, source provenance, dataset hashes, tokenizer integrity and human approval gates.",
+            "Specialist templates are reported separately and can never count as live datasets, approvals, or training readiness.",
             "Release readiness is based on the native registry's complete artifact, hash, benchmark, safety and human-evidence checks.",
             "The audit never downloads, approves, prepares, or trains on a dataset.",
         ],
@@ -191,7 +247,7 @@ def main() -> None:
     if args.output:
         target = Path(args.output)
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(rendered + "\n", encoding="utf-8")
+        target.write_text(rendered + "\\n", encoding="utf-8")
     print(rendered)
 
 
