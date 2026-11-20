@@ -237,7 +237,6 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 stopped_step = state["step"]
                 self.assertEqual(progress_data["step"], stopped_step)
                 self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
-                self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
 
                 resumed = subprocess.run(
                     command + ["--resume", str(checkpoint), "--session-steps", "1"],
@@ -246,8 +245,12 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
                 resumed_state = load_checkpoint(checkpoint, map_location="cpu")
                 self.assertGreater(resumed_state["step"], stopped_step)
+                resumed_progress = json.loads(progress.read_text(encoding="utf-8"))
+                self.assertEqual(resumed_progress["status"], "interrupted")
+                self.assertEqual(resumed_progress["step"], resumed_state["step"])
                 self.assertEqual(
-                    json.loads(progress.read_text(encoding="utf-8"))["status"], "interrupted"
+                    Path(str(checkpoint) + ".sha256").read_text(encoding="ascii").strip(),
+                    hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
                 )
             finally:
                 if process.poll() is None:
@@ -289,6 +292,11 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                     resumed_report["status"], "training_interrupted_not_released"
                 )
                 self.assertEqual(resumed_report["release_status"], "NOT_RELEASED")
+                self.assertEqual(resumed_report["steps"], resumed_state["step"] + 1)
+                self.assertEqual(
+                    resumed_report["checkpoint_sha256"],
+                    hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+                )
             finally:
                 if process.poll() is None:
                     process.kill()
