@@ -46,6 +46,7 @@ def main() -> None:
         "aethrion/tokenizer.py",
         "aethrion/training_config.py",
         "aethrion/family_audit.py",
+        "aethrion/artifact_semantics.py",
         "aethrion/zerogpu_preflight.py",
         "aethrion/space_auth.py",
         "aethrion/train.py",
