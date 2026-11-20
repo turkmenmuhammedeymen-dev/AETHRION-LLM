@@ -26,22 +26,25 @@ class ArtifactSemanticsTests(unittest.TestCase):
             "data_sha256": "a" * 64,
         }, checkpoint)
         digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+        tokenizer = root / "tokenizer.json"
+        tokenizer.write_text(json.dumps({"format": "aethrion-byte-bpe-v1", "merges": []}), encoding="utf-8")
         training = root / "training.json"
         training.write_text(json.dumps({
             "model_id": "chat", "step": 3, "dataset_sha256": "a" * 64,
             "checkpoint_sha256": digest, "release_status": "NOT_RELEASED",
             "status": "training_complete_not_released",
         }), encoding="utf-8")
-        return model_config, checkpoint, digest, training
+        return model_config, checkpoint, digest, training, tokenizer
 
     def test_checkpoint_weights_and_training_report_are_consistent(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            model_config, checkpoint, digest, training = self._fixture(root)
+            model_config, checkpoint, digest, training, tokenizer = self._fixture(root)
             result = audit_model_artifact_semantics(root, "chat", {
                 "model_config": model_config,
                 "checkpoint": "checkpoint.pt",
                 "checkpoint_sha256": digest,
+                "tokenizer": "tokenizer.json",
                 "training_report": "training.json",
             })
             self.assertEqual(result["checkpoint"]["status"], "verified_structure")
@@ -52,7 +55,7 @@ class ArtifactSemanticsTests(unittest.TestCase):
     def test_checkpoint_weight_shape_tampering_is_detected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            model_config, checkpoint, digest, training = self._fixture(root)
+            model_config, checkpoint, digest, training, tokenizer = self._fixture(root)
             payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
             key = next(iter(payload["model"]))
             payload["model"][key] = torch.zeros((1,))
@@ -60,6 +63,7 @@ class ArtifactSemanticsTests(unittest.TestCase):
             result = audit_model_artifact_semantics(root, "chat", {
                 "model_config": model_config, "checkpoint": "checkpoint.pt",
                 "checkpoint_sha256": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+                "tokenizer": "tokenizer.json",
                 "training_report": "training.json",
             })
             self.assertEqual(result["checkpoint"]["status"], "weight_shape_mismatch")
@@ -68,13 +72,14 @@ class ArtifactSemanticsTests(unittest.TestCase):
     def test_report_checkpoint_hash_mismatch_is_detected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            model_config, checkpoint, digest, training = self._fixture(root)
+            model_config, checkpoint, digest, training, tokenizer = self._fixture(root)
             report = json.loads(training.read_text(encoding="utf-8"))
             report["checkpoint_sha256"] = "f" * 64
             training.write_text(json.dumps(report), encoding="utf-8")
             result = audit_model_artifact_semantics(root, "chat", {
                 "model_config": model_config, "checkpoint": "checkpoint.pt",
-                "checkpoint_sha256": digest, "training_report": "training.json",
+                "checkpoint_sha256": digest, "tokenizer": "tokenizer.json",
+                "training_report": "training.json",
             })
             self.assertIn("training_report_checkpoint_hash_mismatch",
                           result["consistency_problems"])
