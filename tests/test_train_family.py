@@ -65,6 +65,24 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 run_family(tmp, selected=["external-model"])
 
+    def test_explicit_empty_selection_is_rejected_instead_of_running_all_models(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch("aethrion.train_family.subprocess.run") as run:
+                with self.assertRaisesRegex(FamilyTrainingError, "empty model selection"):
+                    run_family(tmp, selected=[], execute=True)
+            run.assert_not_called()
+
+    def test_malformed_selection_and_execution_options_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for selected in ("chat", [None], [1]):
+                with self.subTest(selected=selected):
+                    with self.assertRaises(FamilyTrainingError):
+                        run_family(tmp, selected=selected)
+            with self.assertRaisesRegex(FamilyTrainingError, "execute"):
+                run_family(tmp, execute=1)
+            with self.assertRaisesRegex(FamilyTrainingError, "python_executable"):
+                run_family(tmp, python_executable="")
+
     def test_output_directory_must_be_explicit_and_non_root(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder).resolve()
