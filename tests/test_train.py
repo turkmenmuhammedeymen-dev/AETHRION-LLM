@@ -203,15 +203,16 @@ class TrainingUtilityTests(unittest.TestCase):
                 "--source-root", str(raw_dir),
                 "--corpus-report", str(corpus_report),
             ]
-            first = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=120)
+            first = subprocess.run(command + ["--session-steps", "1"], cwd=root, capture_output=True, text=True, timeout=120)
             self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
             checkpoint_path = output / "checkpoint_last.pt"
             self.assertTrue(checkpoint_path.exists())
             self.assertTrue((output / "progress.json").is_file())
+            self.assertEqual(json.loads((output / "progress.json").read_text(encoding="utf-8"))["status"], "interrupted")
             self.assertTrue((output / "metrics.jsonl").is_file())
             config["max_steps"] = 3
             config_path.write_text(json.dumps(config), encoding="utf-8")
-            resumed = subprocess.run(command + ["--resume", str(checkpoint_path)],
+            resumed = subprocess.run(command + ["--resume", str(checkpoint_path), "--session-steps", "2"],
                                      cwd=root, capture_output=True, text=True, timeout=120)
             self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
             checkpoint = load_checkpoint(checkpoint_path, map_location="cpu")

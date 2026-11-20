@@ -55,6 +55,8 @@ try:
     # third-party provider credentials.
     space.SPACE_AUTH_ENABLED = False
     disabled = space._auth_required_message()
+    assert disabled == space.training_readiness()
+
     assert "authentication" in disabled.lower()
     assert disabled == space.chat("hello", [])
     assert disabled == space.code("write a hello world function")
@@ -77,6 +79,11 @@ try:
     # Exercise the SAFE gate and document routes with an isolated in-memory
     # test runtime. This does not enable a production model or external API.
     space.SPACE_AUTH_ENABLED = True
+    readiness = space.training_readiness()
+    assert "Models checked:** 11" in readiness
+    assert "Training started:** NO" in readiness
+    assert "Checkpoints written:** NO" in readiness
+    assert readiness.count(" | BLOCKED | ") + readiness.count(" | READY — NOT STARTED | ") == 11
     smoke_runtime = _SmokeSafetyRuntime()
     space.providers = {"runtime": smoke_runtime}
 

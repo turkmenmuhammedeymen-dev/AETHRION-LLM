@@ -20,7 +20,7 @@ Set AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD under Space Secrets
 to enable authenticated access to local model inference. No model API keys
 are accepted or required.
 
-The chat model remains unavailable until its own trained checkpoint and
+The authenticated Space also provides an 11-model, read-only training-readiness panel. It reports real data-gate blockers but never starts training or writes checkpoints. A READY result is not a trained or released model.\n\nThe chat model remains unavailable until its own trained checkpoint and
 matching tokenizer are installed and integrity-verified. Code, vision,
 image-generation, ASR, TTS, 3D, research, document-intelligence and safety
 specialists are separate first-party model programs and remain unavailable
