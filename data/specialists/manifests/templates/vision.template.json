@@ -1,0 +1,31 @@
+{
+  "format": "aethrion-specialist-dataset-v1",
+  "dataset_id": "REPLACE_WITH_OWNER_ASSIGNED_VISION_DATASET_ID",
+  "model_id": "vision",
+  "modality": "vision",
+  "training_allowed": false,
+  "owner_approval": false,
+  "privacy_reviewed": false,
+  "governance": {
+    "schema": "aethrion-human-review-v1",
+    "model_id": "vision",
+    "approval_status": "pending",
+    "author_role": "",
+    "authorship_attested": false,
+    "first_party_origin_attested": false,
+    "rights_holder_role": "",
+    "rights_attested": false,
+    "source_rights_reviewed": false,
+    "privacy_reviewed": false,
+    "quality_reviewed": false,
+    "reviewer_role": "",
+    "reviewed_at": "",
+    "evidence_uri": ""
+  },
+  "dataset_path": "",
+  "dataset_sha256": "",
+  "tokenizer_path": "",
+  "tokenizer_sha256": "",
+  "sources": [],
+  "_template_notice": "NON-EXECUTABLE TEMPLATE. Replace every placeholder only after owner-authored data exists and independent rights, privacy, quality and human approvals are documented. Do not set approval flags to true to bypass review."
+}

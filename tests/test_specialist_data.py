@@ -391,5 +391,27 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                         validate_specialist_dataset(manifest)
 
 
+    def test_all_specialist_templates_are_explicitly_non_executable_and_fail_closed(self):
+        from aethrion.specialist_data import MODEL_MODALITIES
+        template_root = Path(__file__).resolve().parents[1] / "data" / "specialists" / "manifests" / "templates"
+        expected = set(MODEL_MODALITIES) - {"chat"}
+        found = {path.name.removesuffix(".template.json") for path in template_root.glob("*.template.json")}
+        self.assertEqual(found, expected)
+        for model_id in sorted(expected):
+            with self.subTest(model_id=model_id):
+                path = template_root / f"{model_id}.template.json"
+                payload = json.loads(path.read_text(encoding="utf-8"))
+                self.assertEqual(payload["format"], "aethrion-specialist-dataset-v1")
+                self.assertEqual(payload["model_id"], model_id)
+                self.assertEqual(payload["modality"], MODEL_MODALITIES[model_id])
+                self.assertIs(payload["training_allowed"], False)
+                self.assertIs(payload["owner_approval"], False)
+                self.assertIs(payload["privacy_reviewed"], False)
+                self.assertEqual(payload["sources"], [])
+                self.assertTrue(payload["_template_notice"].startswith("NON-EXECUTABLE TEMPLATE"))
+                with self.assertRaisesRegex(SpecialistDataError, "Training blocked"):
+                    validate_specialist_dataset(path)
+
+
 if __name__ == "__main__":
     unittest.main()
