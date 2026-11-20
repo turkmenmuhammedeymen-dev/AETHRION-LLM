@@ -364,5 +364,39 @@ class TrainingUtilityTests(unittest.TestCase):
             self.assertEqual(recovered["step"], 0)
             self.assertTrue(any("safely loaded" in str(item.message) for item in caught))
 
+
+class BaseArchitecturePreflightContractTests(unittest.TestCase):
+    def test_base_config_rejects_embedding_width_not_divisible_by_attention_heads(self):
+        from aethrion.train import validate_base_training_config
+
+        cfg = {
+            "seed": 42, "data_path": "data.txt", "tokenizer_path": "tokenizer.json",
+            "output_dir": "out", "vocab_size": 256, "block_size": 8,
+            "n_layer": 1, "n_head": 3, "n_embd": 16, "dropout": 0.0,
+            "batch_size": 1, "gradient_accumulation_steps": 1,
+            "learning_rate": 0.001, "min_learning_rate": 0.0001,
+            "weight_decay": 0.0, "max_steps": 2, "warmup_steps": 1,
+            "eval_interval": 1, "eval_batches": 1, "save_interval": 1,
+            "grad_clip": 1.0, "amp": False,
+        }
+        with self.assertRaisesRegex(ValueError, "n_embd must be divisible by n_head"):
+            validate_base_training_config(cfg)
+
+    def test_base_config_accepts_valid_attention_head_divisibility(self):
+        from aethrion.train import validate_base_training_config
+
+        cfg = {
+            "seed": 42, "data_path": "data.txt", "tokenizer_path": "tokenizer.json",
+            "output_dir": "out", "vocab_size": 256, "block_size": 8,
+            "n_layer": 1, "n_head": 4, "n_embd": 16, "dropout": 0.0,
+            "batch_size": 1, "gradient_accumulation_steps": 1,
+            "learning_rate": 0.001, "min_learning_rate": 0.0001,
+            "weight_decay": 0.0, "max_steps": 2, "warmup_steps": 1,
+            "eval_interval": 1, "eval_batches": 1, "save_interval": 1,
+            "grad_clip": 1.0, "amp": False,
+        }
+        validate_base_training_config(cfg)
+
+
 if __name__ == "__main__":
     unittest.main()
