@@ -1,0 +1,34 @@
+{
+  "format": "aethrion-synthetic-corpus-v1",
+  "dataset_id": "aethrion-synthetic-pilot-tr-v1",
+  "language": "tr",
+  "origin": "ai_generated_synthetic",
+  "human_review_status": "not_reviewed",
+  "rights_holder_attestation": false,
+  "training_allowed": false,
+  "production_use_allowed": false,
+  "record_count": 60,
+  "groups": {
+    "fundamentals": 20,
+    "reasoning": 20,
+    "digital_literacy": 20
+  },
+  "files": [
+    "fundamentals.txt",
+    "reasoning.txt",
+    "digital_literacy.txt"
+  ],
+  "purpose": [
+    "utf8_validation",
+    "corpus_parser_smoke_test",
+    "deduplication_smoke_test",
+    "tokenizer_smoke_test",
+    "split_pipeline_smoke_test"
+  ],
+  "limitations": [
+    "Not owner-authored evidence",
+    "Not a third-party licensed corpus",
+    "Not sufficient for model capability claims",
+    "Not approved for production training"
+  ]
+}
