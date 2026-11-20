@@ -89,7 +89,7 @@ class ArtifactSemanticsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             processor = root / "processor.json"
-            processor.write_text(json.dumps({"format": "test-v1", "model_id": "image"}), encoding="utf-8")
+            processor.write_text(json.dumps({"format": "aethrion-processor-v1", "model_id": "image", "modality": "vision", "config": {"size": 224}}), encoding="utf-8")
             result = audit_model_artifact_semantics(root, "vision", {"processor": "processor.json"})
             self.assertEqual(result["processor_status"], "model_id_mismatch")
 
