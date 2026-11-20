@@ -148,7 +148,10 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
                 sources = source_payload.get("sources", [])
                 source_count = len(sources) if isinstance(sources, list) else None
         elif dataset_exists:
-            live_payload = _read_json(dataset_path, f"{model_id} dataset manifest")
+            try:
+                live_payload = _read_json(dataset_path, f"{model_id} dataset manifest")
+            except FamilyAuditError:
+                live_payload = {}
             sources = live_payload.get("sources", [])
             source_count = len(sources) if isinstance(sources, list) else None
             source_manifest_present = isinstance(sources, list) and bool(sources)
