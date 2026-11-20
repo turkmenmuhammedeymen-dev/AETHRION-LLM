@@ -64,12 +64,22 @@ def probe_gradio_config(
     try:
         with opener(request, timeout=timeout_seconds) as response:
             status = getattr(response, "status", 200)
+            if status in {401, 403}:
+                # Gradio auth intentionally protects /config when Space Secrets
+                # enable login. An auth challenge still proves the app answered.
+                return {"auth_required": True}
             if status != 200:
                 raise SpaceRuntimeVerificationError(
                     f"Gradio config endpoint returned HTTP {status}."
                 )
             payload = json.loads(response.read(2 * 1024 * 1024).decode("utf-8"))
-    except (HTTPError, URLError, TimeoutError, OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+    except HTTPError as exc:
+        if exc.code in {401, 403}:
+            return {"auth_required": True}
+        raise SpaceRuntimeVerificationError(
+            f"Gradio config endpoint returned HTTP {exc.code}."
+        ) from exc
+    except (URLError, TimeoutError, OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise SpaceRuntimeVerificationError(
             f"Gradio config endpoint health check failed: {type(exc).__name__}: {exc}"
         ) from exc
