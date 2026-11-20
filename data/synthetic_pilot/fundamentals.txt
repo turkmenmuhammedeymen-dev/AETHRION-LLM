@@ -1,0 +1,20 @@
+Bir algoritma, bir problemi çözmek için izlenen açık ve sonlu adımlar bütünüdür.
+Bir değişken, program çalışırken değeri değişebilen isimlendirilmiş veri alanıdır.
+Fonksiyonlar, tekrar kullanılabilir işlemleri anlamlı bir isim altında toplar.
+Döngüler, belirli komutların bir koşula bağlı olarak yeniden çalışmasını sağlar.
+Koşullu ifadeler, programın izleyeceği yolu mantıksal bir sonuca göre seçer.
+Bir liste, sıralı öğeleri tek bir veri yapısında tutar.
+Sözlük, anahtarları değerlerle eşleştirerek bilgiye isim üzerinden eriştirir.
+Birim testleri, küçük yazılım parçalarının beklenen sonucu verip vermediğini denetler.
+Sürüm kontrolü, dosya değişikliklerinin geçmişini izlemeye yardımcı olur.
+Bir API, yazılım bileşenlerinin tanımlı kurallarla iletişim kurmasını sağlar.
+JSON, yapılandırılmış veriyi anahtar ve değer çiftleriyle temsil eder.
+UTF-8, Unicode karakterlerini bayt dizileriyle kodlayan yaygın bir biçimdir.
+Birincil anahtar, veritabanındaki her kaydı benzersiz biçimde tanımlar.
+Önbellek, sık kullanılan verilere daha hızlı erişmek için geçici kopya tutar.
+Bir istisna, programın normal akışını kesen çalışma zamanı durumudur.
+Girdi doğrulama, beklenmeyen verilerin güvenli biçimde ele alınmasına yardım eder.
+En az ayrıcalık ilkesi, bileşenlere yalnızca gerekli izinlerin verilmesini önerir.
+SHA-256 özeti, dosyaların bütünlüğünü karşılaştırmak için kullanılabilir.
+Günlük kaydı, uygulama olaylarının sonradan incelenmesini kolaylaştırır.
+Yedekleme, beklenmeyen veri kaybına karşı geri dönüş olanağı sağlar.

@@ -1,0 +1,20 @@
+Farklı hesaplarda aynı parolayı tekrar kullanmamak hesap güvenliğini artırır.
+İki aşamalı doğrulama, parola dışında ek bir kontrol katmanı sağlar.
+Bir bağlantıyı açmadan önce alan adını dikkatle incelemek gerekir.
+Kişisel veriler yalnızca gerekli olduğunda ve uygun izinlerle paylaşılmalıdır.
+Uygulama izinleri, kullanım amacıyla düzenli olarak karşılaştırılmalıdır.
+Yazılım güncellemeleri bilinen güvenlik açıklarının kapatılmasına yardımcı olabilir.
+Yedekleri geri yükleyerek denemek, yedeklerin çalıştığını doğrular.
+Bir dosyanın uzantısı, içeriğinin güvenli olduğunu tek başına kanıtlamaz.
+HTTPS bağlantıyı şifreler; ancak web sayfasındaki her iddianın doğru olduğunu garanti etmez.
+Bir çevrim içi haber, paylaşılmadan önce bağımsız kaynaklardan doğrulanmalıdır.
+Yapay zekâ çıktıları hata içerebilir ve önemli bilgiler ayrıca doğrulanmalıdır.
+Bir sohbet sistemine parola veya özel kayıt göndermekten kaçınmak gerekir.
+Dijital ayak izi, çevrim içi etkinliklerin zaman içinde bıraktığı izleri ifade eder.
+Herkese açık depolarda erişim anahtarı veya gizli yapılandırma tutulmamalıdır.
+Erişim belirteçleri yalnızca gerekli izin ve süreyle sınırlandırılmalıdır.
+Dijital içerik üretirken kullanılan kaynakların lisansı kontrol edilmelidir.
+Dosya özeti, iki kopyanın aynı olup olmadığını karşılaştırmaya yardımcı olur.
+Bir güvenlik olayı yaşandığında etkilenen sistem ve alınan önlemler kaydedilmelidir.
+Dosya paylaşımında erişim kapsamı ve bağlantı izinleri gözden geçirilmelidir.
+Bir yapay zekâ sisteminin sınırlarını bilmek, yanlış beklentileri önler.
