@@ -111,6 +111,34 @@ class RuntimeVerificationTests(unittest.TestCase):
             ],
         )
 
+    def test_sends_bearer_token_to_private_space_endpoints(self):
+        payload = {"components": [], "dependencies": []}
+
+        class Response:
+            status = 200
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def read(self, _limit):
+                return json.dumps(payload).encode("utf-8")
+
+        def open_url(request, **_kwargs):
+            self.assertEqual(
+                request.get_header("Authorization"), "Bearer hf_test_token"
+            )
+            return Response()
+
+        result = probe_gradio_config(
+            "vizyon2027/AETHRION-LLM",
+            token="hf_test_token",
+            open_url=open_url,
+        )
+        self.assertEqual(result, payload)
+
     def test_reports_root_404_after_config_404(self):
         def open_url(request, **_kwargs):
             raise HTTPError(request.full_url, 404, "Not Found", None, None)

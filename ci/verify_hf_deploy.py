@@ -127,7 +127,7 @@ def main() -> None:
     print(f"Verified Hugging Face Space HEAD: {revision}", flush=True)
 
     wait_for_space_running(api, repo_id, timeout_seconds=480, poll_interval=10)
-    config = probe_gradio_config(repo_id)
+    config = probe_gradio_config(repo_id, token=token)
     if config.get("auth_required"):
         print(
             "GRADIO_LIVE_HEALTH=PASS auth=protected "
