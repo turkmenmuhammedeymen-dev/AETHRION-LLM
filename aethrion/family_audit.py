@@ -53,7 +53,7 @@ def _local_file(root: Path, relative: str) -> Path:
     if not isinstance(relative, str) or not relative.strip():
         raise FamilyAuditError("Repository artifact paths must be non-empty strings.")
     candidate = Path(relative)
-    if candidate.is_absolute() or "\\\\" in relative or "://" in relative:
+    if candidate.is_absolute() or "\\" in relative or "://" in relative:
         raise FamilyAuditError(f"Unsafe non-local repository path: {relative}")
     if any(part in {"", ".", ".."} for part in relative.split("/")):
         raise FamilyAuditError(f"Unsafe repository path: {relative}")
@@ -247,7 +247,7 @@ def main() -> None:
     if args.output:
         target = Path(args.output)
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(rendered + "\\n", encoding="utf-8")
+        target.write_text(rendered + "\n", encoding="utf-8")
     print(rendered)
 
 
