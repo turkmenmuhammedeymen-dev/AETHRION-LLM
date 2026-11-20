@@ -246,8 +246,14 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
                 resumed_state = load_checkpoint(checkpoint, map_location="cpu")
                 self.assertGreater(resumed_state["step"], stopped_step)
+                resumed_progress = json.loads(progress.read_text(encoding="utf-8"))
+                self.assertEqual(resumed_progress["status"], "interrupted")
+                self.assertEqual(resumed_progress["step"], resumed_state["step"])
                 self.assertEqual(
-                    json.loads(progress.read_text(encoding="utf-8"))["status"], "interrupted"
+                    resumed_progress["step"],
+                    json.loads((output / "training_report.json").read_text(encoding="utf-8"))["step"]
+                    if (output / "training_report.json").is_file()
+                    else resumed_state["step"],
                 )
             finally:
                 if process.poll() is None:
@@ -289,6 +295,11 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                     resumed_report["status"], "training_interrupted_not_released"
                 )
                 self.assertEqual(resumed_report["release_status"], "NOT_RELEASED")
+                self.assertEqual(resumed_report["steps"], resumed_state["step"] + 1)
+                self.assertEqual(
+                    resumed_report["checkpoint_sha256"],
+                    hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+                )
             finally:
                 if process.poll() is None:
                     process.kill()
