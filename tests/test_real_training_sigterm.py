@@ -71,7 +71,7 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
             sources.append({
                 "source_id": f"sigterm-fixture-{source_index}",
                 "path": filename,
-                "license": "Synthetic test fixture",
+                "license": "CC0-1.0",
                 "permitted_uses": "unit-test fixture only; not production training data",
                 "allow_training": True,
             })
@@ -193,8 +193,8 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 "source_path": source.name,
                 "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                 "license": "Synthetic test fixture",
-                "permitted_use": "unit-test fixture only; not production training data",
-                "evidence_uri": "unit-test://fixture",
+                "permitted_use": "Unit-test training fixture only; not production training data",
+                "evidence_uri": "https://example.invalid/fixture-license",
                 "allow_training": True,
                 "privacy_reviewed": True,
             }],
