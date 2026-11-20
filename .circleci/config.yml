@@ -15,6 +15,31 @@ jobs:
           name: Run unit tests
           command: python -m pytest -q
       - run:
+          name: Execute owner-authored intake generator in the repository checkout
+          command: |
+            python scripts/create_owner_data_intake.py
+            python - <<'PY'
+            import json
+            from pathlib import Path
+
+            root = Path("data/intake")
+            report = json.loads((root / "workspace.json").read_text(encoding="utf-8"))
+            expected = {"chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d", "research", "document", "safety"}
+            assert report["model_count"] == 11, report
+            assert {item["model_id"] for item in report["models"]} == expected
+            assert report["training_started"] is False
+            assert report["automatic_approval"] is False
+            for model in expected:
+                folder = root / model
+                assert (folder / "records.jsonl").read_text(encoding="utf-8") == ""
+                submission = json.loads((folder / "submission.json").read_text(encoding="utf-8"))
+                assert submission["training_allowed"] is False
+                assert submission["owner_approval"] is False
+                assert submission["source_count"] == 0
+            print("PASS: 11 empty, fail-closed intake workspaces generated in CI.")
+            PY
+            rm -rf data/intake
+      - run:
           name: Run Hugging Face Space runtime smoke tests
           command: python ci/space_smoke.py
       - run:
