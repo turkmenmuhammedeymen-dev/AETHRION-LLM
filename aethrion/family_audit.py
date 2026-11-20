@@ -251,7 +251,9 @@ def audit_model_family(root: str | Path = ".") -> dict[str, Any]:
             key: value["present"] for key, value in artifact_audit.items()
         }
         artifact_integrity_ok = all(
-            (not item["required"]) or item["integrity_status"] == "verified"
+            item["integrity_status"] == "verified"
+            if item["required"] or item["present"]
+            else item["integrity_status"] in {"not_registered", "missing_optional"}
             for item in artifact_audit.values()
         )
 
