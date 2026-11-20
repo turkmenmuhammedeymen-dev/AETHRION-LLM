@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
@@ -47,42 +48,7 @@ def wait_for_space_running(
         sleep(poll_interval)
 
 
-def probe_gradio_config(
-    repo_id: str,
-    *,
-    timeout_seconds: int = 20,
-    open_url: Callable[..., Any] | None = None,
-) -> dict[str, Any]:
-    """Check the public Gradio config endpoint and validate its response shape."""
-    if "/" not in repo_id or not all(repo_id.split("/", 1)):
-        raise ValueError("repo_id must use owner/name format")
-    owner, name = repo_id.split("/", 1)
-    host = f"{owner}-{name}".lower()
-    url = f"https://{host}.hf.space/config"
-    opener = open_url or urlopen
-    request = Request(url, headers={"User-Agent": "AETHRION-Space-Healthcheck/1.0"})
-    try:
-        with opener(request, timeout=timeout_seconds) as response:
-            status = getattr(response, "status", 200)
-            if status in {401, 403}:
-                # Gradio auth intentionally protects /config when Space Secrets
-                # enable login. An auth challenge still proves the app answered.
-                return {"auth_required": True}
-            if status != 200:
-                raise SpaceRuntimeVerificationError(
-                    f"Gradio config endpoint returned HTTP {status}."
-                )
-            payload = json.loads(response.read(2 * 1024 * 1024).decode("utf-8"))
-    except HTTPError as exc:
-        if exc.code in {401, 403}:
-            return {"auth_required": True}
-        raise SpaceRuntimeVerificationError(
-            f"Gradio config endpoint returned HTTP {exc.code}."
-        ) from exc
-    except (URLError, TimeoutError, OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise SpaceRuntimeVerificationError(
-            f"Gradio config endpoint health check failed: {type(exc).__name__}: {exc}"
-        ) from exc
+def _validate_gradio_config(payload: Any) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise SpaceRuntimeVerificationError("Gradio config response is not a JSON object.")
     if not isinstance(payload.get("components"), list):
@@ -90,3 +56,83 @@ def probe_gradio_config(
     if not isinstance(payload.get("dependencies"), list):
         raise SpaceRuntimeVerificationError("Gradio config is missing its dependencies list.")
     return payload
+
+
+def probe_gradio_config(
+    repo_id: str,
+    *,
+    timeout_seconds: int = 20,
+    open_url: Callable[..., Any] | None = None,
+) -> dict[str, Any]:
+    """Check Gradio config, with the Gradio-client-compatible HTML fallback."""
+    if "/" not in repo_id or not all(repo_id.split("/", 1)):
+        raise ValueError("repo_id must use owner/name format")
+    owner, name = repo_id.split("/", 1)
+    host = f"{owner}-{name}".lower()
+    base_url = f"https://{host}.hf.space"
+    opener = open_url or urlopen
+    headers = {"User-Agent": "AETHRION-Space-Healthcheck/1.0"}
+
+    request = Request(f"{base_url}/config", headers=headers)
+    try:
+        with opener(request, timeout=timeout_seconds) as response:
+            status = getattr(response, "status", 200)
+            if status in {401, 403}:
+                return {"auth_required": True}
+            if status == 200:
+                payload = json.loads(response.read(2 * 1024 * 1024).decode("utf-8"))
+                return _validate_gradio_config(payload)
+            if status != 404:
+                raise SpaceRuntimeVerificationError(
+                    f"Gradio config endpoint returned HTTP {status}."
+                )
+    except HTTPError as exc:
+        if exc.code in {401, 403}:
+            return {"auth_required": True}
+        if exc.code != 404:
+            raise SpaceRuntimeVerificationError(
+                f"Gradio config endpoint returned HTTP {exc.code}."
+            ) from exc
+
+    # Some Gradio/Spaces ingress combinations return 404 for /config while
+    # the app itself is healthy. Gradio Client uses the root HTML as a
+    # compatibility fallback and extracts window.gradio_config from it.
+    root_request = Request(f"{base_url}/", headers=headers)
+    try:
+        with opener(root_request, timeout=timeout_seconds) as response:
+            status = getattr(response, "status", 200)
+            if status in {401, 403}:
+                return {"auth_required": True}
+            if status != 200:
+                raise SpaceRuntimeVerificationError(
+                    f"Gradio root endpoint returned HTTP {status} after /config returned 404."
+                )
+            html = response.read(2 * 1024 * 1024).decode("utf-8")
+    except HTTPError as exc:
+        if exc.code in {401, 403}:
+            return {"auth_required": True}
+        raise SpaceRuntimeVerificationError(
+            f"Gradio root endpoint returned HTTP {exc.code} after /config returned 404."
+        ) from exc
+    except (URLError, TimeoutError, OSError, UnicodeDecodeError) as exc:
+        raise SpaceRuntimeVerificationError(
+            f"Gradio root endpoint health check failed: {type(exc).__name__}: {exc}"
+        ) from exc
+
+    match = re.search(
+        r"window\.gradio_config\s*=\s*(\{.*?\})\s*;\s*</script>",
+        html,
+        flags=re.DOTALL,
+    )
+    if not match:
+        raise SpaceRuntimeVerificationError(
+            "Gradio /config returned 404 and the root HTML did not contain "
+            "an embedded window.gradio_config payload."
+        )
+    try:
+        payload = json.loads(match.group(1))
+    except json.JSONDecodeError as exc:
+        raise SpaceRuntimeVerificationError(
+            "Gradio root HTML contains an invalid embedded config payload."
+        ) from exc
+    return _validate_gradio_config(payload)
