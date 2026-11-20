@@ -1,14 +1,5 @@
 name: Diagnose AETHRION Hugging Face Space
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - ".github/workflows/diagnose-hf-space.yml"
-      - "hf_space/**"
-  workflow_run:
-    workflows: ["Deploy AETHRION-LLM to Hugging Face Space"]
-    types: [completed]
-    branches: ["main"]
   workflow_dispatch:
 permissions:
   contents: read
