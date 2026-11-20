@@ -17,4 +17,5 @@ artifacts/tokenizer.json
 .coverage
 !data/processed/corpus_manifest.json
 *.egg-info/
-data/intake/\ndata/intake/
+data/intake/
+data/intake/
