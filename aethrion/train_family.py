@@ -180,7 +180,24 @@ def run_family(
     repo = Path(root).resolve()
     if session_steps is not None and (type(session_steps) is not int or session_steps < 1):
         raise FamilyTrainingError("session_steps must be a positive integer.")
-    model_ids = selected or list(MODEL_IDS)
+    if type(execute) is not bool:
+        raise FamilyTrainingError("execute must be an explicit boolean.")
+    if selected is None:
+        model_ids = list(MODEL_IDS)
+    else:
+        if not isinstance(selected, list):
+            raise FamilyTrainingError("selected must be a list of model IDs or None.")
+        if not selected:
+            raise FamilyTrainingError(
+                "An explicit empty model selection is invalid; use selected=None to select all eleven models."
+            )
+        if any(not isinstance(model_id, str) or not model_id for model_id in selected):
+            raise FamilyTrainingError("Every selected model ID must be a non-empty string.")
+        model_ids = list(selected)
+    if python_executable is not None and (
+        not isinstance(python_executable, str) or not python_executable.strip()
+    ):
+        raise FamilyTrainingError("python_executable must be a non-empty string when provided.")
     if len(set(model_ids)) != len(model_ids):
         raise FamilyTrainingError("Duplicate model IDs are not allowed.")
     unknown = sorted(set(model_ids) - set(MODEL_IDS))
