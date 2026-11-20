@@ -92,7 +92,8 @@ class NativeModelFamilySmokeTests(unittest.TestCase):
         self._run_loss("vocoder", {
             "mel_bins": 16, "channels": 16, "hop_length": 4,
         }, {
-            "target_mels": torch.randn(self.batch, 16, 4),
+            # _loss transposes [batch, frames, mel_bins] to the vocoder layout.
+            "target_mels": torch.randn(self.batch, 4, 16),
             "target_waveforms": torch.randn(self.batch, 16),
         })
 
