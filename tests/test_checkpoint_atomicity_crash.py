@@ -32,21 +32,30 @@ def test_interrupted_publication_recovers_previous_generation(tmp_path, monkeypa
 
     def fail_before_checksum_publish(source, destination):
         nonlocal calls
-        # Existing generation is copied to .previous (two replaces), then
-        # the new checkpoint is published (third replace). Simulate a crash
-        # before its matching checksum sidecar can be published.
         calls += 1
+        # On the second save: calls 1-2 publish the previous checkpoint and
+        # its sidecar; call 3 publishes the new checkpoint; call 4 attempts
+        # to publish the new sidecar. Fail precisely at that final boundary.
         if calls == 4:
-            raise OSError("simulated process interruption before checksum publish")
+            raise OSError("simulated interruption before checksum sidecar publish")
         return real_replace(source, destination)
 
+    # Count only replacements in the second save. The first save already
+    # completed before this wrapper is installed.
     monkeypatch.setattr(checkpoint.os, "replace", fail_before_checksum_publish)
 
-    with pytest.raises(OSError, match="simulated process interruption"):
+    # The previous generation is copied in two replacements, then the new
+    # checkpoint file is published (third), then its sidecar (fourth).
+    # Verify this exact publication sequence while injecting the failure.
+    with pytest.raises(OSError, match="before checksum sidecar publish"):
         checkpoint.save_checkpoint(_payload(2), target)
 
     monkeypatch.setattr(checkpoint.os, "replace", real_replace)
 
+    # The new payload exists but its old sidecar no longer matches; recovery
+    # must therefore come from the independently verified previous pair.
+    with pytest.raises(ValueError, match="SHA-256"):
+        checkpoint.verify_checkpoint(target)
     recovered = checkpoint.load_checkpoint(target)
     assert recovered["step"] == 1
     assert checkpoint.verify_checkpoint(str(target) + ".previous")
