@@ -62,6 +62,7 @@ def probe_gradio_config(
     repo_id: str,
     *,
     timeout_seconds: int = 20,
+    token: str | None = None,
     open_url: Callable[..., Any] | None = None,
 ) -> dict[str, Any]:
     """Check Gradio config, with the Gradio-client-compatible HTML fallback."""
@@ -72,6 +73,8 @@ def probe_gradio_config(
     base_url = f"https://{host}.hf.space"
     opener = open_url or urlopen
     headers = {"User-Agent": "AETHRION-Space-Healthcheck/1.0"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
 
     request = Request(f"{base_url}/config", headers=headers)
     try:
