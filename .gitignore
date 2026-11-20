@@ -5,6 +5,7 @@ venv/
 .env
 data/raw/*
 data/processed/*
+data/synthetic_fixtures/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 artifacts/*.pt
