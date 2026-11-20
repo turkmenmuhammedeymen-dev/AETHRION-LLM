@@ -36,6 +36,11 @@ def main() -> None:
         )
 
     required_files = [
+        "app.py",
+        "aethrion/space_training.py",
+        "aethrion/train.py",
+        "aethrion/train_family.py",
+        "aethrion/specialist_train.py",
         "aethrion/prepare_data.py",
         "data/base_sources.template.json",
         "data/processed/corpus_manifest.json",
