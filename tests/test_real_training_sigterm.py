@@ -359,5 +359,63 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                     process.wait(timeout=5)
 
 
+    def test_real_base_cli_recovers_previous_checkpoint_after_latest_corruption(self):
+        repo_root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as folder:
+            command, output, _ = self._base_fixture(Path(folder))
+            first = subprocess.run(
+                command + ["--session-steps", "1"], cwd=repo_root,
+                capture_output=True, text=True, timeout=120,
+            )
+            self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+            checkpoint = output / "checkpoint_last.pt"
+            second = subprocess.run(
+                command + ["--resume", str(checkpoint), "--session-steps", "1"],
+                cwd=repo_root, capture_output=True, text=True, timeout=120,
+            )
+            self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+            previous = Path(str(checkpoint) + ".previous")
+            self.assertTrue(previous.is_file())
+            previous_state = load_checkpoint(previous, map_location="cpu")
+            checkpoint.write_bytes(b"deliberately corrupted newest checkpoint")
+            recovered_run = subprocess.run(
+                command + ["--resume", str(checkpoint), "--session-steps", "1"],
+                cwd=repo_root, capture_output=True, text=True, timeout=120,
+            )
+            self.assertEqual(recovered_run.returncode, 0, recovered_run.stdout + recovered_run.stderr)
+            recovered_state = load_checkpoint(checkpoint, map_location="cpu")
+            self.assertGreater(recovered_state["step"], previous_state["step"])
+            self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
+
+    def test_real_specialist_cli_recovers_previous_checkpoint_after_latest_corruption(self):
+        repo_root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as folder:
+            command, output = self._specialist_fixture(Path(folder))
+            first = subprocess.run(
+                command + ["--session-steps", "1"], cwd=repo_root,
+                capture_output=True, text=True, timeout=120,
+            )
+            self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+            checkpoint = output / "checkpoint_last.pt"
+            second = subprocess.run(
+                command + ["--resume", str(checkpoint), "--session-steps", "1"],
+                cwd=repo_root, capture_output=True, text=True, timeout=120,
+            )
+            self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+            previous = Path(str(checkpoint) + ".previous")
+            self.assertTrue(previous.is_file())
+            previous_state = _load_checkpoint(previous, torch.device("cpu"))
+            checkpoint.write_bytes(b"deliberately corrupted newest checkpoint")
+            recovered_run = subprocess.run(
+                command + ["--resume", str(checkpoint), "--session-steps", "1"],
+                cwd=repo_root, capture_output=True, text=True, timeout=120,
+            )
+            self.assertEqual(recovered_run.returncode, 0, recovered_run.stdout + recovered_run.stderr)
+            recovered_state = _load_checkpoint(checkpoint, torch.device("cpu"))
+            self.assertGreater(recovered_state["step"], previous_state["step"])
+            report = json.loads((output / "training_report.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["release_status"], "NOT_RELEASED")
+            self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
+
 if __name__ == "__main__":
     unittest.main()
