@@ -231,5 +231,37 @@ class SpecialistFamilyTrainingSmokeTests(unittest.TestCase):
                 self.assertTrue((output / "training_report.json").is_file())
 
 
+    def test_modality_shape_contracts_reject_invalid_inputs_for_every_specialist(self):
+        from aethrion.specialist_data import (
+            SpecialistDataError,
+            _validate_modality_shapes,
+        )
+
+        invalidators = {
+            "code": lambda a: a.__setitem__("token_ids", a["token_ids"][:, :1]),
+            "vision": lambda a: a.__setitem__("images", a["images"][:, :2]),
+            "image": lambda a: a.__setitem__("images", a["images"][:, :2]),
+            "asr": lambda a: a["input_lengths"].__setitem__(0, 0),
+            "tts": lambda a: a["frame_to_token"].__setitem__((0, 0), 99),
+            "vocoder": lambda a: a["waveform_mask"].__setitem__((0, 0), 2),
+            "3d": lambda a: a.__setitem__("points", a["points"][:, :, :2]),
+            "research": lambda a: a.__setitem__("query_ids", a["query_ids"].astype(np.float32)),
+            "document": lambda a: a.__setitem__("boxes", a["boxes"][:, :, :3]),
+            "safety": lambda a: a["decision_labels"].__setitem__(0, 3),
+        }
+
+        for model_id in MODEL_CONFIGS:
+            with self.subTest(model_id=model_id):
+                valid_arrays = self._arrays(model_id)
+                _validate_modality_shapes(model_id, valid_arrays, len(valid_arrays["sample_id"]))
+
+                invalid_arrays = self._arrays(model_id)
+                invalidators[model_id](invalid_arrays)
+                with self.assertRaises(SpecialistDataError):
+                    _validate_modality_shapes(
+                        model_id, invalid_arrays, len(invalid_arrays["sample_id"])
+                    )
+
+
 if __name__ == "__main__":
     unittest.main()
