@@ -254,7 +254,7 @@ def main() -> None:
             and (step - start_step + 1) >= args.session_steps
             and step < cfg["max_steps"] - 1
         )
-        if step % cfg["eval_interval"] == 0 or session_limit_reached:
+        if step % cfg["eval_interval"] == 0 or session_limit_reached or _STOP_REQUESTED:
             last_metrics = estimate_loss(model, train_data, val_data, cfg, device)
             elapsed = max(time.perf_counter() - started, 1e-9)
             tokens_processed = (step + 1) * cfg["batch_size"] * cfg["block_size"] * cfg["gradient_accumulation_steps"]
