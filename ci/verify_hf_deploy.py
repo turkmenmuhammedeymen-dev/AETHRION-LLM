@@ -16,29 +16,43 @@ def main() -> None:
 
     repo_id = "vizyon2027/AETHRION-LLM"
     api = HfApi(token=token)
-    commit = api.upload_folder(
-        folder_path="hf_space",
-        repo_id=repo_id,
-        repo_type="space",
-        commit_message=(
-            "Deploy complete AETHRION-LLM source, configs, docs, "
-            "data governance and tests"
-        ),
-        ignore_patterns=[
-            "README.md",
-            "**/__pycache__/**",
-            "**/*.pyc",
-            ".DS_Store",
-        ],
-    )
+
+    # Authenticate before staging/uploading so CircleCI logs distinguish a
+    # missing/invalid token from a later upload, read-back, or runtime failure.
+    identity = api.whoami()
+    identity_name = identity.get("name") or identity.get("fullname") or "authenticated"
+    print(f"HF_AUTHENTICATED_USER={identity_name}", flush=True)
+
+    try:
+        commit = api.upload_folder(
+            folder_path="hf_space",
+            repo_id=repo_id,
+            repo_type="space",
+            commit_message=(
+                "Deploy complete AETHRION-LLM source, configs, docs, "
+                "data governance and tests"
+            ),
+            ignore_patterns=[
+                "README.md",
+                "**/__pycache__/**",
+                "**/*.pyc",
+                ".DS_Store",
+            ],
+        )
+    except Exception as exc:
+        raise RuntimeError(
+            "Hugging Face Space upload failed after token authentication "
+            f"({type(exc).__name__}): {exc}. Verify that HF_TOKEN has write "
+            "access to vizyon2027/AETHRION-LLM."
+        ) from exc
+
     revision = getattr(commit, "oid", None)
     if not revision:
         raise RuntimeError(
             "Hugging Face upload did not return a verifiable commit SHA"
         )
 
-    # Verify the complete runtime and every model's training configuration,
-    # not merely the UI and top-level trainer entrypoints.
+    # Verify runtime health-check code as well as the app and model configs.
     required_files = [
         "app.py",
         "pyproject.toml",
@@ -55,6 +69,9 @@ def main() -> None:
         "aethrion/specialist_train.py",
         "aethrion/specialist_data.py",
         "aethrion/prepare_data.py",
+        "ci/hf_runtime.py",
+        "ci/verify_hf_deploy.py",
+        "tests/test_hf_runtime_verification.py",
         "configs/small.json",
         "configs/specialists/code.json",
         "configs/specialists/vision.json",
@@ -72,6 +89,10 @@ def main() -> None:
     ]
     for relative_path in required_files:
         local_path = Path("hf_space") / relative_path
+        if not local_path.is_file():
+            raise RuntimeError(
+                f"Required deployment file is missing locally: {relative_path}"
+            )
         remote_path = Path(
             hf_hub_download(
                 repo_id=repo_id,
@@ -87,10 +108,9 @@ def main() -> None:
             raise RuntimeError(
                 f"Hugging Face read-back SHA-256 mismatch: {relative_path}"
             )
-        print(f"Verified deployed file: {relative_path} ({remote_hash})")
+        print(f"Verified deployed file: {relative_path} ({remote_hash})", flush=True)
 
     # File read-back proves upload integrity, not that the Space actually starts.
-    # Verify the Hub HEAD, wait for the runtime, then hit Gradio's real config API.
     info = api.repo_info(repo_id=repo_id, repo_type="space")
     if getattr(info, "sha", None) != revision:
         raise RuntimeError(
