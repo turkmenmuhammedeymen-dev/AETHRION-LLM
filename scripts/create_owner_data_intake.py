@@ -49,7 +49,7 @@ def create_intake_workspace(output="data/intake"):
     "source_count":0,"training_allowed":False,"owner_approval":False,
     "privacy_reviewed":False,"rights_reviewed":False,
     "speaker_consent_reviewed":False,"safety_reviewed":False,
-    "governance_file":"governance.json","requirements":REQUIREMENTS,
+    "governance_file":"governance.json","requirements":list(REQUIREMENTS),
     "model_specific_review":review,
    }
    if model in {"asr","tts","vocoder"}:
