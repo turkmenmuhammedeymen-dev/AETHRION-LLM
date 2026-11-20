@@ -213,6 +213,13 @@ def audit_model_artifact_semantics(root: str | Path, model_id: str,
             problems.append("training_report_dataset_hash_missing")
         if checkpoint_hash and training.get("checkpoint_sha256") != checkpoint_hash:
             problems.append("training_report_checkpoint_hash_mismatch")
+        checkpoint_dataset_hash = output["checkpoint"].get("dataset_sha256")
+        if checkpoint_dataset_hash and training.get("dataset_sha256") != checkpoint_dataset_hash:
+            problems.append("training_report_dataset_hash_mismatch")
+        checkpoint_step = output["checkpoint"].get("step")
+        report_step = training.get("step", training.get("steps"))
+        if checkpoint_step is not None and report_step is not None and checkpoint_step != report_step:
+            problems.append("training_report_step_mismatch")
         if training.get("release_status") not in {None, "NOT_RELEASED"}:
             problems.append("unexpected_training_report_release_status")
         step = training.get("step", training.get("steps"))
@@ -235,9 +242,13 @@ def audit_model_artifact_semantics(root: str | Path, model_id: str,
             problems.append("evaluation_checkpoint_hash_mismatch")
 
     if training is not None and checkpoint_hash:
+        tokenizer_ok = model_id == "vocoder" or output["tokenizer_status"] == "verified"
+        processor_ok = not processor_required or output["processor_status"] == "verified_structure"
         output["cross_artifact_consistent"] = (
             not problems
             and output["checkpoint"]["status"] == "verified_structure"
+            and tokenizer_ok
+            and processor_ok
             and training.get("model_id") == model_id
             and training.get("checkpoint_sha256") == checkpoint_hash
         )
