@@ -197,13 +197,19 @@ def audit_model_artifact_semantics(root: str | Path, model_id: str,
             processor, processor_status = _read_json(processor_path)
             if processor is None:
                 output["processor_status"] = processor_status
-            elif processor.get("model_id", model_id) != model_id:
-                output["processor_status"] = "model_id_mismatch"
-            elif not isinstance(processor, dict) or not processor:
-                output["processor_status"] = "invalid_processor"
             else:
-                output["processor_status"] = "verified_structure"
-                output["processor_format"] = processor.get("format")
+                from aethrion.specialist_data import MODEL_MODALITIES
+                if processor.get("format") != "aethrion-processor-v1":
+                    output["processor_status"] = "unsupported_processor_format"
+                elif processor.get("model_id") != model_id:
+                    output["processor_status"] = "model_id_mismatch"
+                elif processor.get("modality") != MODEL_MODALITIES[model_id]:
+                    output["processor_status"] = "modality_mismatch"
+                elif not isinstance(processor.get("config"), dict) or not processor["config"]:
+                    output["processor_status"] = "invalid_processor_config"
+                else:
+                    output["processor_status"] = "verified_structure"
+                    output["processor_format"] = processor.get("format")
 
     problems = []
     if training is not None:
