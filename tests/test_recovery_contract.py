@@ -92,9 +92,6 @@ class ContinuousTrainingRecoveryContractTests(unittest.TestCase):
         )
 
 
-if __name__ == "__main__":
-    unittest.main()
-
     def test_real_sigterm_delivery_in_child_process_saves_checkpoint(self):
         import os
         import subprocess
@@ -146,3 +143,6 @@ save_checkpoint({
                     process.kill()
                     process.wait(timeout=5)
 
+
+if __name__ == "__main__":
+    unittest.main()
