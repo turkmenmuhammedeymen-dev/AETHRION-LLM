@@ -199,7 +199,7 @@ def reconcile_metrics_jsonl(path: str | Path, checkpoint_step: int) -> int:
         retained.append(json.dumps(record, ensure_ascii=False) + "\n")
         last_step = step
 
-    needs_rewrite = discarded > 0 or bool(raw_metrics and not raw_metrics.endswith("\\n"))
+    needs_rewrite = discarded > 0 or bool(raw_metrics and not raw_metrics.endswith("\n"))
     if needs_rewrite:
         temporary = Path(str(target) + ".tmp")
         try:
