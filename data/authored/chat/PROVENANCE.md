@@ -1,4 +1,4 @@
-# CHAT pilot data — provenance (DRAFT, NOT APPROVED)
+# CHAT pilot data — provenance (OWNER-ATTESTED 2026-11-21, see GOVERNANCE.json; records changed after the sha256 in that file need re-attestation)
 
 - Content: original Turkish prompt/response pairs written for AETHRION-LLM (not copied from books, sites,
   datasets, repositories or private chats). Authored in a Claude Code session on 2026-11-21 at the project owner's request.

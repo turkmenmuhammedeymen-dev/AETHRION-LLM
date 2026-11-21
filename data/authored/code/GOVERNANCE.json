@@ -1,0 +1,20 @@
+{
+  "schema": "aethrion-human-review-v1",
+  "model_id": "code",
+  "approval_status": "approved",
+  "author_role": "project owner (content drafted by Claude at the owner's request)",
+  "authorship_attested": true,
+  "first_party_origin_attested": true,
+  "rights_holder_role": "project owner",
+  "rights_attested": true,
+  "source_rights_reviewed": true,
+  "privacy_reviewed": true,
+  "quality_reviewed": true,
+  "reviewer_role": "project owner (attestation given in the Claude Code session)",
+  "reviewed_at": "2026-11-21T20:26:00+03:00",
+  "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/code/records.jsonl@sha256:d8a8cf19ebbc654c640eeee1fd325dc88fa670306d1bfd16f7579cbe3ca84cc2",
+  "speaker_consent_reviewed": false,
+  "safety_reviewed": false,
+  "owner_statement": "CHAT, CODE ve RESEARCH kayıtlarını inceledim; içerikler projeye aittir; eğitimde kullanılmasına izin veriyorum; gizlilik ve kalite sorumluluğunu kabul ediyorum.",
+  "reviewed_records_sha256": "d8a8cf19ebbc654c640eeee1fd325dc88fa670306d1bfd16f7579cbe3ca84cc2"
+}

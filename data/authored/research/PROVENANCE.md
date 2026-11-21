@@ -1,4 +1,4 @@
-# RESEARCH pilot data — provenance (DRAFT, NOT APPROVED)
+# RESEARCH pilot data — provenance (OWNER-ATTESTED 2026-11-21, see GOVERNANCE.json; records changed after the sha256 in that file need re-attestation)
 31 original explanatory passages (query -> passage) in Turkish, written for AETHRION-LLM on 2026-11-21 at the owner's
 request; not copied from any source. They contain no citations because they are first-party summaries of general
 knowledge; facts should be reviewed by the owner before approval. Regenerate: `python3 data/authored/research/make_research.py`.
