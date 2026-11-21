@@ -435,6 +435,11 @@ def train_specialist(
         resume = _resolve_artifact_path(repository_root, resume, "resume checkpoint")
         if not resume.is_file():
             raise ValueError("Resume checkpoint must be an existing repository-local file.")
+    elif output.exists() and (not output.is_dir() or any(output.iterdir())):
+        raise ValueError(
+            "Refusing to overwrite existing specialist training outputs; "
+            "use --resume with a verified checkpoint or choose a new output_dir."
+        )
     approval = validate_specialist_dataset(manifest_path, require_training_approval=True)
     if approval["model_id"] != model_id:
         raise ValueError("Training config model_id differs from approved dataset manifest.")
