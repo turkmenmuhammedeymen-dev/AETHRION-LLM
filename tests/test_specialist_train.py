@@ -334,8 +334,6 @@ class SpecialistTrainingTests(unittest.TestCase):
             self.assertEqual(resumed["release_status"], "NOT_RELEASED")
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
     def test_specialist_checkpoint_recovers_when_latest_checksum_sidecar_is_corrupt(self):
@@ -429,3 +427,7 @@ if __name__ == "__main__":
                         recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
                     self.assertEqual(recovered["step"], 4)
                     self.assertTrue(any("recovering from" in str(item.message) for item in caught))
+
+
+if __name__ == "__main__":
+    unittest.main()
