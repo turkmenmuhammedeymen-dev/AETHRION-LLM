@@ -252,8 +252,20 @@ def prepare_text_dataset(
             counts = np.bincount(labels[arrays["split"] == split], minlength=3)
             if np.any(counts < 25):
                 raise PreparationError(f"SAFE {split} requires at least 25 samples per ALLOW/REVIEW/BLOCK class.")
-    destination = Path(output_root).resolve() / "manifests" / model_id
-    destination.mkdir(parents=True, exist_ok=True)
+    manifests_root = Path(output_root).expanduser().resolve() / "manifests"
+    destination = manifests_root / model_id
+    manifest_path = manifests_root / f"{model_id}.json"
+    # Prepared datasets are provenance-bearing artifacts. Never silently replace
+    # an earlier source copy, NPZ, tokenizer or manifest on a rerun.
+    if manifests_root.is_symlink() or destination.exists() or destination.is_symlink():
+        raise PreparationError(
+            f"Refusing to overwrite existing preparation output: {destination}"
+        )
+    if manifest_path.exists() or manifest_path.is_symlink():
+        raise PreparationError(
+            f"Refusing to overwrite existing preparation manifest: {manifest_path}"
+        )
+    destination.mkdir(parents=True, exist_ok=False)
     source_copy = destination / "source.jsonl"
     shutil.copyfile(source, source_copy)
     dataset_path = destination / "dataset.npz"
@@ -263,7 +275,6 @@ def prepare_text_dataset(
         shutil.copyfile(tokenizer_source, tokenizer_path)
     else:
         tokenizer.save(tokenizer_path)
-    manifest_path = destination.parent / f"{model_id}.json"
     source_record = {
         "source_id": f"{model_id}-input-jsonl",
         "source_uri": source_uri,

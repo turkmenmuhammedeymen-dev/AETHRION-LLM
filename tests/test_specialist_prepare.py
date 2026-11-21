@@ -102,6 +102,44 @@ class SpecialistPreparationTests(unittest.TestCase):
                 self.assertEqual(validated["model_id"], "chat")
                 self.assertGreater(validated["split_counts"]["train"], 0)
 
+    def test_chat_preparation_refuses_to_overwrite_existing_artifacts(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "chat.jsonl"
+            rows = [
+                {
+                    "id": f"chat-{index}",
+                    "group_id": f"group-{index}",
+                    "prompt": f"Original prompt {index}?",
+                    "response": f"Original response {index}.",
+                }
+                for index in range(90)
+            ]
+            self._write_jsonl(source, rows)
+            base_tokenizer = root / "base-tokenizer.json"
+            ByteBPETokenizer().save(base_tokenizer)
+
+            manifests = root / "prepared" / "manifests"
+            destination = manifests / "chat"
+            destination.mkdir(parents=True)
+            marker = destination / "source.jsonl"
+            marker.write_text("preserve this existing artifact", encoding="utf-8")
+            existing_manifest = manifests / "chat.json"
+            existing_manifest.write_text('{"existing": true}', encoding="utf-8")
+
+            with self.assertRaisesRegex(PreparationError, "Refusing to overwrite"):
+                prepare_text_dataset(
+                    source, model_id="chat", output_root=root / "prepared",
+                    license_name="CC0-1.0", permitted_use="CI fixture only",
+                    evidence_uri="https://example.invalid/source",
+                    source_uri="unit-test://dataset", max_length=64,
+                    tokenizer_source_path=base_tokenizer,
+                )
+
+            self.assertEqual(marker.read_text(encoding="utf-8"), "preserve this existing artifact")
+            self.assertEqual(existing_manifest.read_text(encoding="utf-8"), '{"existing": true}')
+            self.assertFalse((destination / "dataset.npz").exists())
+
     def test_document_rejects_misaligned_boxes(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
