@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -101,6 +102,31 @@ class SpecialistPreparationTests(unittest.TestCase):
                 validated = validate_specialist_dataset(result["manifest"])
                 self.assertEqual(validated["model_id"], "chat")
                 self.assertGreater(validated["split_counts"]["train"], 0)
+
+    def test_all_text_specialists_refuse_existing_outputs_before_input_processing(self):
+        for model_id in ("chat", "code", "research", "document", "safety"):
+            with self.subTest(model_id=model_id), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                manifests = root / "prepared" / "manifests"
+                destination = manifests / model_id
+                destination.mkdir(parents=True)
+                marker = destination / "preserve.txt"
+                marker.write_text("keep", encoding="utf-8")
+
+                with patch("aethrion.specialist_prepare._read_jsonl") as read_jsonl:
+                    with self.assertRaisesRegex(PreparationError, "Refusing to overwrite"):
+                        prepare_text_dataset(
+                            root / "missing-input.jsonl", model_id=model_id,
+                            output_root=root / "prepared",
+                            license_name="Unit-test fixture",
+                            permitted_use="CI only",
+                            evidence_uri="unit-test://evidence",
+                            source_uri="unit-test://source",
+                        )
+                    read_jsonl.assert_not_called()
+
+                self.assertEqual(marker.read_text(encoding="utf-8"), "keep")
+                self.assertFalse((destination / "dataset.npz").exists())
 
     def test_chat_preparation_refuses_to_overwrite_existing_artifacts(self):
         with tempfile.TemporaryDirectory() as directory:
