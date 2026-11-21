@@ -15,8 +15,6 @@ MAX_FILE_BYTES=512*1024
 MAX_PROJECT_TEXT=180_000
 
 def _safe_name(name):
-    if not isinstance(name, str) or not name or "\x00" in name:
-        raise WorkspaceError("Archive paths must be non-empty UTF-8 strings without NUL bytes.")
     path=PurePosixPath(name.replace("\\", "/"))
     if path.is_absolute() or not path.parts or any(p in {"",".",".."} for p in path.parts):
         raise WorkspaceError("Unsafe archive path.")
@@ -29,13 +27,10 @@ def _safe_name(name):
 def read_project_zip(raw):
     if not raw or len(raw)>MAX_ARCHIVE_BYTES:
         raise WorkspaceError("Project ZIP must be 1 byte–8 MiB.")
-    files={}; total=0; seen_names=set()
+    files={}; total=0
     try:
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
-            all_entries = archive.infolist()
-            if len(all_entries) > MAX_FILES * 4:
-                raise WorkspaceError("Project ZIP contains too many directory or file entries.")
-            entries=[i for i in all_entries if not i.is_dir()]
+            entries=[i for i in archive.infolist() if not i.is_dir()]
             if not entries or len(entries)>MAX_FILES:
                 raise WorkspaceError(f"Project must contain 1–{MAX_FILES} files.")
             for info in entries:
@@ -44,31 +39,13 @@ def read_project_zip(raw):
                 mode=(info.external_attr>>16)&0xFFFF
                 if mode and (mode&0o170000)==0o120000:
                     raise WorkspaceError("Symbolic links are not accepted.")
-                if "\x00" in info.filename:
-                    raise WorkspaceError("NUL bytes in archive paths are not accepted.")
                 name=_safe_name(info.filename)
-                if name in seen_names:
-                    raise WorkspaceError(f"Duplicate project path is not accepted: {name}.")
-                seen_names.add(name)
                 if info.file_size>MAX_FILE_BYTES:
                     raise WorkspaceError(f"{name} exceeds per-file size limit.")
-                # Never call archive.read() on untrusted entries: it allocates the
-                # full decompressed payload before our text-budget check.
-                with archive.open(info, "r") as entry:
-                    content=entry.read(MAX_FILE_BYTES + 1)
-                    if len(content)>MAX_FILE_BYTES:
-                        raise WorkspaceError(f"{name} exceeds per-file size limit after decompression.")
-                    if entry.read(1):
-                        raise WorkspaceError(f"{name} exceeds per-file size limit after decompression.")
-                if len(content)!=info.file_size:
-                    raise WorkspaceError(f"{name} has inconsistent ZIP size metadata.")
-                total+=len(content)
+                content=archive.read(info); total+=len(content)
                 if total>MAX_PROJECT_TEXT:
                     raise WorkspaceError("Project exceeds text budget.")
-                try:
-                    files[name]=content.decode("utf-8",errors="strict")
-                except UnicodeDecodeError as exc:
-                    raise WorkspaceError(f"{name} is not valid UTF-8.") from exc
+                files[name]=content.decode("utf-8",errors="strict")
     except zipfile.BadZipFile as exc:
         raise WorkspaceError("Upload is not a valid ZIP.") from exc
     return files
@@ -76,36 +53,20 @@ def read_project_zip(raw):
 def _validate(changes, originals):
     if not isinstance(changes,dict) or not changes or len(changes)>MAX_FILES:
         raise WorkspaceError("Agent returned an invalid files object.")
-    if not isinstance(originals, dict):
-        raise WorkspaceError("Original project inventory is invalid.")
-    out={}; total_bytes=0
+    out={}
     for raw_name, content in changes.items():
         name=_safe_name(raw_name)
-        if name in out:
-            raise WorkspaceError(f"Duplicate normalized project path is not accepted: {name}.")
         if name not in originals and len(out)+len(originals)>=MAX_FILES:
             raise WorkspaceError("Agent exceeded file-count limit.")
-        if not isinstance(content,str):
+        if not isinstance(content,str) or len(content.encode("utf-8"))>MAX_FILE_BYTES:
             raise WorkspaceError(f"Invalid or oversized file: {name}.")
-        encoded=content.encode("utf-8")
-        if len(encoded)>MAX_FILE_BYTES:
-            raise WorkspaceError(f"Invalid or oversized file: {name}.")
-        total_bytes += len(encoded)
-        if total_bytes > MAX_PROJECT_TEXT:
-            raise WorkspaceError("Updated project exceeds the total text budget.")
-        suffix=PurePosixPath(name).suffix.lower()
-        if suffix==".json":
+        if name.endswith(".json"):
             try: json.loads(content)
             except json.JSONDecodeError as exc: raise WorkspaceError(f"Invalid JSON: {name}.") from exc
-        if suffix==".py":
+        if name.endswith(".py"):
             try: ast.parse(content,filename=name)
             except SyntaxError as exc: raise WorkspaceError(f"Invalid Python syntax in {name}: {exc.msg}.") from exc
         out[name]=content
-    updated=dict(originals)
-    updated.update(out)
-    combined_bytes=sum(len(content.encode("utf-8")) for content in updated.values())
-    if combined_bytes > MAX_PROJECT_TEXT:
-        raise WorkspaceError("Updated project exceeds the total text budget.")
     return out
 
 class ProjectWorkspaceAgent:

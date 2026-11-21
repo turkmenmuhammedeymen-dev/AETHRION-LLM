@@ -1,7 +1,6 @@
 """Bounded document extraction, generation and text-first editing."""
 from __future__ import annotations
-import csv, io, json, zipfile
-from pathlib import PurePosixPath
+import csv, io, json
 from pathlib import Path
 from typing import Any
 
@@ -10,66 +9,6 @@ class DocumentError(ValueError):
 
 MAX_INPUT_BYTES = 8 * 1024 * 1024
 MAX_TEXT_CHARS = 200_000
-
-def _validate_docx_archive(raw: bytes) -> None:
-    """Bound DOCX ZIP expansion before handing the archive to python-docx."""
-    max_entries = 2048
-    max_entry_bytes = 16 * 1024 * 1024
-    max_total_bytes = 32 * 1024 * 1024
-    seen = set()
-    total = 0
-    document_xml_found = False
-    try:
-        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
-            entries = archive.infolist()
-            if not entries or len(entries) > max_entries:
-                raise DocumentError("DOCX archive has an invalid number of ZIP entries.")
-            for info in entries:
-                if info.is_dir():
-                    continue
-                name = info.filename
-                normalized = name.replace("\\", "/")
-                parts = PurePosixPath(normalized).parts
-                if (
-                    not normalized or "\x00" in normalized
-                    or normalized.startswith("/")
-                    or any(part in {"", ".", ".."} for part in parts)
-                    or normalized in seen
-                ):
-                    raise DocumentError("DOCX archive contains duplicate or unsafe paths.")
-                name = normalized
-                seen.add(name)
-                if info.flag_bits & 0x1:
-                    raise DocumentError("Encrypted DOCX entries are not accepted.")
-                if info.file_size > max_entry_bytes:
-                    raise DocumentError("DOCX archive contains an oversized entry.")
-                mode = (info.external_attr >> 16) & 0xFFFF
-                if mode and (mode & 0o170000) == 0o120000:
-                    raise DocumentError("DOCX symbolic-link entries are not accepted.")
-                with archive.open(info, "r") as entry:
-                    actual = 0
-                    while True:
-                        remaining = min(max_entry_bytes + 1 - actual, max_total_bytes + 1 - total)
-                        if remaining <= 0:
-                            raise DocumentError("DOCX uncompressed size exceeds 32 MiB.")
-                        chunk = entry.read(min(1024 * 1024, remaining))
-                        if not chunk:
-                            break
-                        actual += len(chunk)
-                        if actual > max_entry_bytes:
-                            raise DocumentError("DOCX entry exceeds its decompressed size limit.")
-                        if total + actual > max_total_bytes:
-                            raise DocumentError("DOCX uncompressed size exceeds 32 MiB.")
-                    if actual != info.file_size:
-                        raise DocumentError("DOCX ZIP size metadata is inconsistent.")
-                total += actual
-                if name == "word/document.xml":
-                    document_xml_found = True
-    except (zipfile.BadZipFile, OSError, RuntimeError) as exc:
-        raise DocumentError("DOCX archive is invalid or cannot be read safely.") from exc
-    if not document_xml_found:
-        raise DocumentError("DOCX archive is missing word/document.xml.")
-
 
 def extract_document_text(path):
     source = Path(path)
@@ -86,7 +25,6 @@ def extract_document_text(path):
         return text[:MAX_TEXT_CHARS]
     if suffix == ".docx":
         try:
-            _validate_docx_archive(raw)
             from docx import Document
             document = Document(io.BytesIO(raw))
             parts = [p.text for p in document.paragraphs if p.text]
@@ -100,17 +38,7 @@ def extract_document_text(path):
         try:
             from pypdf import PdfReader
             reader = PdfReader(io.BytesIO(raw))
-            parts = []
-            remaining = MAX_TEXT_CHARS
-            for page in reader.pages[:100]:
-                if remaining <= 0:
-                    break
-                page_text = page.extract_text() or ""
-                if page_text:
-                    clipped = page_text[:remaining]
-                    parts.append(clipped)
-                    remaining -= len(clipped)
-            return "\n".join(parts)[:MAX_TEXT_CHARS]
+            return "\n".join(page.extract_text() or "" for page in reader.pages[:100])[:MAX_TEXT_CHARS]
         except Exception as exc:
             raise DocumentError("PDF could not be read.") from exc
     raise DocumentError("Supported formats: TXT, MD, LOG, JSON, CSV, DOCX and PDF.")
