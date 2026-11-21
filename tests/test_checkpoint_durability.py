@@ -57,5 +57,33 @@ class CheckpointDurabilityTests(unittest.TestCase):
             self.assertFalse(Path(str(target) + ".tmp").exists())
 
 
+    def test_resume_reconciles_metrics_to_verified_checkpoint(self):
+        with tempfile.TemporaryDirectory() as folder:
+            target = Path(folder) / "metrics.jsonl"
+            target.write_text(
+                json.dumps({"step": 0, "loss": 1.0}) + "\\n"
+                + json.dumps({"step": 1, "loss": 0.9}) + "\\n"
+                + json.dumps({"step": 2, "loss": 0.8}) + "\\n"
+                + json.dumps({"step": 1, "loss": 0.7}) + "\\n"
+                + "{truncated json",
+                encoding="utf-8",
+            )
+
+            discarded = checkpoint.reconcile_metrics_jsonl(target, checkpoint_step=1)
+
+            records = [json.loads(line) for line in target.read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(discarded, 3)
+            self.assertEqual([record["step"] for record in records], [0, 1])
+            self.assertFalse(Path(str(target) + ".tmp").exists())
+
+    def test_resume_metrics_reconciliation_rejects_invalid_checkpoint_step(self):
+        with tempfile.TemporaryDirectory() as folder:
+            target = Path(folder) / "metrics.jsonl"
+            target.write_text('{"step": 0}\\n', encoding="utf-8")
+            for invalid in (True, -1, 1.5):
+                with self.assertRaisesRegex(ValueError, "checkpoint_step"):
+                    checkpoint.reconcile_metrics_jsonl(target, invalid)
+
+
 if __name__ == "__main__":
     unittest.main()
