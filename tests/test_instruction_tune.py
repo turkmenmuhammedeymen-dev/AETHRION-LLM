@@ -80,6 +80,7 @@ class InstructionTuningTests(unittest.TestCase):
                 "reviewer_role": "unit-test reviewer",
                 "reviewed_at": "2026-01-01T00:00:00Z",
                 "evidence_uri": "unit-test://human-review",
+                "safety_reviewed": True,
             },
             "tokenizer_path": tokenizer_path.name,
             "tokenizer_sha256": sha256_file(tokenizer_path),

@@ -50,6 +50,7 @@ class SpecialistDataApprovalTests(unittest.TestCase):
                 "reviewer_role": "unit-test reviewer",
                 "reviewed_at": "2026-01-01T00:00:00Z",
                 "evidence_uri": "unit-test://human-review",
+                "safety_reviewed": True,
             },
             "dataset_path": "dataset.npz",
             "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),

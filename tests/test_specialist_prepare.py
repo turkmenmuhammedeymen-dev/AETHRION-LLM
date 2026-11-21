@@ -95,6 +95,7 @@ class SpecialistPreparationTests(unittest.TestCase):
                     "reviewer_role": "unit-test reviewer",
                     "reviewed_at": "2026-01-01T00:00:00Z",
                     "evidence_uri": "unit-test://human-review",
+                    "safety_reviewed": True,
                 }
                 manifest["sources"][0]["allow_training"] = True
                 manifest["sources"][0]["privacy_reviewed"] = True
