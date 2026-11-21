@@ -13,7 +13,7 @@ class SessionTests(unittest.TestCase):
     def test_gate_failure_pushes_nothing_and_never_releases(self):
         with tempfile.TemporaryDirectory() as d:
             self._config(d, "chat", "artifacts")
-            r = ss.run_session("chat", 10, root=d, api=Fake(),
+            r = ss.run_session("chat", 10, root=d, api=Fake(), environ=ENV,
                                runner=lambda *a, **k: SimpleNamespace(returncode=2, stdout="", stderr="gate closed"))
             self.assertFalse(r["trainer_ok"]); self.assertEqual(r["pushed"], []); self.assertFalse(r["released"])
     def test_success_pushes_checkpoint(self):
