@@ -22,7 +22,7 @@ import torch
 import torch.nn as nn
 
 from aethrion.specialist_data import validate_specialist_dataset
-from aethrion.checkpoint import write_json_atomic
+from aethrion.checkpoint import reconcile_metrics_jsonl, write_json_atomic
 from aethrion.training_config import require_finite_number, require_int, validate_numeric_tree
 
 
@@ -509,6 +509,10 @@ def train_specialist(
             raise ValueError("max_steps must be greater than the verified resume checkpoint step.")
 
     metrics_path = output / "metrics.jsonl"
+    if resume is not None:
+        discarded = reconcile_metrics_jsonl(metrics_path, checkpoint_step)
+        if discarded:
+            print(f"Recovery discarded {discarded} uncommitted or invalid metrics row(s).", flush=True)
     started = time.perf_counter()
     last_validation = None
     model.train()
