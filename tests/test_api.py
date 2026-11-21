@@ -356,3 +356,39 @@ class ApiHttpIntegrationTests(unittest.TestCase):
         self.assertEqual(response.status_code,503)
 
 if __name__=="__main__": unittest.main()
+
+
+class OpenAICompatEndpointTests(unittest.TestCase):
+    def setUp(self):
+        self.client = TestClient(api.app)
+        self.env_patch = patch.dict("os.environ", {"AETHRION_API_TOKEN": "test-api-token"})
+        self.env_patch.start()
+        self.addCleanup(self.env_patch.stop)
+        self.auth = {"Authorization": "Bearer test-api-token"}
+        self.body = {"model": "aethrion-chat", "messages": [{"role": "user", "content": "Merhaba"}]}
+
+    def test_requires_token(self):
+        self.assertEqual(self.client.get("/v1/models").status_code, 401)
+        self.assertEqual(self.client.post("/v1/chat/completions", json=self.body).status_code, 401)
+
+    def test_untrained_model_returns_503_not_a_fake_answer(self):
+        with patch.object(api, "router", CapabilityRouter()):
+            r = self.client.post("/v1/chat/completions", json=self.body, headers=self.auth)
+            self.assertEqual(r.status_code, 503)
+            self.assertEqual(r.json()["error"]["code"], "model_not_trained")
+            models = self.client.get("/v1/models", headers=self.auth).json()["data"]
+            self.assertTrue(all(not m["available"] for m in models))
+
+    def test_unknown_model_404_and_bad_body_400(self):
+        r = self.client.post("/v1/chat/completions", json={**self.body, "model": "gpt-4"}, headers=self.auth)
+        self.assertEqual(r.status_code, 404)
+        r = self.client.post("/v1/chat/completions", json={"model": "aethrion-chat", "messages": []}, headers=self.auth)
+        self.assertEqual(r.status_code, 400)
+
+    def test_registered_handler_is_served(self):
+        fake = CapabilityRouter()
+        fake.register("chat", "test:handler", lambda request: {"text": "Merhaba"})
+        with patch.object(api, "router", fake):
+            r = self.client.post("/v1/chat/completions", json=self.body, headers=self.auth)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.json()["choices"][0]["message"]["content"], "Merhaba")

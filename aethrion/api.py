@@ -12,6 +12,8 @@ from aethrion.native_runtime import NativeModelRuntime
 from aethrion.workspace_agent import ProjectWorkspaceAgent, WorkspaceError, read_project_zip
 from aethrion.document_tools import create_document,extract_document_text,DocumentError
 from aethrion.security import require_api_token
+from aethrion import openai_compat
+from fastapi.responses import JSONResponse
 from aethrion.visual_safety import require_visual_output_allow, VisualSafetyError
 from fastapi import UploadFile,File,Form,Response,Depends
 try:
@@ -201,6 +203,37 @@ def capabilities():
         model_status = {"registry": f"error:{type(exc).__name__}"}
     return {"available":available,"unavailable":[n for n in all_names if n not in available],
             "model_status":model_status,"execution_policy":"local_only","credentials_exposed":False}
+
+@app.get("/v1/models", dependencies=[Depends(require_api_token)])
+def v1_models():
+    try:
+        statuses = get_native_model_statuses()
+    except Exception:
+        statuses = {}
+    return openai_compat.list_models(router.available(), statuses)
+
+@app.post("/v1/chat/completions", dependencies=[Depends(require_api_token)])
+def v1_chat_completions(request: dict[str, Any]):
+    try:
+        capability, prompt, options = openai_compat.parse_chat_request(request)
+    except openai_compat.ContractError as exc:
+        status = 404 if exc.code == "model_not_found" else 400
+        return JSONResponse(openai_compat.error_body(str(exc), exc.code), status_code=status)
+    model = request["model"]
+    try:
+        result = router.dispatch(capability, CapabilityRequest(prompt, options))
+        text = _text_for_safety(result.output)
+        return openai_compat.build_chat_response(model, text, prompt)
+    except CapabilityUnavailable:
+        return JSONResponse(openai_compat.error_body(
+            f"Model '{model}' is not trained/released yet.", "model_not_trained", "service_unavailable"), status_code=503)
+    except openai_compat.ContractError as exc:
+        return JSONResponse(openai_compat.error_body(str(exc), exc.code, "api_error"), status_code=502)
+    except (ValueError, TypeError) as exc:
+        return JSONResponse(openai_compat.error_body(str(exc), "invalid_request_error"), status_code=400)
+    except Exception as exc:
+        return JSONResponse(openai_compat.error_body(
+            f"Native model operation failed: {type(exc).__name__}", "model_error", "api_error"), status_code=500)
 
 @app.post("/dispatch", dependencies=[Depends(require_api_token)])
 def dispatch(request:DispatchRequest):
