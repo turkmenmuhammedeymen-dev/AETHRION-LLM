@@ -13,7 +13,7 @@ from typing import Any
 import numpy as np
 import torch
 
-from aethrion.checkpoint import load_checkpoint, save_checkpoint, sha256_file, write_json_atomic
+from aethrion.checkpoint import load_checkpoint, reconcile_metrics_jsonl, save_checkpoint, sha256_file, write_json_atomic
 from aethrion.train import capture_rng_state, restore_rng_state
 from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.specialist_data import validate_specialist_dataset
@@ -198,6 +198,10 @@ def tune_instructions(
 
     started = time.perf_counter()
     metrics_path = output / "metrics.jsonl"
+    if resume is not None:
+        discarded = reconcile_metrics_jsonl(metrics_path, checkpoint_step)
+        if discarded:
+            print(f"Recovery discarded {discarded} uncommitted or invalid metrics row(s).", flush=True)
     validation_loss = None
     model.train()
     for step in range(start_step, config["max_steps"]):
