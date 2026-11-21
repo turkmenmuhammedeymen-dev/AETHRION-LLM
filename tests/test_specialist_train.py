@@ -418,10 +418,20 @@ class SpecialistTrainingTests(unittest.TestCase):
                 ("non-object training config", {**valid, "training_config": []}),
             ]
 
-            for label, invalid in invalid_payloads:
+            for index, (label, invalid) in enumerate(invalid_payloads):
                 with self.subTest(label=label):
+                    # Publish two valid generations so the previous slot is a
+                    # known-good recovery point. Bypass _save_checkpoint for
+                    # the malformed latest payload: that writer correctly
+                    # rejects invalid data before it can reach the loader.
+                    checkpoint = Path(directory) / f"checkpoint_{index}.pt"
                     _save_checkpoint(checkpoint, valid)
-                    _save_checkpoint(checkpoint, invalid)
+                    _save_checkpoint(checkpoint, valid)
+                    torch.save(invalid, checkpoint)
+                    digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+                    Path(str(checkpoint) + ".sha256").write_text(
+                        digest + "\\n", encoding="ascii"
+                    )
                     with warnings.catch_warnings(record=True) as caught:
                         warnings.simplefilter("always")
                         recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
