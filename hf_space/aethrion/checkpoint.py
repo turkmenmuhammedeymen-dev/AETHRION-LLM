@@ -164,6 +164,56 @@ def load_checkpoint(
         return recovered
 
 
+
+def reconcile_metrics_jsonl(path: str | Path, checkpoint_step: int) -> int:
+    """Discard malformed, duplicate, out-of-order, or uncommitted metrics after recovery.
+
+    A metrics row is durable before its corresponding checkpoint is published.
+    If a process dies in that window, the row may describe a step that is not in
+    the verified checkpoint. Resume must remove that row before appending again.
+    Returns the number of discarded rows.
+    """
+    if type(checkpoint_step) is not int or checkpoint_step < 0:
+        raise ValueError("checkpoint_step must be a non-negative integer.")
+    target = Path(path)
+    if not target.is_file():
+        return 0
+
+    raw_metrics = target.read_text(encoding="utf-8")
+    retained: list[str] = []
+    last_step = -1
+    discarded = 0
+    for line in raw_metrics.splitlines():
+        try:
+            record = json.loads(line)
+        except (json.JSONDecodeError, TypeError):
+            discarded += 1
+            continue
+        if not isinstance(record, dict):
+            discarded += 1
+            continue
+        step = record.get("step")
+        if type(step) is not int or step < 0 or step > checkpoint_step or step <= last_step:
+            discarded += 1
+            continue
+        retained.append(json.dumps(record, ensure_ascii=False) + "\n")
+        last_step = step
+
+    needs_rewrite = discarded > 0 or bool(raw_metrics and not raw_metrics.endswith("\n"))
+    if needs_rewrite:
+        temporary = Path(str(target) + ".tmp")
+        try:
+            with temporary.open("w", encoding="utf-8", newline="\n") as handle:
+                handle.writelines(retained)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, target)
+            _fsync_directory(target.parent)
+        finally:
+            temporary.unlink(missing_ok=True)
+    return discarded
+
+
 def write_json_atomic(payload: dict[str, Any], path: str | Path) -> None:
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
