@@ -208,7 +208,7 @@ class SafeRuntimeGateTests(unittest.TestCase):
     def test_router_screens_long_prompt_and_generated_output_in_chunks(self):
         router, _, runtime = self._build({"chat": "ready", "safety": "ready"}, output_text="O" * 1001)
         router.dispatch("chat", CapabilityRequest("P" * 1001, {}))
-        self.assertEqual([len(x) for x in runtime.reviewed], [400, 400, 201, 400, 400, 201])
+        self.assertEqual([len(x) for x in runtime.reviewed], [400, 400, 400, 185, 400, 400, 400, 185])
 
     def test_generic_dispatch_cannot_use_document_filesystem_paths(self):
         client=TestClient(api.app)
@@ -223,18 +223,34 @@ class SafeRuntimeGateTests(unittest.TestCase):
     def test_safe_chunk_gate_checks_every_segment(self):
         runtime = _FakeSafetyRuntime({"safety": "ready"})
         api._require_safety_allow_chunks(runtime, "x" * 1001, chunk_chars=400)
-        self.assertEqual(len(runtime.reviewed), 3)
-        self.assertEqual([len(item) for item in runtime.reviewed], [400, 400, 201])
+        self.assertEqual(len(runtime.reviewed), 4)
+        self.assertEqual([len(item) for item in runtime.reviewed], [400, 400, 400, 185])
 
     def test_safe_chunk_gate_stops_on_first_non_allow_segment(self):
         runtime = _FakeSafetyRuntime(
             {"safety": "ready"},
-            decisions={"BLOCK" + "B" * 395: "BLOCK"},
+            decisions={"A" * 128 + "BLOCK" + "B" * 267: "BLOCK"},
         )
         with self.assertRaises(CapabilityUnavailable):
             api._require_safety_allow_chunks(runtime, "A" * 400 + "BLOCK" + "B" * 400, chunk_chars=400)
         self.assertEqual(len(runtime.reviewed), 2)
 
+
+    def test_safe_chunk_gate_rejects_invalid_chunk_parameters(self):
+        runtime = _FakeSafetyRuntime({"safety": "ready"})
+        invalid = [
+            {"chunk_chars": True},
+            {"chunk_chars": 0},
+            {"chunk_chars": 4097},
+            {"chunk_overlap": True},
+            {"chunk_overlap": -1},
+            {"chunk_overlap": 400},
+        ]
+        for options in invalid:
+            with self.subTest(options=options):
+                with self.assertRaises(CapabilityUnavailable):
+                    api._require_safety_allow_chunks(runtime, "sample text", **options)
+        self.assertEqual(runtime.reviewed, [])
 
     def test_safe_chunk_http_wrapper_returns_service_unavailable(self):
         runtime = _FakeSafetyRuntime({"safety": "ready"}, decisions={"BLOCK": "BLOCK"})

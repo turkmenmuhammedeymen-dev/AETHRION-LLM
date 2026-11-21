@@ -68,13 +68,30 @@ def _require_safety_allow_http(runtime: Any, text: str) -> dict[str, Any]:
 
 
 
-def _require_safety_allow_chunks(runtime: Any, text: str, *, chunk_chars: int = 400) -> list[dict[str, Any]]:
-    """Screen every bounded segment so SAFE's finite context cannot silently truncate input."""
-    if not isinstance(text, str) or not text.strip() or chunk_chars < 1:
-        raise CapabilityUnavailable("AETHRION-SAFE received no reviewable text; request stopped.")
+def _require_safety_allow_chunks(
+    runtime: Any,
+    text: str,
+    *,
+    chunk_chars: int = 400,
+    chunk_overlap: int = 128,
+) -> list[dict[str, Any]]:
+    """Screen bounded, overlapping segments to reduce boundary-based safety bypasses."""
+    if (
+        not isinstance(text, str)
+        or not text.strip()
+        or type(chunk_chars) is not int
+        or not 1 <= chunk_chars <= 4096
+        or type(chunk_overlap) is not int
+        or not 0 <= chunk_overlap < chunk_chars
+    ):
+        raise CapabilityUnavailable("AETHRION-SAFE received invalid or unreviewable text; request stopped.")
     verdicts = []
-    for offset in range(0, len(text), chunk_chars):
-        verdicts.append(_require_safety_allow(runtime, text[offset:offset + chunk_chars]))
+    step = chunk_chars - chunk_overlap
+    for offset in range(0, len(text), step):
+        segment = text[offset:offset + chunk_chars]
+        if not segment.strip():
+            continue
+        verdicts.append(_require_safety_allow(runtime, segment))
     return verdicts
 
 
