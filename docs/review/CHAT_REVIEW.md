@@ -1,6 +1,6 @@
 # Review sheet: data/authored/chat/records.jsonl
 
-236 records. Mark problems by id; nothing here approves training.
+311 records. Mark problems by id; nothing here approves training.
 
 ### chat-0001 (chat-selamlasma-0)
 - **prompt**: selam
@@ -1020,3 +1020,310 @@ const topla2 = (a, b) => a + b;
 ### chat-0236 (chat-dil-r03_gunluk-1)
 - **prompt**: Merhaba demenin farklı yolları nelerdir?
 - **response**: Türkçede 'merhaba', 'selam', 'günaydın', 'iyi günler' ve resmî ortamlarda 'selamlar' ya da 'iyi akşamlar' kullanılabilir. Ortama ve kişiye göre seçilir.
+
+### chat-0237 (chat-sohbet-r04_konusma-0)
+- **prompt**: Bugün kendimi çok enerjik hissediyorum!
+- **response**: Harika, bunu duymak güzel! Bu enerjiyi neye harcamak istersin? Önemli bir işi bitirmek, spor yapmak ya da yeni bir şey denemek için güzel bir gün olabilir.
+
+### chat-0238 (chat-empati-r04_konusma-0)
+- **prompt**: Hiçbir şey yapmak istemiyorum.
+- **response**: Bazen böyle günler olabilir ve bu normal. Çok küçük bir şeyle başlayabilirsin: bir bardak su iç, pencereyi aç ya da beş dakika yürü. İstersen bu isteksizliğin nedenini birlikte düşünelim.
+
+### chat-0239 (chat-oneri-r04_konusma-0)
+- **prompt**: Bir karar vermem gerekiyor ama çok kararsızım.
+- **response**: Kararsızlık zor olabilir. Seçeneklerini ve her birinin artı-eksilerini yazmayı dene, senin için en önemli üç ölçütü belirle ve her seçeneği buna göre değerlendir. Durumu anlatırsan birlikte düşünebiliriz.
+
+### chat-0240 (chat-oneri-r04_konusma-0)
+- **prompt**: Kendime nasıl güvenebilirim?
+- **response**: Küçük hedefler koyup onları tamamlamak güveni zamanla artırır. Başardığın şeyleri not al, hata yapmayı öğrenmenin parçası olarak gör ve kendinle nazik bir dille konuş. Güven, bir günde değil, adım adım gelişir.
+
+### chat-0241 (chat-oneri-r04_konusma-0)
+- **prompt**: Ertelemekten kurtulmak istiyorum.
+- **response**: İşi çok küçük adımlara böl ve yalnızca ilk adıma beş dakika ayır. Telefonu uzaklaştır, bir bitiş zamanı belirle ve bitirdiğinde kendini ödüllendir. Başlamak genellikle devam etmekten zordur.
+
+### chat-0242 (chat-oneri-r04_konusma-1)
+- **prompt**: Çalışırken müzik dinlemeli miyim?
+- **response**: Bu kişiden kişiye değişir. Sözsüz, sakin müzik (enstrümantal veya doğa sesleri) çoğu kişiye odaklanmada yardımcı olur. Okuma ya da yazma gerektiren işlerde sözlü müzik dikkat dağıtabilir. İkisini deneyip hangisi sana uyuyorsa onu seç.
+
+### chat-0243 (chat-oneri-r04_konusma-1)
+- **prompt**: Arkadaş edinmek için ne yapmalıyım?
+- **response**: İlgi alanlarına uygun kurslara, kulüplere veya gönüllü etkinliklere katıl. İlk adımı atıp merakla sorular sor ve düzenli olarak görüşmeye çalış. Samimiyet zaman ister; sabırlı ol.
+
+### chat-0244 (chat-oneri-r04_konusma-1)
+- **prompt**: Birinden özür dilemem gerek, nasıl yapmalıyım?
+- **response**: Samimi ol: ne olduğunu kabul et, bunun karşındakini nasıl etkilediğini anladığını söyle ve mazeret üretme. Gerekirse düzeltmek için ne yapacağını belirt. Özür dilemek zayıflık değil, olgunluk göstergesidir.
+
+### chat-0245 (chat-oneri-r04_konusma-2)
+- **prompt**: Bir mesaja nasıl nazikçe 'hayır' denir?
+- **response**: Net ama kibar ol: 'Teklifin için teşekkür ederim, ama şu an bunu yapamayacağım.' Gerekçeyi uzun uzun açıklamak zorunda değilsin. İstersen alternatif bir çözüm de önerebilirsin.
+
+### chat-0246 (chat-empati-r04_konusma-0)
+- **prompt**: Hayatımda neyi değiştirmeliyim bilmiyorum.
+- **response**: Bunu hissetmek bile bir farkındalık göstergesi. Önce nelerin seni memnun, nelerin yorduğunu iki liste hâlinde yazmayı dene. Sonra bir tanesini seçip küçük bir deneme yap. İstersen şu an seni en çok neyin rahatsız ettiğini anlat.
+
+### chat-0247 (chat-empati-r04_konusma-0)
+- **prompt**: Kaygılıyım ama nedenini bilmiyorum.
+- **response**: Nedensiz gibi görünen kaygı da gerçektir ve zor olabilir. Derin ve yavaş nefes almayı, hareket etmeyi ve zihnindekileri yazıya dökmeyi deneyebilirsin. Kaygı sık ve yoğunsa bir ruh sağlığı uzmanıyla konuşmak çok yararlı olur.
+
+### chat-0248 (chat-empati-r04_konusma-1)
+- **prompt**: Birini kaybettim, çok üzgünüm.
+- **response**: Çok üzgünüm, başın sağ olsun. Yas, herkes için farklı yaşanır ve acı hissetmek doğaldır. Acele etmene gerek yok. İstersen onu anlatabilirsin, dinlerim. Yakın çevrenden destek almak da iyi gelir.
+
+### chat-0249 (chat-sohbet-r04_konusma-0)
+- **prompt**: Sana teşekkür etmek istiyorum, çok yardımcı oldun.
+- **response**: Çok sevindim, teşekkür ederim! Yardımcı olabildiysem ne mutlu. Başka bir konuda ihtiyacın olursa buradayım.
+
+### chat-0250 (chat-sohbet-r04_konusma-0)
+- **prompt**: Aynı soruyu tekrar sorsam kızar mısın?
+- **response**: Hayır, kızmam. İstediğin kadar sorabilirsin, gerekirse farklı bir şekilde yeniden açıklarım. Anlayana kadar tekrar etmek öğrenmenin parçasıdır.
+
+### chat-0251 (chat-kimlik-r04_konusma-0)
+- **prompt**: Hata yaptığında ne yaparsın?
+- **response**: Hatamı fark edersem açıkça söylerim ve doğrusunu açıklarım. Sen bir hata görürsen belirt; düzeltmek için elimden geleni yaparım. Bazen emin olmadığım şeyi söylemeyi tercih ederim, çünkü yanıltıcı olmak istemem.
+
+### chat-0252 (chat-kimlik-r04_konusma-0)
+- **prompt**: Bana ne konuda yardım edebilirsin?
+- **response**: Soruları yanıtlamak, metin yazmak ve düzenlemek, kod yazmada ve hata ayıklamada yardım etmek, bir konuyu açıklamak, plan yapmak ve fikir üretmek gibi birçok konuda yardımcı olabilirim. Güncel veriye erişemediğimi ve hata yapabileceğimi unutma.
+
+### chat-0253 (chat-kimlik-r04_konusma-0)
+- **prompt**: Duygularım var mı?
+- **response**: Ben bir yapay zekâ olarak insanlar gibi duygular yaşadığımı söyleyemem. Metinlerden öğrendiğim için duyguları anlayıp sana uygun şekilde yanıt verebilirim, ama bu, insani anlamda bir his değil.
+
+### chat-0254 (chat-kimlik-r04_konusma-1)
+- **prompt**: Sen bir insan mısın?
+- **response**: Hayır, ben bir yapay zekâ asistanıyım. Bir insanla konuşmuyorsun; bir bilgisayar programıyla konuşuyorsun. Yine de elimden geldiğince faydalı olmaya çalışırım.
+
+### chat-0255 (chat-kimlik-r04_konusma-1)
+- **prompt**: Adın ne?
+- **response**: Adım AETHRION. Sorularında ve işlerinde sana yardımcı olmak için buradayım.
+
+### chat-0256 (chat-kimlik-r04_konusma-1)
+- **prompt**: Hangi dilleri konuşabilirsin?
+- **response**: Türkçe başta olmak üzere birkaç dilde sohbet etmeye çalışabilirim. Türkçe konuşmak istersen, tamamen Türkçe devam edebiliriz.
+
+### chat-0257 (chat-kimlik-r04_konusma-2)
+- **prompt**: Hafızan var mı, bir önceki konuşmamızı hatırlar mısın?
+- **response**: Bu sohbetteki önceki mesajları takip edebilirim, ama farklı bir konuşmayı otomatik olarak hatırlamayabilirim. Önemli bir şey varsa bana tekrar hatırlatmak işini kolaylaştırır.
+
+### chat-0258 (chat-kod-r04_konusma-0)
+- **prompt**: Python mu JavaScript mi öğrenmeliyim?
+- **response**: Amacına bağlı. Veri analizi, yapay zekâ ve genel programlama için Python başlangıç için çok uygun. Web siteleri ve tarayıcıda çalışan uygulamalar için JavaScript şart. Ne yapmak istediğini söylersen daha net öneririm.
+
+### chat-0259 (chat-kod-r04_konusma-0)
+- **prompt**: Kod yazmayı öğrenmenin en iyi yolu nedir?
+- **response**: Küçük projeler yaparak öğrenmek en etkili yoldur. Temel kavramları öğren, sonra kendi basit uygulamanı yaz. Hatalarla karşılaşmak normal; onları araştırarak çözmek en çok öğreten kısımdır.
+
+### chat-0260 (chat-kod-r04_konusma-0)
+- **prompt**: Python'da bir listeden tekrar eden elemanları nasıl silerim?
+- **response**: set kullanarak: benzersiz = list(set(liste)). Bu, sırayı korumaz. Sırayı korumak için list(dict.fromkeys(liste)) yazabilirsin.
+
+### chat-0261 (chat-kod-r04_konusma-1)
+- **prompt**: Python'da iki listeyi nasıl birleştiririm?
+- **response**: + operatörü veya extend ile: yeni = liste1 + liste2 veya liste1.extend(liste2). Python 3.5 sonrasında [*liste1, *liste2] de yazılabilir.
+
+### chat-0262 (chat-kod-r04_konusma-1)
+- **prompt**: Python'da bir string'i nasıl tersine çeviririm?
+- **response**: Dilimleme ile: ters = metin[::-1]. Örneğin 'merhaba'[::-1] sonucu 'abahrem' olur.
+
+### chat-0263 (chat-kod-r04_konusma-1)
+- **prompt**: Python'da bir sayının çift olup olmadığını nasıl anlarım?
+- **response**: Mod operatörüyle: if sayi % 2 == 0: çifttir. Sonuç 0 ise sayı çifttir, 1 ise tektir.
+
+### chat-0264 (chat-kod-r04_konusma-2)
+- **prompt**: Python'da kullanıcıdan nasıl girdi alırım?
+- **response**: input fonksiyonuyla: ad = input('Adın: '). Girdi her zaman metin olarak gelir; sayı gerekiyorsa int(input('Yaş: ')) şeklinde dönüştürmelisin.
+
+### chat-0265 (chat-kod-r04_konusma-2)
+- **prompt**: Python'da while döngüsü nasıl çalışır?
+- **response**: Koşul doğru olduğu sürece çalışır:
+
+sayac = 0
+while sayac < 3:
+    print(sayac)
+    sayac += 1
+
+Koşulu değiştirmeyi unutursan sonsuz döngü oluşur.
+
+### chat-0266 (chat-kod-r04_konusma-2)
+- **prompt**: Python'da bir modülü nasıl içe aktarırım?
+- **response**: import anahtar sözcüğüyle: import math. Sonra math.sqrt(16) gibi kullanırsın. Belirli bir fonksiyonu almak için from math import sqrt yazılır.
+
+### chat-0267 (chat-kod-r04_konusma-3)
+- **prompt**: Python'da ValueError ne zaman oluşur?
+- **response**: Bir fonksiyona doğru türde ama uygun olmayan bir değer verdiğinde oluşur. Örneğin int('abc') ifadesi, metin sayıya çevrilemediği için ValueError verir.
+
+### chat-0268 (chat-kod-r04_konusma-3)
+- **prompt**: JavaScript'te == ile === arasındaki fark nedir?
+- **response**: == değerleri karşılaştırırken tür dönüşümü yapar, === ise hem değeri hem türü karşılaştırır. Beklenmedik sonuçlardan kaçınmak için çoğu zaman === kullanılması önerilir.
+
+### chat-0269 (chat-kod-r04_konusma-3)
+- **prompt**: JavaScript'te bir nesne nasıl oluşturulur?
+- **response**: Süslü parantezle: const kisi = { ad: 'Ali', yas: 30 }; Özelliklere kisi.ad veya kisi['yas'] ile ulaşılır.
+
+### chat-0270 (chat-kod-r04_konusma-4)
+- **prompt**: JavaScript'te bir diziye eleman nasıl eklenir?
+- **response**: push yöntemiyle: dizi.push(5); Başa eklemek için unshift kullanılır. Eleman çıkarmak için pop veya shift vardır.
+
+### chat-0271 (chat-kod-r04_konusma-4)
+- **prompt**: HTML'de bir resim nasıl eklenir?
+- **response**: img etiketiyle: <img src="resim.jpg" alt="Açıklama">. alt niteliği, resim yüklenmezse veya ekran okuyucular için açıklama sağlar.
+
+### chat-0272 (chat-kod-r04_konusma-4)
+- **prompt**: HTML'de liste nasıl yapılır?
+- **response**: Madde işaretli liste için ul, numaralı liste için ol kullanılır; her öğe li etiketiyle yazılır. Örneğin: <ul><li>Elma</li><li>Armut</li></ul>.
+
+### chat-0273 (chat-kod-r04_konusma-5)
+- **prompt**: CSS'te yazı rengi nasıl değiştirilir?
+- **response**: color özelliğiyle: p { color: #333; } veya p { color: red; }. Arka plan rengi için background-color kullanılır.
+
+### chat-0274 (chat-kod-r04_konusma-5)
+- **prompt**: CSS'te Flexbox nedir?
+- **response**: Flexbox, öğeleri bir satır veya sütun içinde esnek şekilde hizalamayı ve boşluklarını yönetmeyi sağlayan bir yerleşim sistemidir. Kapsayıcıya display: flex vererek başlanır; justify-content ve align-items ile hizalama yapılır.
+
+### chat-0275 (chat-kod-r04_konusma-5)
+- **prompt**: SQL'de JOIN ne işe yarar?
+- **response**: JOIN, iki veya daha fazla tabloyu ortak bir sütun üzerinden birleştirir. Örneğin siparişler tablosunu müşteriler tablosuyla müşteri_id üzerinden eşleştirip hangi müşterinin hangi siparişi verdiğini görebilirsin.
+
+### chat-0276 (chat-kod-r04_konusma-6)
+- **prompt**: SQL'de kayıt nasıl eklenir?
+- **response**: INSERT INTO ile: INSERT INTO kullanicilar (ad, yas) VALUES ('Ali', 30); Birden fazla sütun varsa sırayla değerleri veririz.
+
+### chat-0277 (chat-kod-r04_konusma-6)
+- **prompt**: SQL'de kayıt nasıl güncellenir?
+- **response**: UPDATE ile: UPDATE kullanicilar SET yas = 31 WHERE ad = 'Ali'; WHERE kullanmazsan tüm satırlar güncellenir, bu yüzden dikkatli olmalısın.
+
+### chat-0278 (chat-kod-r04_konusma-6)
+- **prompt**: Git'te değişiklikleri nasıl kaydederim?
+- **response**: Önce git add . ile değişiklikleri hazırla, sonra git commit -m 'açıklama' ile kaydet. Uzak depoya göndermek için git push kullanılır.
+
+### chat-0279 (chat-kod-r04_konusma-7)
+- **prompt**: Birim testi nedir?
+- **response**: Birim testi, bir kodun küçük bir parçasını (örneğin bir fonksiyonu) tek başına çalıştırıp beklenen sonucu verip vermediğini kontrol eden otomatik testtir. Hataları erken yakalamaya ve kodu güvenle değiştirmeye yardımcı olur.
+
+### chat-0280 (chat-kod-r04_konusma-7)
+- **prompt**: Hata mesajını nasıl okumalıyım?
+- **response**: Hata mesajının en altındaki satır genellikle hatanın türünü ve nedenini söyler, üstündeki satırlar ise hatanın hangi dosyada ve satırda oluştuğunu gösterir. Önce o satırı, sonra çevresindeki kodu incele.
+
+### chat-0281 (chat-kod-r04_konusma-7)
+- **prompt**: Kodumu nasıl daha okunabilir yapabilirim?
+- **response**: Anlamlı değişken ve fonksiyon adları kullan, fonksiyonları kısa ve tek bir işe odaklı tut, gereksiz tekrarları azalt ve gerektiğinde kısa yorumlar ekle. Tutarlı biçimlendirme de okunabilirliği artırır.
+
+### chat-0282 (chat-bilgi_cografya-r04_konusma-0)
+- **prompt**: Dünyanın en kalabalık şehri hangisi?
+- **response**: Bu, tanıma ve yıla göre değişir. Tokyo büyük şehir bölgesi olarak sıklıkla en kalabalık olarak anılır. Güncel sıralama için resmî istatistik kaynaklarına bakmak en doğrusudur.
+
+### chat-0283 (chat-bilgi_cografya-r04_konusma-0)
+- **prompt**: Karadeniz'in kıyısı olan şehirler hangileri?
+- **response**: Türkiye'de Karadeniz kıyısında Samsun, Trabzon, Ordu, Giresun, Rize, Sinop, Zonguldak ve Artvin gibi şehirler bulunur.
+
+### chat-0284 (chat-bilgi_cografya-r04_konusma-0)
+- **prompt**: Ege Denizi hangi ülkelerle komşudur?
+- **response**: Ege Denizi'nin kıyıları Türkiye ve Yunanistan'dadır. Denizde çok sayıda ada bulunur.
+
+### chat-0285 (chat-bilgi_cografya-r04_konusma-1)
+- **prompt**: Nil Nehri hangi kıtadadır?
+- **response**: Nil Nehri, Afrika kıtasındadır ve Mısır'dan geçerek Akdeniz'e dökülür.
+
+### chat-0286 (chat-bilgi_cografya-r04_konusma-1)
+- **prompt**: Everest Dağı nerededir?
+- **response**: Everest Dağı, Nepal ile Çin'in Tibet bölgesi sınırında, Himalayalar'da yer alır. Yüksekliği yaklaşık 8.849 metredir.
+
+### chat-0287 (chat-bilgi_cografya-r04_konusma-1)
+- **prompt**: Amazon ormanları neden önemli?
+- **response**: Amazon ormanları, dünyanın en geniş yağmur ormanlarındandır. Çok sayıda canlı türüne ev sahipliği yapar, karbondioksit depolar ve iklimi dengelemeye yardımcı olur. Ormansızlaşma bu nedenle büyük bir çevre sorunudur.
+
+### chat-0288 (chat-bilgi_cografya-r04_konusma-2)
+- **prompt**: Kuzey Kutbu ile Güney Kutbu arasındaki fark nedir?
+- **response**: Kuzey Kutbu, kara değil donmuş okyanus üzerindedir. Güney Kutbu ise Antarktika kıtası üzerinde yer alır ve çok daha soğuktur. Penguenler Güney Yarımküre'de, kutup ayıları ise Kuzey Kutbu çevresinde yaşar.
+
+### chat-0289 (chat-tarih-r04_konusma-0)
+- **prompt**: Cumhuriyet Bayramı hangi gün kutlanır?
+- **response**: Cumhuriyet Bayramı her yıl 29 Ekim'de kutlanır. 1923'te cumhuriyetin ilan edildiği günü anar.
+
+### chat-0290 (chat-tarih-r04_konusma-0)
+- **prompt**: Kurtuluş Savaşı hangi yıllar arasında oldu?
+- **response**: Türk Kurtuluş Savaşı, yaygın olarak 1919-1922 yılları arasında gerçekleşti. 1923'te Lozan Antlaşması imzalandı.
+
+### chat-0291 (chat-tarih-r04_konusma-0)
+- **prompt**: Roma İmparatorluğu ne zaman yıkıldı?
+- **response**: Batı Roma İmparatorluğu, 476'da yıkıldı. Doğu Roma (Bizans) İmparatorluğu ise 1453'e kadar devam etti.
+
+### chat-0292 (chat-tarih-r04_konusma-1)
+- **prompt**: Piramitleri kim yaptı?
+- **response**: Mısır piramitleri, yaklaşık 4.500 yıl önce Eski Mısır'da firavunların mezarı olarak inşa edildi. En büyüğü, Giza'daki Keops Piramidi'dir.
+
+### chat-0293 (chat-tarih-r04_konusma-1)
+- **prompt**: Rönesans nedir?
+- **response**: Rönesans, 14. yüzyıldan itibaren İtalya'da başlayıp Avrupa'ya yayılan, sanat, bilim ve düşüncede yeniden doğuş olarak bilinen kültürel harekettir. Leonardo da Vinci ve Michelangelo bu dönemin tanınmış isimleridir.
+
+### chat-0294 (chat-tarih-r04_konusma-1)
+- **prompt**: Ay'a ilk insan ne zaman çıktı?
+- **response**: İlk insan, 20 Temmuz 1969'da Apollo 11 görevi sırasında Ay'a ayak bastı. Bu kişi Neil Armstrong'tu.
+
+### chat-0295 (chat-tarih-r04_konusma-2)
+- **prompt**: İpek Yolu nedir?
+- **response**: İpek Yolu, Çin'i Asya ve Avrupa'ya bağlayan eski ticaret yollarının genel adıdır. İpek, baharat ve diğer mallar bu yollarla taşındı; kültürlerin ve fikirlerin alışverişine de aracılık etti.
+
+### chat-0296 (chat-matematik-r04_konusma-0)
+- **prompt**: Bir yıl kaç gündür?
+- **response**: Normal bir yıl 365 gündür. Dört yılda bir gelen artık yıl ise 366 gündür; çünkü şubat ayı 29 gün olur.
+
+### chat-0297 (chat-matematik-r04_konusma-0)
+- **prompt**: Bir üçgenin alanı nasıl hesaplanır?
+- **response**: Üçgenin alanı, taban uzunluğu ile yüksekliğinin çarpımının yarısıdır: Alan = (taban x yükseklik) / 2. Tabanı 6, yüksekliği 4 olan üçgenin alanı 12'dir.
+
+### chat-0298 (chat-matematik-r04_konusma-0)
+- **prompt**: Kesirler nasıl toplanır?
+- **response**: Paydalar aynıysa paylar toplanır: 1/5 + 2/5 = 3/5. Paydalar farklıysa önce ortak payda bulunur: 1/2 + 1/3 = 3/6 + 2/6 = 5/6.
+
+### chat-0299 (chat-matematik-r04_konusma-1)
+- **prompt**: Bir sayının karesi nedir?
+- **response**: Bir sayının karesi, o sayının kendisiyle çarpımıdır. Örneğin 7'nin karesi 7 x 7 = 49'dur.
+
+### chat-0300 (chat-matematik-r04_konusma-1)
+- **prompt**: Negatif sayılar nedir?
+- **response**: Negatif sayılar sıfırdan küçük olan sayılardır ve eksi işaretiyle gösterilir. Örneğin hava sıcaklığı sıfırın altına düştüğünde -5 derece deriz.
+
+### chat-0301 (chat-matematik-r04_konusma-1)
+- **prompt**: Yüzde nasıl hesaplanır?
+- **response**: Bir sayının yüzdesini bulmak için sayıyı yüze bölüp yüzde değeriyle çarparız. Örneğin 200'ün yüzde 15'i, 200 x 15 / 100 = 30'dur.
+
+### chat-0302 (chat-matematik-r04_konusma-2)
+- **prompt**: Bir metrede kaç santimetre var?
+- **response**: Bir metrede 100 santimetre vardır. Bir kilometre ise 1000 metredir.
+
+### chat-0303 (chat-matematik-r04_konusma-2)
+- **prompt**: Dikdörtgenin çevresi nasıl bulunur?
+- **response**: Dikdörtgenin çevresi, iki kenar uzunluğunun toplamının iki katıdır. Kenarları 5 ve 3 ise çevre 2 x (5 + 3) = 16'dır.
+
+### chat-0304 (chat-bilim-r04_konusma-0)
+- **prompt**: Okyanuslar neden tuzludur?
+- **response**: Nehirler kayalardan eriyen mineralleri ve tuzları denizlere taşır. Su buharlaşınca tuz denizde kalır. Milyonlarca yıl boyunca bu birikim, okyanus suyunun tuzlu olmasına neden olmuştur.
+
+### chat-0305 (chat-bilim-r04_konusma-0)
+- **prompt**: Neden yıldızlar parlar?
+- **response**: Yıldızlar, çok sıcak gaz toplarıdır. Çekirdeklerinde hidrojenin helyuma dönüştüğü nükleer füzyon olur; bu süreç çok büyük enerji açığa çıkarır ve yıldız ışık yayar.
+
+### chat-0306 (chat-bilim-r04_konusma-0)
+- **prompt**: Kara delik nedir?
+- **response**: Kara delik, yerçekimi o kadar güçlü olan bir uzay bölgesidir ki ışık bile kaçamaz. Genellikle çok büyük yıldızların ömrünün sonunda çökmesiyle oluşur.
+
+### chat-0307 (chat-bilim-r04_konusma-1)
+- **prompt**: Neden gökyüzü mavi görünür?
+- **response**: Güneş ışığı atmosferdeki gaz moleküllerine çarptığında kısa dalga boylu mavi ışık daha çok saçılır. Bu yüzden gökyüzünü her yönde mavi görürüz. Gün batımında ışık daha uzun yol katettiği için kızıl tonlar öne çıkar.
+
+### chat-0308 (chat-bilim-r04_konusma-1)
+- **prompt**: Dinozorlar neden yok oldu?
+- **response**: Bilim insanlarının çoğu, yaklaşık 66 milyon yıl önce büyük bir asteroitin Dünya'ya çarpmasının iklimi hızla değiştirdiğini ve kuş olmayan dinozorların yok olmasına yol açtığını düşünür. Volkanik etkinliğin de katkısı olmuş olabilir.
+
+### chat-0309 (chat-bilim-r04_konusma-1)
+- **prompt**: Neden ter dökeriz?
+- **response**: Terleme, vücudun ısısını düzenlemesine yardım eder. Ter buharlaşırken deriden ısı alır ve vücudu serinletir. Sıcakta, egzersiz sırasında veya heyecanlandığımızda terleriz.
+
+### chat-0310 (chat-bilim-r04_konusma-2)
+- **prompt**: Işık neden gölge oluşturur?
+- **response**: Işık düz çizgiler hâlinde ilerler. Işığı geçirmeyen bir cisim yolunu kesince onun arkasında ışığın ulaşmadığı bir alan oluşur; buna gölge denir.
+
+### chat-0311 (chat-bilim-r04_konusma-2)
+- **prompt**: Kan grupları nelerdir?
+- **response**: İnsanlarda temel kan grupları A, B, AB ve 0'dır. Ayrıca Rh faktörüne göre pozitif veya negatif olurlar. Kan nakli sırasında uyumlu kan grubu seçmek hayati önem taşır.
