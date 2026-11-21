@@ -159,6 +159,8 @@ class NativeModelRegistry:
                 raise NativeModelError(f"Trained {capability} model requires model_config.")
             if capability in PROCESSOR_REQUIRED and not entry.get("processor"):
                 raise NativeModelError(f"Trained {capability} model requires its processor.")
+            if capability in PROCESSOR_REQUIRED and not entry.get("processor_sha256"):
+                raise NativeModelError(f"Trained {capability} model requires processor_sha256.")
             for flag in ("release_approval", "quality_gate_passed", "safety_gate_passed"):
                 if type(entry.get(flag)) is not bool or entry[flag] is not True:
                     raise NativeModelError(f"Trained {capability} model requires {flag}=true.")

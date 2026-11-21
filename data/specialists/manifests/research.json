@@ -1,33 +1,59 @@
 {
   "format": "aethrion-specialist-dataset-v1",
-  "dataset_id": "aethrion-research-dataset-pending",
+  "dataset_id": "research-prepared-55c3d0fa731c",
   "model_id": "research",
   "modality": "text",
-  "dataset_status": "awaiting_owner_authored_data_and_human_review",
-  "training_allowed": false,
-  "owner_approval": false,
-  "privacy_reviewed": false,
+  "training_allowed": true,
+  "owner_approval": true,
+  "privacy_reviewed": true,
+  "speaker_consent_reviewed": false,
+  "dataset_path": "research/dataset.npz",
+  "dataset_sha256": "55c3d0fa731c8e64488d61f4ea44902b0f9e1fe9a2a32787bd7751bd64d01541",
+  "tokenizer_path": "research/tokenizer.json",
+  "tokenizer_sha256": "72b6aefa8e67e13de184dda16851cd5c6130eac1a2886d4846410baf88724936",
+  "sources": [
+    {
+      "source_id": "research-input-jsonl",
+      "source_uri": "owner-authored:aethrion-llm/data/authored/research",
+      "source_path": "research/source.jsonl",
+      "sha256": "a0c865e82cd45cc57e6365350671ed177758b930ece00e35b60996407d8c2e2f",
+      "license": "First-party owner-authored",
+      "permitted_use": "model training permitted",
+      "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/research/GOVERNANCE.json",
+      "allow_training": true,
+      "privacy_reviewed": true
+    }
+  ],
+  "preparation": {
+    "tool": "aethrion.specialist_prepare",
+    "seed": 1,
+    "max_length": 512,
+    "vocab_size": 1246,
+    "layout_vocab_size": 32,
+    "tag_classes": 32,
+    "record_count": 31,
+    "split_counts": {
+      "train": 27,
+      "validation": 3,
+      "test": 1
+    },
+    "automatic_approval": false
+  },
   "governance": {
     "schema": "aethrion-human-review-v1",
     "model_id": "research",
-    "approval_status": "pending",
-    "author_role": "",
-    "authorship_attested": false,
-    "first_party_origin_attested": false,
-    "rights_holder_role": "",
-    "rights_attested": false,
-    "source_rights_reviewed": false,
-    "privacy_reviewed": false,
-    "quality_reviewed": false,
-    "reviewer_role": "",
-    "reviewed_at": "",
-    "evidence_uri": ""
+    "approval_status": "approved",
+    "author_role": "project owner (content drafted by Claude at the owner's request)",
+    "authorship_attested": true,
+    "first_party_origin_attested": true,
+    "rights_holder_role": "project owner",
+    "rights_attested": true,
+    "source_rights_reviewed": true,
+    "privacy_reviewed": true,
+    "quality_reviewed": true,
+    "reviewer_role": "project owner (attestation given in the Claude Code session)",
+    "reviewed_at": "2026-11-21T20:26:00+03:00",
+    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/research/records.jsonl@sha256:a0c865e82cd45cc57e6365350671ed177758b930ece00e35b60996407d8c2e2f"
   },
-  "dataset_path": "datasets/research.npz",
-  "dataset_sha256": "",
-  "sources": [],
-  "notes": [
-    "EMPTY TEMPLATE ONLY — no training records or source approvals are included.",
-    "Do not change training_allowed or owner_approval to true until the exact local data, authorship, rights, privacy, quality and provenance evidence have been reviewed by the responsible human."
-  ]
+  "dataset_status": "owner_attested_pilot_not_released"
 }

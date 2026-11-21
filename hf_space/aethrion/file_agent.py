@@ -1,6 +1,7 @@
 """Bounded extraction for common document formats and LLM-assisted analysis."""
 from __future__ import annotations
 import base64,csv,io,json,zipfile
+from aethrion.document_tools import DocumentError, _validate_docx_archive
 from pathlib import PurePosixPath
 from xml.etree import ElementTree
 MAX_FILE_BYTES=8*1024*1024
@@ -24,16 +25,28 @@ def extract_text(filename:str,content_base64:str)->str:
         try: from pypdf import PdfReader
         except ImportError as exc: raise FileAnalysisError("PDF support requires pypdf.") from exc
         reader=PdfReader(io.BytesIO(raw))
-        return "\n".join(page.extract_text() or "" for page in reader.pages[:100])[:200_000]
+        parts=[]; remaining=200_000
+        for page in reader.pages[:100]:
+            if remaining<=0: break
+            page_text=page.extract_text() or ""
+            if page_text:
+                clipped=page_text[:remaining]
+                parts.append(clipped); remaining-=len(clipped)
+        return "\n".join(parts)[:200_000]
     try:
-        with zipfile.ZipFile(io.BytesIO(raw)) as archive: xml=archive.read("word/document.xml")
+        _validate_docx_archive(raw)
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            with archive.open("word/document.xml", "r") as entry:
+                xml = entry.read(16 * 1024 * 1024 + 1)
+                if len(xml) > 16 * 1024 * 1024 or entry.read(1):
+                    raise FileAnalysisError("DOCX document.xml exceeds its decompressed size limit.")
         root=ElementTree.fromstring(xml); paragraphs=[]
         for p in root.iter():
             if p.tag.endswith("}p"):
                 value="".join(n.text or "" for n in p.iter() if n.tag.endswith("}t"))
                 if value: paragraphs.append(value)
         return "\n".join(paragraphs)[:200_000]
-    except (KeyError,zipfile.BadZipFile,ElementTree.ParseError) as exc: raise FileAnalysisError("Invalid DOCX document.") from exc
+    except (DocumentError,KeyError,zipfile.BadZipFile,ElementTree.ParseError) as exc: raise FileAnalysisError("Invalid DOCX document.") from exc
 
 class FileAnalysisAgent:
     def __init__(self,chat_provider): self.chat_provider=chat_provider

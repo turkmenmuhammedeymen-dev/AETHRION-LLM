@@ -47,7 +47,7 @@ class AETHRIONTTS(nn.Module):
             nn.GELU(), nn.Conv1d(config.width, config.mel_bins, 1)
         )
 
-    def forward(self, token_ids: torch.Tensor, frame_to_token: torch.Tensor):
+    def forward(self, token_ids: torch.Tensor, frame_to_token: torch.Tensor, token_mask: torch.Tensor | None = None):
         if token_ids.ndim != 2 or token_ids.dtype != torch.long:
             raise ValueError("token_ids must be [batch, tokens] long tensor")
         if frame_to_token.ndim != 2 or frame_to_token.dtype != torch.long:
@@ -58,7 +58,12 @@ class AETHRIONTTS(nn.Module):
             raise ValueError("TTS token outside vocabulary")
         if frame_to_token.min().item() < 0 or frame_to_token.max().item() >= token_ids.size(1):
             raise ValueError("frame_to_token references a missing input token")
-        encoded = self.encoder(self.embedding(token_ids))
+        padding_mask = None
+        if token_mask is not None:
+            if token_mask.shape != token_ids.shape or not token_mask.bool().any():
+                raise ValueError("token_mask must match token_ids and include real tokens")
+            padding_mask = ~token_mask.bool()
+        encoded = self.encoder(self.embedding(token_ids), src_key_padding_mask=padding_mask)
         aligned = encoded.gather(1, frame_to_token.unsqueeze(-1).expand(-1, -1, encoded.size(-1)))
         return self.decoder(aligned.transpose(1, 2)).transpose(1, 2)
 
@@ -86,17 +91,23 @@ class AETHRIONTTS(nn.Module):
         padded = [F.pad(row, (0, max_length - row.numel()), value=0) for row in rows]
         return torch.stack(padded), lengths
 
-    def duration_loss(self, token_ids, target_durations):
+    def duration_loss(self, token_ids, target_durations, token_mask=None):
         if target_durations.shape != token_ids.shape or target_durations.dtype != torch.long:
             raise ValueError("target_durations must be a long tensor matching token_ids")
-        if target_durations.min().item() < 1:
-            raise ValueError("target_durations must be positive")
+        if token_mask is None:
+            token_mask = torch.ones_like(target_durations, dtype=torch.bool)
+        if token_mask.shape != token_ids.shape or not token_mask.bool().any():
+            raise ValueError("token_mask must identify at least one real token per batch")
+        if target_durations[token_mask.bool()].min().item() < 1 or torch.any(target_durations[~token_mask.bool()] != 0):
+            raise ValueError("real-token durations must be positive and padded durations must be zero")
         encoded = self.encoder(self.embedding(token_ids))
         predicted_log = self.duration_predictor(encoded).squeeze(-1)
-        return F.smooth_l1_loss(predicted_log, torch.log1p(target_durations.float()))
+        losses = F.smooth_l1_loss(predicted_log, torch.log1p(target_durations.float()), reduction="none")
+        mask = token_mask.to(losses.dtype)
+        return (losses * mask).sum() / mask.sum().clamp_min(1)
 
-    def acoustic_loss(self, token_ids, frame_to_token, target_mels, frame_mask=None):
-        predicted = self(token_ids, frame_to_token)
+    def acoustic_loss(self, token_ids, frame_to_token, target_mels, frame_mask=None, token_mask=None):
+        predicted = self(token_ids, frame_to_token, token_mask)
         if predicted.shape != target_mels.shape:
             raise ValueError("predicted and target mel spectrogram shapes must match")
         loss = F.l1_loss(predicted, target_mels, reduction="none")
