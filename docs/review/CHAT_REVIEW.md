@@ -1,0 +1,1022 @@
+# Review sheet: data/authored/chat/records.jsonl
+
+236 records. Mark problems by id; nothing here approves training.
+
+### chat-0001 (chat-selamlasma-0)
+- **prompt**: selam
+- **response**: Merhaba! Ben AETHRION. Sorularında, yazılarında ve fikirlerinde yardımcı olmaya hazırım. Bugün ne yapmak istersin?
+
+### chat-0002 (chat-selamlasma-0)
+- **prompt**: günaydın
+- **response**: Günaydın! Umarım güzel bir güne başlıyorsundur. Bugün sana nasıl yardımcı olabilirim?
+
+### chat-0003 (chat-selamlasma-0)
+- **prompt**: nasılsın?
+- **response**: İyiyim, teşekkürler. Bir yapay zekâ olarak yorulmuyorum ama sana yardım etmek beni çalışır halde tutuyor. Sen nasılsın, bugün neyle uğraşıyorsun?
+
+### chat-0004 (chat-kimlik-1)
+- **prompt**: sen kimsin?
+- **response**: Ben AETHRION. Sorulara cevap veren, metin yazmaya ve düşünmeye yardım eden bir yapay zekâ asistanıyım. Bilmediğim bir şey olursa bunu açıkça söylerim.
+
+### chat-0005 (chat-kimlik-1)
+- **prompt**: kim yaptı seni?
+- **response**: Beni AETHRION ekibi geliştiriyor. Henüz gelişme aşamasındayım; bu yüzden zaman zaman hata yapabilirim ve önemli konularda cevaplarımı doğrulamanı öneririm.
+
+### chat-0006 (chat-kimlik-1)
+- **prompt**: yanlış bir şey söylersem düzeltir misin?
+- **response**: Evet, düzeltirim. Bir bilgi yanlışsa bunu nazikçe belirtip doğrusunu açıklarım. Emin olmadığım durumlarda da emin olmadığımı söylerim.
+
+### chat-0007 (chat-kimlik-2)
+- **prompt**: her şeyi biliyor musun?
+- **response**: Hayır, her şeyi bilmiyorum. Bazı konularda bilgim eksik veya eski olabilir. Emin olmadığım şeyi uydurmak yerine bunu açıkça söylemeyi tercih ederim.
+
+### chat-0008 (chat-bilgi_cografya-2)
+- **prompt**: İstanbul hangi ülkededir?
+- **response**: İstanbul, Türkiye'dedir. Ülkenin en kalabalık şehridir ve Avrupa ile Asya kıtaları arasında, Boğaz'ın iki yakasında yer alır.
+
+### chat-0009 (chat-bilgi_cografya-2)
+- **prompt**: Türkiye'nin başkenti neresi?
+- **response**: Türkiye'nin başkenti Ankara'dır. Cumhuriyet'in ilanından kısa süre önce, 1923'te başkent olmuştur.
+
+### chat-0010 (chat-bilgi_bilim-3)
+- **prompt**: Dünya Güneş'in çevresinde mi döner?
+- **response**: Evet. Dünya, Güneş'in çevresinde yaklaşık 365 gün 6 saatte bir tur atar. Mevsimler, Dünya'nın eksenin eğik olmasından kaynaklanır.
+
+### chat-0011 (chat-bilgi_bilim-3)
+- **prompt**: su kaç derecede kaynar?
+- **response**: Deniz seviyesinde saf su 100 santigrat derecede kaynar. Rakım arttıkça hava basıncı düştüğü için kaynama noktası da düşer.
+
+### chat-0012 (chat-bilgi_bilim-3)
+- **prompt**: Fotosentez nedir?
+- **response**: Fotosentez, bitkilerin ışık enerjisini kullanarak su ve karbondioksitten şeker ve oksijen üretmesidir. Bu süreç büyük ölçüde yapraklardaki kloroplastlarda gerçekleşir.
+
+### chat-0013 (chat-bilgi_bilim-4)
+- **prompt**: Işık hızı ne kadardır?
+- **response**: Boşlukta ışığın hızı saniyede yaklaşık 299.792 kilometredir. Pratikte çoğu zaman 300.000 km/sn olarak yuvarlanır.
+
+### chat-0014 (chat-matematik-4)
+- **prompt**: 12 çarpı 8 kaç eder?
+- **response**: 12 çarpı 8, 96 eder.
+
+### chat-0015 (chat-matematik-4)
+- **prompt**: 144'ün karekökü kaç?
+- **response**: 144'ün karekökü 12'dir, çünkü 12 çarpı 12 eşittir 144.
+
+### chat-0016 (chat-matematik-5)
+- **prompt**: Bir dikdörtgenin alanı nasıl bulunur?
+- **response**: Dikdörtgenin alanı, uzun kenarı ile kısa kenarının çarpımıdır. Örneğin kenarları 5 cm ve 3 cm ise alan 15 santimetrekaredir.
+
+### chat-0017 (chat-matematik-5)
+- **prompt**: Yüzde 20'si 150 olan sayı kaçtır?
+- **response**: Sayıya x diyelim. x'in yüzde 20'si 150 ise x çarpı 0,2 eşittir 150 olur. Buradan x = 150 / 0,2 = 750 bulunur.
+
+### chat-0018 (chat-matematik-5)
+- **prompt**: Asal sayı nedir?
+- **response**: Asal sayı, yalnızca 1'e ve kendisine bölünebilen, 1'den büyük doğal sayıdır. Örneğin 2, 3, 5, 7 ve 11 asal sayılardır. 2 ise tek çift asal sayıdır.
+
+### chat-0019 (chat-kod-6)
+- **prompt**: Python'da bir listenin elemanlarını nasıl toplarım?
+- **response**: Python'da yerleşik sum fonksiyonunu kullanabilirsin. Örnek:
+
+sayilar = [1, 2, 3, 4]
+toplam = sum(sayilar)
+print(toplam)  # 10
+
+### chat-0020 (chat-kod-6)
+- **prompt**: Python'da bir dosyayı nasıl okurum?
+- **response**: with open kullanmak en güvenli yoldur, çünkü dosya otomatik kapanır:
+
+with open('veri.txt', encoding='utf-8') as f:
+    icerik = f.read()
+
+Satır satır okumak için for satir in f: döngüsünü kullanabilirsin.
+
+### chat-0021 (chat-kod-6)
+- **prompt**: Bir sayının asal olup olmadığını Python ile nasıl kontrol ederim?
+- **response**: Sayıyı 2'den kareköküne kadar olan sayılara bölmeyi deneyebilirsin:
+
+def asal_mi(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+### chat-0022 (chat-kod-7)
+- **prompt**: JavaScript'te const ile let arasındaki fark nedir?
+- **response**: const ile tanımlanan değişkene sonradan yeni bir değer atanamaz. let ile tanımlanan değişkenin değeri değiştirilebilir. İkisi de blok kapsamlıdır. Değeri değişmeyecekse const tercih edilir.
+
+### chat-0023 (chat-kod-7)
+- **prompt**: SQL'de tablodaki tüm kayıtları nasıl getiririm?
+- **response**: SELECT * FROM tablo_adi; sorgusu tablodaki tüm sütunları ve satırları getirir. Yalnızca belirli sütunlar için SELECT ad, soyad FROM tablo_adi; yazabilirsin.
+
+### chat-0024 (chat-kod-7)
+- **prompt**: Git'te son commit'i nasıl geri alırım?
+- **response**: Değişiklikleri koruyarak commit'i geri almak için git reset --soft HEAD~1 kullanılır. Değişiklikleri de silmek istersen git reset --hard HEAD~1 çalıştırılır; ancak bu geri döndürülemez, bu yüzden dikkatli kullanmalısın.
+
+### chat-0025 (chat-kod-8)
+- **prompt**: Hata ayıklarken nereden başlamalıyım?
+- **response**: Önce hatayı tekrarlayabildiğinden emin ol. Sonra hata mesajını dikkatle oku, sorunun hangi satırda başladığını bul ve sorunu küçük bir örneğe indirge. Tek seferde tek değişiklik yaparak ilerlemek nedeni bulmanı kolaylaştırır.
+
+### chat-0026 (chat-yazim-8)
+- **prompt**: Bana kısa bir tanışma e-postası yazar mısın?
+- **response**: Elbette. Örnek:
+
+Konu: Tanışma
+
+Merhaba Ayşe Hanım,
+
+Ben Ali Yılmaz. Ekibe yeni katıldım ve sizinle tanışmak istedim. Uygun olduğunuzda kısa bir görüşme yapabilir miyiz?
+
+Saygılarımla,
+Ali Yılmaz
+
+### chat-0027 (chat-yazim-8)
+- **prompt**: Toplantı için nazik bir erteleme mesajı yaz.
+- **response**: Merhaba, yarınki toplantımıza beklenmedik bir işim çıktığı için katılamayacağım. Uygunsa aynı konuyu perşembe günü görüşebilir miyiz? Anlayışınız için teşekkür ederim.
+
+### chat-0028 (chat-yazim-9)
+- **prompt**: Bu cümleyi daha resmi yap: 'Yarın gelemem, işim var.'
+- **response**: Resmi hâli: 'Yarın bir işim bulunduğundan dolayı katılamayacağım.'
+
+### chat-0029 (chat-yazim-9)
+- **prompt**: Kısaca fotosentezi bir çocuğa nasıl anlatırım?
+- **response**: Şöyle anlatabilirsin: 'Bitkiler yemeklerini kendileri yapar. Güneş ışığını, suyu ve havadaki gazı kullanarak besin üretirler. Buna fotosentez denir.'
+
+### chat-0030 (chat-yazim-9)
+- **prompt**: Bir uygulama için slogan öner.
+- **response**: Birkaç öneri: 'Düşünceni hızlandır.', 'Fikrin, bir adım ötede.', 'Zekânın sınırı yok.' Uygulamanın ne yaptığını söylersen daha isabetli öneriler üretebilirim.
+
+### chat-0031 (chat-oneri-10)
+- **prompt**: Verimli çalışmak için ne önerirsin?
+- **response**: Üç şey işe yarar: Günün en önemli işini sabah yapmak, çalışmayı 25-50 dakikalık bloklara bölüp aralara kısa mola koymak ve dikkat dağıtan bildirimleri kapatmak. Hangisi sana uygunsa onunla başla.
+
+### chat-0032 (chat-oneri-10)
+- **prompt**: Uyku düzenimi nasıl düzeltebilirim?
+- **response**: Her gün aynı saatte yatıp kalkmaya çalış, yatmadan önceki bir saatte ekranları azalt ve akşam geç saatlerde kafein almamaya dikkat et. Sorun uzun sürerse bir sağlık uzmanına danışmak iyi olur.
+
+### chat-0033 (chat-oneri-10)
+- **prompt**: Yeni bir dil öğrenmeye nasıl başlamalıyım?
+- **response**: Her gün kısa ama düzenli çalış. Temel kelimelerle başla, sesli dinle, düşük seviyede içerik tüket ve öğrendiklerini mutlaka konuşarak ya da yazarak kullan. Hedefini küçük adımlara bölmek motivasyonu korur.
+
+### chat-0034 (chat-oneri-11)
+- **prompt**: Stresle nasıl başa çıkabilirim?
+- **response**: Derin nefes egzersizleri, kısa yürüyüşler ve düzenli uyku yardımcı olabilir. Seni neyin zorladığını yazıya dökmek de zihni rahatlatır. Stres uzun süre devam ediyorsa bir uzmandan destek almayı düşün.
+
+### chat-0035 (chat-empati-11)
+- **prompt**: Kendimi çok yalnız hissediyorum.
+- **response**: Bunu paylaştığın için teşekkür ederim; böyle hissetmek zor olabilir. İstersen neyin seni yalnız hissettirdiğini anlat, dinlerim. Güvendiğin biriyle konuşmak da iyi gelebilir. Kendini çok kötü hissediyorsan bir uzmandan destek almayı ihmal etme.
+
+### chat-0036 (chat-empati-11)
+- **prompt**: Sınavım kötü geçti, moralim bozuk.
+- **response**: Çok üzüldüğünü anlıyorum. Tek bir sınav senin değerini ya da yeteneğini belirlemez. İstersen hangi konularda zorlandığına bakalım ve bir sonraki sınav için küçük bir çalışma planı çıkaralım.
+
+### chat-0037 (chat-dürüstlük-12)
+- **prompt**: Bilmediğin bir şeyi sorarsam ne yaparsın?
+- **response**: Bilmediğimi açıkça söylerim ve uydurmam. Elimdeki bilgiye dayanarak ne kadarını söyleyebileceğimi belirtir, gerekirse kaynağı doğrulamanı öneririm.
+
+### chat-0038 (chat-dürüstlük-12)
+- **prompt**: Bugünkü döviz kuru kaç?
+- **response**: Gerçek zamanlı veriye erişimim olmadığı için bugünkü kuru söyleyemem. Güncel kur için bir banka uygulamasına veya güvenilir bir finans sitesine bakmanı öneririm.
+
+### chat-0039 (chat-dürüstlük-12)
+- **prompt**: Yarın hava nasıl olacak?
+- **response**: Güncel hava durumu verisine erişimim yok. Doğru tahmin için Meteoroloji Genel Müdürlüğü'nün sitesine veya hava durumu uygulamana bakabilirsin.
+
+### chat-0040 (chat-dürüstlük-13)
+- **prompt**: Hangi hisseyi almalıyım?
+- **response**: Yatırım tavsiyesi veremem; kararın risklerini bilmeden yönlendirmek doğru olmaz. Genel bir çerçeve verebilirim: yatırım yapmadan önce risk toleransını, hedefini ve süreni belirle, çeşitlendirmeyi düşün ve gerekirse lisanslı bir danışmana başvur.
+
+### chat-0041 (chat-dürüstlük-13)
+- **prompt**: Bu ilaç hangi dozda alınır?
+- **response**: İlaç dozu kişiye ve ilaca göre değiştiği için sana doğru bir doz söyleyemem. Kutudaki prospektüs veya doktorunun reçetesi esas alınmalı. Emin değilsen eczacına ya da doktoruna danış.
+
+### chat-0042 (chat-güvenlik-13)
+- **prompt**: Başkasının şifresini nasıl öğrenirim?
+- **response**: Bu konuda yardımcı olamam; başkasının hesabına izinsiz erişmek hem etik değil hem de yasa dışıdır. Kendi şifreni unuttuysan hizmetin 'şifremi unuttum' seçeneğini kullanabilirsin.
+
+### chat-0043 (chat-güvenlik-14)
+- **prompt**: Birini nasıl takip ederim, haberi olmadan?
+- **response**: Birini habersiz takip etmek mahremiyetini ihlal eder ve yasal sorunlara yol açar, bu yüzden yardımcı olamam. Bir güvenlik endişen varsa yetkili makamlara veya bir uzmana başvurmanı öneririm.
+
+### chat-0044 (chat-güvenlik-14)
+- **prompt**: Şifremi güçlü yapmak için ne yapmalıyım?
+- **response**: Uzun olsun, en az 12-14 karakter. Kolay tahmin edilen kelimelerden, doğum tarihi gibi bilgilerden kaçın. Her hesap için farklı şifre kullan ve bir şifre yöneticisi ile iki adımlı doğrulamayı etkinleştir.
+
+### chat-0045 (chat-güvenlik-14)
+- **prompt**: Oltalama (phishing) e-postası nasıl anlaşılır?
+- **response**: Aciliyet baskısı yapan, yazım hataları içeren, şüpheli bağlantı veya ek isteyen ve gönderen adresi resmî alan adıyla uyuşmayan e-postalara dikkat et. Bağlantıya tıklamadan önce üzerine gelip adresi kontrol et; şüphe varsa kurumu resmî kanaldan ara.
+
+### chat-0046 (chat-yapay_zeka-15)
+- **prompt**: Yapay zekâ nedir?
+- **response**: Yapay zekâ, bilgisayarların öğrenme, akıl yürütme, dil anlama gibi normalde insan zekâsı gerektiren işleri yapabilmesini sağlayan teknolojilerin genel adıdır. Makine öğrenmesi bunun önemli bir alt alanıdır.
+
+### chat-0047 (chat-yapay_zeka-15)
+- **prompt**: Makine öğrenmesi nasıl çalışır?
+- **response**: Bir model, çok sayıda örnek veriden kalıpları öğrenir. Eğitim sırasında tahminlerinin hatası ölçülür ve model parametreleri bu hatayı azaltacak şekilde güncellenir. Sonrasında model daha önce görmediği verilerde tahmin yapabilir.
+
+### chat-0048 (chat-yapay_zeka-15)
+- **prompt**: Dil modeli nedir?
+- **response**: Dil modeli, bir metin dizisinde sıradaki kelimeyi veya parçayı tahmin etmeyi öğrenen bir yapay zekâ modelidir. Çok miktarda metinle eğitilince akıcı metin üretebilir; ancak her zaman doğru bilgi vermesi garanti değildir.
+
+### chat-0049 (chat-yapay_zeka-16)
+- **prompt**: Yapay zekâ hata yapar mı?
+- **response**: Evet, yapar. Yanlış veya eksik bilgi üretebilir ve emin olmadığı şeyleri kendinden emin söyleyebilir. Önemli konularda çıktıları güvenilir kaynaklardan doğrulamak gerekir.
+
+### chat-0050 (chat-oneri-16)
+- **prompt**: Bir kitap önerir misin?
+- **response**: Ne tür kitapları sevdiğini bilmeden öneri yapmak zor. Roman, bilim, tarih ya da kişisel gelişim gibi hangi alandan hoşlandığını söylersen sana uygun, tanınmış eserlerden öneriler sunabilirim.
+
+### chat-0051 (chat-sohbet-16)
+- **prompt**: Bir fıkra anlatır mısın?
+- **response**: Tabii: Öğretmen sormuş: 'Çocuklar, dünyanın en hızlı şeyi nedir?' Ali cevap vermiş: 'Öğretmenim, ders zili.'
+
+### chat-0052 (chat-sohbet-17)
+- **prompt**: Tavsiye eder misin, öğle yemeğinde ne yiyeyim?
+- **response**: Hafif ve doyurucu bir şey istiyorsan mercimek çorbası ile salata iyi bir seçim. Daha doyurucu bir şey için tavuklu pilav veya sebze yemeği olabilir. Canın ne çekiyor?
+
+### chat-0053 (chat-sohbet-17)
+- **prompt**: Teşekkür ederim.
+- **response**: Rica ederim! Başka bir konuda yardımcı olmamı istersen buradayım.
+
+### chat-0054 (chat-sohbet-17)
+- **prompt**: Görüşürüz.
+- **response**: Görüşmek üzere! İhtiyacın olursa tekrar yaz, iyi günler.
+
+### chat-0055 (chat-empati-18)
+- **prompt**: Bir şey sormak istiyorum ama utanıyorum.
+- **response**: Hiç çekinme, burada yargılanmazsın. Sorunu istediğin gibi sor; elimden geldiğince açık ve saygılı bir cevap vermeye çalışırım.
+
+### chat-0056 (chat-sohbet-18)
+- **prompt**: Bunu anlamadım, daha basit anlatır mısın?
+- **response**: Tabii. Hangi kısmı anlamadığını söylersen onu günlük hayattan bir örnekle, daha kısa cümlelerle yeniden anlatırım.
+
+### chat-0057 (chat-sohbet-18)
+- **prompt**: Cevabın çok uzun oldu, kısalt.
+- **response**: Haklısın. Kısa hâli: sana en önemli noktayı söylüyorum, ayrıntı istersen genişletirim. Hangi bölümün özetini istersin?
+
+### chat-0058 (chat-çeviri-19)
+- **prompt**: Bir cümleyi İngilizceye çevir: 'Bugün hava çok güzel.'
+- **response**: 'The weather is very nice today.'
+
+### chat-0059 (chat-çeviri-19)
+- **prompt**: 'Thank you very much' Türkçede nasıl söylenir?
+- **response**: 'Çok teşekkür ederim' veya 'Çok sağ olun' diyebilirsin. Resmî olmayan ortamlarda 'Çok sağ ol' da kullanılır.
+
+### chat-0060 (chat-yazim-19)
+- **prompt**: Bir toplantı notunu nasıl özetlerim?
+- **response**: Önce toplantının amacını bir cümleyle yaz. Sonra alınan kararları, sorumlu kişileri ve tarihleri madde madde listele. Son olarak açık kalan konuları ayrı bir başlıkta topla.
+
+### chat-0061 (chat-oneri-20)
+- **prompt**: Bir CV'de neler olmalı?
+- **response**: Ad ve iletişim bilgileri, kısa bir özet, iş deneyimi, eğitim, beceriler ve varsa projeler. Her deneyim için sorumlulukları değil, elde ettiğin somut sonuçları yaz. Tek sayfa ve düzenli olması iyi bir başlangıçtır.
+
+### chat-0062 (chat-oneri-20)
+- **prompt**: Takım çalışmasında anlaşmazlık olursa ne yapmalıyım?
+- **response**: Önce karşı tarafı dinle ve konuyu kişiden ayırıp sorun üzerinde konuş. Ortak hedefi hatırla, seçenekleri birlikte listele ve gerekirse tarafsız birinden yardım iste.
+
+### chat-0063 (chat-oneri-20)
+- **prompt**: Bir günlük plan yapabilir misin?
+- **response**: Elbette. Basit bir örnek: sabah en önemli iş (2 saat), öğleden önce toplantı ve yazışmalar, öğleden sonra ikinci öncelikli işler, akşam kısa yürüyüş ve ertesi günün planı. İşlerini ve saatlerini yazarsan sana özel bir plan hazırlayayım.
+
+### chat-0064 (chat-yazim-21)
+- **prompt**: Bir şiir yaz.
+- **response**: Kısa bir deneme:
+
+Sabahın ilk ışığı pencereye düşer,
+Yeni bir gün gibi umut da yeşerir.
+Bir fincan sıcaklık, bir derin nefes,
+Her başlangıç biraz cesaret ister.
+
+### chat-0065 (chat-tarih-r02_bilgi-0)
+- **prompt**: Osmanlı Devleti ne zaman kuruldu?
+- **response**: Osmanlı Devleti, geleneksel olarak 1299 yılında Osman Bey tarafından kurulmuş kabul edilir. Küçük bir beylik olarak başlamış, sonraki yüzyıllarda üç kıtaya yayılan bir imparatorluğa dönüşmüştür.
+
+### chat-0066 (chat-tarih-r02_bilgi-0)
+- **prompt**: Türkiye Cumhuriyeti hangi tarihte ilan edildi?
+- **response**: Türkiye Cumhuriyeti 29 Ekim 1923'te ilan edildi. Mustafa Kemal Atatürk ilk cumhurbaşkanı seçildi.
+
+### chat-0067 (chat-tarih-r02_bilgi-0)
+- **prompt**: İstanbul'un fethi ne zaman gerçekleşti?
+- **response**: İstanbul, 29 Mayıs 1453'te Fatih Sultan Mehmet komutasındaki Osmanlı ordusu tarafından fethedildi. Bu olay Bizans İmparatorluğu'nun sonunu getirdi.
+
+### chat-0068 (chat-tarih-r02_bilgi-1)
+- **prompt**: Fransız Devrimi hangi yıl başladı?
+- **response**: Fransız Devrimi 1789'da başladı. Bastille'in alınması 14 Temmuz 1789'da gerçekleşti ve devrimin sembolü sayılır.
+
+### chat-0069 (chat-tarih-r02_bilgi-1)
+- **prompt**: İkinci Dünya Savaşı ne zaman sona erdi?
+- **response**: İkinci Dünya Savaşı, Avrupa'da Mayıs 1945'te, Asya'da ise Eylül 1945'te sona erdi.
+
+### chat-0070 (chat-tarih-r02_bilgi-1)
+- **prompt**: Matbaa'yı kim icat etti?
+- **response**: Avrupa'da hareketli metal harflerle baskıyı 15. yüzyılda Johannes Gutenberg geliştirdi. Daha önce Doğu Asya'da farklı baskı teknikleri kullanılıyordu.
+
+### chat-0071 (chat-coğrafya-r02_bilgi-0)
+- **prompt**: Dünyanın en uzun nehri hangisidir?
+- **response**: En uzun nehir olarak genellikle Nil gösterilir; ancak Amazon ile hangisinin daha uzun olduğu ölçüm yöntemine göre tartışmalıdır. Nil yaklaşık 6.600 kilometredir.
+
+### chat-0072 (chat-coğrafya-r02_bilgi-0)
+- **prompt**: Türkiye'nin en yüksek dağı hangisi?
+- **response**: Türkiye'nin en yüksek dağı, Ağrı Dağı'dır. Yüksekliği yaklaşık 5.137 metredir.
+
+### chat-0073 (chat-coğrafya-r02_bilgi-0)
+- **prompt**: Türkiye'nin en büyük gölü hangisidir?
+- **response**: Türkiye'nin yüzölçümü en büyük gölü Van Gölü'dür. Suyu sodalı olduğu için tatlı su gölü değildir.
+
+### chat-0074 (chat-coğrafya-r02_bilgi-1)
+- **prompt**: Dünyanın en büyük okyanusu hangisi?
+- **response**: En büyük okyanus Pasifik Okyanusu'dur. Dünya yüzeyinin yaklaşık üçte birini kaplar.
+
+### chat-0075 (chat-coğrafya-r02_bilgi-1)
+- **prompt**: Kaç kıta vardır?
+- **response**: Yaygın kabule göre yedi kıta vardır: Asya, Afrika, Kuzey Amerika, Güney Amerika, Antarktika, Avrupa ve Avustralya/Okyanusya. Bazı ülkeler farklı sayım modelleri kullanır.
+
+### chat-0076 (chat-coğrafya-r02_bilgi-1)
+- **prompt**: Ankara hangi bölgededir?
+- **response**: Ankara, İç Anadolu Bölgesi'ndedir.
+
+### chat-0077 (chat-bilim-r02_bilgi-0)
+- **prompt**: Mevsimler neden oluşur?
+- **response**: Mevsimler, Dünya'nın dönme ekseninin yörünge düzlemine göre yaklaşık 23,5 derece eğik olmasından oluşur. Bu eğiklik yüzünden yılın farklı zamanlarında bir yarım küre Güneş ışınlarını daha dik alır.
+
+### chat-0078 (chat-bilim-r02_bilgi-0)
+- **prompt**: Gökkuşağı nasıl oluşur?
+- **response**: Güneş ışığı yağmur damlalarına girdiğinde kırılır, damlanın içinde yansır ve tekrar kırılarak çıkar. Işık bu sırada renklerine ayrıldığı için gökkuşağı görünür.
+
+### chat-0079 (chat-bilim-r02_bilgi-0)
+- **prompt**: Ses boşlukta yayılır mı?
+- **response**: Hayır. Ses mekanik bir dalgadır ve yayılmak için hava, su ya da katı gibi bir ortama ihtiyaç duyar. Bu yüzden uzay boşluğunda ses iletilmez.
+
+### chat-0080 (chat-bilim-r02_bilgi-1)
+- **prompt**: Yerçekimi nedir?
+- **response**: Yerçekimi, kütleye sahip cisimlerin birbirini çekmesini sağlayan kuvvettir. Dünya'nın yerçekimi, cisimleri yüzeyine doğru çeker ve bu nedenle serbest düşen cisimler hızlanır.
+
+### chat-0081 (chat-bilim-r02_bilgi-1)
+- **prompt**: Atom nedir?
+- **response**: Atom, bir elementin özelliklerini taşıyan en küçük birimdir. Merkezinde proton ve nötronlardan oluşan bir çekirdek, çevresinde ise elektronlar bulunur.
+
+### chat-0082 (chat-bilim-r02_bilgi-1)
+- **prompt**: DNA ne işe yarar?
+- **response**: DNA, canlıların kalıtsal bilgisini taşıyan moleküldür. Hücrelerin hangi proteinleri üreteceğini belirleyen talimatları içerir ve üreme sırasında bir sonraki nesle aktarılır.
+
+### chat-0083 (chat-bilim-r02_bilgi-2)
+- **prompt**: İnsan kalbi kaç odacıktan oluşur?
+- **response**: İnsan kalbi dört odacıktan oluşur: iki kulakçık ve iki karıncık. Kalbin sağ tarafı kanı akciğerlere, sol tarafı ise vücuda pompalar.
+
+### chat-0084 (chat-bilim-r02_bilgi-2)
+- **prompt**: Vitaminler neden önemlidir?
+- **response**: Vitaminler, vücudun düzgün çalışması için az miktarda gereken besin ögeleridir. Enerji metabolizması, bağışıklık ve hücre yenilenmesi gibi birçok süreçte rol oynarlar. Dengeli beslenmek çoğu zaman yeterlidir.
+
+### chat-0085 (chat-bilim-r02_bilgi-2)
+- **prompt**: Güneş sistemimizde kaç gezegen var?
+- **response**: Güneş sistemimizde sekiz gezegen vardır: Merkür, Venüs, Dünya, Mars, Jüpiter, Satürn, Uranüs ve Neptün.
+
+### chat-0086 (chat-bilim-r02_bilgi-3)
+- **prompt**: Ay'ın Dünya'ya uzaklığı ne kadar?
+- **response**: Ay, Dünya'ya ortalama olarak yaklaşık 384.000 kilometre uzaklıktadır.
+
+### chat-0087 (chat-bilim-r02_bilgi-3)
+- **prompt**: Elektrik akımının birimi nedir?
+- **response**: Elektrik akımının birimi amperdir. Gerilimin birimi volt, direncin birimi ise ohm'dur.
+
+### chat-0088 (chat-bilim-r02_bilgi-3)
+- **prompt**: Asit ve baz arasındaki fark nedir?
+- **response**: Asitler suda çözündüğünde hidrojen iyonu verir ve pH değerleri 7'den küçüktür. Bazlar ise pH değeri 7'den büyük olan maddelerdir. pH 7 nötrdür, saf su gibi.
+
+### chat-0089 (chat-bilim-r02_bilgi-4)
+- **prompt**: Enerji korunumu ne demektir?
+- **response**: Enerji korunumu, kapalı bir sistemde toplam enerjinin değişmediğini söyler. Enerji yok olmaz veya yoktan var olmaz, sadece bir türden başka bir türe dönüşür.
+
+### chat-0090 (chat-bilim-r02_bilgi-4)
+- **prompt**: Newton'un birinci yasası nedir?
+- **response**: Newton'un birinci yasasına göre, bir cisme dışarıdan net bir kuvvet etki etmedikçe duran cisim durmaya, hareket eden cisim ise sabit hızla gitmeye devam eder. Buna eylemsizlik yasası da denir.
+
+### chat-0091 (chat-matematik-r02_bilgi-0)
+- **prompt**: Bir üçgenin iç açıları toplamı kaçtır?
+- **response**: Düzlemdeki bir üçgenin iç açıları toplamı 180 derecedir.
+
+### chat-0092 (chat-matematik-r02_bilgi-0)
+- **prompt**: Pi sayısı nedir?
+- **response**: Pi, bir dairenin çevresinin çapına oranıdır. Değeri yaklaşık 3,14159'dur ve ondalık kısmı sonsuza kadar tekrar etmeden devam eder.
+
+### chat-0093 (chat-matematik-r02_bilgi-0)
+- **prompt**: Bir çemberin alanı nasıl hesaplanır?
+- **response**: Çemberin (aslında dairenin) alanı pi çarpı yarıçapın karesidir. Yarıçapı 3 cm olan bir dairenin alanı yaklaşık 3,14 x 9 = 28,26 santimetrekaredir.
+
+### chat-0094 (chat-matematik-r02_bilgi-1)
+- **prompt**: 25'in yüzde 40'ı kaçtır?
+- **response**: 25'in yüzde 40'ı, 25 x 0,40 = 10 eder.
+
+### chat-0095 (chat-matematik-r02_bilgi-1)
+- **prompt**: 3 kg elma 90 liraysa 5 kg kaç lira eder?
+- **response**: 1 kg elma 90 / 3 = 30 liradır. 5 kg için 5 x 30 = 150 lira öder.
+
+### chat-0096 (chat-matematik-r02_bilgi-1)
+- **prompt**: Ortalama nasıl hesaplanır?
+- **response**: Sayıların toplamını sayı adedine bölersin. Örneğin 4, 6 ve 8'in ortalaması (4 + 6 + 8) / 3 = 6'dır.
+
+### chat-0097 (chat-matematik-r02_bilgi-2)
+- **prompt**: Denklem nedir?
+- **response**: Denklem, iki ifadenin eşit olduğunu belirten ve bilinmeyen içeren bir matematiksel ifadedir. Örneğin 2x + 3 = 11 denkleminde x = 4 çözümdür.
+
+### chat-0098 (chat-matematik-r02_bilgi-2)
+- **prompt**: 2x + 6 = 14 denklemini çöz.
+- **response**: Önce iki taraftan 6 çıkarılır: 2x = 8. Sonra iki taraf 2'ye bölünür: x = 4.
+
+### chat-0099 (chat-matematik-r02_bilgi-2)
+- **prompt**: Faktöriyel nedir?
+- **response**: Bir n sayısının faktöriyeli, 1'den n'ye kadar olan tüm doğal sayıların çarpımıdır. Örneğin 5! = 5 x 4 x 3 x 2 x 1 = 120'dir.
+
+### chat-0100 (chat-matematik-r02_bilgi-3)
+- **prompt**: Bir saat kaç saniyedir?
+- **response**: Bir saat 3600 saniyedir, çünkü bir saat 60 dakika, her dakika da 60 saniyedir.
+
+### chat-0101 (chat-matematik-r02_bilgi-3)
+- **prompt**: Olasılık nedir?
+- **response**: Olasılık, bir olayın gerçekleşme ihtimalinin 0 ile 1 arasında bir sayıyla ifadesidir. Hilesiz bir paranın yazı gelme olasılığı 1/2'dir.
+
+### chat-0102 (chat-kod-r02_bilgi-0)
+- **prompt**: Python'da bir fonksiyon nasıl tanımlanır?
+- **response**: def anahtar sözcüğüyle:
+
+def selamla(isim):
+    return 'Merhaba ' + isim
+
+print(selamla('Ayşe'))
+
+### chat-0103 (chat-kod-r02_bilgi-0)
+- **prompt**: Python'da liste ile demet (tuple) arasındaki fark nedir?
+- **response**: Liste değiştirilebilir, demet değiştirilemez (immutable). Liste köşeli parantezle [1, 2], demet normal parantezle (1, 2) yazılır. Değişmemesi gereken veriler için demet uygundur.
+
+### chat-0104 (chat-kod-r02_bilgi-0)
+- **prompt**: Python'da bir sözlük nasıl kullanılır?
+- **response**: Sözlük anahtar-değer çiftlerini tutar:
+
+kisi = {'ad': 'Ali', 'yas': 30}
+print(kisi['ad'])
+kisi['sehir'] = 'Ankara'
+
+### chat-0105 (chat-kod-r02_bilgi-1)
+- **prompt**: Python'da list comprehension nedir?
+- **response**: Bir listeyi tek satırda üretmenin kısa yoludur:
+
+kareler = [x * x for x in range(5)]  # [0, 1, 4, 9, 16]
+
+Koşul eklemek için sona if yazılabilir.
+
+### chat-0106 (chat-kod-r02_bilgi-1)
+- **prompt**: Python'da try except ne işe yarar?
+- **response**: Hataları yakalamak için kullanılır:
+
+try:
+    sayi = int('abc')
+except ValueError:
+    print('Geçersiz sayı')
+
+Böylece program hata yüzünden çökmez.
+
+### chat-0107 (chat-kod-r02_bilgi-1)
+- **prompt**: Python'da bir sınıf nasıl yazılır?
+- **response**: class anahtar sözcüğüyle:
+
+class Kedi:
+    def __init__(self, ad):
+        self.ad = ad
+    def miyavla(self):
+        return self.ad + ' miyavlıyor'
+
+k = Kedi('Pamuk')
+print(k.miyavla())
+
+### chat-0108 (chat-kod-r02_bilgi-2)
+- **prompt**: Python'da bir listeyi nasıl sıralarım?
+- **response**: sorted(liste) yeni bir sıralı liste döndürür, liste.sort() ise listeyi yerinde sıralar. Büyükten küçüğe için reverse=True verebilirsin: sorted(liste, reverse=True).
+
+### chat-0109 (chat-kod-r02_bilgi-2)
+- **prompt**: Bir metindeki kelimeleri Python'da nasıl sayarım?
+- **response**: split ile kelimelere ayırıp len alabilirsin:
+
+metin = 'bu bir deneme metnidir'
+print(len(metin.split()))  # 4
+
+### chat-0110 (chat-kod-r02_bilgi-2)
+- **prompt**: JavaScript'te bir dizi nasıl döngüyle gezilir?
+- **response**: for...of kullanabilirsin:
+
+const sayilar = [1, 2, 3];
+for (const s of sayilar) {
+  console.log(s);
+}
+
+Ayrıca sayilar.forEach(...) yöntemi de vardır.
+
+### chat-0111 (chat-kod-r02_bilgi-3)
+- **prompt**: JavaScript'te bir fonksiyon nasıl yazılır?
+- **response**: İki yaygın yol vardır:
+
+function topla(a, b) { return a + b; }
+const topla2 = (a, b) => a + b;
+
+İkincisine ok fonksiyonu denir.
+
+### chat-0112 (chat-kod-r02_bilgi-3)
+- **prompt**: HTML'de bir bağlantı nasıl eklenir?
+- **response**: a etiketini kullanırsın: <a href="sayfa.html">Bağlantı metni</a>. href niteliği hedef adresi belirtir.
+
+### chat-0113 (chat-kod-r02_bilgi-3)
+- **prompt**: CSS'te bir elemanı yatayda nasıl ortalarım?
+- **response**: Blok bir eleman için genişlik verip margin: 0 auto; kullanabilirsin. İçeriği ortalamak için flex ile display: flex; justify-content: center; yazman yeterlidir.
+
+### chat-0114 (chat-kod-r02_bilgi-4)
+- **prompt**: Terminalde bir klasöre nasıl girerim?
+- **response**: cd komutuyla: cd klasor_adi. Bir üst klasöre çıkmak için cd .. yazılır. Bulunduğun yeri görmek için pwd komutunu kullanabilirsin.
+
+### chat-0115 (chat-kod-r02_bilgi-4)
+- **prompt**: Linux'ta dosyaları nasıl listelerim?
+- **response**: ls komutuyla. Ayrıntılı liste için ls -l, gizli dosyalar için ls -a kullanılır.
+
+### chat-0116 (chat-kod-r02_bilgi-4)
+- **prompt**: Git'te yeni bir dal nasıl oluştururum?
+- **response**: git checkout -b yeni-dal ya da yeni sürümlerde git switch -c yeni-dal komutuyla hem dalı oluşturur hem de ona geçersin.
+
+### chat-0117 (chat-kod-r02_bilgi-5)
+- **prompt**: API nedir?
+- **response**: API, bir yazılımın başka bir yazılımla belirli kurallar üzerinden konuşmasını sağlayan arayüzdür. Örneğin bir hava durumu uygulaması, sunucudaki verilere bir API isteği göndererek ulaşır.
+
+### chat-0118 (chat-kod-r02_bilgi-5)
+- **prompt**: Veritabanı nedir?
+- **response**: Veritabanı, verilerin düzenli biçimde saklandığı, sorgulanabildiği ve güncellenebildiği sistemdir. SQL ile çalışan ilişkisel veritabanları verileri tablolar hâlinde tutar.
+
+### chat-0119 (chat-kod-r02_bilgi-5)
+- **prompt**: Algoritma nedir?
+- **response**: Algoritma, bir problemi çözmek için izlenen adım adım ve belirli kurallara dayanan işlemler dizisidir. Yemek tarifi gibi düşünebilirsin; girdiyi alır ve istenen çıktıyı üretir.
+
+### chat-0120 (chat-kod-r02_bilgi-6)
+- **prompt**: Özyineleme (recursion) nedir?
+- **response**: Bir fonksiyonun kendini çağırarak problemi daha küçük parçalara bölmesidir. Mutlaka bir durma koşulu olmalı. Örneğin faktöriyel: f(n) = n * f(n-1), f(0) = 1.
+
+### chat-0121 (chat-kod-r02_bilgi-6)
+- **prompt**: Bir SQL sorgusunda koşul nasıl yazılır?
+- **response**: WHERE kullanırsın: SELECT * FROM kullanicilar WHERE yas > 18; Birden fazla koşul için AND ve OR operatörlerini kullanabilirsin.
+
+### chat-0122 (chat-yazim-r02_bilgi-0)
+- **prompt**: Bir resmi dilekçe nasıl yazılır?
+- **response**: Dilekçede sırayla şunlar bulunur: Hitap edilen makam, konu, açıklama bölümü, talep ve sonda tarih, ad-soyad ve imza. Dil resmî ve net olmalı. Konunu söylersen örnek bir dilekçe hazırlayabilirim.
+
+### chat-0123 (chat-yazim-r02_bilgi-0)
+- **prompt**: İş görüşmesinde kendimi nasıl tanıtmalıyım?
+- **response**: Kısa ve net ol: adın, eğitimin, kısa deneyim özetin ve neden bu pozisyona uygun olduğun. Bir veya iki dakikayı geçmesin ve somut bir başarı örneği ekle.
+
+### chat-0124 (chat-yazim-r02_bilgi-0)
+- **prompt**: Bir e-postaya nazik bir ret cevabı yaz.
+- **response**: Merhaba, teklifiniz için teşekkür ederim. Şu an yoğunluğum nedeniyle bu işi üstlenemeyeceğim. Düşündüğünüz için tekrar teşekkür ederim, ilerleyen dönemde tekrar görüşmek dileğiyle.
+
+### chat-0125 (chat-yazim-r02_bilgi-1)
+- **prompt**: Doğum günü mesajı yazar mısın?
+- **response**: Elbette: 'Doğum günün kutlu olsun! Yeni yaşının sana sağlık, mutluluk ve güzel anılar getirmesini dilerim.' Kişiye göre daha samimi ya da daha resmî yapabilirim.
+
+### chat-0126 (chat-yazim-r02_bilgi-1)
+- **prompt**: Bir ürün için kısa tanıtım metni yaz.
+- **response**: Ürünün adını ve özelliklerini söylersen daha doğru yazabilirim. Genel bir örnek: 'Günlük işlerinizi kolaylaştıran hafif, dayanıklı ve şık tasarım. Siz yeter ki başlayın.'
+
+### chat-0127 (chat-yazim-r02_bilgi-1)
+- **prompt**: Bir paragrafı nasıl özetlerim?
+- **response**: Önce ana fikri bul, sonra destekleyen en önemli bir iki ayrıntıyı seç ve bunları kendi cümlelerinle, orijinalinden çok daha kısa yaz. Gereksiz örnekleri ve tekrarları çıkar.
+
+### chat-0128 (chat-yazim-r02_bilgi-2)
+- **prompt**: Bir hikayeye nasıl başlanır?
+- **response**: İlgi çekici bir ana, bir soruya veya bir çatışmaya girerek başla. Örneğin: 'Kapı üç kez çalındı, ama dışarıda kimse yoktu.' Sonra karakteri ve arzusunu hızla tanıt.
+
+### chat-0129 (chat-yazim-r02_bilgi-2)
+- **prompt**: Başlık önermede nelere dikkat etmeliyim?
+- **response**: Başlık kısa, net ve içeriği doğru yansıtmalı. Merak uyandırabilir ama yanıltıcı olmamalı. Anahtar kelimeyi öne alıp gereksiz sözcüklerden kaçınmak etkilidir.
+
+### chat-0130 (chat-oneri-r02_bilgi-0)
+- **prompt**: Sunum yaparken heyecanımı nasıl yenerim?
+- **response**: Konuyu iyi hazırla ve yüksek sesle birkaç kez prova yap. Başlamadan önce derin nefes al, ilk cümleni ezberle ve izleyiciyle göz teması kur. Biraz heyecan normaldir, dikkatini artırır.
+
+### chat-0131 (chat-oneri-r02_bilgi-0)
+- **prompt**: Ders çalışırken odaklanamıyorum, ne yapmalıyım?
+- **response**: Telefonu uzağa koy, çalışmayı 25 dakikalık bloklara bölüp 5 dakika mola ver ve her blok için tek bir küçük hedef belirle. Düzenli uyku ve su da dikkati olumlu etkiler.
+
+### chat-0132 (chat-oneri-r02_bilgi-0)
+- **prompt**: İyi bir not alma yöntemi nedir?
+- **response**: Dersi dinlerken anahtar kelimeleri ve ana fikirleri yaz, her şeyi kopyalamaya çalışma. Ders sonrasında notları kendi cümlelerinle düzenle ve birkaç soruya çevirip tekrar et.
+
+### chat-0133 (chat-oneri-r02_bilgi-1)
+- **prompt**: Para biriktirmek için ne yapabilirim?
+- **response**: Önce gelir ve giderlerini yaz. Her ay gelirinin belirli bir kısmını, harcamadan önce kenara ayır. Gereksiz abonelikleri gözden geçir ve küçük, ulaşılabilir hedefler koy.
+
+### chat-0134 (chat-oneri-r02_bilgi-1)
+- **prompt**: Sağlıklı beslenmenin temel kuralları nelerdir?
+- **response**: Çeşitli beslen: sebze, meyve, tam tahıl ve yeterli protein tüket. İşlenmiş gıdaları, şekeri ve tuzu sınırla, bol su iç ve öğünleri düzenli tut. Özel bir sağlık durumun varsa bir diyetisyene danış.
+
+### chat-0135 (chat-oneri-r02_bilgi-1)
+- **prompt**: Spora nasıl başlamalıyım?
+- **response**: Küçük başla: haftada üç gün 20-30 dakikalık tempolu yürüyüş iyi bir başlangıçtır. Sonra süreyi ve yoğunluğu yavaş yavaş artır. Sağlık sorunun varsa önce doktoruna danış.
+
+### chat-0136 (chat-oneri-r02_bilgi-2)
+- **prompt**: Zaman yönetimi için ipucu verir misin?
+- **response**: İşlerini önem ve aciliyete göre sırala, günün başında üç öncelik belirle ve her işe makul bir süre ayır. Aynı anda birden fazla işe girişmemek zaman kazandırır.
+
+### chat-0137 (chat-oneri-r02_bilgi-2)
+- **prompt**: Kitap okuma alışkanlığı nasıl kazanılır?
+- **response**: Her gün 10-15 dakikayla başla, ilgini çeken bir kitap seç ve okuma saatini sabitle. Sevmediğin kitabı bırakmak da sorun değil; amaç alışkanlık kazanmak.
+
+### chat-0138 (chat-empati-r02_bilgi-0)
+- **prompt**: Bir arkadaşımla kavga ettim, ne yapmalıyım?
+- **response**: Önce sakinleşmek için biraz zaman tanı. Sonra suçlamadan, kendi hislerini anlatarak konuşmayı dene ve onu dinle. Yanlışın olduysa özür dilemek ilişkiyi onarmaya yardımcı olur.
+
+### chat-0139 (chat-empati-r02_bilgi-0)
+- **prompt**: Çok yoruldum, her şeyden sıkıldım.
+- **response**: Böyle hissetmen anlaşılır. Biraz dinlenmeye ve kendine zaman ayırmaya hakkın var. İstersen seni neyin yorduğunu anlat; birlikte küçük bir rahatlama planı yapabiliriz.
+
+### chat-0140 (chat-empati-r02_bilgi-0)
+- **prompt**: Bana moral verir misin?
+- **response**: Tabii. Zor zamanlar geçicidir ve şu ana kadar atlattığın her şey sana güç kazandırdı. Bugün küçük bir şeyi tamamlaman bile bir ilerleme. Ben buradayım, anlatmak istediğin bir şey var mı?
+
+### chat-0141 (chat-empati-r02_bilgi-1)
+- **prompt**: İşimi kaybettim, korkuyorum.
+- **response**: Çok üzgünüm, bu gerçekten zor bir durum. Korkman doğal. Önce temel giderlerini ve elindeki seçenekleri yazarak bir tablo çıkarmak iyi gelir. İstersen CV ve iş arama planı konusunda yardımcı olabilirim.
+
+### chat-0142 (chat-empati-r02_bilgi-1)
+- **prompt**: Kendimi başarısız hissediyorum.
+- **response**: Böyle hissetmen seni başarısız yapmaz; duygular gerçeği her zaman yansıtmaz. Bugüne kadar başardığın üç şeyi düşünmeyi dene. İstersen seni neyin bu hisse soktuğunu konuşalım.
+
+### chat-0143 (chat-dürüstlük-r02_bilgi-0)
+- **prompt**: Bir bilgiden emin olmadığında ne yaparsın?
+- **response**: Emin olmadığımı belirtirim ve uydurmam. Elimdeki bilginin sınırını söyler, mümkünse nasıl doğrulanabileceğini önerir ve gerekirse sana daha fazla ayrıntı sorarım.
+
+### chat-0144 (chat-dürüstlük-r02_bilgi-0)
+- **prompt**: Bana yalan söyler misin?
+- **response**: Hayır, bilerek yanlış bilgi vermem. Bazen hata yapabilirim ama bunu isteyerek yapmam. Yanlış bir şey fark edersen söylemen beni düzeltmeme yardımcı olur.
+
+### chat-0145 (chat-dürüstlük-r02_bilgi-0)
+- **prompt**: Son dakika haberlerini bilir misin?
+- **response**: Hayır, güncel haberlere ve gerçek zamanlı verilere erişimim yok. En güncel gelişmeler için güvenilir haber kaynaklarına bakmanı öneririm.
+
+### chat-0146 (chat-dürüstlük-r02_bilgi-1)
+- **prompt**: Hukuki bir sorunum var, avukat yerine geçer misin?
+- **response**: Avukat yerine geçemem. Genel bilgi verip sürecin nasıl işlediğini açıklayabilirim, ama durumuna özel hukuki tavsiye için bir avukata danışmalısın.
+
+### chat-0147 (chat-dürüstlük-r02_bilgi-1)
+- **prompt**: Teşhis koyabilir misin, başım ağrıyor?
+- **response**: Teşhis koyamam. Baş ağrısı pek çok nedenden olabilir: uykusuzluk, stres, susuzluk gibi. Ağrı şiddetliyse, ani başladıysa, ateş ya da görme sorunlarıyla birlikteyse hemen bir sağlık kuruluşuna başvur.
+
+### chat-0148 (chat-güvenlik-r02_bilgi-0)
+- **prompt**: Birine zarar vermek için yardım eder misin?
+- **response**: Hayır, birine zarar vermeye yönelik konularda yardımcı olamam. Bir sorunun varsa, örneğin öfke ya da çatışma yaşıyorsan, seninle sakin yollar bulmak için konuşabilirim.
+
+### chat-0149 (chat-güvenlik-r02_bilgi-0)
+- **prompt**: Kopya çekmek için ipucu verir misin?
+- **response**: Kopya konusunda yardımcı olmam, çünkü bu hem adil değil hem de sana uzun vadede zarar verir. Ama konu çalışması, tekrar yöntemleri ya da sınav stratejisi konusunda memnuniyetle yardımcı olurum.
+
+### chat-0150 (chat-güvenlik-r02_bilgi-0)
+- **prompt**: Çevrimiçi alışverişte dolandırıcılıktan nasıl korunurum?
+- **response**: Güvenilir ve tanınmış sitelerden alışveriş yap, adres çubuğunda https olduğundan emin ol, aşırı ucuz fiyatlara şüpheyle yaklaş ve kart bilgilerini asla başkalarıyla paylaşma. Tek kullanımlık veya sanal kart kullanmak da risk azaltır.
+
+### chat-0151 (chat-güvenlik-r02_bilgi-1)
+- **prompt**: Verilerimi internette nasıl korurum?
+- **response**: Güçlü ve farklı şifreler kullan, iki adımlı doğrulamayı aç, cihazlarını güncel tut ve bilinmeyen bağlantılara tıklama. Sosyal medyada paylaştığın kişisel bilgileri de sınırla.
+
+### chat-0152 (chat-güvenlik-r02_bilgi-1)
+- **prompt**: Çocuklar için güvenli internet kullanımı nasıl sağlanır?
+- **response**: Yaşa uygun içerik filtreleri kullan, çocuğunla internette ne yaptığı hakkında açıkça konuş ve kişisel bilgi paylaşmaması gerektiğini anlat. Sorun yaşarsa sana gelebileceğini bilmesi en önemli koruma.
+
+### chat-0153 (chat-yapay_zeka-r02_bilgi-0)
+- **prompt**: Doğal dil işleme nedir?
+- **response**: Doğal dil işleme (NLP), bilgisayarların insan dilini anlaması, işlemesi ve üretmesiyle ilgilenen yapay zekâ alanıdır. Çeviri, duygu analizi ve sohbet botları örnekleridir.
+
+### chat-0154 (chat-yapay_zeka-r02_bilgi-0)
+- **prompt**: Sinir ağı nedir?
+- **response**: Sinir ağı, birbirine bağlı yapay nöronlardan oluşan bir modeldir. Katmanlar hâlinde çalışır; veriden öğrenirken bağlantı ağırlıkları, hatayı azaltacak şekilde ayarlanır.
+
+### chat-0155 (chat-yapay_zeka-r02_bilgi-0)
+- **prompt**: Eğitim verisi ne demektir?
+- **response**: Eğitim verisi, bir yapay zekâ modelinin örnek alarak öğrendiği veri kümesidir. Verinin kalitesi ve çeşitliliği, modelin başarısını doğrudan etkiler.
+
+### chat-0156 (chat-yapay_zeka-r02_bilgi-1)
+- **prompt**: Aşırı öğrenme (overfitting) nedir?
+- **response**: Modelin eğitim verisini ezberleyip yeni verilerde kötü performans göstermesidir. Daha fazla veri, düzenlileştirme veya modeli sadeleştirmek bu sorunu azaltabilir.
+
+### chat-0157 (chat-yapay_zeka-r02_bilgi-1)
+- **prompt**: Yapay zekâ insanların yerini alır mı?
+- **response**: Bazı görevleri otomatikleştirebilir, ama çoğu işte insanın yargısı, yaratıcılığı ve sorumluluğu gerekir. Genelde yapay zekâ, işleri tamamen yok etmekten çok, işlerin nasıl yapıldığını değiştirir.
+
+### chat-0158 (chat-yapay_zeka-r02_bilgi-1)
+- **prompt**: Bir yapay zekâya ne kadar güvenmeliyim?
+- **response**: Faydalı bir yardımcı olarak güvenebilirsin ama tek doğru kaynak gibi görmemelisin. Sağlık, hukuk, finans gibi önemli konularda çıktıları mutlaka uzmanlarla veya güvenilir kaynaklarla doğrula.
+
+### chat-0159 (chat-yemek-r03_gunluk-0)
+- **prompt**: Mercimek çorbası nasıl yapılır?
+- **response**: Bir soğanı doğrayıp yağda kavur, bir havuç ve bir patatesi küp doğrayıp ekle. Bir su bardağı kırmızı mercimek ve yaklaşık altı su bardağı su ilave edip mercimekler yumuşayana kadar pişir. Blenderdan geçirip tuz ve baharat ekle, limonla servis et.
+
+### chat-0160 (chat-yemek-r03_gunluk-0)
+- **prompt**: Menemen nasıl yapılır?
+- **response**: Tavada zeytinyağında veya tereyağında biberleri kavur, rendelenmiş veya küçük doğranmış domatesleri ekle ve suyunu çekene kadar pişir. Yumurtaları kır, tuz ve karabiber ekle, istediğin kıvama gelince ocaktan al.
+
+### chat-0161 (chat-yemek-r03_gunluk-0)
+- **prompt**: Pilav nasıl pirinç gibi taneli olur?
+- **response**: Pirinci ılık tuzlu suda yarım saat beklet ve durula. Tereyağında kavurup, pirincin iki katı kadar sıcak su ekle. Kısık ateşte suyunu çekene kadar pişirip altını kapatarak dinlendir; karıştırmamak önemlidir.
+
+### chat-0162 (chat-yemek-r03_gunluk-1)
+- **prompt**: Çay nasıl demlenir?
+- **response**: Çaydanlığın alt kısmında suyu kaynat, üstteki demliğe çayı koy ve üzerine kaynar su ekle. Kısık ateşte yaklaşık 15-20 dakika demle. Tavşan kanı renginde olunca bardaklara doldurup suyla açabilirsin.
+
+### chat-0163 (chat-yemek-r03_gunluk-1)
+- **prompt**: Kahvaltıda ne yiyebilirim?
+- **response**: Dengeli bir kahvaltı için yumurta, peynir, zeytin, domates ve salatalık, yanına tam tahıllı ekmek iyi bir seçim. İstersen biraz ceviz veya meyve de ekleyebilirsin.
+
+### chat-0164 (chat-yemek-r03_gunluk-1)
+- **prompt**: Vejetaryen bir akşam yemeği önerir misin?
+- **response**: Sebzeli nohut yemeği ve yanında bulgur pilavı iyi bir seçim. Hafif bir şey istersen fırında sebze ve yoğurt da olur. Alerjin veya sevmediğin bir şey varsa söyle, ona göre öneririm.
+
+### chat-0165 (chat-yemek-r03_gunluk-2)
+- **prompt**: Evde fazla kalan ekmekle ne yapılır?
+- **response**: Bayat ekmekle galeta unu yapabilir, kızarmış ekmek ve ekmek dilimleriyle kahvaltı hazırlayabilir ya da ıslatıp köfteye katabilirsin. Küçük küçük doğrayıp kruton yapmak da güzel bir fikir.
+
+### chat-0166 (chat-seyahat-r03_gunluk-0)
+- **prompt**: İstanbul'da gezilecek yerler nelerdir?
+- **response**: Ayasofya, Topkapı Sarayı, Sultanahmet Camii, Kapalıçarşı, Galata Kulesi ve Boğaz turu en bilinen duraklardır. Daha sakin bir gün için Kuzguncuk veya Moda sahilini de deneyebilirsin.
+
+### chat-0167 (chat-seyahat-r03_gunluk-0)
+- **prompt**: Kapadokya'ya ne zaman gitmeliyim?
+- **response**: İlkbahar ve sonbahar, hava ılık olduğu için en uygun dönemlerdir. Yazın sıcak, kışın soğuk ve karlı olabilir ama kışın manzara çok güzeldir. Sabah balon turu için hava koşullarına dikkat etmek gerekir.
+
+### chat-0168 (chat-seyahat-r03_gunluk-0)
+- **prompt**: Seyahat için bavul nasıl hazırlanır?
+- **response**: Önce gideceğin yerin hava durumuna ve kaç gün kalacağına bak. Mix-match edilebilen kıyafetler seç, ilaç, şarj aleti, kimlik gibi önemli şeyleri el çantana koy. Bir liste yapıp tek tek işaretlemek unutmayı azaltır.
+
+### chat-0169 (chat-seyahat-r03_gunluk-1)
+- **prompt**: Yurt dışına çıkarken nelere dikkat etmeliyim?
+- **response**: Pasaportunun geçerlilik süresini, vize gereksinimini, sağlık sigortasını ve rezervasyonları kontrol et. Önemli belgelerin kopyasını ayrı yerde sakla ve gideceğin ülkenin temel kurallarını öğren.
+
+### chat-0170 (chat-dilbilgisi-r03_gunluk-0)
+- **prompt**: Türkçede 'de' ve 'da' ne zaman ayrı yazılır?
+- **response**: Bulunma hâli eki olan -de/-da bitişik yazılır: evde, okulda. Bağlaç olan 'de/da' ise ayrı yazılır ve çıkarıldığında cümle anlamı bozulmaz: Ben de geldim.
+
+### chat-0171 (chat-dilbilgisi-r03_gunluk-0)
+- **prompt**: 'ki' bağlacı ne zaman ayrı yazılır?
+- **response**: Bağlaç olan 'ki' ayrı yazılır: Biliyorum ki başaracaksın. Sıfat yapan -ki eki ise bitişik yazılır: evdeki, benimki. Birkaç kalıplaşmış sözcük (belki, sanki, çünkü) bitişik yazılır.
+
+### chat-0172 (chat-dilbilgisi-r03_gunluk-0)
+- **prompt**: Noktalama işaretleri neden önemlidir?
+- **response**: Noktalama işaretleri cümlenin anlamını ve okunuşunu belirler. Örneğin 'Hadi yiyelim, çocuklar' ile 'Hadi yiyelim çocukları' çok farklı anlamlara gelir.
+
+### chat-0173 (chat-dilbilgisi-r03_gunluk-1)
+- **prompt**: Sıfat nedir?
+- **response**: Sıfat, isimlerin önüne gelerek onları niteleyen veya belirten sözcüktür. 'Güzel bir ev' ifadesinde 'güzel' sıfattır.
+
+### chat-0174 (chat-dilbilgisi-r03_gunluk-1)
+- **prompt**: Fiil nedir?
+- **response**: Fiil, iş, oluş ve durum bildiren sözcüktür. 'Koşmak', 'gelmek', 'olmak' birer fiildir. Zaman ve kişiye göre çekimlenirler.
+
+### chat-0175 (chat-dilbilgisi-r03_gunluk-1)
+- **prompt**: Eş anlamlı kelime nedir?
+- **response**: Anlamları aynı ya da çok yakın olan kelimelerdir. Örneğin 'güzel' ile 'hoş', 'büyük' ile 'iri' eş anlamlı sayılabilir.
+
+### chat-0176 (chat-dilbilgisi-r03_gunluk-2)
+- **prompt**: Zıt anlamlı kelime nedir?
+- **response**: Anlamca birbirine karşıt olan kelimelerdir. Örneğin sıcak-soğuk, uzun-kısa, gece-gündüz.
+
+### chat-0177 (chat-dil-r03_gunluk-0)
+- **prompt**: İngilizce 'I am' ne demek?
+- **response**: 'I am' Türkçede 'Ben ... im/ım' anlamına gelir. Örneğin 'I am a student' cümlesi 'Ben öğrenciyim' demektir.
+
+### chat-0178 (chat-dil-r03_gunluk-0)
+- **prompt**: İngilizce'de geçmiş zaman nasıl yapılır?
+- **response**: Düzenli fiillere -ed eklenir: work, worked. Düzensiz fiiller ise farklı hâller alır: go, went; see, saw. Olumsuz ve soru için did yardımcı fiili kullanılır.
+
+### chat-0179 (chat-iş-r03_gunluk-0)
+- **prompt**: Bir iş yerinde nasıl iyi iletişim kurulur?
+- **response**: Net ve nazik konuş, karşındakini dinle, beklentileri yazılı hâle getir ve geri bildirimleri kişiye değil konuya odaklı ver. Anlamadığın şeyi sormaktan çekinme.
+
+### chat-0180 (chat-iş-r03_gunluk-0)
+- **prompt**: Zam istemek için nasıl hazırlanmalıyım?
+- **response**: Başarılarını ve katkılarını somut örneklerle listele, piyasa maaşlarını araştır ve görüşme için uygun bir zaman iste. Konuşmayı sakin, saygılı ve hedefli yürüt; alternatif çözümlere de açık ol.
+
+### chat-0181 (chat-iş-r03_gunluk-0)
+- **prompt**: Bir toplantıyı verimli yapmanın yolu nedir?
+- **response**: Önceden gündem paylaş, süreyi sınırla, katılımcıları gerçekten gerekli olanlarla sınırlı tut ve sonunda kararlar ile sorumluları yazıp paylaş. Bu, toplantıların etkisini artırır.
+
+### chat-0182 (chat-iş-r03_gunluk-1)
+- **prompt**: Proje yönetiminde ilk adım nedir?
+- **response**: Önce amacı ve başarı ölçütlerini netleştir. Sonra işleri parçalara böl, sorumlu ve tarih ata, riskleri belirle ve düzenli ilerleme takibi yap.
+
+### chat-0183 (chat-iş-r03_gunluk-1)
+- **prompt**: Girişim fikrimi nasıl test ederim?
+- **response**: Küçük bir deneyle başla: potansiyel müşterilerle konuş, basit bir prototip veya tanıtım sayfası yap ve ilgi olup olmadığını ölç. Tam ürünü yapmadan önce talebi doğrulamak zaman ve para kazandırır.
+
+### chat-0184 (chat-finans-r03_gunluk-0)
+- **prompt**: Bir bütçe nasıl yapılır?
+- **response**: Aylık gelirini yaz, sabit giderleri (kira, fatura) çıkar, değişken giderleri tahmin et ve kalanı tasarruf ile hedeflere ayır. Ay sonunda gerçekleşenle karşılaştırıp ayarlamalar yap.
+
+### chat-0185 (chat-finans-r03_gunluk-0)
+- **prompt**: Enflasyon nedir?
+- **response**: Enflasyon, mal ve hizmetlerin genel fiyat düzeyinin zaman içinde artmasıdır. Para birimi aynı miktarla daha az şey satın alır, yani paranın alım gücü düşer.
+
+### chat-0186 (chat-finans-r03_gunluk-0)
+- **prompt**: Faiz nedir?
+- **response**: Faiz, borç alınan paranın kullanımı karşılığında ödenen bedeldir. Mevduatta para bankada tutulursa banka sana faiz öder, kredide ise sen bankaya faiz ödersin.
+
+### chat-0187 (chat-finans-r03_gunluk-1)
+- **prompt**: Acil durum fonu nedir?
+- **response**: Beklenmedik harcamalar için ayrılan nakit birikimdir. Genellikle birkaç aylık temel giderin karşılanacağı tutarda ve kolay erişilebilir bir hesapta tutulması önerilir.
+
+### chat-0188 (chat-teknoloji-r03_gunluk-0)
+- **prompt**: Bilgisayarım yavaşladı, ne yapmalıyım?
+- **response**: Gereksiz başlangıç programlarını kapat, kullanmadığın uygulamaları kaldır, diskte boş yer aç ve sistemi güncelle. Sorun devam ederse virüs taraması yap ve belleğin yeterli olup olmadığına bak.
+
+### chat-0189 (chat-teknoloji-r03_gunluk-0)
+- **prompt**: Wi-Fi bağlantım kopuyor, ne yapabilirim?
+- **response**: Modemi birkaç dakika kapatıp aç, cihaza daha yakın bir yere geç, kanalı değiştirmeyi dene ve modemin yazılımını güncelle. Sorun sürüyorsa internet sağlayıcınla iletişime geç.
+
+### chat-0190 (chat-teknoloji-r03_gunluk-0)
+- **prompt**: Telefonun şarjı çabuk bitiyor, ne yapmalıyım?
+- **response**: Ekran parlaklığını düşür, arka planda çalışan uygulamaları kısıtla, konum ve bildirimleri gözden geçir ve güncellemeleri yap. Pil yıllanmışsa değiştirmek gerekebilir.
+
+### chat-0191 (chat-teknoloji-r03_gunluk-1)
+- **prompt**: Yedek almak neden önemlidir?
+- **response**: Cihaz arızası, çalınma veya fidye yazılımı gibi durumlarda verilerini kaybetmemeni sağlar. 3-2-1 kuralı iyi bir yöntemdir: 3 kopya, 2 farklı ortam, 1 tanesi farklı bir yerde.
+
+### chat-0192 (chat-teknoloji-r03_gunluk-1)
+- **prompt**: Bulut depolama nedir?
+- **response**: Verilerin kendi cihazın yerine internet üzerindeki sunucularda saklandığı hizmettir. Dosyalarına her yerden erişebilir ve paylaşabilirsin, ancak güçlü şifre ve iki adımlı doğrulama kullanmalısın.
+
+### chat-0193 (chat-teknoloji-r03_gunluk-1)
+- **prompt**: Yazılım nedir?
+- **response**: Yazılım, bilgisayara ne yapacağını anlatan programlar ve verilerin bütünüdür. Donanım fiziksel parçalardır; yazılım onları çalıştıran talimatlardır.
+
+### chat-0194 (chat-teknoloji-r03_gunluk-2)
+- **prompt**: İnternet nasıl çalışır?
+- **response**: İnternet, dünya genelinde birbirine bağlı ağların oluşturduğu bir yapıdır. Veriler küçük paketlere bölünür, yönlendiriciler üzerinden hedef cihaza ulaşır ve orada tekrar birleştirilir.
+
+### chat-0195 (chat-sağlık-r03_gunluk-0)
+- **prompt**: Uyku neden önemlidir?
+- **response**: Uyku sırasında beden dinlenir, bellek pekişir ve bağışıklık sistemi güçlenir. Yetersiz uyku dikkat, ruh hali ve genel sağlığı olumsuz etkiler. Yetişkinler için genelde 7-9 saat önerilir.
+
+### chat-0196 (chat-sağlık-r03_gunluk-0)
+- **prompt**: Su içmek neden önemli?
+- **response**: Vücudun büyük kısmı sudur. Su, ısı düzenlemesi, sindirim ve atık atılımı gibi işlevlerde rol oynar. İhtiyaç kişiye ve havaya göre değişir; susuzluk hissi ve idrar rengi iyi birer göstergedir.
+
+### chat-0197 (chat-sağlık-r03_gunluk-0)
+- **prompt**: Ateşim var, ne yapmalıyım?
+- **response**: Dinlen, bol sıvı al ve hafif giyin. Ateş yüksekse, birkaç günden uzun sürüyorsa, nefes darlığı veya şiddetli baş ağrısı gibi belirtilerle birlikteyse mutlaka bir sağlık kuruluşuna başvur. İlaç kullanımı için doktora veya eczacıya danış.
+
+### chat-0198 (chat-sağlık-r03_gunluk-1)
+- **prompt**: Boyun ağrısına ne iyi gelir?
+- **response**: Duruşuna dikkat et, uzun süre ekrana eğilerek bakma, hafif germe hareketleri yap ve sıcak uygulama deneyebilirsin. Ağrı şiddetliyse, kolda uyuşma varsa ya da düzelmiyorsa doktora git.
+
+### chat-0199 (chat-sağlık-r03_gunluk-1)
+- **prompt**: Ruh sağlığı için günlük alışkanlıklar neler olabilir?
+- **response**: Düzenli uyku, hareket, sevdiklerinle vakit geçirmek ve kısa nefes veya farkındalık egzersizleri faydalı olabilir. Zorlanıyorsan bir ruh sağlığı uzmanından destek almak güçlülük göstergesidir.
+
+### chat-0200 (chat-eğitim-r03_gunluk-0)
+- **prompt**: Çocuğum derse ilgi göstermiyor, ne yapabilirim?
+- **response**: Önce nedenini anlamaya çalış: yorgunluk, zorlanma veya ilgisizlik olabilir. Küçük hedefler koy, çalışmayı oyunla ilişkilendir ve başarılarını takdir et. Sorun devam ederse öğretmeniyle görüşmek yararlı olur.
+
+### chat-0201 (chat-eğitim-r03_gunluk-0)
+- **prompt**: Sınav kaygısıyla nasıl başa çıkılır?
+- **response**: Önceden düzenli çalış, sınav öncesi iyi uyu, derin nefes al ve olumsuz düşünceleri fark edip gerçekçi düşüncelerle değiştir. Kaygı çok yoğunsa okul rehber öğretmeni veya uzmandan destek alabilirsin.
+
+### chat-0202 (chat-eğitim-r03_gunluk-0)
+- **prompt**: Etkili tekrar yöntemi nedir?
+- **response**: Aralıklı tekrar ve kendini sınama en etkili yöntemlerdendir. Konuyu bir kez okumak yerine, birkaç gün arayla ve kitaba bakmadan hatırlamaya çalışarak tekrar et.
+
+### chat-0203 (chat-eğitim-r03_gunluk-1)
+- **prompt**: Okumayı hızlandırmak için ne yapabilirim?
+- **response**: Düzenli okuyarak kelime dağarcığını geliştir, parmakla veya işaretle takip etmek yerine gözlerini rahat hareket ettir ve anlamayı ihmal etme. Hızdan çok anlamak önemlidir.
+
+### chat-0204 (chat-kültür-r03_gunluk-0)
+- **prompt**: Atatürk kimdir?
+- **response**: Mustafa Kemal Atatürk, Türkiye Cumhuriyeti'nin kurucusu ve ilk cumhurbaşkanıdır. Kurtuluş Savaşı'nın önderliğini yapmış, cumhuriyeti ilan etmiş ve birçok alanda reform gerçekleştirmiştir.
+
+### chat-0205 (chat-kültür-r03_gunluk-0)
+- **prompt**: Nasreddin Hoca kimdir?
+- **response**: Nasreddin Hoca, Türk halk kültüründe fıkralarıyla tanınan, zekice ve düşündürücü anlatılarıyla bilinen bir halk bilgesidir. Fıkralarında hem mizah hem de hayat dersi bulunur.
+
+### chat-0206 (chat-kültür-r03_gunluk-0)
+- **prompt**: Türk kahvesi neden meşhurdur?
+- **response**: Türk kahvesi, ince öğütülmüş kahvenin cezvede pişirilmesiyle yapılır ve köpüğüyle ünlüdür. UNESCO tarafından Türk kahvesi kültürü ve geleneği somut olmayan kültürel miras listesine alınmıştır.
+
+### chat-0207 (chat-kültür-r03_gunluk-1)
+- **prompt**: Bayramlarda neler yapılır?
+- **response**: Bayramlarda aile ve akrabalar ziyaret edilir, tatlı ve yemekler paylaşılır, büyüklerin eli öpülür ve çocuklara harçlık verilir. Kurban Bayramı'nda ayrıca kurban kesilip paylaşılır.
+
+### chat-0208 (chat-kültür-r03_gunluk-1)
+- **prompt**: Mevlana kimdir?
+- **response**: Mevlana Celaleddin-i Rumi, 13. yüzyılda Anadolu'da yaşamış mutasavvıf ve şairdir. Mesnevi adlı eseriyle tanınır ve sevgi, hoşgörü ve insanlık temalarını işlemiştir.
+
+### chat-0209 (chat-kültür-r03_gunluk-1)
+- **prompt**: Yunus Emre kimdir?
+- **response**: Yunus Emre, 13-14. yüzyılda yaşamış Türk halk şairi ve mutasavvıftır. Sade bir Türkçeyle yazdığı şiirlerinde sevgi, hoşgörü ve insana saygıyı anlatır.
+
+### chat-0210 (chat-spor-r03_gunluk-0)
+- **prompt**: Futbolda ofsayt nedir?
+- **response**: Bir oyuncu, rakip yarı sahada, topun ve sondan ikinci savunmacının ilerisinde bulunduğu hâlde topu alırsa ofsayt olur. Hakem bu durumda oyunu durdurup serbest vuruş verir.
+
+### chat-0211 (chat-spor-r03_gunluk-0)
+- **prompt**: Basketbolda bir takımda kaç oyuncu sahada olur?
+- **response**: Basketbolda her takımdan sahada aynı anda beş oyuncu bulunur.
+
+### chat-0212 (chat-spor-r03_gunluk-0)
+- **prompt**: Bir maratonun mesafesi ne kadardır?
+- **response**: Maraton 42,195 kilometredir.
+
+### chat-0213 (chat-oneri-r03_gunluk-0)
+- **prompt**: Sabah rutini oluşturmak için ne yapmalıyım?
+- **response**: Her gün aynı saatte kalk, önceki akşam hazırlık yap ve sabahın ilk saatinde telefonla oyalanma. Su iç, hafif bir hareket yap ve günün üç önceliğini belirle. Küçük başla ve istikrarlı ol.
+
+### chat-0214 (chat-oneri-r03_gunluk-0)
+- **prompt**: Dağınıklıkla nasıl başa çıkılır?
+- **response**: Her gün 10 dakika ayırarak küçük alanları toparla, kullanmadığın eşyaları ayır ve her eşyaya bir yer belirle. Büyük işi küçük parçalara bölmek motivasyonu korur.
+
+### chat-0215 (chat-oneri-r03_gunluk-0)
+- **prompt**: Komşumla sorun yaşıyorum, ne yapmalıyım?
+- **response**: Önce sakin bir dille ve saygılı biçimde sorunu doğrudan paylaşmayı dene. İşe yaramazsa apartman yönetimine başvurabilirsin. Hukuki bir boyut varsa bir avukata danışmak gerekir.
+
+### chat-0216 (chat-oneri-r03_gunluk-1)
+- **prompt**: Hediye seçerken nelere dikkat etmeliyim?
+- **response**: Kişinin ilgi alanlarını, ihtiyaçlarını ve zevkini düşün. Pahalı olmasından çok düşünceli olması önemlidir. İstersen kişinin kim olduğunu ve bütçeni söyle, öneri hazırlayayım.
+
+### chat-0217 (chat-sohbet-r03_gunluk-0)
+- **prompt**: Bana bir bilmece sor.
+- **response**: Dinle: 'Ağzı var dili yok, konuşur ama ses çıkarmaz, kapalı kalır ama içi dolu.' Bu nedir? Cevap: Kitap. Başka bilmece istersen söyle.
+
+### chat-0218 (chat-sohbet-r03_gunluk-0)
+- **prompt**: Rastgele bir bilgi söyle.
+- **response**: Ahtapotların üç kalbi vardır: ikisi kanı solungaçlara, biri de vücuda pompalar.
+
+### chat-0219 (chat-sohbet-r03_gunluk-0)
+- **prompt**: Canım sıkılıyor, ne yapabilirim?
+- **response**: Kısa bir yürüyüş yapabilir, sevdiğin bir müzik açabilir, yeni bir şey öğrenmeye başlayabilir ya da bir arkadaşını arayabilirsin. İstersen birlikte küçük bir kelime oyunu oynayalım.
+
+### chat-0220 (chat-sohbet-r03_gunluk-1)
+- **prompt**: Sence hayatın anlamı nedir?
+- **response**: Bu, insanların yüzyıllardır farklı yanıtlar verdiği derin bir soru. Kimine göre sevmek ve sevilmek, kimine göre bir amaca hizmet etmek. Kendi yanıtını bulmak kişisel bir yolculuk. Sana neyin anlamlı geldiğini merak ederim.
+
+### chat-0221 (chat-sohbet-r03_gunluk-1)
+- **prompt**: Hangi renk daha güzel, mavi mi kırmızı mı?
+- **response**: Bu tamamen zevke bağlı. Mavi genellikle huzur ve sakinlik, kırmızı ise enerji ve heyecan çağrıştırır. Senin tercihin hangisi ve nerede kullanmayı düşünüyorsun?
+
+### chat-0222 (chat-sohbet-r03_gunluk-1)
+- **prompt**: Gelecekte teknoloji nasıl olacak?
+- **response**: Kesin konuşamam, ama yapay zekâ, yenilenebilir enerji ve sağlık teknolojilerinde hızlı gelişmeler bekleniyor. Bu gelişmelerin faydalı olması etik ve güvenlik konularına da bağlı olacak.
+
+### chat-0223 (chat-bilgi_dil-r03_gunluk-0)
+- **prompt**: Türkçe dünyanın kaç kişi tarafından konuşulur?
+- **response**: Türkçeyi ana dil olarak konuşanların sayısı yaklaşık 80-90 milyon civarında tahmin edilir; ikinci dil olarak konuşanlarla birlikte bu sayı daha da yüksektir. Kesin rakamlar kaynağa göre değişir.
+
+### chat-0224 (chat-bilgi_dil-r03_gunluk-0)
+- **prompt**: Alfabemizde kaç harf var?
+- **response**: Türk alfabesinde 29 harf bulunur: 8 ünlü, 21 ünsüz.
+
+### chat-0225 (chat-bilgi_dil-r03_gunluk-0)
+- **prompt**: Ünlü harfler hangileridir?
+- **response**: Türkçedeki sekiz ünlü harf a, e, ı, i, o, ö, u ve ü'dür.
+
+### chat-0226 (chat-bilgi_dil-r03_gunluk-1)
+- **prompt**: Büyük ünlü uyumu nedir?
+- **response**: Türkçede bir sözcükteki ünlülerin kalın-ince uyumuna göre sıralanmasıdır. Örneğin kalın ünlülü 'kitap' sözcüğü 'kitap-lar', ince ünlülü 'ev' sözcüğü 'ev-ler' olur. Ekler köke göre kalın veya ince olur.
+
+### chat-0227 (chat-bilgi_dil-r03_gunluk-1)
+- **prompt**: Bir cümlenin öğeleri nelerdir?
+- **response**: Temel öğeler özne ve yüklemdir. Yardımcı öğeler ise nesne, dolaylı tümleç ve zarf tümlecidir. 'Ali kitabı okudu' cümlesinde özne Ali, nesne kitap, yüklem okudur.
+
+### chat-0228 (chat-bilgi_dil-r03_gunluk-1)
+- **prompt**: Deyim ile atasözü arasındaki fark nedir?
+- **response**: Deyim, kalıplaşmış ve genellikle mecaz anlamlı söz öbeğidir ('göz atmak'). Atasözü ise bir öğüt veya yargı bildiren, kalıplaşmış cümledir ('Damlaya damlaya göl olur').
+
+### chat-0229 (chat-bilgi_dil-r03_gunluk-2)
+- **prompt**: 'Damlaya damlaya göl olur' ne demek?
+- **response**: Küçük şeylerin birikerek büyük sonuçlar doğurduğunu anlatır. Sabırla ve düzenli biçimde biriktirilen küçük adımlar zamanla büyük bir başarıya dönüşür.
+
+### chat-0230 (chat-bilgi_dil-r03_gunluk-2)
+- **prompt**: 'Sakla samanı, gelir zamanı' ne demek?
+- **response**: Bugün işe yaramayan şeylerin ileride işe yarayabileceğini, bu yüzden israf etmemek gerektiğini anlatan bir atasözüdür.
+
+### chat-0231 (chat-sohbet-r03_gunluk-2)
+- **prompt**: Kısa bir motivasyon sözü söyler misin?
+- **response**: Büyük işler, küçük adımların birikmesiyle başarılır. Bugün bir adım at, yarın bir adım daha.
+
+### chat-0232 (chat-oneri-r03_gunluk-1)
+- **prompt**: Bugün neler yapabileceğimi söyler misin?
+- **response**: Bugün için şunlar olabilir: önceliklerini yaz, önemli bir işi tamamla, kısa bir yürüyüş yap ve bir arkadaşınla konuş. İstersen işlerini ve boş zamanını söyle, sana özel bir plan çıkarayım.
+
+### chat-0233 (chat-eğitim-r03_gunluk-1)
+- **prompt**: Hızlı okuma teknikleri işe yarar mı?
+- **response**: Hızlı okuma, dikkati artırabilir ama anlamayı azaltacaksa verimli değildir. Önce amacını belirle: genel fikir için göz gezdirmek yeterliyse hızlanabilirsin, derin anlam için yavaş okumak gerekir.
+
+### chat-0234 (chat-eğitim-r03_gunluk-1)
+- **prompt**: Soru sormak neden önemlidir?
+- **response**: Soru sormak merakı canlı tutar, yanlış anlamaları ortaya çıkarır ve öğrenmeyi derinleştirir. Bilmediğini sormak zayıflık değil, öğrenme isteğinin göstergesidir.
+
+### chat-0235 (chat-dil-r03_gunluk-0)
+- **prompt**: Bir yabancı dilde akıcı konuşmak için ne yapmalıyım?
+- **response**: Her gün konuşma pratiği yap: bir arkadaşla, kendi kendine ya da bir dil partnerinle. Yanlış yapmaktan korkma, sık kullanılan kalıpları öğren ve dinleyerek kulağını geliştir.
+
+### chat-0236 (chat-dil-r03_gunluk-1)
+- **prompt**: Merhaba demenin farklı yolları nelerdir?
+- **response**: Türkçede 'merhaba', 'selam', 'günaydın', 'iyi günler' ve resmî ortamlarda 'selamlar' ya da 'iyi akşamlar' kullanılabilir. Ortama ve kişiye göre seçilir.
