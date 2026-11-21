@@ -391,3 +391,41 @@ if __name__ == "__main__":
 
             with self.assertRaisesRegex(ValueError, "integrity verification failed"):
                 _load_checkpoint(checkpoint, torch.device("cpu"))
+
+
+    def test_specialist_checkpoint_rejects_invalid_verified_payload_and_recovers_previous(self):
+        import warnings
+        from aethrion.specialist_train import _load_checkpoint, _save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            valid = {
+                "format": "aethrion-specialist-checkpoint-v2",
+                "model_id": "code", "step": 4, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": {},
+                "training_config": {
+                    "seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                    "weight_decay": 0.0, "grad_clip": 1.0,
+                    "eval_interval": 1, "save_interval": 1, "max_steps": 8,
+                },
+            }
+            invalid_payloads = [
+                ("unsupported format", {**valid, "format": "unknown"}),
+                ("missing required field", {key: value for key, value in valid.items() if key != "rng_state"}),
+                ("negative step", {**valid, "step": -1}),
+                ("boolean step", {**valid, "step": True}),
+                ("empty training config", {**valid, "training_config": {}}),
+                ("non-object training config", {**valid, "training_config": []}),
+            ]
+
+            for label, invalid in invalid_payloads:
+                with self.subTest(label=label):
+                    _save_checkpoint(checkpoint, valid)
+                    _save_checkpoint(checkpoint, invalid)
+                    with warnings.catch_warnings(record=True) as caught:
+                        warnings.simplefilter("always")
+                        recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
+                    self.assertEqual(recovered["step"], 4)
+                    self.assertTrue(any("recovering from" in str(item.message) for item in caught))
