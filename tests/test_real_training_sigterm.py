@@ -247,7 +247,7 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
                 # Simulate a metric flushed just before a crash prevented its checkpoint.
                 with metrics_path.open("a", encoding="utf-8") as handle:
-                    handle.write(json.dumps({"step": stopped_step + 1, "orphan": True}) + "\\n")
+                    handle.write(json.dumps({"step": stopped_step + 1, "orphan": True}) + "\n")
 
                 resumed = subprocess.run(
                     command + ["--resume", str(checkpoint), "--session-steps", "1"],
@@ -296,7 +296,7 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
                 metrics_path = output / "metrics.jsonl"
                 with metrics_path.open("a", encoding="utf-8") as handle:
-                    handle.write(json.dumps({"step": stopped_step + 1, "orphan": True}) + "\\n")
+                    handle.write(json.dumps({"step": stopped_step + 1, "orphan": True}) + "\n")
 
                 resumed = subprocess.run(
                     command + ["--resume", str(checkpoint), "--session-steps", "1"],
