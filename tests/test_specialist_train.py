@@ -336,3 +336,58 @@ class SpecialistTrainingTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+    def test_specialist_checkpoint_recovers_when_latest_checksum_sidecar_is_corrupt(self):
+        import warnings
+        from aethrion.specialist_train import _load_checkpoint, _save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            payload = {
+                "format": "aethrion-specialist-checkpoint-v2",
+                "model_id": "code", "step": 0, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": {},
+                "training_config": {
+                    "seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                    "weight_decay": 0.0, "grad_clip": 1.0,
+                    "eval_interval": 1, "save_interval": 1, "max_steps": 2,
+                },
+            }
+            _save_checkpoint(checkpoint, payload)
+            _save_checkpoint(checkpoint, {**payload, "step": 1})
+            Path(str(checkpoint) + ".sha256").write_text("invalid-sidecar\\n", encoding="ascii")
+
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
+
+            self.assertEqual(recovered["step"], 0)
+            self.assertTrue(any("recovering from" in str(item.message) for item in caught))
+
+    def test_specialist_checkpoint_fails_closed_when_both_checksum_sidecars_are_corrupt(self):
+        from aethrion.specialist_train import _load_checkpoint, _save_checkpoint
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint_last.pt"
+            payload = {
+                "format": "aethrion-specialist-checkpoint-v2",
+                "model_id": "code", "step": 0, "model_config": {},
+                "model_state": {}, "optimizer_state": {},
+                "dataset_sha256": "0" * 64, "tokenizer_sha256": "1" * 64,
+                "manifest_sha256": "2" * 64, "rng_state": {},
+                "training_config": {
+                    "seed": 11, "batch_size": 2, "learning_rate": 0.001,
+                    "weight_decay": 0.0, "grad_clip": 1.0,
+                    "eval_interval": 1, "save_interval": 1, "max_steps": 2,
+                },
+            }
+            _save_checkpoint(checkpoint, payload)
+            _save_checkpoint(checkpoint, {**payload, "step": 1})
+            Path(str(checkpoint) + ".sha256").write_text("invalid-latest\\n", encoding="ascii")
+            Path(str(checkpoint) + ".previous.sha256").write_text("invalid-previous\\n", encoding="ascii")
+
+            with self.assertRaisesRegex(ValueError, "integrity verification failed"):
+                _load_checkpoint(checkpoint, torch.device("cpu"))
