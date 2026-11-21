@@ -70,6 +70,9 @@ try:
     assert disabled == space.voice(None)[0]
     assert disabled == space.three_d_text("simple object")[0]
     assert disabled == space.edit_project(None, "review")[0]
+    assert disabled == space.training_session("code", 5)
+    setup = space.training_setup_status()
+    assert "HF_TOKEN secret" in setup and "MISSING" in setup
 
     try:
         space.image("a simple landscape")

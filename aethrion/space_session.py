@@ -19,7 +19,7 @@ MAX_SESSION_STEPS = 500
 
 
 def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = None, environ=None,
-                runner: Callable[..., Any] | None = None) -> dict[str, Any]:
+                runner: Callable[..., Any] | None = None, timeout: int = 3300) -> dict[str, Any]:
     # artifact_sync retains a legacy "base" identifier for artifact operations,
     # but train_family does not expose it as a trainable model. Reject it before
     # downloading anything so the session API and trainer share one model list.
@@ -49,7 +49,7 @@ def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = No
         raise artifact_sync.ArtifactSyncError(f"Unsafe training output directory: {exc}") from exc
     pulled = artifact_sync.pull_model_artifacts(model, directory, api=api, environ=environ)
     cmd = [sys.executable, "-m", "aethrion.train_family", "--execute", "--models", model, "--session-steps", str(steps)]
-    result = (runner or subprocess.run)(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=3300)
+    result = (runner or subprocess.run)(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=timeout)
     ok = getattr(result, "returncode", 1) == 0
     pushed = artifact_sync.push_model_artifacts(model, directory, api=api, environ=environ) if ok and directory.is_dir() else []
     return {"model": model, "steps": steps, "pulled": pulled, "pushed": pushed, "trainer_ok": ok,

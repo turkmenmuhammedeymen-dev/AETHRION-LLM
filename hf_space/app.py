@@ -122,6 +122,49 @@ def training_readiness():
     except Exception as exc:
         return "### Training readiness unavailable\n- " + type(exc).__name__ + ": " + str(exc)[:240]
 
+TRAIN_SESSION_MODELS = ["code", "research"]
+
+
+def training_setup_status():
+    """Booleans only: never reveal secret values."""
+    token = bool(os.environ.get("HF_TOKEN"))
+    repo = bool(os.environ.get("AETHRION_ARTIFACT_REPO", "").strip())
+    lines = ["### Training session setup",
+             f"- Space authentication: {'OK' if SPACE_AUTH_ENABLED else 'MISSING'}",
+             f"- HF_TOKEN secret: {'OK' if token else 'MISSING'}",
+             f"- AETHRION_ARTIFACT_REPO variable: {'OK' if repo else 'MISSING'}"]
+    if not (SPACE_AUTH_ENABLED and token and repo):
+        lines.append("Sessions stay disabled until all three are configured (see docs/SETUP_PRIVATE_ARTIFACT_REPO.md).")
+    return "\n".join(lines)
+
+
+@spaces.GPU(duration=110)
+def _gpu_training_session(model, steps):
+    from aethrion.space_session import run_session
+    return run_session(model, int(steps), root=Path(__file__).resolve().parent, timeout=100)
+
+
+def training_session(model, steps):
+    """One bounded, resumable, gate-checked session. Never releases a model."""
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    if model not in TRAIN_SESSION_MODELS:
+        return "Only models with a validated data gate can run: " + ", ".join(TRAIN_SESSION_MODELS)
+    if not os.environ.get("HF_TOKEN") or not os.environ.get("AETHRION_ARTIFACT_REPO", "").strip():
+        return training_setup_status()
+    try:
+        result = _gpu_training_session(model, steps)
+    except Exception as exc:
+        return "### Training session failed\n- " + type(exc).__name__ + ": " + str(exc)[:300]
+    return (
+        "### Training session finished\n"
+        f"- Model: {result['model']} | steps requested: {result['steps']}\n"
+        f"- Trainer ok: {result['trainer_ok']} | pulled: {len(result['pulled'])} files | pushed: {len(result['pushed'])} files\n"
+        "- Released: NO — a session is not a release; evaluation and human approval are still required.\n"
+        f"```\n{result['trainer_tail']}\n```"
+    )
+
+
 def status():
     try:
         model_status = get_native_model_statuses()
@@ -430,6 +473,17 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
         gr.Button("Check all 11 model data gates (read-only)").click(
             training_readiness, inputs=[], outputs=readiness_report
         )
+    with gr.Accordion("Training session (owner only)", open=False):
+        gr.Markdown(
+            "Runs one short, resumable, data-gate-checked session for a single model and mirrors "
+            "its checkpoint to your private artifact repo. It cannot release a model."
+        )
+        setup_report = gr.Markdown("Setup has not been checked in this session.")
+        gr.Button("Check training setup (booleans only)").click(training_setup_status, inputs=[], outputs=setup_report)
+        train_model = gr.Dropdown(TRAIN_SESSION_MODELS, value="code", label="Model")
+        train_steps = gr.Slider(1, 100, value=25, step=1, label="Optimizer steps this session")
+        train_report = gr.Markdown()
+        gr.Button("Run one training session").click(training_session, inputs=[train_model, train_steps], outputs=train_report)
     with gr.Tabs():
         with gr.Tab("AI Chat"):
             gr.ChatInterface(chat,type="messages",chatbot=gr.Chatbot(type="messages",height=420))
@@ -486,7 +540,7 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
             a=gr.Audio(sources=["microphone","upload"],type="filepath")
             text=gr.Markdown();spoken=gr.Audio(type="filepath")
             gr.Button("Recognize and respond").click(voice,inputs=a,outputs=[text,spoken])
-    gr.Markdown("---\nCredentials stay in Space Secrets. Uploaded project code is never executed. Training is not started from this interface.")
+    gr.Markdown("---\nCredentials stay in Space Secrets. Uploaded project code is never executed. Training starts only from the owner-only session panel, after every data gate passes.")
 
 if __name__ == "__main__":
     demo.queue(default_concurrency_limit=2, max_size=20).launch(
