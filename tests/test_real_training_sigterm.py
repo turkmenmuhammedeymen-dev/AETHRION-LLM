@@ -245,6 +245,9 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 self.assertTrue(metrics, "SIGTERM stop must persist a final validation metric")
                 self.assertEqual(metrics[-1]["step"], stopped_step)
                 self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
+                # Simulate a metric flushed just before a crash prevented its checkpoint.
+                with metrics_path.open("a", encoding="utf-8") as handle:
+                    handle.write(json.dumps({"step": stopped_step + 1, "orphan": True}) + "\n")
 
                 resumed = subprocess.run(
                     command + ["--resume", str(checkpoint), "--session-steps", "1"],
@@ -253,6 +256,12 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
                 resumed_state = load_checkpoint(checkpoint, map_location="cpu")
                 self.assertGreater(resumed_state["step"], stopped_step)
+                recovered_metrics = [
+                    json.loads(line) for line in metrics_path.read_text(encoding="utf-8").splitlines()
+                ]
+                recovered_steps = [record["step"] for record in recovered_metrics]
+                self.assertEqual(recovered_steps, sorted(set(recovered_steps)))
+                self.assertNotIn(True, [record.get("orphan", False) for record in recovered_metrics])
                 resumed_progress = json.loads(progress.read_text(encoding="utf-8"))
                 self.assertEqual(resumed_progress["status"], "interrupted")
                 self.assertEqual(resumed_progress["step"], resumed_state["step"])
@@ -285,6 +294,9 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 self.assertEqual(report["status"], "training_interrupted_not_released")
                 self.assertEqual(report["checkpoint_sha256"], hashlib.sha256(checkpoint.read_bytes()).hexdigest())
                 self.assertTrue(Path(str(checkpoint) + ".sha256").is_file())
+                metrics_path = output / "metrics.jsonl"
+                with metrics_path.open("a", encoding="utf-8") as handle:
+                    handle.write(json.dumps({"step": stopped_step + 1, "orphan": True}) + "\n")
 
                 resumed = subprocess.run(
                     command + ["--resume", str(checkpoint), "--session-steps", "1"],
@@ -293,6 +305,12 @@ class RealTrainingSigtermRecoveryTests(unittest.TestCase):
                 self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
                 resumed_state = _load_checkpoint(checkpoint, torch.device("cpu"))
                 self.assertGreater(resumed_state["step"], stopped_step)
+                recovered_metrics = [
+                    json.loads(line) for line in metrics_path.read_text(encoding="utf-8").splitlines()
+                ]
+                recovered_steps = [record["step"] for record in recovered_metrics]
+                self.assertEqual(recovered_steps, sorted(set(recovered_steps)))
+                self.assertNotIn(True, [record.get("orphan", False) for record in recovered_metrics])
                 resumed_report = json.loads(
                     (output / "training_report.json").read_text(encoding="utf-8")
                 )

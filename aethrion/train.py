@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.tokenizer import ByteBPETokenizer, validate_tokenizer_provenance
-from aethrion.checkpoint import load_checkpoint, save_checkpoint, sha256_file, write_json_atomic
+from aethrion.checkpoint import load_checkpoint, reconcile_metrics_jsonl, save_checkpoint, sha256_file, write_json_atomic
 from aethrion.training_config import require_finite_number, require_int
 
 _STOP_REQUESTED = False
@@ -218,6 +218,16 @@ def main() -> None:
     output = Path(cfg["output_dir"]); output.mkdir(parents=True, exist_ok=True)
     metrics_path = output / "metrics.jsonl"
     progress_path = output / "progress.json"
+    if args.resume:
+        discarded = reconcile_metrics_jsonl(metrics_path, checkpoint_step)
+        if discarded:
+            print(f"Recovery discarded {discarded} uncommitted or invalid metrics row(s).", flush=True)
+        write_json_atomic({
+            "status": "resuming",
+            "step": checkpoint_step,
+            "max_steps": cfg["max_steps"],
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        }, progress_path)
     started = time.perf_counter()
     last_metrics = {}
     global _STOP_REQUESTED
