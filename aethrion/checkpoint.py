@@ -195,13 +195,13 @@ def reconcile_metrics_jsonl(path: str | Path, checkpoint_step: int) -> int:
         if type(step) is not int or step < 0 or step > checkpoint_step or step <= last_step:
             discarded += 1
             continue
-        retained.append(json.dumps(record, ensure_ascii=False) + "\\n")
+        retained.append(json.dumps(record, ensure_ascii=False) + "\n")
         last_step = step
 
     if discarded:
         temporary = Path(str(target) + ".tmp")
         try:
-            with temporary.open("w", encoding="utf-8", newline="\\n") as handle:
+            with temporary.open("w", encoding="utf-8", newline="\n") as handle:
                 handle.writelines(retained)
                 handle.flush()
                 os.fsync(handle.fileno())
