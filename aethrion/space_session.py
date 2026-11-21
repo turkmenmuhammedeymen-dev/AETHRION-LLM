@@ -13,15 +13,18 @@ from pathlib import Path
 from typing import Any, Callable
 
 from aethrion import artifact_sync
-from aethrion.train_family import _resolve_output_dir
+from aethrion.train_family import MODEL_IDS, _resolve_output_dir
 
 MAX_SESSION_STEPS = 500
 
 
 def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = None, environ=None,
                 runner: Callable[..., Any] | None = None) -> dict[str, Any]:
-    if model not in artifact_sync.ALLOWED_MODELS:
-        raise artifact_sync.ArtifactSyncError(f"Unknown model '{model}'.")
+    # artifact_sync retains a legacy "base" identifier for artifact operations,
+    # but train_family does not expose it as a trainable model. Reject it before
+    # downloading anything so the session API and trainer share one model list.
+    if model not in MODEL_IDS:
+        raise artifact_sync.ArtifactSyncError(f"Unknown or unsupported training model '{model}'.")
     if isinstance(steps, bool) or not isinstance(steps, int) or not 1 <= steps <= MAX_SESSION_STEPS:
         raise ValueError(f"steps must be an integer between 1 and {MAX_SESSION_STEPS}.")
     repo_root = Path(root).resolve()
@@ -36,6 +39,10 @@ def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = No
         raise artifact_sync.ArtifactSyncError(f"Training config is missing or invalid: {config_path}") from exc
     if not isinstance(config, dict):
         raise artifact_sync.ArtifactSyncError("Training config must be a JSON object.")
+    if model != "chat" and config.get("model_id") != model:
+        raise artifact_sync.ArtifactSyncError(
+            f"Training config model_id does not match selected model '{model}'."
+        )
     try:
         directory = _resolve_output_dir(repo_root, config.get("output_dir"))
     except ValueError as exc:
