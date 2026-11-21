@@ -15,7 +15,15 @@ from typing import Any
 
 ALLOWED_MODELS = frozenset({"chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d", "research", "document", "safety", "base"})
 _NAME = re.compile(r"^[A-Za-z0-9._-]{1,120}$")
-ALLOWED_SUFFIXES = (".pt", ".json", ".sha256", ".npz")
+# Only resumable model state is mirrored. Runtime telemetry stays in the Space
+# workspace and is not uploaded as a model artifact.
+ALLOWED_ARTIFACT_NAMES = frozenset({
+    "checkpoint_last.pt",
+    "checkpoint_last.pt.sha256",
+    "checkpoint_last.pt.previous",
+    "checkpoint_last.pt.previous.sha256",
+})
+RUNTIME_FILES = frozenset({"metrics.jsonl", "training_report.json"})
 
 
 class ArtifactSyncError(RuntimeError):
@@ -51,7 +59,7 @@ def _require_private(api: Any, repo: str) -> None:
 def _safe(model: str, name: str) -> None:
     if model not in ALLOWED_MODELS:
         raise ArtifactSyncError(f"Unknown model '{model}'.")
-    if not _NAME.fullmatch(name) or not name.endswith(ALLOWED_SUFFIXES) or name.startswith("."):
+    if not _NAME.fullmatch(name) or name not in ALLOWED_ARTIFACT_NAMES:
         raise ArtifactSyncError(f"File name not allowed: {name!r}")
 
 
@@ -63,11 +71,22 @@ def _check_model(model: str) -> None:
 def push_model_artifacts(model: str, directory: str | Path, *, api: Any = None, environ=None) -> list[str]:
     _check_model(model)
     repo = _repo_id(environ); client = _client(api, environ); _require_private(client, repo)
-    directory = Path(directory); sent = []
+    directory = Path(directory)
+    if not directory.is_dir():
+        raise ArtifactSyncError("Artifact directory does not exist.")
+    # Validate the complete upload set before the first network write. The
+    # trainer also emits metrics.jsonl and training_report.json; these are
+    # runtime telemetry, not resumable model state, so keep them local.
+    candidates = []
     for path in sorted(directory.iterdir()):
         if not path.is_file() or path.is_symlink():
             continue
+        if path.name in RUNTIME_FILES:
+            continue
         _safe(model, path.name)
+        candidates.append(path)
+    sent = []
+    for path in candidates:
         client.upload_file(path_or_fileobj=str(path), path_in_repo=f"{model}/{path.name}", repo_id=repo, repo_type="model")
         sent.append(path.name)
     return sent

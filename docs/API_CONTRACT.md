@@ -13,7 +13,7 @@ Auth: `Authorization: Bearer <AETHRION_API_TOKEN>` (401 without it, 503 if the s
 | POST | `/v1/chat/completions` | Text models: `aethrion-chat`, `-code`, `-research`, `-safety` |
 
 Model ids: `aethrion-chat|code|research|document|safety|vision|image|3d|asr|tts`.
-Non-text ids are listed by `/v1/models` but use their dedicated endpoints.
+Non-text ids are listed by `/v1/models` but use their dedicated endpoints. The `vocoder` entry in the internal training manifest is a TTS component, not a standalone public API model, so it is intentionally excluded from this contract.
 
 Request: `{"model","messages":[{"role":"system|user|assistant","content"}],"max_tokens"?:1-2048,"temperature"?:0-2}`.
 `stream` is rejected (`stream_not_supported`). Usage counts are character estimates and labeled `estimated`.
