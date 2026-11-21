@@ -213,6 +213,20 @@ def prepare_text_dataset(
         raise PreparationError("License, permitted_use and evidence_uri must be documented; approvals stay false.")
     if max_length < 2 or vocab_size < 256 or reason_classes < 1 or layout_vocab_size < 1 or tag_classes < 1:
         raise PreparationError("Invalid tokenizer or sequence dimensions.")
+    # Prepared datasets are provenance-bearing artifacts. Check collisions
+    # before reading input or training/loading tokenizers so a rerun is cheap
+    # and cannot perform unnecessary work against an existing output.
+    manifests_root = Path(output_root).expanduser().resolve() / "manifests"
+    destination = manifests_root / model_id
+    manifest_path = manifests_root / f"{model_id}.json"
+    if manifests_root.is_symlink() or destination.exists() or destination.is_symlink():
+        raise PreparationError(
+            f"Refusing to overwrite existing preparation output: {destination}"
+        )
+    if manifest_path.exists() or manifest_path.is_symlink():
+        raise PreparationError(
+            f"Refusing to overwrite existing preparation manifest: {manifest_path}"
+        )
     if model_id == "chat" and tokenizer_source_path is None:
         raise PreparationError("CHAT instruction preparation requires the exact existing BASE tokenizer via tokenizer_source_path.")
     if model_id != "chat" and tokenizer_source_path is not None:
@@ -255,16 +269,6 @@ def prepare_text_dataset(
     manifests_root = Path(output_root).expanduser().resolve() / "manifests"
     destination = manifests_root / model_id
     manifest_path = manifests_root / f"{model_id}.json"
-    # Prepared datasets are provenance-bearing artifacts. Never silently replace
-    # an earlier source copy, NPZ, tokenizer or manifest on a rerun.
-    if manifests_root.is_symlink() or destination.exists() or destination.is_symlink():
-        raise PreparationError(
-            f"Refusing to overwrite existing preparation output: {destination}"
-        )
-    if manifest_path.exists() or manifest_path.is_symlink():
-        raise PreparationError(
-            f"Refusing to overwrite existing preparation manifest: {manifest_path}"
-        )
     destination.mkdir(parents=True, exist_ok=False)
     source_copy = destination / "source.jsonl"
     shutil.copyfile(source, source_copy)
