@@ -18,7 +18,9 @@ class ArtifactSyncTests(unittest.TestCase):
     def test_round_trip_and_private_creation(self):
         with tempfile.TemporaryDirectory() as d:
             src = Path(d, "src"); src.mkdir(); (src / "checkpoint_last.pt").write_bytes(b"w"); (src / "checkpoint_last.pt.sha256").write_text("h")
-            (src / "notes.txt").write_text("ignored? no: must be rejected")
+            (src / "notes.txt").write_text("must be rejected")
+            (src / "metrics.jsonl").write_text('{"step":1,"train_loss":0.5}\\n')
+            (src / "training_report.json").write_text('{"status":"training_in_progress_not_released"}')
             f = Fake()
             with self.assertRaises(s.ArtifactSyncError): s.push_model_artifacts("chat", src, api=f, environ=ENV)
             (src / "notes.txt").unlink()
@@ -32,6 +34,16 @@ class ArtifactSyncTests(unittest.TestCase):
             with self.assertRaises(s.ArtifactSyncError): s.push_model_artifacts("chat", d, api=Fake(private=False), environ=ENV)
             with self.assertRaises(s.ArtifactSyncError): s.push_model_artifacts("evil", d, api=Fake(), environ=ENV)
             with self.assertRaises(s.ArtifactSyncError): s.push_model_artifacts("chat", d, api=Fake(), environ={})
+    def test_rejects_unknown_files_before_any_upload(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "checkpoint_last.pt").write_bytes(b"checkpoint")
+            (root / "unexpected.json").write_text("{}")
+            fake = Fake()
+            with self.assertRaises(s.ArtifactSyncError):
+                s.push_model_artifacts("chat", root, api=fake, environ=ENV)
+            self.assertEqual(fake.up, [])
+
     def test_rejects_bad_names(self):
         for n in ("../x.pt", ".hidden.pt", "a b.pt", "x.exe"):
             with self.assertRaises(s.ArtifactSyncError): s._safe("chat", n)
