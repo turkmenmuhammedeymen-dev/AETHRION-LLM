@@ -83,3 +83,11 @@ Inference remains separately protected by Space authentication. The Space smoke
 test verifies that training readiness works without inference credentials,
 contains eleven model rows, and explicitly reports that training did not start
 and no checkpoint was written.
+
+## Private artifact sync and session wrapper
+
+`aethrion/artifact_sync.py` mirrors `artifacts/models/<model>/` to a **private** Hugging Face model repo
+(`AETHRION_ARTIFACT_REPO`, secret `HF_TOKEN`); it refuses public repos and non-allow-listed file names.
+`aethrion/space_session.run_session(model, steps)` does pull -> gate-checked `train_family --execute` -> push for
+one model and never marks anything released. Setup (owner): create the private repo, add `HF_TOKEN` and
+`AETHRION_ARTIFACT_REPO` as Space secrets. Training still fails closed until the data gate is opened by the owner.
