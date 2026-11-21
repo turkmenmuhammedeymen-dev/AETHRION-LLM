@@ -430,7 +430,7 @@ class SpecialistTrainingTests(unittest.TestCase):
                     torch.save(invalid, checkpoint)
                     digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
                     Path(str(checkpoint) + ".sha256").write_text(
-                        digest + "\\n", encoding="ascii"
+                        digest + "\n", encoding="ascii"
                     )
                     with warnings.catch_warnings(record=True) as caught:
                         warnings.simplefilter("always")
