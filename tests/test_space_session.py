@@ -12,10 +12,13 @@ class SessionTests(unittest.TestCase):
         kwargs.setdefault("environ", ENV)
         return ss.run_session(*args, **kwargs)
 
-    def _config(self, root, model, output_dir):
+    def _config(self, root, model, output_dir, *, config_model=None):
         path = (Path(root) / "configs" / ("small.json" if model == "chat" else f"specialists/{model}.json"))
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps({"model_id": model, "output_dir": output_dir}), encoding="utf-8")
+        path.write_text(
+            json.dumps({"model_id": config_model or model, "output_dir": output_dir}),
+            encoding="utf-8",
+        )
 
     def test_gate_failure_pushes_nothing_and_never_releases(self):
         with tempfile.TemporaryDirectory() as d:
@@ -57,7 +60,9 @@ class SessionTests(unittest.TestCase):
 
     def test_specialist_config_model_mismatch_is_rejected_before_download(self):
         with tempfile.TemporaryDirectory() as d:
-            self._config(d, "vision", "artifacts/models/vision")
+            # The selected model determines the config filename; its contents
+            # deliberately claim a different model to exercise the mismatch guard.
+            self._config(d, "code", "artifacts/models/code", config_model="vision")
             with patch("aethrion.space_session.artifact_sync.pull_model_artifacts") as pull:
                 with self.assertRaisesRegex(s.ArtifactSyncError, "does not match"):
                     self._run_session("code", 5, root=d, api=Fake(), environ=ENV)
