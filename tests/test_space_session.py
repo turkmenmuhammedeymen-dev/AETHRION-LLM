@@ -5,6 +5,12 @@ from aethrion import space_session as ss, artifact_sync as s
 from tests.test_artifact_sync import Fake, ENV
 
 class SessionTests(unittest.TestCase):
+    def _run_session(self, *args, **kwargs):
+        # The fake Hub client requires the same explicit private-repo setting
+        # that production receives from the Space environment.
+        kwargs.setdefault("environ", ENV)
+        return ss.run_session(*args, **kwargs)
+
     def _config(self, root, model, output_dir):
         path = (Path(root) / "configs" / ("small.json" if model == "chat" else f"specialists/{model}.json"))
         path.parent.mkdir(parents=True, exist_ok=True)
