@@ -179,10 +179,11 @@ def reconcile_metrics_jsonl(path: str | Path, checkpoint_step: int) -> int:
     if not target.is_file():
         return 0
 
+    raw_metrics = target.read_text(encoding="utf-8")
     retained: list[str] = []
     last_step = -1
     discarded = 0
-    for line in target.read_text(encoding="utf-8").splitlines():
+    for line in raw_metrics.splitlines():
         try:
             record = json.loads(line)
         except (json.JSONDecodeError, TypeError):
@@ -198,7 +199,8 @@ def reconcile_metrics_jsonl(path: str | Path, checkpoint_step: int) -> int:
         retained.append(json.dumps(record, ensure_ascii=False) + "\n")
         last_step = step
 
-    if discarded:
+    needs_rewrite = discarded > 0 or bool(raw_metrics and not raw_metrics.endswith("\\n"))
+    if needs_rewrite:
         temporary = Path(str(target) + ".tmp")
         try:
             with temporary.open("w", encoding="utf-8", newline="\n") as handle:
