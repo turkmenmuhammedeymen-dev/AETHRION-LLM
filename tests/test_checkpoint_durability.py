@@ -93,7 +93,7 @@ class CheckpointDurabilityTests(unittest.TestCase):
             discarded = checkpoint.reconcile_metrics_jsonl(target, checkpoint_step=0)
 
             self.assertEqual(discarded, 0)
-            self.assertTrue(target.read_text(encoding="utf-8").endswith("\\n"))
+            self.assertTrue(target.read_text(encoding="utf-8").endswith("\n"))
             self.assertEqual(json.loads(target.read_text(encoding="utf-8")), {"step": 0, "loss": 1.0})
 
 
