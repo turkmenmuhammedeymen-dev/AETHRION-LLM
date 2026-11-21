@@ -420,9 +420,21 @@ if __name__ == "__main__":
                 ("non-object training config", {**valid, "training_config": []}),
             ]
 
+            writer_rejects = {"unsupported format", "empty training config", "non-object training config"}
             for label, invalid in invalid_payloads:
                 with self.subTest(label=label):
                     _save_checkpoint(checkpoint, valid)
+                    if label in writer_rejects:
+                        # The writer refuses these payloads up front, so the verified
+                        # checkpoint on disk must be left untouched and load cleanly.
+                        with self.assertRaises(ValueError):
+                            _save_checkpoint(checkpoint, invalid)
+                        with warnings.catch_warnings(record=True) as caught:
+                            warnings.simplefilter("always")
+                            recovered = _load_checkpoint(checkpoint, torch.device("cpu"))
+                        self.assertEqual(recovered["step"], 4)
+                        self.assertFalse(any("recovering from" in str(item.message) for item in caught))
+                        continue
                     _save_checkpoint(checkpoint, invalid)
                     with warnings.catch_warnings(record=True) as caught:
                         warnings.simplefilter("always")
