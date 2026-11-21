@@ -115,6 +115,23 @@ class SpecialistTrainingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "escapes"):
                 train_specialist(config, root / "missing-manifest.json")
 
+    def test_fresh_specialist_run_refuses_existing_outputs_before_dataset_access(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = self._config(root)
+            output = Path(config["output_dir"])
+            output.mkdir()
+            marker = output / "keep-me.txt"
+            marker.write_text("existing training artifact", encoding="utf-8")
+
+            with patch("aethrion.specialist_train.validate_specialist_dataset") as validate:
+                with self.assertRaisesRegex(ValueError, "Refusing to overwrite existing specialist training outputs"):
+                    train_specialist(config, root / "missing-manifest.json")
+
+            validate.assert_not_called()
+            self.assertEqual(marker.read_text(encoding="utf-8"), "existing training artifact")
+            self.assertEqual(sorted(path.name for path in output.iterdir()), ["keep-me.txt"])
+
     def test_invalid_numeric_specialist_config_fails_before_dataset_access(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
