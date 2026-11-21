@@ -85,5 +85,17 @@ class CheckpointDurabilityTests(unittest.TestCase):
                     checkpoint.reconcile_metrics_jsonl(target, invalid)
 
 
+    def test_resume_metrics_reconciliation_restores_missing_final_newline(self):
+        with tempfile.TemporaryDirectory() as folder:
+            target = Path(folder) / "metrics.jsonl"
+            target.write_text('{"step": 0, "loss": 1.0}', encoding="utf-8")
+
+            discarded = checkpoint.reconcile_metrics_jsonl(target, checkpoint_step=0)
+
+            self.assertEqual(discarded, 0)
+            self.assertTrue(target.read_text(encoding="utf-8").endswith("\\n"))
+            self.assertEqual(json.loads(target.read_text(encoding="utf-8")), {"step": 0, "loss": 1.0})
+
+
 if __name__ == "__main__":
     unittest.main()
