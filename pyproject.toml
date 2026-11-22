@@ -24,3 +24,8 @@ include = ["aethrion*"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.pytest.ini_options]
+# The repository and HF Space contain mirrored *_test.py modules.
+# Import them by path so identical basenames cannot collide in sys.modules.
+addopts = "--import-mode=importlib"
