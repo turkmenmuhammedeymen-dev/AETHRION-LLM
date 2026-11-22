@@ -1,0 +1,360 @@
+{"id": "vision-0001", "group_id": "vision-artı-mavi", "image_path": "images/vision-0001.png", "caption": "Gri zemin üzerinde sol altta mavi bir artı."}
+{"id": "vision-0002", "group_id": "vision-artı-mor", "image_path": "images/vision-0002.png", "caption": "Gri zemin üzerinde sağ altta mor bir artı."}
+{"id": "vision-0003", "group_id": "vision-daire-sarı", "image_path": "images/vision-0003.png", "caption": "Siyah zemin üzerinde sağ üstte sarı bir daire."}
+{"id": "vision-0004", "group_id": "vision-kare-mor", "image_path": "images/vision-0004.png", "caption": "Beyaz zemin üzerinde sol altta mor bir kare."}
+{"id": "vision-0005", "group_id": "vision-daire-pembe", "image_path": "images/vision-0005.png", "caption": "Gri zemin üzerinde sol üstte pembe bir daire."}
+{"id": "vision-0006", "group_id": "vision-daire-yeşil", "image_path": "images/vision-0006.png", "caption": "Beyaz zemin üzerinde sağ üstte yeşil bir daire."}
+{"id": "vision-0007", "group_id": "vision-üçgen-kırmızı", "image_path": "images/vision-0007.png", "caption": "Siyah zemin üzerinde sol üstte kırmızı bir üçgen."}
+{"id": "vision-0008", "group_id": "vision-dikdörtgen-turuncu", "image_path": "images/vision-0008.png", "caption": "Beyaz zemin üzerinde sol üstte turuncu bir dikdörtgen."}
+{"id": "vision-0009", "group_id": "vision-üçgen-mor", "image_path": "images/vision-0009.png", "caption": "Siyah zemin üzerinde sol altta mor bir üçgen."}
+{"id": "vision-0010", "group_id": "vision-kare-turkuaz", "image_path": "images/vision-0010.png", "caption": "Siyah zemin üzerinde sol üstte turkuaz bir kare."}
+{"id": "vision-0011", "group_id": "vision-daire-pembe", "image_path": "images/vision-0011.png", "caption": "Siyah zemin üzerinde sağ altta pembe bir daire."}
+{"id": "vision-0012", "group_id": "vision-artı-mavi", "image_path": "images/vision-0012.png", "caption": "Siyah zemin üzerinde sağ altta mavi bir artı."}
+{"id": "vision-0013", "group_id": "vision-üçgen-turkuaz", "image_path": "images/vision-0013.png", "caption": "Gri zemin üzerinde sol üstte turkuaz bir üçgen."}
+{"id": "vision-0014", "group_id": "vision-dikdörtgen-turkuaz", "image_path": "images/vision-0014.png", "caption": "Beyaz zemin üzerinde sağ üstte turkuaz bir dikdörtgen."}
+{"id": "vision-0015", "group_id": "vision-artı-turuncu", "image_path": "images/vision-0015.png", "caption": "Beyaz zemin üzerinde sağ üstte turuncu bir artı."}
+{"id": "vision-0016", "group_id": "vision-daire-turkuaz", "image_path": "images/vision-0016.png", "caption": "Beyaz zemin üzerinde sol üstte turkuaz bir daire."}
+{"id": "vision-0017", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0017.png", "caption": "Gri zemin üzerinde ortada sarı bir üçgen."}
+{"id": "vision-0018", "group_id": "vision-üçgen-pembe", "image_path": "images/vision-0018.png", "caption": "Beyaz zemin üzerinde sağ üstte pembe bir üçgen."}
+{"id": "vision-0019", "group_id": "vision-kare-mor", "image_path": "images/vision-0019.png", "caption": "Siyah zemin üzerinde sol altta mor bir kare."}
+{"id": "vision-0020", "group_id": "vision-kare-turkuaz", "image_path": "images/vision-0020.png", "caption": "Beyaz zemin üzerinde sağ altta turkuaz bir kare."}
+{"id": "vision-0021", "group_id": "vision-üçgen-yeşil", "image_path": "images/vision-0021.png", "caption": "Siyah zemin üzerinde sol altta yeşil bir üçgen."}
+{"id": "vision-0022", "group_id": "vision-dikdörtgen-turuncu", "image_path": "images/vision-0022.png", "caption": "Gri zemin üzerinde sol üstte turuncu bir dikdörtgen."}
+{"id": "vision-0023", "group_id": "vision-üçgen-mavi", "image_path": "images/vision-0023.png", "caption": "Gri zemin üzerinde ortada mavi bir üçgen."}
+{"id": "vision-0024", "group_id": "vision-dikdörtgen-pembe", "image_path": "images/vision-0024.png", "caption": "Beyaz zemin üzerinde sağ altta pembe bir dikdörtgen."}
+{"id": "vision-0025", "group_id": "vision-daire-kırmızı", "image_path": "images/vision-0025.png", "caption": "Siyah zemin üzerinde sol üstte kırmızı bir daire."}
+{"id": "vision-0026", "group_id": "vision-artı-turuncu", "image_path": "images/vision-0026.png", "caption": "Gri zemin üzerinde sağ altta turuncu bir artı."}
+{"id": "vision-0027", "group_id": "vision-elmas-mor", "image_path": "images/vision-0027.png", "caption": "Beyaz zemin üzerinde ortada mor bir elmas."}
+{"id": "vision-0028", "group_id": "vision-elmas-kırmızı", "image_path": "images/vision-0028.png", "caption": "Beyaz zemin üzerinde sol üstte kırmızı bir elmas."}
+{"id": "vision-0029", "group_id": "vision-kare-turuncu", "image_path": "images/vision-0029.png", "caption": "Siyah zemin üzerinde ortada turuncu bir kare."}
+{"id": "vision-0030", "group_id": "vision-dikdörtgen-yeşil", "image_path": "images/vision-0030.png", "caption": "Gri zemin üzerinde ortada yeşil bir dikdörtgen."}
+{"id": "vision-0031", "group_id": "vision-artı-yeşil", "image_path": "images/vision-0031.png", "caption": "Gri zemin üzerinde ortada yeşil bir artı."}
+{"id": "vision-0032", "group_id": "vision-artı-yeşil", "image_path": "images/vision-0032.png", "caption": "Gri zemin üzerinde sağ altta yeşil bir artı."}
+{"id": "vision-0033", "group_id": "vision-kare-turuncu", "image_path": "images/vision-0033.png", "caption": "Siyah zemin üzerinde sağ altta turuncu bir kare."}
+{"id": "vision-0034", "group_id": "vision-daire-mavi", "image_path": "images/vision-0034.png", "caption": "Siyah zemin üzerinde sağ altta mavi bir daire."}
+{"id": "vision-0035", "group_id": "vision-dikdörtgen-sarı", "image_path": "images/vision-0035.png", "caption": "Gri zemin üzerinde sağ üstte sarı bir dikdörtgen."}
+{"id": "vision-0036", "group_id": "vision-dikdörtgen-mavi", "image_path": "images/vision-0036.png", "caption": "Beyaz zemin üzerinde sağ altta mavi bir dikdörtgen."}
+{"id": "vision-0037", "group_id": "vision-üçgen-turuncu", "image_path": "images/vision-0037.png", "caption": "Siyah zemin üzerinde ortada turuncu bir üçgen."}
+{"id": "vision-0038", "group_id": "vision-kare-pembe", "image_path": "images/vision-0038.png", "caption": "Beyaz zemin üzerinde sağ üstte pembe bir kare."}
+{"id": "vision-0039", "group_id": "vision-elmas-turkuaz", "image_path": "images/vision-0039.png", "caption": "Siyah zemin üzerinde sağ üstte turkuaz bir elmas."}
+{"id": "vision-0040", "group_id": "vision-kare-kırmızı", "image_path": "images/vision-0040.png", "caption": "Siyah zemin üzerinde sol altta kırmızı bir kare."}
+{"id": "vision-0041", "group_id": "vision-daire-pembe", "image_path": "images/vision-0041.png", "caption": "Beyaz zemin üzerinde sağ üstte pembe bir daire."}
+{"id": "vision-0042", "group_id": "vision-dikdörtgen-sarı", "image_path": "images/vision-0042.png", "caption": "Beyaz zemin üzerinde sağ üstte sarı bir dikdörtgen."}
+{"id": "vision-0043", "group_id": "vision-elmas-kırmızı", "image_path": "images/vision-0043.png", "caption": "Gri zemin üzerinde sol altta kırmızı bir elmas."}
+{"id": "vision-0044", "group_id": "vision-artı-pembe", "image_path": "images/vision-0044.png", "caption": "Siyah zemin üzerinde sağ üstte pembe bir artı."}
+{"id": "vision-0045", "group_id": "vision-dikdörtgen-kırmızı", "image_path": "images/vision-0045.png", "caption": "Gri zemin üzerinde ortada kırmızı bir dikdörtgen."}
+{"id": "vision-0046", "group_id": "vision-kare-turuncu", "image_path": "images/vision-0046.png", "caption": "Siyah zemin üzerinde sol üstte turuncu bir kare."}
+{"id": "vision-0047", "group_id": "vision-elmas-kırmızı", "image_path": "images/vision-0047.png", "caption": "Siyah zemin üzerinde sol üstte kırmızı bir elmas."}
+{"id": "vision-0048", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0048.png", "caption": "Gri zemin üzerinde sol altta sarı bir üçgen."}
+{"id": "vision-0049", "group_id": "vision-kare-turkuaz", "image_path": "images/vision-0049.png", "caption": "Gri zemin üzerinde sol altta turkuaz bir kare."}
+{"id": "vision-0050", "group_id": "vision-artı-mavi", "image_path": "images/vision-0050.png", "caption": "Gri zemin üzerinde sol üstte mavi bir artı."}
+{"id": "vision-0051", "group_id": "vision-kare-kırmızı", "image_path": "images/vision-0051.png", "caption": "Gri zemin üzerinde ortada kırmızı bir kare."}
+{"id": "vision-0052", "group_id": "vision-üçgen-mavi", "image_path": "images/vision-0052.png", "caption": "Beyaz zemin üzerinde sol altta mavi bir üçgen."}
+{"id": "vision-0053", "group_id": "vision-elmas-turuncu", "image_path": "images/vision-0053.png", "caption": "Gri zemin üzerinde sağ altta turuncu bir elmas."}
+{"id": "vision-0054", "group_id": "vision-artı-kırmızı", "image_path": "images/vision-0054.png", "caption": "Gri zemin üzerinde sol üstte kırmızı bir artı."}
+{"id": "vision-0055", "group_id": "vision-elmas-pembe", "image_path": "images/vision-0055.png", "caption": "Gri zemin üzerinde ortada pembe bir elmas."}
+{"id": "vision-0056", "group_id": "vision-kare-mavi", "image_path": "images/vision-0056.png", "caption": "Gri zemin üzerinde sol üstte mavi bir kare."}
+{"id": "vision-0057", "group_id": "vision-elmas-turkuaz", "image_path": "images/vision-0057.png", "caption": "Gri zemin üzerinde ortada turkuaz bir elmas."}
+{"id": "vision-0058", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0058.png", "caption": "Gri zemin üzerinde sağ üstte sarı bir üçgen."}
+{"id": "vision-0059", "group_id": "vision-daire-sarı", "image_path": "images/vision-0059.png", "caption": "Beyaz zemin üzerinde sağ üstte sarı bir daire."}
+{"id": "vision-0060", "group_id": "vision-daire-turkuaz", "image_path": "images/vision-0060.png", "caption": "Gri zemin üzerinde ortada turkuaz bir daire."}
+{"id": "vision-0061", "group_id": "vision-üçgen-turkuaz", "image_path": "images/vision-0061.png", "caption": "Gri zemin üzerinde ortada turkuaz bir üçgen."}
+{"id": "vision-0062", "group_id": "vision-kare-mavi", "image_path": "images/vision-0062.png", "caption": "Beyaz zemin üzerinde sağ altta mavi bir kare."}
+{"id": "vision-0063", "group_id": "vision-dikdörtgen-sarı", "image_path": "images/vision-0063.png", "caption": "Beyaz zemin üzerinde sol üstte sarı bir dikdörtgen."}
+{"id": "vision-0064", "group_id": "vision-üçgen-pembe", "image_path": "images/vision-0064.png", "caption": "Siyah zemin üzerinde ortada pembe bir üçgen."}
+{"id": "vision-0065", "group_id": "vision-artı-pembe", "image_path": "images/vision-0065.png", "caption": "Gri zemin üzerinde sağ altta pembe bir artı."}
+{"id": "vision-0066", "group_id": "vision-kare-turkuaz", "image_path": "images/vision-0066.png", "caption": "Gri zemin üzerinde sağ altta turkuaz bir kare."}
+{"id": "vision-0067", "group_id": "vision-elmas-mavi", "image_path": "images/vision-0067.png", "caption": "Beyaz zemin üzerinde sol altta mavi bir elmas."}
+{"id": "vision-0068", "group_id": "vision-daire-sarı", "image_path": "images/vision-0068.png", "caption": "Beyaz zemin üzerinde sol altta sarı bir daire."}
+{"id": "vision-0069", "group_id": "vision-artı-mor", "image_path": "images/vision-0069.png", "caption": "Gri zemin üzerinde sağ üstte mor bir artı."}
+{"id": "vision-0070", "group_id": "vision-daire-turkuaz", "image_path": "images/vision-0070.png", "caption": "Siyah zemin üzerinde sol altta turkuaz bir daire."}
+{"id": "vision-0071", "group_id": "vision-dikdörtgen-mavi", "image_path": "images/vision-0071.png", "caption": "Siyah zemin üzerinde sağ altta mavi bir dikdörtgen."}
+{"id": "vision-0072", "group_id": "vision-daire-mor", "image_path": "images/vision-0072.png", "caption": "Gri zemin üzerinde ortada mor bir daire."}
+{"id": "vision-0073", "group_id": "vision-kare-kırmızı", "image_path": "images/vision-0073.png", "caption": "Gri zemin üzerinde sağ üstte kırmızı bir kare."}
+{"id": "vision-0074", "group_id": "vision-kare-yeşil", "image_path": "images/vision-0074.png", "caption": "Siyah zemin üzerinde sol altta yeşil bir kare."}
+{"id": "vision-0075", "group_id": "vision-elmas-yeşil", "image_path": "images/vision-0075.png", "caption": "Siyah zemin üzerinde sağ altta yeşil bir elmas."}
+{"id": "vision-0076", "group_id": "vision-artı-mor", "image_path": "images/vision-0076.png", "caption": "Siyah zemin üzerinde sol üstte mor bir artı."}
+{"id": "vision-0077", "group_id": "vision-daire-kırmızı", "image_path": "images/vision-0077.png", "caption": "Beyaz zemin üzerinde sol üstte kırmızı bir daire."}
+{"id": "vision-0078", "group_id": "vision-artı-sarı", "image_path": "images/vision-0078.png", "caption": "Beyaz zemin üzerinde sağ altta sarı bir artı."}
+{"id": "vision-0079", "group_id": "vision-kare-mavi", "image_path": "images/vision-0079.png", "caption": "Gri zemin üzerinde sağ üstte mavi bir kare."}
+{"id": "vision-0080", "group_id": "vision-dikdörtgen-kırmızı", "image_path": "images/vision-0080.png", "caption": "Gri zemin üzerinde sol altta kırmızı bir dikdörtgen."}
+{"id": "vision-0081", "group_id": "vision-kare-kırmızı", "image_path": "images/vision-0081.png", "caption": "Siyah zemin üzerinde sağ üstte kırmızı bir kare."}
+{"id": "vision-0082", "group_id": "vision-daire-turuncu", "image_path": "images/vision-0082.png", "caption": "Beyaz zemin üzerinde sol üstte turuncu bir daire."}
+{"id": "vision-0083", "group_id": "vision-artı-mavi", "image_path": "images/vision-0083.png", "caption": "Beyaz zemin üzerinde sol üstte mavi bir artı."}
+{"id": "vision-0084", "group_id": "vision-artı-kırmızı", "image_path": "images/vision-0084.png", "caption": "Siyah zemin üzerinde ortada kırmızı bir artı."}
+{"id": "vision-0085", "group_id": "vision-üçgen-mavi", "image_path": "images/vision-0085.png", "caption": "Gri zemin üzerinde sol üstte mavi bir üçgen."}
+{"id": "vision-0086", "group_id": "vision-üçgen-turuncu", "image_path": "images/vision-0086.png", "caption": "Beyaz zemin üzerinde sağ altta turuncu bir üçgen."}
+{"id": "vision-0087", "group_id": "vision-elmas-pembe", "image_path": "images/vision-0087.png", "caption": "Siyah zemin üzerinde sol üstte pembe bir elmas."}
+{"id": "vision-0088", "group_id": "vision-dikdörtgen-turuncu", "image_path": "images/vision-0088.png", "caption": "Gri zemin üzerinde ortada turuncu bir dikdörtgen."}
+{"id": "vision-0089", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0089.png", "caption": "Beyaz zemin üzerinde sol üstte sarı bir üçgen."}
+{"id": "vision-0090", "group_id": "vision-dikdörtgen-turkuaz", "image_path": "images/vision-0090.png", "caption": "Siyah zemin üzerinde sağ altta turkuaz bir dikdörtgen."}
+{"id": "vision-0091", "group_id": "vision-elmas-kırmızı", "image_path": "images/vision-0091.png", "caption": "Gri zemin üzerinde sağ üstte kırmızı bir elmas."}
+{"id": "vision-0092", "group_id": "vision-artı-pembe", "image_path": "images/vision-0092.png", "caption": "Siyah zemin üzerinde sol üstte pembe bir artı."}
+{"id": "vision-0093", "group_id": "vision-dikdörtgen-mor", "image_path": "images/vision-0093.png", "caption": "Siyah zemin üzerinde sol üstte mor bir dikdörtgen."}
+{"id": "vision-0094", "group_id": "vision-üçgen-mor", "image_path": "images/vision-0094.png", "caption": "Beyaz zemin üzerinde sağ üstte mor bir üçgen."}
+{"id": "vision-0095", "group_id": "vision-daire-mavi", "image_path": "images/vision-0095.png", "caption": "Gri zemin üzerinde sağ üstte mavi bir daire."}
+{"id": "vision-0096", "group_id": "vision-artı-turuncu", "image_path": "images/vision-0096.png", "caption": "Beyaz zemin üzerinde sağ altta turuncu bir artı."}
+{"id": "vision-0097", "group_id": "vision-kare-sarı", "image_path": "images/vision-0097.png", "caption": "Gri zemin üzerinde ortada sarı bir kare."}
+{"id": "vision-0098", "group_id": "vision-üçgen-turkuaz", "image_path": "images/vision-0098.png", "caption": "Siyah zemin üzerinde sol üstte turkuaz bir üçgen."}
+{"id": "vision-0099", "group_id": "vision-daire-kırmızı", "image_path": "images/vision-0099.png", "caption": "Beyaz zemin üzerinde sol altta kırmızı bir daire."}
+{"id": "vision-0100", "group_id": "vision-kare-sarı", "image_path": "images/vision-0100.png", "caption": "Gri zemin üzerinde sol üstte sarı bir kare."}
+{"id": "vision-0101", "group_id": "vision-dikdörtgen-turuncu", "image_path": "images/vision-0101.png", "caption": "Siyah zemin üzerinde sol altta turuncu bir dikdörtgen."}
+{"id": "vision-0102", "group_id": "vision-dikdörtgen-turkuaz", "image_path": "images/vision-0102.png", "caption": "Beyaz zemin üzerinde sağ altta turkuaz bir dikdörtgen."}
+{"id": "vision-0103", "group_id": "vision-dikdörtgen-pembe", "image_path": "images/vision-0103.png", "caption": "Siyah zemin üzerinde sağ üstte pembe bir dikdörtgen."}
+{"id": "vision-0104", "group_id": "vision-kare-mor", "image_path": "images/vision-0104.png", "caption": "Siyah zemin üzerinde sol üstte mor bir kare."}
+{"id": "vision-0105", "group_id": "vision-daire-turuncu", "image_path": "images/vision-0105.png", "caption": "Gri zemin üzerinde sağ üstte turuncu bir daire."}
+{"id": "vision-0106", "group_id": "vision-dikdörtgen-turuncu", "image_path": "images/vision-0106.png", "caption": "Gri zemin üzerinde sağ altta turuncu bir dikdörtgen."}
+{"id": "vision-0107", "group_id": "vision-elmas-kırmızı", "image_path": "images/vision-0107.png", "caption": "Siyah zemin üzerinde sağ altta kırmızı bir elmas."}
+{"id": "vision-0108", "group_id": "vision-dikdörtgen-turuncu", "image_path": "images/vision-0108.png", "caption": "Siyah zemin üzerinde sağ üstte turuncu bir dikdörtgen."}
+{"id": "vision-0109", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0109.png", "caption": "Siyah zemin üzerinde ortada sarı bir üçgen."}
+{"id": "vision-0110", "group_id": "vision-elmas-mor", "image_path": "images/vision-0110.png", "caption": "Beyaz zemin üzerinde sağ üstte mor bir elmas."}
+{"id": "vision-0111", "group_id": "vision-üçgen-yeşil", "image_path": "images/vision-0111.png", "caption": "Gri zemin üzerinde sol üstte yeşil bir üçgen."}
+{"id": "vision-0112", "group_id": "vision-elmas-kırmızı", "image_path": "images/vision-0112.png", "caption": "Gri zemin üzerinde ortada kırmızı bir elmas."}
+{"id": "vision-0113", "group_id": "vision-üçgen-kırmızı", "image_path": "images/vision-0113.png", "caption": "Gri zemin üzerinde sağ altta kırmızı bir üçgen."}
+{"id": "vision-0114", "group_id": "vision-dikdörtgen-mavi", "image_path": "images/vision-0114.png", "caption": "Gri zemin üzerinde sol altta mavi bir dikdörtgen."}
+{"id": "vision-0115", "group_id": "vision-üçgen-pembe", "image_path": "images/vision-0115.png", "caption": "Siyah zemin üzerinde sağ üstte pembe bir üçgen."}
+{"id": "vision-0116", "group_id": "vision-daire-turkuaz", "image_path": "images/vision-0116.png", "caption": "Gri zemin üzerinde sol altta turkuaz bir daire."}
+{"id": "vision-0117", "group_id": "vision-dikdörtgen-turuncu", "image_path": "images/vision-0117.png", "caption": "Beyaz zemin üzerinde sağ üstte turuncu bir dikdörtgen."}
+{"id": "vision-0118", "group_id": "vision-üçgen-pembe", "image_path": "images/vision-0118.png", "caption": "Siyah zemin üzerinde sağ altta pembe bir üçgen."}
+{"id": "vision-0119", "group_id": "vision-kare-yeşil", "image_path": "images/vision-0119.png", "caption": "Siyah zemin üzerinde sağ altta yeşil bir kare."}
+{"id": "vision-0120", "group_id": "vision-daire-sarı", "image_path": "images/vision-0120.png", "caption": "Gri zemin üzerinde sağ üstte sarı bir daire."}
+{"id": "vision-0121", "group_id": "vision-kare-sarı", "image_path": "images/vision-0121.png", "caption": "Gri zemin üzerinde sol altta sarı bir kare."}
+{"id": "vision-0122", "group_id": "vision-elmas-turkuaz", "image_path": "images/vision-0122.png", "caption": "Beyaz zemin üzerinde sol altta turkuaz bir elmas."}
+{"id": "vision-0123", "group_id": "vision-artı-kırmızı", "image_path": "images/vision-0123.png", "caption": "Beyaz zemin üzerinde sol üstte kırmızı bir artı."}
+{"id": "vision-0124", "group_id": "vision-dikdörtgen-turkuaz", "image_path": "images/vision-0124.png", "caption": "Siyah zemin üzerinde sol altta turkuaz bir dikdörtgen."}
+{"id": "vision-0125", "group_id": "vision-daire-sarı", "image_path": "images/vision-0125.png", "caption": "Gri zemin üzerinde sol üstte sarı bir daire."}
+{"id": "vision-0126", "group_id": "vision-artı-turkuaz", "image_path": "images/vision-0126.png", "caption": "Gri zemin üzerinde sol üstte turkuaz bir artı."}
+{"id": "vision-0127", "group_id": "vision-dikdörtgen-mavi", "image_path": "images/vision-0127.png", "caption": "Beyaz zemin üzerinde sağ üstte mavi bir dikdörtgen."}
+{"id": "vision-0128", "group_id": "vision-kare-yeşil", "image_path": "images/vision-0128.png", "caption": "Beyaz zemin üzerinde sağ üstte yeşil bir kare."}
+{"id": "vision-0129", "group_id": "vision-daire-pembe", "image_path": "images/vision-0129.png", "caption": "Gri zemin üzerinde sağ üstte pembe bir daire."}
+{"id": "vision-0130", "group_id": "vision-elmas-yeşil", "image_path": "images/vision-0130.png", "caption": "Beyaz zemin üzerinde sağ üstte yeşil bir elmas."}
+{"id": "vision-0131", "group_id": "vision-dikdörtgen-mor", "image_path": "images/vision-0131.png", "caption": "Siyah zemin üzerinde ortada mor bir dikdörtgen."}
+{"id": "vision-0132", "group_id": "vision-dikdörtgen-pembe", "image_path": "images/vision-0132.png", "caption": "Gri zemin üzerinde sağ üstte pembe bir dikdörtgen."}
+{"id": "vision-0133", "group_id": "vision-daire-mavi", "image_path": "images/vision-0133.png", "caption": "Siyah zemin üzerinde ortada mavi bir daire."}
+{"id": "vision-0134", "group_id": "vision-üçgen-pembe", "image_path": "images/vision-0134.png", "caption": "Siyah zemin üzerinde sol üstte pembe bir üçgen."}
+{"id": "vision-0135", "group_id": "vision-elmas-turuncu", "image_path": "images/vision-0135.png", "caption": "Beyaz zemin üzerinde sağ üstte turuncu bir elmas."}
+{"id": "vision-0136", "group_id": "vision-dikdörtgen-mor", "image_path": "images/vision-0136.png", "caption": "Gri zemin üzerinde sol altta mor bir dikdörtgen."}
+{"id": "vision-0137", "group_id": "vision-daire-pembe", "image_path": "images/vision-0137.png", "caption": "Gri zemin üzerinde ortada pembe bir daire."}
+{"id": "vision-0138", "group_id": "vision-üçgen-yeşil", "image_path": "images/vision-0138.png", "caption": "Beyaz zemin üzerinde sağ altta yeşil bir üçgen."}
+{"id": "vision-0139", "group_id": "vision-elmas-pembe", "image_path": "images/vision-0139.png", "caption": "Beyaz zemin üzerinde ortada pembe bir elmas."}
+{"id": "vision-0140", "group_id": "vision-dikdörtgen-sarı", "image_path": "images/vision-0140.png", "caption": "Gri zemin üzerinde ortada sarı bir dikdörtgen."}
+{"id": "vision-0141", "group_id": "vision-dikdörtgen-mavi", "image_path": "images/vision-0141.png", "caption": "Gri zemin üzerinde sağ altta mavi bir dikdörtgen."}
+{"id": "vision-0142", "group_id": "vision-elmas-mavi", "image_path": "images/vision-0142.png", "caption": "Beyaz zemin üzerinde sağ altta mavi bir elmas."}
+{"id": "vision-0143", "group_id": "vision-elmas-mor", "image_path": "images/vision-0143.png", "caption": "Siyah zemin üzerinde sol altta mor bir elmas."}
+{"id": "vision-0144", "group_id": "vision-dikdörtgen-sarı", "image_path": "images/vision-0144.png", "caption": "Beyaz zemin üzerinde sol altta sarı bir dikdörtgen."}
+{"id": "vision-0145", "group_id": "vision-kare-turkuaz", "image_path": "images/vision-0145.png", "caption": "Gri zemin üzerinde sağ üstte turkuaz bir kare."}
+{"id": "vision-0146", "group_id": "vision-daire-turuncu", "image_path": "images/vision-0146.png", "caption": "Siyah zemin üzerinde sağ altta turuncu bir daire."}
+{"id": "vision-0147", "group_id": "vision-artı-mor", "image_path": "images/vision-0147.png", "caption": "Siyah zemin üzerinde sağ altta mor bir artı."}
+{"id": "vision-0148", "group_id": "vision-dikdörtgen-kırmızı", "image_path": "images/vision-0148.png", "caption": "Siyah zemin üzerinde ortada kırmızı bir dikdörtgen."}
+{"id": "vision-0149", "group_id": "vision-dikdörtgen-yeşil", "image_path": "images/vision-0149.png", "caption": "Beyaz zemin üzerinde sol üstte yeşil bir dikdörtgen."}
+{"id": "vision-0150", "group_id": "vision-artı-pembe", "image_path": "images/vision-0150.png", "caption": "Siyah zemin üzerinde sağ altta pembe bir artı."}
+{"id": "vision-0151", "group_id": "vision-artı-turkuaz", "image_path": "images/vision-0151.png", "caption": "Siyah zemin üzerinde ortada turkuaz bir artı."}
+{"id": "vision-0152", "group_id": "vision-kare-mor", "image_path": "images/vision-0152.png", "caption": "Siyah zemin üzerinde ortada mor bir kare."}
+{"id": "vision-0153", "group_id": "vision-artı-turuncu", "image_path": "images/vision-0153.png", "caption": "Siyah zemin üzerinde sağ üstte turuncu bir artı."}
+{"id": "vision-0154", "group_id": "vision-dikdörtgen-mavi", "image_path": "images/vision-0154.png", "caption": "Siyah zemin üzerinde sol üstte mavi bir dikdörtgen."}
+{"id": "vision-0155", "group_id": "vision-artı-pembe", "image_path": "images/vision-0155.png", "caption": "Gri zemin üzerinde sol üstte pembe bir artı."}
+{"id": "vision-0156", "group_id": "vision-elmas-pembe", "image_path": "images/vision-0156.png", "caption": "Beyaz zemin üzerinde sol altta pembe bir elmas."}
+{"id": "vision-0157", "group_id": "vision-elmas-sarı", "image_path": "images/vision-0157.png", "caption": "Beyaz zemin üzerinde sol üstte sarı bir elmas."}
+{"id": "vision-0158", "group_id": "vision-daire-sarı", "image_path": "images/vision-0158.png", "caption": "Siyah zemin üzerinde sol altta sarı bir daire."}
+{"id": "vision-0159", "group_id": "vision-kare-turkuaz", "image_path": "images/vision-0159.png", "caption": "Gri zemin üzerinde sol üstte turkuaz bir kare."}
+{"id": "vision-0160", "group_id": "vision-daire-yeşil", "image_path": "images/vision-0160.png", "caption": "Gri zemin üzerinde sol altta yeşil bir daire."}
+{"id": "vision-0161", "group_id": "vision-dikdörtgen-mor", "image_path": "images/vision-0161.png", "caption": "Gri zemin üzerinde sağ altta mor bir dikdörtgen."}
+{"id": "vision-0162", "group_id": "vision-artı-mor", "image_path": "images/vision-0162.png", "caption": "Beyaz zemin üzerinde sol üstte mor bir artı."}
+{"id": "vision-0163", "group_id": "vision-elmas-mavi", "image_path": "images/vision-0163.png", "caption": "Siyah zemin üzerinde sağ altta mavi bir elmas."}
+{"id": "vision-0164", "group_id": "vision-elmas-sarı", "image_path": "images/vision-0164.png", "caption": "Beyaz zemin üzerinde ortada sarı bir elmas."}
+{"id": "vision-0165", "group_id": "vision-kare-pembe", "image_path": "images/vision-0165.png", "caption": "Gri zemin üzerinde sol üstte pembe bir kare."}
+{"id": "vision-0166", "group_id": "vision-dikdörtgen-mavi", "image_path": "images/vision-0166.png", "caption": "Beyaz zemin üzerinde ortada mavi bir dikdörtgen."}
+{"id": "vision-0167", "group_id": "vision-daire-pembe", "image_path": "images/vision-0167.png", "caption": "Siyah zemin üzerinde sol altta pembe bir daire."}
+{"id": "vision-0168", "group_id": "vision-daire-mavi", "image_path": "images/vision-0168.png", "caption": "Beyaz zemin üzerinde sol üstte mavi bir daire."}
+{"id": "vision-0169", "group_id": "vision-üçgen-kırmızı", "image_path": "images/vision-0169.png", "caption": "Gri zemin üzerinde sağ üstte kırmızı bir üçgen."}
+{"id": "vision-0170", "group_id": "vision-kare-turkuaz", "image_path": "images/vision-0170.png", "caption": "Siyah zemin üzerinde sağ üstte turkuaz bir kare."}
+{"id": "vision-0171", "group_id": "vision-kare-sarı", "image_path": "images/vision-0171.png", "caption": "Beyaz zemin üzerinde sağ altta sarı bir kare."}
+{"id": "vision-0172", "group_id": "vision-dikdörtgen-mor", "image_path": "images/vision-0172.png", "caption": "Beyaz zemin üzerinde sol üstte mor bir dikdörtgen."}
+{"id": "vision-0173", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0173.png", "caption": "Beyaz zemin üzerinde sağ üstte sarı bir üçgen."}
+{"id": "vision-0174", "group_id": "vision-kare-pembe", "image_path": "images/vision-0174.png", "caption": "Gri zemin üzerinde sağ altta pembe bir kare."}
+{"id": "vision-0175", "group_id": "vision-artı-yeşil", "image_path": "images/vision-0175.png", "caption": "Beyaz zemin üzerinde sol üstte yeşil bir artı."}
+{"id": "vision-0176", "group_id": "vision-dikdörtgen-sarı", "image_path": "images/vision-0176.png", "caption": "Siyah zemin üzerinde ortada sarı bir dikdörtgen."}
+{"id": "vision-0177", "group_id": "vision-üçgen-yeşil", "image_path": "images/vision-0177.png", "caption": "Siyah zemin üzerinde sağ altta yeşil bir üçgen."}
+{"id": "vision-0178", "group_id": "vision-üçgen-kırmızı", "image_path": "images/vision-0178.png", "caption": "Siyah zemin üzerinde sol altta kırmızı bir üçgen."}
+{"id": "vision-0179", "group_id": "vision-dikdörtgen-turkuaz", "image_path": "images/vision-0179.png", "caption": "Gri zemin üzerinde sol üstte turkuaz bir dikdörtgen."}
+{"id": "vision-0180", "group_id": "vision-kare-turkuaz", "image_path": "images/vision-0180.png", "caption": "Beyaz zemin üzerinde sol altta turkuaz bir kare."}
+{"id": "vision-0181", "group_id": "vision-artı-mavi", "image_path": "images/vision-0181.png", "caption": "Beyaz zemin üzerinde sağ altta mavi bir artı."}
+{"id": "vision-0182", "group_id": "vision-kare-yeşil", "image_path": "images/vision-0182.png", "caption": "Siyah zemin üzerinde ortada yeşil bir kare."}
+{"id": "vision-0183", "group_id": "vision-üçgen-turuncu", "image_path": "images/vision-0183.png", "caption": "Gri zemin üzerinde sol üstte turuncu bir üçgen."}
+{"id": "vision-0184", "group_id": "vision-kare-pembe", "image_path": "images/vision-0184.png", "caption": "Siyah zemin üzerinde sol altta pembe bir kare."}
+{"id": "vision-0185", "group_id": "vision-üçgen-kırmızı", "image_path": "images/vision-0185.png", "caption": "Beyaz zemin üzerinde sol üstte kırmızı bir üçgen."}
+{"id": "vision-0186", "group_id": "vision-daire-sarı", "image_path": "images/vision-0186.png", "caption": "Gri zemin üzerinde ortada sarı bir daire."}
+{"id": "vision-0187", "group_id": "vision-üçgen-mavi", "image_path": "images/vision-0187.png", "caption": "Gri zemin üzerinde sağ üstte mavi bir üçgen."}
+{"id": "vision-0188", "group_id": "vision-kare-mavi", "image_path": "images/vision-0188.png", "caption": "Beyaz zemin üzerinde sağ üstte mavi bir kare."}
+{"id": "vision-0189", "group_id": "vision-üçgen-mor", "image_path": "images/vision-0189.png", "caption": "Gri zemin üzerinde sol altta mor bir üçgen."}
+{"id": "vision-0190", "group_id": "vision-elmas-mavi", "image_path": "images/vision-0190.png", "caption": "Siyah zemin üzerinde sol altta mavi bir elmas."}
+{"id": "vision-0191", "group_id": "vision-üçgen-pembe", "image_path": "images/vision-0191.png", "caption": "Gri zemin üzerinde sağ üstte pembe bir üçgen."}
+{"id": "vision-0192", "group_id": "vision-dikdörtgen-kırmızı", "image_path": "images/vision-0192.png", "caption": "Siyah zemin üzerinde sağ altta kırmızı bir dikdörtgen."}
+{"id": "vision-0193", "group_id": "vision-üçgen-turkuaz", "image_path": "images/vision-0193.png", "caption": "Siyah zemin üzerinde sağ altta turkuaz bir üçgen."}
+{"id": "vision-0194", "group_id": "vision-dikdörtgen-mor", "image_path": "images/vision-0194.png", "caption": "Siyah zemin üzerinde sağ üstte mor bir dikdörtgen."}
+{"id": "vision-0195", "group_id": "vision-dikdörtgen-turuncu", "image_path": "images/vision-0195.png", "caption": "Beyaz zemin üzerinde sağ altta turuncu bir dikdörtgen."}
+{"id": "vision-0196", "group_id": "vision-elmas-yeşil", "image_path": "images/vision-0196.png", "caption": "Beyaz zemin üzerinde ortada yeşil bir elmas."}
+{"id": "vision-0197", "group_id": "vision-dikdörtgen-yeşil", "image_path": "images/vision-0197.png", "caption": "Beyaz zemin üzerinde ortada yeşil bir dikdörtgen."}
+{"id": "vision-0198", "group_id": "vision-kare-pembe", "image_path": "images/vision-0198.png", "caption": "Siyah zemin üzerinde sağ altta pembe bir kare."}
+{"id": "vision-0199", "group_id": "vision-üçgen-pembe", "image_path": "images/vision-0199.png", "caption": "Siyah zemin üzerinde sol altta pembe bir üçgen."}
+{"id": "vision-0200", "group_id": "vision-dikdörtgen-turkuaz", "image_path": "images/vision-0200.png", "caption": "Gri zemin üzerinde ortada turkuaz bir dikdörtgen."}
+{"id": "vision-0201", "group_id": "vision-dikdörtgen-turkuaz", "image_path": "images/vision-0201.png", "caption": "Beyaz zemin üzerinde ortada turkuaz bir dikdörtgen."}
+{"id": "vision-0202", "group_id": "vision-elmas-turuncu", "image_path": "images/vision-0202.png", "caption": "Beyaz zemin üzerinde ortada turuncu bir elmas."}
+{"id": "vision-0203", "group_id": "vision-artı-pembe", "image_path": "images/vision-0203.png", "caption": "Beyaz zemin üzerinde sağ altta pembe bir artı."}
+{"id": "vision-0204", "group_id": "vision-artı-pembe", "image_path": "images/vision-0204.png", "caption": "Beyaz zemin üzerinde sol üstte pembe bir artı."}
+{"id": "vision-0205", "group_id": "vision-dikdörtgen-kırmızı", "image_path": "images/vision-0205.png", "caption": "Beyaz zemin üzerinde ortada kırmızı bir dikdörtgen."}
+{"id": "vision-0206", "group_id": "vision-dikdörtgen-yeşil", "image_path": "images/vision-0206.png", "caption": "Siyah zemin üzerinde sol altta yeşil bir dikdörtgen."}
+{"id": "vision-0207", "group_id": "vision-üçgen-mavi", "image_path": "images/vision-0207.png", "caption": "Beyaz zemin üzerinde sağ altta mavi bir üçgen."}
+{"id": "vision-0208", "group_id": "vision-kare-sarı", "image_path": "images/vision-0208.png", "caption": "Beyaz zemin üzerinde sol üstte sarı bir kare."}
+{"id": "vision-0209", "group_id": "vision-daire-yeşil", "image_path": "images/vision-0209.png", "caption": "Gri zemin üzerinde sağ üstte yeşil bir daire."}
+{"id": "vision-0210", "group_id": "vision-dikdörtgen-mavi", "image_path": "images/vision-0210.png", "caption": "Gri zemin üzerinde ortada mavi bir dikdörtgen."}
+{"id": "vision-0211", "group_id": "vision-daire-pembe", "image_path": "images/vision-0211.png", "caption": "Siyah zemin üzerinde sol üstte pembe bir daire."}
+{"id": "vision-0212", "group_id": "vision-dikdörtgen-mor", "image_path": "images/vision-0212.png", "caption": "Beyaz zemin üzerinde sağ altta mor bir dikdörtgen."}
+{"id": "vision-0213", "group_id": "vision-artı-yeşil", "image_path": "images/vision-0213.png", "caption": "Beyaz zemin üzerinde sağ altta yeşil bir artı."}
+{"id": "vision-0214", "group_id": "vision-artı-yeşil", "image_path": "images/vision-0214.png", "caption": "Siyah zemin üzerinde sağ üstte yeşil bir artı."}
+{"id": "vision-0215", "group_id": "vision-daire-mor", "image_path": "images/vision-0215.png", "caption": "Siyah zemin üzerinde sağ üstte mor bir daire."}
+{"id": "vision-0216", "group_id": "vision-dikdörtgen-turkuaz", "image_path": "images/vision-0216.png", "caption": "Gri zemin üzerinde sağ altta turkuaz bir dikdörtgen."}
+{"id": "vision-0217", "group_id": "vision-daire-pembe", "image_path": "images/vision-0217.png", "caption": "Siyah zemin üzerinde sağ üstte pembe bir daire."}
+{"id": "vision-0218", "group_id": "vision-daire-yeşil", "image_path": "images/vision-0218.png", "caption": "Beyaz zemin üzerinde ortada yeşil bir daire."}
+{"id": "vision-0219", "group_id": "vision-üçgen-turuncu", "image_path": "images/vision-0219.png", "caption": "Beyaz zemin üzerinde sağ üstte turuncu bir üçgen."}
+{"id": "vision-0220", "group_id": "vision-artı-turuncu", "image_path": "images/vision-0220.png", "caption": "Gri zemin üzerinde sağ üstte turuncu bir artı."}
+{"id": "vision-0221", "group_id": "vision-artı-mavi", "image_path": "images/vision-0221.png", "caption": "Siyah zemin üzerinde sağ üstte mavi bir artı."}
+{"id": "vision-0222", "group_id": "vision-daire-turuncu", "image_path": "images/vision-0222.png", "caption": "Beyaz zemin üzerinde sağ altta turuncu bir daire."}
+{"id": "vision-0223", "group_id": "vision-kare-mor", "image_path": "images/vision-0223.png", "caption": "Gri zemin üzerinde sağ üstte mor bir kare."}
+{"id": "vision-0224", "group_id": "vision-kare-mor", "image_path": "images/vision-0224.png", "caption": "Gri zemin üzerinde sol altta mor bir kare."}
+{"id": "vision-0225", "group_id": "vision-dikdörtgen-turuncu", "image_path": "images/vision-0225.png", "caption": "Beyaz zemin üzerinde ortada turuncu bir dikdörtgen."}
+{"id": "vision-0226", "group_id": "vision-artı-kırmızı", "image_path": "images/vision-0226.png", "caption": "Siyah zemin üzerinde sağ üstte kırmızı bir artı."}
+{"id": "vision-0227", "group_id": "vision-üçgen-turkuaz", "image_path": "images/vision-0227.png", "caption": "Gri zemin üzerinde sağ altta turkuaz bir üçgen."}
+{"id": "vision-0228", "group_id": "vision-dikdörtgen-sarı", "image_path": "images/vision-0228.png", "caption": "Siyah zemin üzerinde sağ altta sarı bir dikdörtgen."}
+{"id": "vision-0229", "group_id": "vision-daire-mor", "image_path": "images/vision-0229.png", "caption": "Beyaz zemin üzerinde sağ altta mor bir daire."}
+{"id": "vision-0230", "group_id": "vision-üçgen-mor", "image_path": "images/vision-0230.png", "caption": "Siyah zemin üzerinde sağ altta mor bir üçgen."}
+{"id": "vision-0231", "group_id": "vision-kare-mor", "image_path": "images/vision-0231.png", "caption": "Gri zemin üzerinde ortada mor bir kare."}
+{"id": "vision-0232", "group_id": "vision-artı-mor", "image_path": "images/vision-0232.png", "caption": "Gri zemin üzerinde sol altta mor bir artı."}
+{"id": "vision-0233", "group_id": "vision-dikdörtgen-pembe", "image_path": "images/vision-0233.png", "caption": "Siyah zemin üzerinde ortada pembe bir dikdörtgen."}
+{"id": "vision-0234", "group_id": "vision-dikdörtgen-kırmızı", "image_path": "images/vision-0234.png", "caption": "Siyah zemin üzerinde sol üstte kırmızı bir dikdörtgen."}
+{"id": "vision-0235", "group_id": "vision-kare-turuncu", "image_path": "images/vision-0235.png", "caption": "Siyah zemin üzerinde sol altta turuncu bir kare."}
+{"id": "vision-0236", "group_id": "vision-dikdörtgen-mavi", "image_path": "images/vision-0236.png", "caption": "Gri zemin üzerinde sağ üstte mavi bir dikdörtgen."}
+{"id": "vision-0237", "group_id": "vision-kare-mor", "image_path": "images/vision-0237.png", "caption": "Siyah zemin üzerinde sağ üstte mor bir kare."}
+{"id": "vision-0238", "group_id": "vision-elmas-mavi", "image_path": "images/vision-0238.png", "caption": "Beyaz zemin üzerinde ortada mavi bir elmas."}
+{"id": "vision-0239", "group_id": "vision-üçgen-mor", "image_path": "images/vision-0239.png", "caption": "Siyah zemin üzerinde sağ üstte mor bir üçgen."}
+{"id": "vision-0240", "group_id": "vision-dikdörtgen-sarı", "image_path": "images/vision-0240.png", "caption": "Siyah zemin üzerinde sol üstte sarı bir dikdörtgen."}
+{"id": "vision-0241", "group_id": "vision-elmas-mor", "image_path": "images/vision-0241.png", "caption": "Siyah zemin üzerinde sol üstte mor bir elmas."}
+{"id": "vision-0242", "group_id": "vision-artı-mor", "image_path": "images/vision-0242.png", "caption": "Siyah zemin üzerinde sol altta mor bir artı."}
+{"id": "vision-0243", "group_id": "vision-kare-pembe", "image_path": "images/vision-0243.png", "caption": "Gri zemin üzerinde sağ üstte pembe bir kare."}
+{"id": "vision-0244", "group_id": "vision-artı-sarı", "image_path": "images/vision-0244.png", "caption": "Siyah zemin üzerinde sol altta sarı bir artı."}
+{"id": "vision-0245", "group_id": "vision-elmas-turuncu", "image_path": "images/vision-0245.png", "caption": "Gri zemin üzerinde sol üstte turuncu bir elmas."}
+{"id": "vision-0246", "group_id": "vision-daire-sarı", "image_path": "images/vision-0246.png", "caption": "Gri zemin üzerinde sol altta sarı bir daire."}
+{"id": "vision-0247", "group_id": "vision-üçgen-pembe", "image_path": "images/vision-0247.png", "caption": "Beyaz zemin üzerinde sol üstte pembe bir üçgen."}
+{"id": "vision-0248", "group_id": "vision-daire-mor", "image_path": "images/vision-0248.png", "caption": "Siyah zemin üzerinde sağ altta mor bir daire."}
+{"id": "vision-0249", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0249.png", "caption": "Siyah zemin üzerinde sol altta sarı bir üçgen."}
+{"id": "vision-0250", "group_id": "vision-elmas-mavi", "image_path": "images/vision-0250.png", "caption": "Beyaz zemin üzerinde sağ üstte mavi bir elmas."}
+{"id": "vision-0251", "group_id": "vision-üçgen-kırmızı", "image_path": "images/vision-0251.png", "caption": "Gri zemin üzerinde sol altta kırmızı bir üçgen."}
+{"id": "vision-0252", "group_id": "vision-üçgen-yeşil", "image_path": "images/vision-0252.png", "caption": "Beyaz zemin üzerinde ortada yeşil bir üçgen."}
+{"id": "vision-0253", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0253.png", "caption": "Siyah zemin üzerinde sağ altta sarı bir üçgen."}
+{"id": "vision-0254", "group_id": "vision-artı-pembe", "image_path": "images/vision-0254.png", "caption": "Gri zemin üzerinde sol altta pembe bir artı."}
+{"id": "vision-0255", "group_id": "vision-elmas-turuncu", "image_path": "images/vision-0255.png", "caption": "Siyah zemin üzerinde sol üstte turuncu bir elmas."}
+{"id": "vision-0256", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0256.png", "caption": "Beyaz zemin üzerinde ortada sarı bir üçgen."}
+{"id": "vision-0257", "group_id": "vision-artı-turkuaz", "image_path": "images/vision-0257.png", "caption": "Beyaz zemin üzerinde sağ üstte turkuaz bir artı."}
+{"id": "vision-0258", "group_id": "vision-elmas-mor", "image_path": "images/vision-0258.png", "caption": "Gri zemin üzerinde ortada mor bir elmas."}
+{"id": "vision-0259", "group_id": "vision-elmas-mor", "image_path": "images/vision-0259.png", "caption": "Beyaz zemin üzerinde sağ altta mor bir elmas."}
+{"id": "vision-0260", "group_id": "vision-kare-turuncu", "image_path": "images/vision-0260.png", "caption": "Gri zemin üzerinde sağ altta turuncu bir kare."}
+{"id": "vision-0261", "group_id": "vision-daire-yeşil", "image_path": "images/vision-0261.png", "caption": "Gri zemin üzerinde sol üstte yeşil bir daire."}
+{"id": "vision-0262", "group_id": "vision-dikdörtgen-pembe", "image_path": "images/vision-0262.png", "caption": "Siyah zemin üzerinde sol üstte pembe bir dikdörtgen."}
+{"id": "vision-0263", "group_id": "vision-daire-kırmızı", "image_path": "images/vision-0263.png", "caption": "Gri zemin üzerinde sol üstte kırmızı bir daire."}
+{"id": "vision-0264", "group_id": "vision-artı-sarı", "image_path": "images/vision-0264.png", "caption": "Siyah zemin üzerinde sağ üstte sarı bir artı."}
+{"id": "vision-0265", "group_id": "vision-artı-sarı", "image_path": "images/vision-0265.png", "caption": "Gri zemin üzerinde ortada sarı bir artı."}
+{"id": "vision-0266", "group_id": "vision-üçgen-kırmızı", "image_path": "images/vision-0266.png", "caption": "Gri zemin üzerinde ortada kırmızı bir üçgen."}
+{"id": "vision-0267", "group_id": "vision-dikdörtgen-mor", "image_path": "images/vision-0267.png", "caption": "Siyah zemin üzerinde sol altta mor bir dikdörtgen."}
+{"id": "vision-0268", "group_id": "vision-elmas-turuncu", "image_path": "images/vision-0268.png", "caption": "Gri zemin üzerinde sağ üstte turuncu bir elmas."}
+{"id": "vision-0269", "group_id": "vision-kare-mor", "image_path": "images/vision-0269.png", "caption": "Siyah zemin üzerinde sağ altta mor bir kare."}
+{"id": "vision-0270", "group_id": "vision-üçgen-turkuaz", "image_path": "images/vision-0270.png", "caption": "Beyaz zemin üzerinde sol altta turkuaz bir üçgen."}
+{"id": "vision-0271", "group_id": "vision-daire-kırmızı", "image_path": "images/vision-0271.png", "caption": "Gri zemin üzerinde sağ üstte kırmızı bir daire."}
+{"id": "vision-0272", "group_id": "vision-üçgen-yeşil", "image_path": "images/vision-0272.png", "caption": "Gri zemin üzerinde sağ üstte yeşil bir üçgen."}
+{"id": "vision-0273", "group_id": "vision-dikdörtgen-kırmızı", "image_path": "images/vision-0273.png", "caption": "Gri zemin üzerinde sağ üstte kırmızı bir dikdörtgen."}
+{"id": "vision-0274", "group_id": "vision-daire-kırmızı", "image_path": "images/vision-0274.png", "caption": "Siyah zemin üzerinde sağ altta kırmızı bir daire."}
+{"id": "vision-0275", "group_id": "vision-kare-mavi", "image_path": "images/vision-0275.png", "caption": "Gri zemin üzerinde ortada mavi bir kare."}
+{"id": "vision-0276", "group_id": "vision-elmas-mavi", "image_path": "images/vision-0276.png", "caption": "Siyah zemin üzerinde sol üstte mavi bir elmas."}
+{"id": "vision-0277", "group_id": "vision-elmas-yeşil", "image_path": "images/vision-0277.png", "caption": "Gri zemin üzerinde ortada yeşil bir elmas."}
+{"id": "vision-0278", "group_id": "vision-dikdörtgen-yeşil", "image_path": "images/vision-0278.png", "caption": "Siyah zemin üzerinde ortada yeşil bir dikdörtgen."}
+{"id": "vision-0279", "group_id": "vision-elmas-yeşil", "image_path": "images/vision-0279.png", "caption": "Siyah zemin üzerinde sol altta yeşil bir elmas."}
+{"id": "vision-0280", "group_id": "vision-artı-sarı", "image_path": "images/vision-0280.png", "caption": "Beyaz zemin üzerinde sol üstte sarı bir artı."}
+{"id": "vision-0281", "group_id": "vision-üçgen-pembe", "image_path": "images/vision-0281.png", "caption": "Gri zemin üzerinde ortada pembe bir üçgen."}
+{"id": "vision-0282", "group_id": "vision-kare-turkuaz", "image_path": "images/vision-0282.png", "caption": "Siyah zemin üzerinde sol altta turkuaz bir kare."}
+{"id": "vision-0283", "group_id": "vision-üçgen-mavi", "image_path": "images/vision-0283.png", "caption": "Gri zemin üzerinde sol altta mavi bir üçgen."}
+{"id": "vision-0284", "group_id": "vision-daire-turuncu", "image_path": "images/vision-0284.png", "caption": "Siyah zemin üzerinde sağ üstte turuncu bir daire."}
+{"id": "vision-0285", "group_id": "vision-daire-mavi", "image_path": "images/vision-0285.png", "caption": "Siyah zemin üzerinde sol üstte mavi bir daire."}
+{"id": "vision-0286", "group_id": "vision-üçgen-kırmızı", "image_path": "images/vision-0286.png", "caption": "Gri zemin üzerinde sol üstte kırmızı bir üçgen."}
+{"id": "vision-0287", "group_id": "vision-üçgen-pembe", "image_path": "images/vision-0287.png", "caption": "Gri zemin üzerinde sol altta pembe bir üçgen."}
+{"id": "vision-0288", "group_id": "vision-kare-yeşil", "image_path": "images/vision-0288.png", "caption": "Siyah zemin üzerinde sol üstte yeşil bir kare."}
+{"id": "vision-0289", "group_id": "vision-artı-sarı", "image_path": "images/vision-0289.png", "caption": "Beyaz zemin üzerinde ortada sarı bir artı."}
+{"id": "vision-0290", "group_id": "vision-üçgen-mor", "image_path": "images/vision-0290.png", "caption": "Beyaz zemin üzerinde sol altta mor bir üçgen."}
+{"id": "vision-0291", "group_id": "vision-kare-mavi", "image_path": "images/vision-0291.png", "caption": "Siyah zemin üzerinde sol altta mavi bir kare."}
+{"id": "vision-0292", "group_id": "vision-artı-turuncu", "image_path": "images/vision-0292.png", "caption": "Gri zemin üzerinde sol üstte turuncu bir artı."}
+{"id": "vision-0293", "group_id": "vision-daire-yeşil", "image_path": "images/vision-0293.png", "caption": "Siyah zemin üzerinde ortada yeşil bir daire."}
+{"id": "vision-0294", "group_id": "vision-daire-turkuaz", "image_path": "images/vision-0294.png", "caption": "Siyah zemin üzerinde sağ üstte turkuaz bir daire."}
+{"id": "vision-0295", "group_id": "vision-dikdörtgen-mor", "image_path": "images/vision-0295.png", "caption": "Beyaz zemin üzerinde ortada mor bir dikdörtgen."}
+{"id": "vision-0296", "group_id": "vision-dikdörtgen-turkuaz", "image_path": "images/vision-0296.png", "caption": "Beyaz zemin üzerinde sol üstte turkuaz bir dikdörtgen."}
+{"id": "vision-0297", "group_id": "vision-dikdörtgen-pembe", "image_path": "images/vision-0297.png", "caption": "Siyah zemin üzerinde sol altta pembe bir dikdörtgen."}
+{"id": "vision-0298", "group_id": "vision-üçgen-turuncu", "image_path": "images/vision-0298.png", "caption": "Gri zemin üzerinde ortada turuncu bir üçgen."}
+{"id": "vision-0299", "group_id": "vision-elmas-mavi", "image_path": "images/vision-0299.png", "caption": "Gri zemin üzerinde sağ altta mavi bir elmas."}
+{"id": "vision-0300", "group_id": "vision-artı-turkuaz", "image_path": "images/vision-0300.png", "caption": "Beyaz zemin üzerinde ortada turkuaz bir artı."}
+{"id": "vision-0301", "group_id": "vision-kare-mavi", "image_path": "images/vision-0301.png", "caption": "Siyah zemin üzerinde sağ üstte mavi bir kare."}
+{"id": "vision-0302", "group_id": "vision-artı-turkuaz", "image_path": "images/vision-0302.png", "caption": "Beyaz zemin üzerinde sol üstte turkuaz bir artı."}
+{"id": "vision-0303", "group_id": "vision-artı-yeşil", "image_path": "images/vision-0303.png", "caption": "Siyah zemin üzerinde sol üstte yeşil bir artı."}
+{"id": "vision-0304", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0304.png", "caption": "Beyaz zemin üzerinde sağ altta sarı bir üçgen."}
+{"id": "vision-0305", "group_id": "vision-artı-turuncu", "image_path": "images/vision-0305.png", "caption": "Siyah zemin üzerinde ortada turuncu bir artı."}
+{"id": "vision-0306", "group_id": "vision-kare-mavi", "image_path": "images/vision-0306.png", "caption": "Beyaz zemin üzerinde ortada mavi bir kare."}
+{"id": "vision-0307", "group_id": "vision-kare-yeşil", "image_path": "images/vision-0307.png", "caption": "Gri zemin üzerinde sağ altta yeşil bir kare."}
+{"id": "vision-0308", "group_id": "vision-kare-turkuaz", "image_path": "images/vision-0308.png", "caption": "Gri zemin üzerinde ortada turkuaz bir kare."}
+{"id": "vision-0309", "group_id": "vision-daire-turuncu", "image_path": "images/vision-0309.png", "caption": "Beyaz zemin üzerinde ortada turuncu bir daire."}
+{"id": "vision-0310", "group_id": "vision-elmas-mavi", "image_path": "images/vision-0310.png", "caption": "Gri zemin üzerinde sol altta mavi bir elmas."}
+{"id": "vision-0311", "group_id": "vision-üçgen-turkuaz", "image_path": "images/vision-0311.png", "caption": "Siyah zemin üzerinde sol altta turkuaz bir üçgen."}
+{"id": "vision-0312", "group_id": "vision-dikdörtgen-pembe", "image_path": "images/vision-0312.png", "caption": "Gri zemin üzerinde sol altta pembe bir dikdörtgen."}
+{"id": "vision-0313", "group_id": "vision-artı-kırmızı", "image_path": "images/vision-0313.png", "caption": "Beyaz zemin üzerinde sağ altta kırmızı bir artı."}
+{"id": "vision-0314", "group_id": "vision-artı-mavi", "image_path": "images/vision-0314.png", "caption": "Siyah zemin üzerinde sol üstte mavi bir artı."}
+{"id": "vision-0315", "group_id": "vision-kare-yeşil", "image_path": "images/vision-0315.png", "caption": "Siyah zemin üzerinde sağ üstte yeşil bir kare."}
+{"id": "vision-0316", "group_id": "vision-elmas-sarı", "image_path": "images/vision-0316.png", "caption": "Gri zemin üzerinde sol altta sarı bir elmas."}
+{"id": "vision-0317", "group_id": "vision-dikdörtgen-mor", "image_path": "images/vision-0317.png", "caption": "Siyah zemin üzerinde sağ altta mor bir dikdörtgen."}
+{"id": "vision-0318", "group_id": "vision-üçgen-yeşil", "image_path": "images/vision-0318.png", "caption": "Gri zemin üzerinde sol altta yeşil bir üçgen."}
+{"id": "vision-0319", "group_id": "vision-artı-mor", "image_path": "images/vision-0319.png", "caption": "Beyaz zemin üzerinde sağ altta mor bir artı."}
+{"id": "vision-0320", "group_id": "vision-elmas-mavi", "image_path": "images/vision-0320.png", "caption": "Siyah zemin üzerinde ortada mavi bir elmas."}
+{"id": "vision-0321", "group_id": "vision-elmas-pembe", "image_path": "images/vision-0321.png", "caption": "Gri zemin üzerinde sol üstte pembe bir elmas."}
+{"id": "vision-0322", "group_id": "vision-elmas-pembe", "image_path": "images/vision-0322.png", "caption": "Gri zemin üzerinde sol altta pembe bir elmas."}
+{"id": "vision-0323", "group_id": "vision-kare-sarı", "image_path": "images/vision-0323.png", "caption": "Siyah zemin üzerinde sol üstte sarı bir kare."}
+{"id": "vision-0324", "group_id": "vision-artı-kırmızı", "image_path": "images/vision-0324.png", "caption": "Beyaz zemin üzerinde sol altta kırmızı bir artı."}
+{"id": "vision-0325", "group_id": "vision-elmas-pembe", "image_path": "images/vision-0325.png", "caption": "Siyah zemin üzerinde sağ altta pembe bir elmas."}
+{"id": "vision-0326", "group_id": "vision-daire-sarı", "image_path": "images/vision-0326.png", "caption": "Siyah zemin üzerinde ortada sarı bir daire."}
+{"id": "vision-0327", "group_id": "vision-üçgen-turuncu", "image_path": "images/vision-0327.png", "caption": "Gri zemin üzerinde sağ altta turuncu bir üçgen."}
+{"id": "vision-0328", "group_id": "vision-üçgen-pembe", "image_path": "images/vision-0328.png", "caption": "Beyaz zemin üzerinde sol altta pembe bir üçgen."}
+{"id": "vision-0329", "group_id": "vision-daire-mor", "image_path": "images/vision-0329.png", "caption": "Beyaz zemin üzerinde sol üstte mor bir daire."}
+{"id": "vision-0330", "group_id": "vision-elmas-sarı", "image_path": "images/vision-0330.png", "caption": "Siyah zemin üzerinde ortada sarı bir elmas."}
+{"id": "vision-0331", "group_id": "vision-elmas-mavi", "image_path": "images/vision-0331.png", "caption": "Siyah zemin üzerinde sağ üstte mavi bir elmas."}
+{"id": "vision-0332", "group_id": "vision-kare-pembe", "image_path": "images/vision-0332.png", "caption": "Gri zemin üzerinde ortada pembe bir kare."}
+{"id": "vision-0333", "group_id": "vision-daire-mavi", "image_path": "images/vision-0333.png", "caption": "Beyaz zemin üzerinde sağ üstte mavi bir daire."}
+{"id": "vision-0334", "group_id": "vision-daire-yeşil", "image_path": "images/vision-0334.png", "caption": "Siyah zemin üzerinde sol üstte yeşil bir daire."}
+{"id": "vision-0335", "group_id": "vision-daire-yeşil", "image_path": "images/vision-0335.png", "caption": "Beyaz zemin üzerinde sağ altta yeşil bir daire."}
+{"id": "vision-0336", "group_id": "vision-elmas-pembe", "image_path": "images/vision-0336.png", "caption": "Siyah zemin üzerinde sağ üstte pembe bir elmas."}
+{"id": "vision-0337", "group_id": "vision-üçgen-mor", "image_path": "images/vision-0337.png", "caption": "Gri zemin üzerinde sağ altta mor bir üçgen."}
+{"id": "vision-0338", "group_id": "vision-dikdörtgen-pembe", "image_path": "images/vision-0338.png", "caption": "Beyaz zemin üzerinde ortada pembe bir dikdörtgen."}
+{"id": "vision-0339", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0339.png", "caption": "Siyah zemin üzerinde sağ üstte sarı bir üçgen."}
+{"id": "vision-0340", "group_id": "vision-üçgen-mavi", "image_path": "images/vision-0340.png", "caption": "Siyah zemin üzerinde sağ üstte mavi bir üçgen."}
+{"id": "vision-0341", "group_id": "vision-kare-turuncu", "image_path": "images/vision-0341.png", "caption": "Gri zemin üzerinde sol üstte turuncu bir kare."}
+{"id": "vision-0342", "group_id": "vision-kare-kırmızı", "image_path": "images/vision-0342.png", "caption": "Beyaz zemin üzerinde ortada kırmızı bir kare."}
+{"id": "vision-0343", "group_id": "vision-daire-sarı", "image_path": "images/vision-0343.png", "caption": "Gri zemin üzerinde sağ altta sarı bir daire."}
+{"id": "vision-0344", "group_id": "vision-daire-turuncu", "image_path": "images/vision-0344.png", "caption": "Siyah zemin üzerinde sol altta turuncu bir daire."}
+{"id": "vision-0345", "group_id": "vision-artı-pembe", "image_path": "images/vision-0345.png", "caption": "Beyaz zemin üzerinde sağ üstte pembe bir artı."}
+{"id": "vision-0346", "group_id": "vision-daire-pembe", "image_path": "images/vision-0346.png", "caption": "Beyaz zemin üzerinde sol üstte pembe bir daire."}
+{"id": "vision-0347", "group_id": "vision-artı-turkuaz", "image_path": "images/vision-0347.png", "caption": "Siyah zemin üzerinde sol üstte turkuaz bir artı."}
+{"id": "vision-0348", "group_id": "vision-elmas-turkuaz", "image_path": "images/vision-0348.png", "caption": "Siyah zemin üzerinde sol altta turkuaz bir elmas."}
+{"id": "vision-0349", "group_id": "vision-kare-yeşil", "image_path": "images/vision-0349.png", "caption": "Gri zemin üzerinde sol üstte yeşil bir kare."}
+{"id": "vision-0350", "group_id": "vision-elmas-yeşil", "image_path": "images/vision-0350.png", "caption": "Siyah zemin üzerinde sağ üstte yeşil bir elmas."}
+{"id": "vision-0351", "group_id": "vision-dikdörtgen-sarı", "image_path": "images/vision-0351.png", "caption": "Gri zemin üzerinde sol üstte sarı bir dikdörtgen."}
+{"id": "vision-0352", "group_id": "vision-daire-mavi", "image_path": "images/vision-0352.png", "caption": "Gri zemin üzerinde sağ altta mavi bir daire."}
+{"id": "vision-0353", "group_id": "vision-daire-pembe", "image_path": "images/vision-0353.png", "caption": "Siyah zemin üzerinde ortada pembe bir daire."}
+{"id": "vision-0354", "group_id": "vision-dikdörtgen-mavi", "image_path": "images/vision-0354.png", "caption": "Gri zemin üzerinde sol üstte mavi bir dikdörtgen."}
+{"id": "vision-0355", "group_id": "vision-elmas-sarı", "image_path": "images/vision-0355.png", "caption": "Beyaz zemin üzerinde sağ üstte sarı bir elmas."}
+{"id": "vision-0356", "group_id": "vision-elmas-yeşil", "image_path": "images/vision-0356.png", "caption": "Siyah zemin üzerinde ortada yeşil bir elmas."}
+{"id": "vision-0357", "group_id": "vision-üçgen-sarı", "image_path": "images/vision-0357.png", "caption": "Beyaz zemin üzerinde sol altta sarı bir üçgen."}
+{"id": "vision-0358", "group_id": "vision-daire-yeşil", "image_path": "images/vision-0358.png", "caption": "Siyah zemin üzerinde sağ altta yeşil bir daire."}
+{"id": "vision-0359", "group_id": "vision-dikdörtgen-pembe", "image_path": "images/vision-0359.png", "caption": "Beyaz zemin üzerinde sağ üstte pembe bir dikdörtgen."}
+{"id": "vision-0360", "group_id": "vision-üçgen-yeşil", "image_path": "images/vision-0360.png", "caption": "Beyaz zemin üzerinde sol altta yeşil bir üçgen."}

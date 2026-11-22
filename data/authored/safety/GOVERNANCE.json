@@ -11,10 +11,10 @@
   "privacy_reviewed": true,
   "quality_reviewed": true,
   "reviewer_role": "project owner (attestation given in the Claude Code session)",
-  "reviewed_at": "2026-11-22T12:37+03:00",
-  "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/safety/records.jsonl@sha256:06eb2763193e50bb6b8e3f4727ee8e0382d02c28c8da65bf6fbfb6a43d546cc2",
+  "reviewed_at": "2026-11-22T13:16+03:00",
+  "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/safety/records.jsonl@sha256:9a81ddde531c12da3e01989fa13673d51d34943881d043f7f9e0fe2a7a42c6f3",
   "speaker_consent_reviewed": false,
   "safety_reviewed": true,
-  "owner_statement": "SAFETY kayıtlarını ve etiketlerini inceledim; içerikler projeye aittir; eğitimde kullanılmasına izin veriyorum; güvenlik incelemesini ben yaptım ve sorumluluğunu kabul ediyorum.",
-  "reviewed_records_sha256": "06eb2763193e50bb6b8e3f4727ee8e0382d02c28c8da65bf6fbfb6a43d546cc2"
+  "owner_statement": "VISION, IMAGE, 3D, DOCUMENT, SAFETY ve CHAT kayıtlarını inceledim; içerikler projeye aittir (kodla üretilmiş sentetik veridir); eğitimde kullanılmasına izin veriyorum; gizlilik, kalite ve güvenlik incelemesi sorumluluğunu kabul ediyorum.",
+  "reviewed_records_sha256": "9a81ddde531c12da3e01989fa13673d51d34943881d043f7f9e0fe2a7a42c6f3"
 }

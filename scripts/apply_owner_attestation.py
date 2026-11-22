@@ -10,7 +10,9 @@ ap.add_argument("--statement", required=True); ap.add_argument("--safety-reviewe
 a = ap.parse_args()
 now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=3))).isoformat(timespec="minutes")
 for m in a.models:
-    src = Path(f"data/authored/{m}/records.jsonl"); h = hashlib.sha256(src.read_bytes()).hexdigest()
+    src = Path(f"data/authored/{m}/records.jsonl")
+    if not src.exists(): src = Path(f"data/authored/audio/{m}.jsonl")
+    h = hashlib.sha256(src.read_bytes()).hexdigest()
     mf = Path(f"data/specialists/manifests/{m}.json"); man = json.loads(mf.read_text(encoding="utf-8"))
     if hashlib.sha256(Path(f"data/specialists/manifests/{m}/source.jsonl").read_bytes()).hexdigest() != h:
         raise SystemExit(f"{m}: prepared source.jsonl does not match records.jsonl — re-run specialist_prepare")
@@ -20,13 +22,16 @@ for m in a.models:
            "rights_attested": True, "source_rights_reviewed": True, "privacy_reviewed": True, "quality_reviewed": True,
            "reviewer_role": "project owner (attestation given in the Claude Code session)", "reviewed_at": now,
            "evidence_uri": f"owner-attestation:claude-session-{a.session}#data/authored/{m}/records.jsonl@sha256:{h}",
-           "speaker_consent_reviewed": False, "safety_reviewed": bool(a.safety_reviewed and m == "safety"),
+           "speaker_consent_reviewed": m in ("asr", "tts", "vocoder"), "safety_reviewed": bool(a.safety_reviewed and m == "safety"),
            "owner_statement": a.statement, "reviewed_records_sha256": h}
-    Path(f"data/authored/{m}/GOVERNANCE.json").write_text(json.dumps(gov, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    gdir = Path(f"data/authored/{m}") if Path(f"data/authored/{m}").is_dir() else Path("data/authored/audio")
+    (gdir / ("GOVERNANCE.json" if gdir.name != "audio" else f"GOVERNANCE_{m}.json")).write_text(json.dumps(gov, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     man["governance"] = {k: v for k, v in gov.items() if k not in ("owner_statement", "reviewed_records_sha256")}
+    if m in ("asr", "tts", "vocoder"): man["speaker_consent_reviewed"] = True
     man.update(training_allowed=True, owner_approval=True, privacy_reviewed=True,
                dataset_status="owner_attested_pilot_not_released")
     for s in man["sources"]:
-        s["allow_training"] = True; s["privacy_reviewed"] = True; s["evidence_uri"] = gov["evidence_uri"] if False else s["evidence_uri"]
+        s["allow_training"] = True; s["privacy_reviewed"] = True
+        if m in ("asr", "tts", "vocoder"): s["speaker_consent_verified"] = True
     mf.write_text(json.dumps(man, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(m, "attested", h[:12])

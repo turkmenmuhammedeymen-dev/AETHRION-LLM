@@ -122,7 +122,7 @@ def training_readiness():
     except Exception as exc:
         return "### Training readiness unavailable\n- " + type(exc).__name__ + ": " + str(exc)[:240]
 
-TRAIN_SESSION_MODELS = ["code", "research", "safety"]
+TRAIN_SESSION_MODELS = ["code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document"]
 
 
 def training_setup_status():

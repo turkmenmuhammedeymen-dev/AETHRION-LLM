@@ -1,0 +1,160 @@
+{"id": "audio-0001", "group_id": "audio-phrase-0", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0001.wav", "transcript": "portakal", "durations": [95]}
+{"id": "audio-0002", "group_id": "audio-phrase-1", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0002.wav", "transcript": "gece", "durations": [57]}
+{"id": "audio-0003", "group_id": "audio-phrase-2", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0003.wav", "transcript": "güneş portakal", "durations": [59, 7, 86]}
+{"id": "audio-0004", "group_id": "audio-phrase-3", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0004.wav", "transcript": "bahçe", "durations": [66]}
+{"id": "audio-0005", "group_id": "audio-phrase-4", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0005.wav", "transcript": "altı", "durations": [58]}
+{"id": "audio-0006", "group_id": "audio-phrase-5", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0006.wav", "transcript": "yazı çay", "durations": [51, 44]}
+{"id": "audio-0007", "group_id": "audio-phrase-6", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0007.wav", "transcript": "nasılsın", "durations": [99]}
+{"id": "audio-0008", "group_id": "audio-phrase-7", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0008.wav", "transcript": "kahve altı", "durations": [59, 7, 50]}
+{"id": "audio-0009", "group_id": "audio-phrase-8", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0009.wav", "transcript": "ders güneş", "durations": [47, 66]}
+{"id": "audio-0010", "group_id": "audio-phrase-9", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0010.wav", "transcript": "kitap", "durations": [65]}
+{"id": "audio-0011", "group_id": "audio-phrase-10", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0011.wav", "transcript": "sekiz", "durations": [68]}
+{"id": "audio-0012", "group_id": "audio-phrase-11", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0012.wav", "transcript": "sayı merhaba", "durations": [58, 80]}
+{"id": "audio-0013", "group_id": "audio-phrase-12", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0013.wav", "transcript": "hayır", "durations": [68]}
+{"id": "audio-0014", "group_id": "audio-phrase-13", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0014.wav", "transcript": "su", "durations": [38]}
+{"id": "audio-0015", "group_id": "audio-phrase-14", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0015.wav", "transcript": "beş", "durations": [16, 30]}
+{"id": "audio-0016", "group_id": "audio-phrase-15", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0016.wav", "transcript": "şarkı bahçe", "durations": [18, 21, 8, 12, 65]}
+{"id": "audio-0017", "group_id": "audio-phrase-16", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0017.wav", "transcript": "şehir üç", "durations": [60, 36]}
+{"id": "audio-0018", "group_id": "audio-phrase-17", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0018.wav", "transcript": "ders köy", "durations": [47, 44]}
+{"id": "audio-0019", "group_id": "audio-phrase-18", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0019.wav", "transcript": "yardım dokuz", "durations": [67, 65]}
+{"id": "audio-0020", "group_id": "audio-phrase-19", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0020.wav", "transcript": "ederim hava", "durations": [77, 52]}
+{"id": "audio-0021", "group_id": "audio-phrase-20", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0021.wav", "transcript": "yol", "durations": [17, 12, 18]}
+{"id": "audio-0022", "group_id": "audio-phrase-21", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0022.wav", "transcript": "yazı", "durations": [59]}
+{"id": "audio-0023", "group_id": "audio-phrase-22", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0023.wav", "transcript": "iki güneş", "durations": [40, 66]}
+{"id": "audio-0024", "group_id": "audio-phrase-23", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0024.wav", "transcript": "sınıf araba", "durations": [60, 7, 62]}
+{"id": "audio-0025", "group_id": "audio-phrase-24", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0025.wav", "transcript": "elma akşam", "durations": [57, 59]}
+{"id": "audio-0026", "group_id": "audio-phrase-25", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0026.wav", "transcript": "portakal kitap", "durations": [93, 57]}
+{"id": "audio-0027", "group_id": "audio-phrase-26", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0027.wav", "transcript": "deniz bugün", "durations": [59, 64]}
+{"id": "audio-0028", "group_id": "audio-phrase-27", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0028.wav", "transcript": "bahçe kar", "durations": [65, 37]}
+{"id": "audio-0029", "group_id": "audio-phrase-28", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0029.wav", "transcript": "dağ", "durations": [46]}
+{"id": "audio-0030", "group_id": "audio-phrase-29", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0030.wav", "transcript": "kahve on", "durations": [59, 19, 18]}
+{"id": "audio-0031", "group_id": "audio-phrase-30", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0031.wav", "transcript": "şehir", "durations": [69]}
+{"id": "audio-0032", "group_id": "audio-phrase-31", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0032.wav", "transcript": "güneş", "durations": [67]}
+{"id": "audio-0033", "group_id": "audio-phrase-32", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0033.wav", "transcript": "masa lütfen", "durations": [58, 68]}
+{"id": "audio-0034", "group_id": "audio-phrase-33", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0034.wav", "transcript": "şarkı", "durations": [18, 21, 8, 20]}
+{"id": "audio-0035", "group_id": "audio-phrase-34", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0035.wav", "transcript": "teşekkür akşam", "durations": [94, 59]}
+{"id": "audio-0036", "group_id": "audio-phrase-35", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0036.wav", "transcript": "sınıf", "durations": [69]}
+{"id": "audio-0037", "group_id": "audio-phrase-36", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0037.wav", "transcript": "bugün", "durations": [66]}
+{"id": "audio-0038", "group_id": "audio-phrase-37", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0038.wav", "transcript": "arkadaş iki", "durations": [79, 7, 40]}
+{"id": "audio-0039", "group_id": "audio-phrase-38", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0039.wav", "transcript": "sekiz lütfen", "durations": [66, 68]}
+{"id": "audio-0040", "group_id": "audio-phrase-39", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0040.wav", "transcript": "okul", "durations": [58]}
+{"id": "audio-0041", "group_id": "audio-phrase-40", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0041.wav", "transcript": "çay dokuz", "durations": [37, 65]}
+{"id": "audio-0042", "group_id": "audio-phrase-41", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0042.wav", "transcript": "araba okumak", "durations": [61, 7, 70]}
+{"id": "audio-0043", "group_id": "audio-phrase-42", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0043.wav", "transcript": "çok", "durations": [45]}
+{"id": "audio-0044", "group_id": "audio-phrase-43", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0044.wav", "transcript": "masa çiçek", "durations": [58, 56]}
+{"id": "audio-0045", "group_id": "audio-phrase-44", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0045.wav", "transcript": "evet dağ", "durations": [50, 44]}
+{"id": "audio-0046", "group_id": "audio-phrase-45", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0046.wav", "transcript": "ekmek gece", "durations": [57, 56]}
+{"id": "audio-0047", "group_id": "audio-phrase-46", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0047.wav", "transcript": "on", "durations": [38]}
+{"id": "audio-0048", "group_id": "audio-phrase-47", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0048.wav", "transcript": "okul müzik", "durations": [49, 66]}
+{"id": "audio-0049", "group_id": "audio-phrase-48", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0049.wav", "transcript": "yağmur sekiz", "durations": [75, 60]}
+{"id": "audio-0050", "group_id": "audio-phrase-49", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0050.wav", "transcript": "çiçek", "durations": [65]}
+{"id": "audio-0051", "group_id": "audio-phrase-50", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0051.wav", "transcript": "arkadaş güneş", "durations": [79, 66]}
+{"id": "audio-0052", "group_id": "audio-phrase-51", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0052.wav", "transcript": "yazı otobüs", "durations": [51, 77]}
+{"id": "audio-0053", "group_id": "audio-phrase-52", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0053.wav", "transcript": "çay sabah", "durations": [44, 60]}
+{"id": "audio-0054", "group_id": "audio-phrase-53", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0054.wav", "transcript": "üç", "durations": [37]}
+{"id": "audio-0055", "group_id": "audio-phrase-54", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0055.wav", "transcript": "portakal ekmek", "durations": [93, 58]}
+{"id": "audio-0056", "group_id": "audio-phrase-55", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0056.wav", "transcript": "güzel", "durations": [67]}
+{"id": "audio-0057", "group_id": "audio-phrase-56", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0057.wav", "transcript": "müzik akşam", "durations": [59, 66]}
+{"id": "audio-0058", "group_id": "audio-phrase-57", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0058.wav", "transcript": "bahçe şehir", "durations": [65, 60]}
+{"id": "audio-0059", "group_id": "audio-phrase-58", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0059.wav", "transcript": "sayı yol", "durations": [58, 9, 12, 17]}
+{"id": "audio-0060", "group_id": "audio-phrase-59", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0060.wav", "transcript": "deniz", "durations": [67]}
+{"id": "audio-0061", "group_id": "audio-phrase-60", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0061.wav", "transcript": "güneş müzik", "durations": [59, 66]}
+{"id": "audio-0062", "group_id": "audio-phrase-61", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0062.wav", "transcript": "portakal bahçe", "durations": [93, 58]}
+{"id": "audio-0063", "group_id": "audio-phrase-62", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0063.wav", "transcript": "tamam gece", "durations": [58, 56]}
+{"id": "audio-0064", "group_id": "audio-phrase-63", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0064.wav", "transcript": "ekmek", "durations": [66]}
+{"id": "audio-0065", "group_id": "audio-phrase-64", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0065.wav", "transcript": "yedi bahçe", "durations": [49, 65]}
+{"id": "audio-0066", "group_id": "audio-phrase-65", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0066.wav", "transcript": "su üç", "durations": [30, 35]}
+{"id": "audio-0067", "group_id": "audio-phrase-66", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0067.wav", "transcript": "ederim iki", "durations": [77, 41]}
+{"id": "audio-0068", "group_id": "audio-phrase-67", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0068.wav", "transcript": "elma", "durations": [59]}
+{"id": "audio-0069", "group_id": "audio-phrase-68", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0069.wav", "transcript": "yağmur", "durations": [77]}
+{"id": "audio-0070", "group_id": "audio-phrase-69", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0070.wav", "transcript": "okumak ekmek", "durations": [76, 58]}
+{"id": "audio-0071", "group_id": "audio-phrase-70", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0071.wav", "transcript": "yağmur dağ", "durations": [68, 45]}
+{"id": "audio-0072", "group_id": "audio-phrase-71", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0072.wav", "transcript": "ederim", "durations": [79]}
+{"id": "audio-0073", "group_id": "audio-phrase-72", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0073.wav", "transcript": "sabah deniz", "durations": [59, 15, 12, 9, 30]}
+{"id": "audio-0074", "group_id": "audio-phrase-73", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0074.wav", "transcript": "aile", "durations": [20, 12, 9, 21]}
+{"id": "audio-0075", "group_id": "audio-phrase-74", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0075.wav", "transcript": "teşekkür", "durations": [95]}
+{"id": "audio-0076", "group_id": "audio-phrase-75", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0076.wav", "transcript": "sayı yağmur", "durations": [58, 68]}
+{"id": "audio-0077", "group_id": "audio-phrase-76", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0077.wav", "transcript": "dokuz", "durations": [66]}
+{"id": "audio-0078", "group_id": "audio-phrase-77", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0078.wav", "transcript": "kalem kitap", "durations": [58, 7, 57]}
+{"id": "audio-0079", "group_id": "audio-phrase-78", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0079.wav", "transcript": "hava", "durations": [60]}
+{"id": "audio-0080", "group_id": "audio-phrase-79", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0080.wav", "transcript": "sabah dört", "durations": [59, 53]}
+{"id": "audio-0081", "group_id": "audio-phrase-80", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0081.wav", "transcript": "dört", "durations": [54]}
+{"id": "audio-0082", "group_id": "audio-phrase-81", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0082.wav", "transcript": "portakal yardım", "durations": [93, 68]}
+{"id": "audio-0083", "group_id": "audio-phrase-82", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0083.wav", "transcript": "masa otobüs", "durations": [51, 77]}
+{"id": "audio-0084", "group_id": "audio-phrase-83", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0084.wav", "transcript": "masa sınıf", "durations": [58, 60]}
+{"id": "audio-0085", "group_id": "audio-phrase-84", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0085.wav", "transcript": "hava sınıf", "durations": [51, 7, 61]}
+{"id": "audio-0086", "group_id": "audio-phrase-85", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0086.wav", "transcript": "çay şehir", "durations": [44, 61]}
+{"id": "audio-0087", "group_id": "audio-phrase-86", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0087.wav", "transcript": "altı bir", "durations": [49, 45]}
+{"id": "audio-0088", "group_id": "audio-phrase-87", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0088.wav", "transcript": "kahve sabah", "durations": [59, 7, 60]}
+{"id": "audio-0089", "group_id": "audio-phrase-88", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0089.wav", "transcript": "yedi", "durations": [58]}
+{"id": "audio-0090", "group_id": "audio-phrase-89", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0090.wav", "transcript": "lütfen dört", "durations": [68, 52]}
+{"id": "audio-0091", "group_id": "audio-phrase-90", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0091.wav", "transcript": "elma güzel", "durations": [57, 59]}
+{"id": "audio-0092", "group_id": "audio-phrase-91", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0092.wav", "transcript": "okumak kar", "durations": [76, 38]}
+{"id": "audio-0093", "group_id": "audio-phrase-92", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0093.wav", "transcript": "otobüs", "durations": [20, 58]}
+{"id": "audio-0094", "group_id": "audio-phrase-93", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0094.wav", "transcript": "güzel çiçek", "durations": [66, 56]}
+{"id": "audio-0095", "group_id": "audio-phrase-94", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0095.wav", "transcript": "sabah", "durations": [68]}
+{"id": "audio-0096", "group_id": "audio-phrase-95", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0096.wav", "transcript": "dört üç", "durations": [45, 36]}
+{"id": "audio-0097", "group_id": "audio-phrase-96", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0097.wav", "transcript": "akşam", "durations": [67]}
+{"id": "audio-0098", "group_id": "audio-phrase-97", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0098.wav", "transcript": "kahve", "durations": [68]}
+{"id": "audio-0099", "group_id": "audio-phrase-98", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0099.wav", "transcript": "dokuz dört", "durations": [58, 52]}
+{"id": "audio-0100", "group_id": "audio-phrase-99", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0100.wav", "transcript": "güzel bir", "durations": [59, 44]}
+{"id": "audio-0101", "group_id": "audio-phrase-100", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0101.wav", "transcript": "okumak kalem", "durations": [76, 59]}
+{"id": "audio-0102", "group_id": "audio-phrase-101", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0102.wav", "transcript": "güzel şarkı", "durations": [66, 9, 21, 8, 21]}
+{"id": "audio-0103", "group_id": "audio-phrase-102", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0103.wav", "transcript": "iki beş", "durations": [40, 15, 30]}
+{"id": "audio-0104", "group_id": "audio-phrase-103", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0104.wav", "transcript": "iki", "durations": [49]}
+{"id": "audio-0105", "group_id": "audio-phrase-104", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0105.wav", "transcript": "araba", "durations": [70]}
+{"id": "audio-0106", "group_id": "audio-phrase-105", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0106.wav", "transcript": "ekmek hayır", "durations": [57, 7, 60]}
+{"id": "audio-0107", "group_id": "audio-phrase-106", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0107.wav", "transcript": "çok akşam", "durations": [36, 66]}
+{"id": "audio-0108", "group_id": "audio-phrase-107", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0108.wav", "transcript": "yağmur okul", "durations": [75, 50]}
+{"id": "audio-0109", "group_id": "audio-phrase-108", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0109.wav", "transcript": "gece yazı", "durations": [48, 7, 51]}
+{"id": "audio-0110", "group_id": "audio-phrase-109", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0110.wav", "transcript": "lütfen yardım", "durations": [68, 7, 67]}
+{"id": "audio-0111", "group_id": "audio-phrase-110", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0111.wav", "transcript": "üç teşekkür", "durations": [28, 7, 87]}
+{"id": "audio-0112", "group_id": "audio-phrase-111", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0112.wav", "transcript": "müzik bahçe", "durations": [59, 65]}
+{"id": "audio-0113", "group_id": "audio-phrase-112", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0113.wav", "transcript": "güneş dört", "durations": [59, 52]}
+{"id": "audio-0114", "group_id": "audio-phrase-113", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0114.wav", "transcript": "güzel gece", "durations": [59, 55]}
+{"id": "audio-0115", "group_id": "audio-phrase-114", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0115.wav", "transcript": "bir dağ", "durations": [37, 45]}
+{"id": "audio-0116", "group_id": "audio-phrase-115", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0116.wav", "transcript": "sınıf dağ", "durations": [60, 45]}
+{"id": "audio-0117", "group_id": "audio-phrase-116", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0117.wav", "transcript": "müzik bugün", "durations": [59, 64]}
+{"id": "audio-0118", "group_id": "audio-phrase-117", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0118.wav", "transcript": "iyiyim", "durations": [80]}
+{"id": "audio-0119", "group_id": "audio-phrase-118", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0119.wav", "transcript": "dağ portakal", "durations": [37, 7, 87]}
+{"id": "audio-0120", "group_id": "audio-phrase-119", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0120.wav", "transcript": "kitap arkadaş", "durations": [63, 79]}
+{"id": "audio-0121", "group_id": "audio-phrase-120", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0121.wav", "transcript": "on çay", "durations": [29, 45]}
+{"id": "audio-0122", "group_id": "audio-phrase-121", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0122.wav", "transcript": "lütfen müzik", "durations": [68, 66]}
+{"id": "audio-0123", "group_id": "audio-phrase-122", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0123.wav", "transcript": "kar ederim", "durations": [28, 16, 71]}
+{"id": "audio-0124", "group_id": "audio-phrase-123", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0124.wav", "transcript": "elma kahve", "durations": [57, 60]}
+{"id": "audio-0125", "group_id": "audio-phrase-124", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0125.wav", "transcript": "okumak", "durations": [78]}
+{"id": "audio-0126", "group_id": "audio-phrase-125", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0126.wav", "transcript": "hava otobüs", "durations": [51, 77]}
+{"id": "audio-0127", "group_id": "audio-phrase-126", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0127.wav", "transcript": "kar", "durations": [46]}
+{"id": "audio-0128", "group_id": "audio-phrase-127", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0128.wav", "transcript": "tamam beş", "durations": [58, 15, 30]}
+{"id": "audio-0129", "group_id": "audio-phrase-128", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0129.wav", "transcript": "altı dağ", "durations": [49, 45]}
+{"id": "audio-0130", "group_id": "audio-phrase-129", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0130.wav", "transcript": "portakal su", "durations": [93, 30]}
+{"id": "audio-0131", "group_id": "audio-phrase-130", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0131.wav", "transcript": "çay", "durations": [46]}
+{"id": "audio-0132", "group_id": "audio-phrase-131", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0132.wav", "transcript": "sekiz elma", "durations": [66, 51]}
+{"id": "audio-0133", "group_id": "audio-phrase-132", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0133.wav", "transcript": "müzik", "durations": [67]}
+{"id": "audio-0134", "group_id": "audio-phrase-133", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0134.wav", "transcript": "yazı gece", "durations": [51, 55]}
+{"id": "audio-0135", "group_id": "audio-phrase-134", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0135.wav", "transcript": "akşam çay", "durations": [59, 44]}
+{"id": "audio-0136", "group_id": "audio-phrase-135", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0136.wav", "transcript": "teşekkür okul", "durations": [94, 49]}
+{"id": "audio-0137", "group_id": "audio-phrase-136", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0137.wav", "transcript": "evet yağmur", "durations": [50, 7, 68]}
+{"id": "audio-0138", "group_id": "audio-phrase-137", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0138.wav", "transcript": "on dokuz", "durations": [29, 65]}
+{"id": "audio-0139", "group_id": "audio-phrase-138", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0139.wav", "transcript": "dağ otobüs", "durations": [37, 77]}
+{"id": "audio-0140", "group_id": "audio-phrase-139", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0140.wav", "transcript": "portakal köy", "durations": [93, 38]}
+{"id": "audio-0141", "group_id": "audio-phrase-140", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0141.wav", "transcript": "yardım", "durations": [76]}
+{"id": "audio-0142", "group_id": "audio-phrase-141", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0142.wav", "transcript": "bir nasılsın", "durations": [37, 7, 91]}
+{"id": "audio-0143", "group_id": "audio-phrase-142", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0143.wav", "transcript": "kitap yedi", "durations": [63, 50]}
+{"id": "audio-0144", "group_id": "audio-phrase-143", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0144.wav", "transcript": "kar şehir", "durations": [28, 16, 61]}
+{"id": "audio-0145", "group_id": "audio-phrase-144", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0145.wav", "transcript": "bahçe yedi", "durations": [65, 49]}
+{"id": "audio-0146", "group_id": "audio-phrase-145", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0146.wav", "transcript": "dokuz iyiyim", "durations": [58, 7, 71]}
+{"id": "audio-0147", "group_id": "audio-phrase-146", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0147.wav", "transcript": "bugün kalem", "durations": [57, 7, 59]}
+{"id": "audio-0148", "group_id": "audio-phrase-147", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0148.wav", "transcript": "dört okul", "durations": [45, 7, 50]}
+{"id": "audio-0149", "group_id": "audio-phrase-148", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0149.wav", "transcript": "tamam", "durations": [67]}
+{"id": "audio-0150", "group_id": "audio-phrase-149", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0150.wav", "transcript": "iki sekiz", "durations": [40, 7, 60]}
+{"id": "audio-0151", "group_id": "audio-phrase-150", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0151.wav", "transcript": "dağ bahçe", "durations": [37, 65]}
+{"id": "audio-0152", "group_id": "audio-phrase-151", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0152.wav", "transcript": "üç köy", "durations": [28, 45]}
+{"id": "audio-0153", "group_id": "audio-phrase-152", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0153.wav", "transcript": "okumak dokuz", "durations": [69, 65]}
+{"id": "audio-0154", "group_id": "audio-phrase-153", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0154.wav", "transcript": "yardım tamam", "durations": [67, 7, 59]}
+{"id": "audio-0155", "group_id": "audio-phrase-154", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0155.wav", "transcript": "hayır sekiz", "durations": [51, 16, 59]}
+{"id": "audio-0156", "group_id": "audio-phrase-155", "speaker_id": "synthetic-voice-0", "wav_path": "wav/clip-0156.wav", "transcript": "arkadaş", "durations": [87]}
+{"id": "audio-0157", "group_id": "audio-phrase-156", "speaker_id": "synthetic-voice-1", "wav_path": "wav/clip-0157.wav", "transcript": "köy", "durations": [46]}
+{"id": "audio-0158", "group_id": "audio-phrase-157", "speaker_id": "synthetic-voice-2", "wav_path": "wav/clip-0158.wav", "transcript": "lütfen", "durations": [76]}
+{"id": "audio-0159", "group_id": "audio-phrase-158", "speaker_id": "synthetic-voice-3", "wav_path": "wav/clip-0159.wav", "transcript": "hava akşam", "durations": [51, 66]}
+{"id": "audio-0160", "group_id": "audio-phrase-159", "speaker_id": "synthetic-voice-4", "wav_path": "wav/clip-0160.wav", "transcript": "merhaba bugün", "durations": [80, 64]}

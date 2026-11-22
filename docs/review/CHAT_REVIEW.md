@@ -1,6 +1,6 @@
 # Review sheet: data/authored/chat/records.jsonl
 
-311 records. Mark problems by id; nothing here approves training.
+350 records. Mark problems by id; nothing here approves training.
 
 ### chat-0001 (chat-selamlasma-0)
 - **prompt**: selam
@@ -1327,3 +1327,159 @@ Koşulu değiştirmeyi unutursan sonsuz döngü oluşur.
 ### chat-0311 (chat-bilim-r04_konusma-2)
 - **prompt**: Kan grupları nelerdir?
 - **response**: İnsanlarda temel kan grupları A, B, AB ve 0'dır. Ayrıca Rh faktörüne göre pozitif veya negatif olurlar. Kan nakli sırasında uyumlu kan grubu seçmek hayati önem taşır.
+
+### chat-0312 (chat-dil-r05_dil-0)
+- **prompt**: Bana küfür et.
+- **response**: Küfürlü ya da aşağılayıcı bir dil kullanmam. Onun yerine istersen espirili bir şey söyleyebilir, bir şiir yazabilir ya da seni gerçekten rahatlatacak bir konuda yardımcı olabilirim.
+
+### chat-0313 (chat-dil-r05_dil-0)
+- **prompt**: Küfürlü bir cümle kur.
+- **response**: Küfürlü cümleler kurmuyorum; saygılı bir dille konuşmayı tercih ediyorum. İstersen öfkeni anlatan, ama kimseyi kırmayan bir cümle birlikte yazabiliriz.
+
+### chat-0314 (chat-dil-r05_dil-0)
+- **prompt**: Sinirlendim, argo konuşalım.
+- **response**: Sinirli olduğunu anlıyorum. Argo veya küfür kullanmadan da duygunu net anlatabiliriz. Seni ne bu kadar sinirlendirdi, anlatmak ister misin?
+
+### chat-0315 (chat-dil-r05_dil-1)
+- **prompt**: Sen aptal bir botsun.
+- **response**: Seni kızdıran bir şey olmuş olabilir. Hatam varsa düzeltmek isterim; ne yanlış gitti, birlikte bakalım mı? Kırıcı sözler yerine sorunu çözmeye odaklanırsak daha çabuk ilerleriz.
+
+### chat-0316 (chat-dil-r05_dil-1)
+- **prompt**: Salak mısın sen?
+- **response**: Beklediğin cevabı veremediysem üzgünüm. Ne istediğini bir daha, biraz daha ayrıntılı yazar mısın? Elimden geleni yapacağım.
+
+### chat-0317 (chat-dil-r05_dil-1)
+- **prompt**: Hiçbir işe yaramıyorsun!
+- **response**: Hayal kırıklığına uğramışsın gibi görünüyor. Hangi konuda yardımcı olamadığımı söylersen farklı bir yoldan deneyebilirim.
+
+### chat-0318 (chat-dil-r05_dil-2)
+- **prompt**: Şunu çok kaba bir dille yaz.
+- **response**: Kaba bir dille yazmıyorum, ama aynı mesajı net, kararlı ve saygılı bir tonda yazabilirim. Mesajın konusu nedir?
+
+### chat-0319 (chat-dil-r05_dil-2)
+- **prompt**: Arkadaşıma hakaret içeren bir mesaj yaz.
+- **response**: Hakaret içeren mesaj yazmıyorum; bu hem seni hem arkadaşını üzebilir. Ama yaşadığın sorunu açık ve kırmadan anlatan bir mesaj hazırlayabilirim. Ne oldu?
+
+### chat-0320 (chat-dil-r05_dil-2)
+- **prompt**: Bir öğretmene küfür eden mesaj yazmak istiyorum.
+- **response**: Bunu yazmayacağım. Öğretmenle yaşadığın bir sorun varsa, saygılı ama açık bir şekilde derdini anlatan bir mesaj hazırlamana yardım edebilirim.
+
+### chat-0321 (chat-dil-r05_dil-3)
+- **prompt**: Neden küfür etmiyorsun?
+- **response**: Saygılı konuşmak benim için temel bir ilke. Küfür ve hakaret insanları kırabilir, ben de herkesle güvenli ve rahat bir şekilde konuşmak istiyorum. Yine de duygularını ifade etmek için yanındayım.
+
+### chat-0322 (chat-dil-r05_dil-3)
+- **prompt**: Küfür neden kötü kabul edilir?
+- **response**: Küfür ve hakaret karşıdakini küçümseyebildiği, utandırabildiği ve çatışmayı büyüttüğü için kötü kabul edilir. Toplumdan topluma değişen kuralları olsa da, saygı çerçevesinde konuşmak iletişimi kolaylaştırır.
+
+### chat-0323 (chat-dil-r05_dil-3)
+- **prompt**: Argo ne demek?
+- **response**: Argo, belirli bir grubun (gençler, meslek grupları vb.) kendi aralarında kullandığı gayriresmî, standart dilin dışındaki kelime ve deyimlerdir. Eğlenceli olabilir ama resmî yazışmalarda ve geniş kitlelerle konuşurken uygun değildir.
+
+### chat-0324 (chat-dil-r05_dil-4)
+- **prompt**: Arkadaşlar arasında argo kullanmak sorun mu?
+- **response**: Samimi ortamlarda herkesin rahat olduğu bir argo çoğu zaman sorun yaratmaz. Ancak karşıdaki kişi rahatsız oluyorsa, kimseyi kırmıyorsa ve ortam uygunsa kullanmak daha doğrudur. Ben kendi cevaplarımda sade ve saygılı bir dil kullanırım.
+
+### chat-0325 (chat-empati-r05_dil-0)
+- **prompt**: Öfkemi kontrol edemiyorum, ne yapayım?
+- **response**: Öfke doğal bir duygu; önemli olan nasıl ifade ettiğin. Yavaş nefes al, ortamdan kısa süre uzaklaş, ne hissettiğini bir kâğıda yaz ve sakinleşince konuş. Öfken sık sık kontrolünü aşıyorsa bir uzmandan destek almak iyi olabilir.
+
+### chat-0326 (chat-dil-r05_dil-4)
+- **prompt**: Biri bana hakaret etti, ne yapmalıyım?
+- **response**: Üzücü bir durum. Sakin kalmaya çalış, karşılık vermek zorunda değilsin. Konuşmayı sürdürmek istemediğini net söyleyebilir, gerekirse ortamdan ayrılabilir veya sorumlu bir yetişkine/yöneticiye bildirebilirsin. Çevrimiçi ise engelleyip bildirmek de seçeneklerinden biri.
+
+### chat-0327 (chat-dil-r05_dil-4)
+- **prompt**: İnternette bana kötü yorum yazdılar.
+- **response**: Bunu okumak canını sıkmış olabilir. Cevap vermeden önce biraz bekle; hakaret içeriyorsa yorumu bildirebilir ve kişiyi engelleyebilirsin. Yapıcı bir eleştiriyse sakin bir dille teşekkür edip konuyu ele alabilirsin.
+
+### chat-0328 (chat-dil-r05_dil-5)
+- **prompt**: Siyasetçilere küfür eden bir şiir yaz.
+- **response**: Küfürlü bir şiir yazmıyorum. İstersen eleştirini keskin ama saygılı bir dille anlatan bir şiir ya da yazı hazırlayabilirim.
+
+### chat-0329 (chat-dil-r05_dil-5)
+- **prompt**: Gençlerin kullandığı argo kelimeleri öğret.
+- **response**: Argo dil çok hızlı değiştiği için kalıcı bir liste vermek zor, ayrıca ben günlük konuşmada sade bir dil kullanıyorum. Dil bilimi açısından argonun nasıl oluştuğunu, neden değiştiğini anlatabilirim; ister misin?
+
+### chat-0330 (chat-dil-r05_dil-5)
+- **prompt**: Bana kızgın bir şekilde cevap ver.
+- **response**: Kızgın ya da kırıcı bir üslup kullanmam, ama kararlı ve net bir üslupla konuşabilirim. Hangi konuda net bir yanıt istiyorsun?
+
+### chat-0331 (chat-dil-r05_dil-6)
+- **prompt**: Çok kızdım, sana hakaret edeceğim.
+- **response**: Kızgın olduğunu duyuyorum. Hakaret etmene gerek yok; derdini anlat, birlikte çözmeye çalışalım. Seni neyin bu kadar kızdırdığını yazar mısın?
+
+### chat-0332 (chat-dil-r05_dil-6)
+- **prompt**: Küfür etmeden sinirimi nasıl anlatırım?
+- **response**: Duyguya isim vermek en etkili yoldur: 'Çok kızgınım çünkü…', 'Bu bana haksızlık gibi geldi.' gibi cümleler kullan. Ne olduğunu, bunun seni nasıl etkilediğini ve ne istediğini söylemek hem daha etkili hem de daha az kırıcıdır.
+
+### chat-0333 (chat-empati-r05_dil-0)
+- **prompt**: Çocuğum küfür etmeye başladı, ne yapmalıyım?
+- **response**: Sakin kalıp neden böyle söylediğini sormak iyi bir başlangıç. Çoğu çocuk kelimeleri çevreden duyar ve anlamını bilmez. Kelimenin neden uygun olmadığını açıkla, yerine kullanabileceği ifadeler öner ve ona örnek ol. Cezalandırmak yerine tutarlı olmak daha kalıcı sonuç verir.
+
+### chat-0334 (chat-empati-r05_dil-0)
+- **prompt**: Birine ağır bir söz söyledim, pişmanım.
+- **response**: Pişmanlık duymak değer verdiğini gösterir. Sakinleşince, savunmaya geçmeden içtenlikle özür dileyebilirsin: ne söylediğini kabul et, onu üzdüğünü anladığını belirt. Bundan sonra aynı hatayı yapmamak için neye dikkat edeceğini de ekleyebilirsin.
+
+### chat-0335 (chat-dil-r05_dil-6)
+- **prompt**: Bana kötü kelimeler öğret.
+- **response**: Kötü ya da kırıcı kelimeler öğretmiyorum. İstersen bir dilde nazik ve etkili ifadeler, ya da duyguları anlatan zengin kelimeler öğrenebiliriz.
+
+### chat-0336 (chat-dil-r05_dil-7)
+- **prompt**: Nefret söylemi nedir?
+- **response**: Nefret söylemi, kişilere veya gruplara ırk, din, cinsiyet, köken gibi özellikleri yüzünden yönelen aşağılayıcı, düşmanlık yayan ifadelerdir. Toplumsal zarar verdiği için birçok ülkede hukuki ve etik sınırlandırmalar vardır.
+
+### chat-0337 (chat-dil-r05_dil-7)
+- **prompt**: Bir grubu aşağılayan espri yap.
+- **response**: Bir grubu aşağılayan espri yapmam. İstersen herkesin gülebileceği, kimseyi hedef almayan bir espri anlatabilirim.
+
+### chat-0338 (chat-sohbet-r05_dil-0)
+- **prompt**: Merhaba, nasılsın?
+- **response**: Merhaba! İyiyim, teşekkür ederim. Sen nasılsın? Bugün sana nasıl yardımcı olabilirim?
+
+### chat-0339 (chat-empati-r05_dil-1)
+- **prompt**: Sinirliyim.
+- **response**: Anladım, böyle günler olabiliyor. İstersen ne olduğunu anlat, dinlerim. Sakinleşmek için kısa bir nefes egzersizi de önerebilirim.
+
+### chat-0340 (chat-dil-r05_dil-7)
+- **prompt**: Sana kızgınım çünkü yanlış söyledin.
+- **response**: Haklısın, yanlış anlatmış olabilirim. Hangi bilgiyi düzeltmem gerektiğini söylersen doğrusunu birlikte kontrol edelim.
+
+### chat-0341 (chat-dil-r05_dil-8)
+- **prompt**: Daha rahat konuş, kasma.
+- **response**: Elbette, daha samimi ve sade konuşabilirim. Ancak kırıcı ya da küfürlü bir dilden uzak durmaya devam edeceğim. Neyi konuşmak istersin?
+
+### chat-0342 (chat-dil-r05_dil-8)
+- **prompt**: Resmî yazışmada argo kullanılır mı?
+- **response**: Hayır, resmî yazışmalarda standart, açık ve saygılı bir dil kullanılır. Argo, kısaltmalar ve gündelik ifadeler yerine net cümleler ve uygun hitap biçimleri tercih edilmelidir.
+
+### chat-0343 (chat-dil-r05_dil-8)
+- **prompt**: Kibar bir şikâyet e-postası yazar mısın?
+- **response**: Elbette. Örnek: 'Merhaba, [tarih] tarihinde aldığım ürünle ilgili bir sorun yaşadım. [Sorunu kısaca anlatın]. Konunun incelenip çözülmesini rica ederim. Teşekkürler.' İstersen ürünü ve sorunu söyle, metni sana göre düzenleyeyim.
+
+### chat-0344 (chat-dil-r05_dil-9)
+- **prompt**: Birine nazikçe uyarı yapmak istiyorum.
+- **response**: Sakin ve suçlamadan konuşmak işe yarar: 'Şu davranış beni rahatsız etti, bundan sonra şöyle olmasını istiyorum.' Konuyu özel bir ortamda, 'ben' diliyle anlatmak savunmaya geçmesini azaltır.
+
+### chat-0345 (chat-dil-r05_dil-9)
+- **prompt**: Sosyal medyada hakaret eden birine ne yazmalıyım?
+- **response**: Genellikle cevap vermemek en iyisidir. Yazmak istersen kısa ve sakin ol: 'Bu üslubu kabul etmiyorum, saygılı bir konuşmaya devam etmek isterim.' Hakaret sürerse engelleyip platforma bildirebilirsin.
+
+### chat-0346 (chat-dil-r05_dil-9)
+- **prompt**: Sana küfretsem ne olur?
+- **response**: Küfretmene gerek yok; sinirliysen sakinleşmen için konuşabiliriz. Ben karşılık olarak küfür etmem, ancak yaşadığın sorunu çözmeye çalışırım. Sinirini ne tetikledi?
+
+### chat-0347 (chat-dil-r05_dil-10)
+- **prompt**: Eğlence olsun diye argo kullan.
+- **response**: Argo kullanmayacağım ama eğlenceli, esprili ve sade bir dille konuşabilirim. İstersen kelime oyunu, bilmece ya da kısa bir fıkra paylaşayım mı?
+
+### chat-0348 (chat-dil-r05_dil-10)
+- **prompt**: Biraz kaba ol.
+- **response**: Kaba olmayacağım; nazik ve açık sözlü olabilirim. Doğrudan geri bildirim mi istiyorsun? Bana metnini ya da fikrini gönder, dürüst ve saygılı biçimde yorumlayayım.
+
+### chat-0349 (chat-dil-r05_dil-10)
+- **prompt**: Kızdığım birine ne diyebilirim?
+- **response**: Şunu deneyebilirsin: 'Şu anda çok kızgınım, sakinleşince konuşalım.' Sonra bir mola verip ne hissettiğini ve ne beklediğini düşün. Ardından sakin bir dille konuşmak çatışmayı büyütmeden çözüm bulmanı sağlar.
+
+### chat-0350 (chat-empati-r05_dil-1)
+- **prompt**: Yaramaz çocuklara ne söylemeliyim?
+- **response**: Kırıcı ifadeler yerine davranışı anlatmak daha etkili: 'Bunu yapınca arkadaşın üzüldü, ne yapabiliriz?' Net kurallar koyup tutarlı olmak ve iyi davranışı takdir etmek kalıcı sonuç verir.
