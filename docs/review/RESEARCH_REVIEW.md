@@ -1,6 +1,6 @@
 # Review sheet: data/authored/research/records.jsonl
 
-31 records. Mark problems by id; nothing here approves training.
+69 records. Mark problems by id; nothing here approves training.
 
 ### research-0001 (research-fotosentez)
 - **query**: Fotosentez nedir ve nerede gerçekleşir?
@@ -125,3 +125,155 @@
 ### research-0031 (research-istatistik-ortalama)
 - **query**: Ortalama ve ortanca arasındaki fark nedir?
 - **passage**: Ortalama, değerlerin toplamının adedine bölünmesiyle bulunur ve çok uç değerlerden etkilenir. Ortanca (medyan) ise sıralanmış veride ortadaki değerdir ve uç değerlere daha dayanıklıdır. Gelir gibi çarpık dağılan verilerde ortanca, tipik değeri genellikle daha iyi temsil eder.
+
+### research-0032 (research-su-dongusu)
+- **query**: Su döngüsü nedir?
+- **passage**: Su döngüsü, suyun okyanuslar, atmosfer, kara ve canlılar arasında sürekli dolaşımıdır. Güneş enerjisi yüzey sularını buharlaştırır, su buharı yükselip soğuyunca yoğuşarak bulutları oluşturur. Bulutlardan yağmur veya kar olarak yeryüzüne dönen su, bir kısmıyla akarsulara karışır, bir kısmıyla yer altına sızar. Bu döngü tatlı su kaynaklarının yenilenmesini sağlar.
+
+### research-0033 (research-yercekimi)
+- **query**: Yerçekimi kuvveti nedir?
+- **passage**: Yerçekimi, kütlesi olan cisimlerin birbirini çektiği kuvvettir. Newton'a göre kuvvet, kütlelerin çarpımıyla doğru, aralarındaki uzaklığın karesiyle ters orantılıdır. Dünya'nın yüzeyinde serbest bırakılan cisimler yaklaşık 9,8 m/s² ivmeyle düşer. Aya ve gezegenlerin yörüngede kalmasını da aynı çekim sağlar.
+
+### research-0034 (research-mevsimler)
+- **query**: Mevsimler neden oluşur?
+- **passage**: Mevsimler, Dünya'nın dönme ekseninin yörünge düzlemine göre yaklaşık 23,5 derece eğik olmasından kaynaklanır. Eğiklik yüzünden yılın farklı dönemlerinde bir yarımküre Güneş'e daha dik açıyla bakar ve daha çok ısı alır. Dünya'nın Güneş'e uzaklığı mevsimleri belirleyen ana etken değildir; kuzey yarımkürede yaz olduğunda güney yarımkürede kış yaşanır.
+
+### research-0035 (research-dna)
+- **query**: DNA ne işe yarar?
+- **passage**: DNA, canlıların kalıtsal bilgisini taşıyan çift sarmallı moleküldür. Dört bazın (A, T, G, C) dizilişi genleri oluşturur ve genler proteinlerin yapımı için talimat verir. Hücre bölünmeden önce DNA kendini eşler, böylece bilgi yeni hücrelere aktarılır. Dizideki değişimler olan mutasyonlar kalıtsal çeşitliliğin kaynaklarından biridir.
+
+### research-0036 (research-bagisiklik)
+- **query**: Bağışıklık sistemi nasıl çalışır?
+- **passage**: Bağışıklık sistemi, vücudu bakteri, virüs ve diğer yabancı etkenlere karşı koruyan hücre ve organlar ağıdır. Doğuştan gelen bağışıklık hızlı ve genel bir yanıt verir; kazanılmış bağışıklık ise belirli bir etkeni tanıyıp hatırlayan lenfositlerle çalışır. Aşılar, hastalığa yol açmadan bu hafızayı oluşturarak sonraki karşılaşmalarda daha hızlı yanıt verilmesini sağlar.
+
+### research-0037 (research-sindirim)
+- **query**: Sindirim sistemi besinleri nasıl işler?
+- **passage**: Sindirim ağızda çiğneme ve tükürük enzimleriyle başlar. Yemek borusundan mideye geçen besin asit ve enzimlerle parçalanır. İnce bağırsakta besin maddeleri kana emilir, kalın bağırsakta ise su ve mineraller geri alınır. Karaciğer ve pankreas, sindirimi destekleyen safra ve enzimleri üretir.
+
+### research-0038 (research-dolasim)
+- **query**: Kalp ve dolaşım sistemi nasıl çalışır?
+- **passage**: Kalp, kanı damarlar boyunca pompalayan kas yapılı bir organdır. Akciğerlerde oksijenlenen kan kalbin sol tarafından vücuda dağıtılır; dokulardan dönen oksijeni azalmış kan sağ taraftan akciğerlere gönderilir. Atardamarlar kanı kalpten uzağa, toplardamarlar kalbe doğru taşır.
+
+### research-0039 (research-ruzgar-enerjisi)
+- **query**: Rüzgâr enerjisi elektrik üretiminde nasıl kullanılır?
+- **passage**: Rüzgâr türbinleri, kanatlara çarpan havanın hareket enerjisini dönme hareketine çevirir. Bu hareket bir jeneratörü çalıştırarak elektrik üretir. Rüzgâr enerjisi yenilenebilirdir ve üretim sırasında karbon salımı yapmaz; ancak üretim rüzgârın hızına bağlı olduğu için değişkendir ve depolama ile şebeke planlaması gerektirir.
+
+### research-0040 (research-gunes-paneli)
+- **query**: Güneş panelleri nasıl elektrik üretir?
+- **passage**: Güneş panelleri yarı iletken malzemeden yapılmış hücrelerden oluşur. Işık hücreye düştüğünde elektronlar harekete geçer ve doğru akım oluşur. Bu akım evirici ile şebekenin kullandığı alternatif akıma çevrilir. Verim; ışık şiddetine, panelin açısına ve sıcaklığına bağlıdır.
+
+### research-0041 (research-internet)
+- **query**: İnternet nasıl çalışır?
+- **passage**: İnternet, dünya genelindeki ağların ortak kurallarla birbirine bağlandığı bir sistemdir. Veriler küçük paketlere bölünür, her paket adres bilgisiyle yönlendiriciler üzerinden hedefe iletilir ve orada birleştirilir. Alan adları DNS ile IP adreslerine çevrilir. Web, bu altyapının üzerinde çalışan bir hizmettir.
+
+### research-0042 (research-sifreleme)
+- **query**: Şifreleme neden önemlidir?
+- **passage**: Şifreleme, bir veriyi anahtarı olmayanların okuyamayacağı biçime çevirir. Haberleşmede mesajların yol boyunca gizli kalmasını, depolamada ise cihaz kaybolsa bile verilerin korunmasını sağlar. Simetrik şifrelemede aynı anahtar, asimetrik şifrelemede bir anahtar çifti kullanılır. Güvenlik; algoritmanın yanında anahtarın güvenle saklanmasına da bağlıdır.
+
+### research-0043 (research-makine-ogrenmesi)
+- **query**: Makine öğrenmesi nedir?
+- **passage**: Makine öğrenmesi, bilgisayarların kuralları tek tek yazılmadan örneklerden örüntü öğrenmesini sağlayan yaklaşımdır. Denetimli öğrenmede model etiketli örneklerle eğitilir; denetimsiz öğrenmede etiketsiz verideki yapı keşfedilir. Modelin başarısı, eğitim verisinin kalitesine ve değerlendirmenin eğitimden ayrı veriyle yapılmasına bağlıdır.
+
+### research-0044 (research-veri-yapilari)
+- **query**: Yığın ve kuyruk arasındaki fark nedir?
+- **passage**: Yığın son giren ilk çıkar (LIFO), kuyruk ise ilk giren ilk çıkar (FIFO) kuralıyla çalışır. Yığında ekleme ve çıkarma aynı uçtan yapılır; bu yapı işlev çağrılarını ve geri alma işlemlerini yönetmek için kullanılır. Kuyrukta ekleme bir uçtan, çıkarma diğer uçtan yapılır; sıra bekleyen işleri düzenlemek için uygundur.
+
+### research-0045 (research-karmasiklik)
+- **query**: Algoritma karmaşıklığı ne anlama gelir?
+- **passage**: Algoritma karmaşıklığı, girdi büyüdükçe bir algoritmanın zaman ve bellek ihtiyacının nasıl arttığını gösterir. Büyük O gösterimi üst sınırı ifade eder: O(1) sabit, O(n) doğrusal, O(n log n) ve O(n²) ise daha hızlı büyüyen maliyetlerdir. Küçük girdilerde fark az görülür, büyük verilerde ise belirleyici olur.
+
+### research-0046 (research-osmanli-kurulus)
+- **query**: Osmanlı Devleti ne zaman kuruldu?
+- **passage**: Osmanlı Devleti, 13. yüzyılın sonu ve 14. yüzyılın başında Söğüt çevresinde Osman Bey önderliğinde ortaya çıkan bir beylik olarak başladı. Bizans sınırındaki konumu, gaza anlayışı ve göçlerle gelen nüfus beyliğin büyümesine yardımcı oldu. İstanbul'un 1453'te fethiyle devlet imparatorluk niteliğini güçlendirdi.
+
+### research-0047 (research-matbaa)
+- **query**: Matbaanın icadı toplumu nasıl etkiledi?
+- **passage**: 15. yüzyılın ortalarında Gutenberg'in hareketli metal harfli matbaası kitap üretimini hızlandırıp ucuzlattı. Bilgi daha geniş kesimlere ulaştı, okuryazarlık arttı ve bilimsel görüşlerin yayılması kolaylaştı. Reform ve Aydınlanma dönemlerinde düşüncelerin dolaşımı matbaayla hızlandı.
+
+### research-0048 (research-sanayi-devrimi)
+- **query**: Sanayi Devrimi nedir?
+- **passage**: Sanayi Devrimi, 18. yüzyılın sonlarında Britanya'da başlayan ve üretimin el emeğinden makinelere kaymasını getiren dönüşümdür. Buhar gücü, dokuma makineleri ve demir üretimindeki gelişmeler fabrikaları yaygınlaştırdı. Kentleşme arttı, çalışma biçimleri değişti ve ekonomik büyüme hızlandı; aynı zamanda çalışma koşulları ve çevre sorunları ortaya çıktı.
+
+### research-0049 (research-iklim)
+- **query**: Sera etkisi nedir?
+- **passage**: Sera etkisi, atmosferdeki bazı gazların Dünya'dan uzaya yayılan ısıyı tutmasıyla gezegenin yaşanabilir sıcaklıkta kalmasıdır. Su buharı, karbondioksit ve metan başlıca sera gazlarıdır. Fosil yakıt kullanımı gibi insan etkinlikleri bu gazların derişimini artırarak ek ısınmaya yol açar.
+
+### research-0050 (research-besin-zinciri)
+- **query**: Besin zinciri nedir?
+- **passage**: Besin zinciri, enerjinin üreticilerden tüketicilere aktarıldığı sıralamadır. Bitkiler güneş enerjisini üretir, otçullar bitkileri, etçiller ise otçulları tüketir. Ayrıştırıcılar ölü organik maddeyi parçalayarak besinleri doğaya geri verir. Her basamakta enerjinin büyük bölümü ısı olarak kaybolur.
+
+### research-0051 (research-biyocesitlilik)
+- **query**: Biyolojik çeşitlilik neden önemlidir?
+- **passage**: Biyolojik çeşitlilik, bir bölgedeki tür, gen ve ekosistem çeşitliliğidir. Çeşitli ekosistemler su temizleme, tozlaşma ve iklim dengeleme gibi hizmetler sunar. Tür kaybı bu dengeyi bozabilir; bu nedenle yaşam alanlarının korunması önem taşır.
+
+### research-0052 (research-ekonomi-enflasyon)
+- **query**: Enflasyon nedir?
+- **passage**: Enflasyon, mal ve hizmet fiyatlarının genel düzeyinde sürekli artıştır. Fiyatlar yükseldikçe aynı parayla alınabilen ürün miktarı azalır, yani paranın satın alma gücü düşer. Talep fazlası, maliyet artışları ve para politikası enflasyonu etkileyebilir. Merkez bankaları genellikle faiz politikasıyla fiyat istikrarını hedefler.
+
+### research-0053 (research-arz-talep)
+- **query**: Arz ve talep kanunu nedir?
+- **passage**: Arz ve talep, piyasada fiyatın nasıl oluştuğunu açıklayan temel ilkedir. Talep arttığında ve arz sabit kaldığında fiyat yükselme eğilimi gösterir; arz arttığında fiyat düşme eğilimindedir. Fiyat, arz ile talebin kesiştiği denge noktasında oluşur.
+
+### research-0054 (research-beslenme)
+- **query**: Dengeli beslenme neyi içerir?
+- **passage**: Dengeli beslenme; sebze, meyve, tahıl, protein kaynakları ve yeterli sıvıyı çeşitli şekilde almayı içerir. Tuz, ilave şeker ve doymuş yağ tüketiminin sınırlı tutulması önerilir. Porsiyon miktarı ve düzenli öğünler enerji dengesine yardımcı olur. Özel sağlık durumlarında beslenme planı için bir uzmana danışılmalıdır.
+
+### research-0055 (research-uyku)
+- **query**: Uyku neden önemlidir?
+- **passage**: Uyku sırasında beden dinlenir, hafıza pekişir ve bağışıklık sistemi desteklenir. Yetişkinler için genellikle yedi ila dokuz saat uyku önerilir. Düzenli uyku saatleri, karanlık ve sessiz bir ortam ve akşamları ekran kullanımını azaltmak uyku kalitesini artırabilir.
+
+### research-0056 (research-spor)
+- **query**: Düzenli egzersizin faydaları nelerdir?
+- **passage**: Düzenli egzersiz kalp ve damar sağlığını, kas gücünü ve kemik yoğunluğunu destekler. Ruh halini iyileştirebilir ve stres düzeyini azaltabilir. Haftada en az 150 dakika orta şiddette hareket genel bir hedef olarak kabul edilir. Başlangıçta yoğunluğu kademeli artırmak yaralanma riskini azaltır.
+
+### research-0057 (research-okuma)
+- **query**: Kitap okumanın bilişsel faydaları nelerdir?
+- **passage**: Düzenli okumak kelime dağarcığını genişletir, dikkat süresini ve eleştirel düşünmeyi geliştirir. Kurgu okumak başkalarının bakış açısını anlamaya yardımcı olabilir. Her gün kısa bir süre ayırmak, uzun ve seyrek okumaya göre alışkanlık kazandırmada daha kolaydır.
+
+### research-0058 (research-dil-ogrenme)
+- **query**: Yeni bir dil öğrenmek için hangi yöntemler etkilidir?
+- **passage**: Dil öğrenmede düzenli kısa çalışma, dinleme ve konuşma pratiği ile aralıklı tekrar etkilidir. Hedef dilde yazılmış kolay metinler okumak kelimeyi bağlam içinde öğretir. Hata yapmaktan çekinmeden konuşmak akıcılığı artırır.
+
+### research-0059 (research-fotograf)
+- **query**: Pozlama üçgeni nedir?
+- **passage**: Pozlama üçgeni; diyafram, enstantane (deklanşör hızı) ve ISO ayarlarının birlikte görüntü parlaklığını belirlemesidir. Geniş diyafram daha çok ışık alır ve alan derinliğini azaltır. Uzun enstantane hareketi bulanıklaştırır, yüksek ISO ise parlaklığı artırırken gürültüyü çoğaltır. Üçü arasındaki denge fotoğrafın amacına göre kurulur.
+
+### research-0060 (research-muzik)
+- **query**: Majör ve minör gam arasındaki fark nedir?
+- **passage**: Majör gam genellikle parlak ve neşeli, minör gam ise daha durgun ve hüzünlü bir karakterle ilişkilendirilir. Fark, üçüncü derecenin aralığından gelir: majörde büyük üçlü, minörde küçük üçlü vardır. Bu yapı akorların ve melodilerin duygusal etkisini şekillendirir.
+
+### research-0061 (research-harita)
+- **query**: Enlem ve boylam nasıl kullanılır?
+- **passage**: Enlem, ekvatora göre kuzey veya güney konumu; boylam ise başlangıç meridyenine göre doğu veya batı konumu derece cinsinden belirtir. İkisi birlikte yeryüzündeki herhangi bir noktayı tanımlar. Navigasyon sistemleri bu koordinatları kullanarak konum hesaplar.
+
+### research-0062 (research-trafik)
+- **query**: Güvenli sürüş için hangi kurallar önemlidir?
+- **passage**: Güvenli sürüşte hız sınırlarına uymak, takip mesafesini korumak, emniyet kemerini takmak ve sürüş sırasında telefonu kullanmamak temel kurallardır. Yorgunken veya alkol etkisindeyken araç kullanılmamalıdır. Hava ve yol koşullarına göre hızı ayarlamak kaza riskini azaltır.
+
+### research-0063 (research-e-posta-guvenlik)
+- **query**: E-posta güvenliği için hangi adımlar atılmalıdır?
+- **passage**: E-posta hesabında güçlü ve benzersiz bir parola ile iki aşamalı doğrulama kullanılmalıdır. Beklenmedik bağlantılara ve eklere tıklanmamalı, gönderen adresi dikkatle kontrol edilmelidir. Bir hesabın ele geçirildiğinden şüpheleniliyorsa parola hemen değiştirilmeli ve oturumlar kapatılmalıdır.
+
+### research-0064 (research-surdurulebilirlik)
+- **query**: Geri dönüşüm neden önemlidir?
+- **passage**: Geri dönüşüm, atıkların yeni ürünlere dönüştürülmesiyle ham madde ve enerji tüketimini azaltır. Depolama alanlarına giden çöp miktarı düşer. Verimli geri dönüşüm için atıkların kaynağında ayrıştırılması ve temiz tutulması gerekir.
+
+### research-0065 (research-matematik-oran)
+- **query**: Yüzde hesabı nasıl yapılır?
+- **passage**: Bir sayının yüzdesini bulmak için sayı, yüzde değerine bölünüp yüze ile çarpılır; başka bir ifadeyle yüzde yirmi, sayının 0,20 ile çarpılmasıdır. Artış ve azalış oranı, farkın başlangıç değerine bölünmesiyle bulunur. Yüzde hesaplarında hangi değere göre oran alındığını netleştirmek önemlidir.
+
+### research-0066 (research-geometri)
+- **query**: Pisagor teoremi nedir?
+- **passage**: Pisagor teoremi, dik üçgende hipotenüsün karesinin diğer iki kenarın kareleri toplamına eşit olduğunu söyler. Yani a² + b² = c² bağıntısı geçerlidir. Teorem; uzaklık hesabında, inşaat ve haritacılıkta yaygın olarak kullanılır.
+
+### research-0067 (research-olasilik)
+- **query**: Olasılık nedir?
+- **passage**: Olasılık, bir olayın gerçekleşme ihtimalini sıfır ile bir arasında bir sayıyla ifade eder. Eşit olasılıklı durumlarda olasılık, istenen durum sayısının tüm durum sayısına bölünmesiyle bulunur. Örneğin hilesiz bir zarda çift gelme olasılığı üçte biri değil, yarıdır. Bağımsız olayların olasılıkları çarpılır.
+
+### research-0068 (research-proje-yonetimi)
+- **query**: Küçük bir proje nasıl planlanır?
+- **passage**: Projeyi planlarken önce hedef ve teslim tarihi netleştirilir, sonra iş küçük görevlere bölünür. Her göreve sorumlu kişi ve süre atanır; bağımlılıklar belirlenir. Düzenli kısa toplantılar ve görev takibi, gecikmelerin erken fark edilmesine yardımcı olur.
+
+### research-0069 (research-sunum)
+- **query**: Etkili bir sunum nasıl hazırlanır?
+- **passage**: Etkili sunum, dinleyicinin ihtiyacına odaklanan tek bir ana mesajla başlar. Slaytlarda az metin, anlaşılır görsel ve tutarlı bir tasarım kullanılır. Sunumdan önce zamanlamayı denemek ve olası soruları düşünmek rahat bir anlatım sağlar.

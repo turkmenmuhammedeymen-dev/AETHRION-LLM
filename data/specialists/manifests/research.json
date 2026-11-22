@@ -1,6 +1,6 @@
 {
   "format": "aethrion-specialist-dataset-v1",
-  "dataset_id": "research-prepared-55c3d0fa731c",
+  "dataset_id": "research-prepared-e8b32b235ddb",
   "model_id": "research",
   "modality": "text",
   "training_allowed": true,
@@ -8,15 +8,15 @@
   "privacy_reviewed": true,
   "speaker_consent_reviewed": false,
   "dataset_path": "research/dataset.npz",
-  "dataset_sha256": "55c3d0fa731c8e64488d61f4ea44902b0f9e1fe9a2a32787bd7751bd64d01541",
+  "dataset_sha256": "e8b32b235ddbee264e156d59d18403ca35986563345f298fe9902a3001ac5155",
   "tokenizer_path": "research/tokenizer.json",
-  "tokenizer_sha256": "72b6aefa8e67e13de184dda16851cd5c6130eac1a2886d4846410baf88724936",
+  "tokenizer_sha256": "65baf2f3ae76f39e7aef6b1f12bf95ff4fb128fa5f1b51cff5916f0a152efd2e",
   "sources": [
     {
       "source_id": "research-input-jsonl",
       "source_uri": "owner-authored:aethrion-llm/data/authored/research",
       "source_path": "research/source.jsonl",
-      "sha256": "a0c865e82cd45cc57e6365350671ed177758b930ece00e35b60996407d8c2e2f",
+      "sha256": "5d3b060e346b4b84ad8360c97d1f75314db0066b14b5ed2b6be59a38c688a4ef",
       "license": "First-party owner-authored",
       "permitted_use": "model training permitted",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/research/GOVERNANCE.json",
@@ -28,14 +28,14 @@
     "tool": "aethrion.specialist_prepare",
     "seed": 1,
     "max_length": 512,
-    "vocab_size": 1246,
+    "vocab_size": 1940,
     "layout_vocab_size": 32,
     "tag_classes": 32,
-    "record_count": 31,
+    "record_count": 69,
     "split_counts": {
-      "train": 27,
-      "validation": 3,
-      "test": 1
+      "train": 55,
+      "validation": 8,
+      "test": 6
     },
     "automatic_approval": false
   },
@@ -52,8 +52,10 @@
     "privacy_reviewed": true,
     "quality_reviewed": true,
     "reviewer_role": "project owner (attestation given in the Claude Code session)",
-    "reviewed_at": "2026-11-21T20:26:00+03:00",
-    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/research/records.jsonl@sha256:a0c865e82cd45cc57e6365350671ed177758b930ece00e35b60996407d8c2e2f"
+    "reviewed_at": "2026-11-22T12:37+03:00",
+    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/research/records.jsonl@sha256:5d3b060e346b4b84ad8360c97d1f75314db0066b14b5ed2b6be59a38c688a4ef",
+    "speaker_consent_reviewed": false,
+    "safety_reviewed": false
   },
   "dataset_status": "owner_attested_pilot_not_released"
 }
