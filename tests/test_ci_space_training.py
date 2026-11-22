@@ -6,7 +6,7 @@ from types import SimpleNamespace
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from ci.provision_space_training import provision  # noqa: E402
-from ci.trigger_space_training import run  # noqa: E402
+from ci.trigger_space_training import make_client, run  # noqa: E402
 
 
 class FakeApi:
@@ -55,6 +55,16 @@ class TriggerTests(unittest.TestCase):
                 return "### Training session finished\n- Trainer ok: True" if model == "code" else "### Training session failed"
         res = run(C(), ["code", "safety"], 5, 1)
         self.assertEqual(res, [("code", True), ("safety", False)])
+
+
+class ClientCompatTests(unittest.TestCase):
+    def test_uses_token_keyword_when_available(self):
+        class New:
+            def __init__(self, src, token=None, auth=None): self.kw = ("token", token, auth)
+        class Old:
+            def __init__(self, src, hf_token=None, auth=None): self.kw = ("hf_token", hf_token, auth)
+        self.assertEqual(make_client("s", "t", ("u", "p"), New).kw, ("token", "t", ("u", "p")))
+        self.assertEqual(make_client("s", "t", ("u", "p"), Old).kw, ("hf_token", "t", ("u", "p")))
 
 
 if __name__ == "__main__":

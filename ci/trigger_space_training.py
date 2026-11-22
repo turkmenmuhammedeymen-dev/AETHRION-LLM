@@ -21,6 +21,16 @@ def run(client, models, steps, rounds):
     return summary
 
 
+def make_client(space_id, token, auth, client_cls=None):
+    """gradio_client renamed `hf_token` to `token` in newer releases; support both."""
+    import inspect
+    if client_cls is None:
+        from gradio_client import Client as client_cls
+    params = inspect.signature(client_cls.__init__).parameters
+    key = "token" if "token" in params else "hf_token"
+    return client_cls(space_id, auth=auth, **{key: token})
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", default=DEFAULT_MODELS)
@@ -31,8 +41,7 @@ def main() -> int:
     if not (token and user and pw):
         print("Missing HF_TOKEN / AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in the CircleCI context 'aethrion-deploy'.", file=sys.stderr)
         return 2
-    from gradio_client import Client
-    client = Client(SPACE_ID, hf_token=token, auth=(user, pw))
+    client = make_client(SPACE_ID, token, (user, pw))
     results = run(client, a.models, a.steps, a.rounds)
     failed = [m for m, ok in results if not ok]
     print("SUMMARY", {"ok": [m for m, ok in results if ok], "failed": failed})
