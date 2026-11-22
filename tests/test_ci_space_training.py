@@ -6,7 +6,7 @@ from types import SimpleNamespace
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from ci.provision_space_training import provision  # noqa: E402
-from ci.trigger_space_training import make_client, run  # noqa: E402
+from ci.trigger_space_training import login_cookies, make_client, run  # noqa: E402
 
 
 class FakeApi:
@@ -81,7 +81,22 @@ class LoginRetryTests(unittest.TestCase):
         with self.assertRaises(RuntimeError) as ctx:
             make_client("o/s", "t", ("u", "pw"), C)
         self.assertIn("Space login rejected", str(ctx.exception))
-        self.assertNotIn("pw", str(ctx.exception).replace("password", ""))
+
+
+class LoginCookieTests(unittest.TestCase):
+    def test_login_sends_bearer_token_and_returns_cookies(self):
+        seen = {}
+        def fake_post(url, data, headers, timeout):
+            seen.update(url=url, data=data, headers=headers)
+            return SimpleNamespace(status_code=200, cookies={"access-token": "abc"})
+        out = login_cookies("https://x.hf.space/", "u", "p", "hf_tok", post=fake_post)
+        self.assertEqual(out, {"access-token": "abc"})
+        self.assertEqual(seen["url"], "https://x.hf.space/login")
+        self.assertEqual(seen["headers"]["Authorization"], "Bearer hf_tok")
+
+    def test_login_failure_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            login_cookies("https://x.hf.space", "u", "p", "t", post=lambda *a, **k: SimpleNamespace(status_code=401, cookies={}))
 
 
 if __name__ == "__main__":

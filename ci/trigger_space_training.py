@@ -30,35 +30,42 @@ def _credential_candidates(user, pw):
     return out
 
 
-def _probe_login(space_url, token, user, pw):
-    try:
-        import requests
-        r = requests.post(space_url.rstrip("/") + "/login", data={"username": user, "password": pw},
-                          headers={"Authorization": f"Bearer {token}"}, timeout=30)
-        return f"HTTP {r.status_code} {r.text[:120]!r}"
-    except Exception as exc:  # diagnostics only
-        return f"probe failed: {type(exc).__name__}"
+def login_cookies(src, user, pw, token, post=None):
+    """Log in to a Gradio-auth Space that is PRIVATE: the request must carry the HF token (gradio_client's own
+    login does not, so Hugging Face answers 401/404). Returns the session cookies."""
+    if post is None:
+        import httpx
+        post = httpx.post
+    resp = post(src.rstrip("/") + "/login", data={"username": user, "password": pw},
+                headers={"Authorization": f"Bearer {token}"}, timeout=30)
+    if resp.status_code != 200:
+        raise ValueError(f"login HTTP {resp.status_code}")
+    return {name: value for name, value in resp.cookies.items()}
 
 
 def make_client(space_id, token, auth, client_cls=None):
-    """gradio_client renamed `hf_token` to `token` in newer releases; support both. Retries credential variants."""
+    """Build a gradio_client Client that can use a private Space with Gradio auth. Supports both the old
+    (`hf_token`) and new (`token`) keyword names and retries trimmed credential variants."""
     import inspect
     if client_cls is None:
-        from gradio_client import Client as client_cls
+        from gradio_client import Client as _Base
+
+        class client_cls(_Base):  # noqa: N801 - local subclass
+            def _login(self, auth):
+                self.cookies = login_cookies(self.src, auth[0], auth[1], token)
     params = inspect.signature(client_cls.__init__).parameters
     key = "token" if "token" in params else "hf_token"
     last = None
     for user, pw in _credential_candidates(*auth):
         try:
             return client_cls(space_id, auth=(user, pw), **{key: token})
-        except ValueError as exc:  # "Could not login"
+        except ValueError as exc:
             last = exc
     user, pw = auth
-    url = "https://" + space_id.replace("/", "-").replace("_", "-").lower() + ".hf.space"
     raise RuntimeError(
         "Space login rejected. Check that AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in the CircleCI context are "
         f"EXACTLY the Space secrets of the same names. (username length {len(user)}, password length {len(pw)}; "
-        f"server answer: {_probe_login(url, token, user.strip(), pw)})"
+        f"last error: {last})"
     ) from last
 
 
