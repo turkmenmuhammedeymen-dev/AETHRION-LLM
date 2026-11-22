@@ -8,7 +8,7 @@ import os
 import sys
 
 SPACE_ID = "vizyon2027/AETHRION-LLM"
-DEFAULT_MODELS = ["code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document"]
+DEFAULT_MODELS = ["chat", "code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document"]
 
 
 def run(client, models, steps, rounds):

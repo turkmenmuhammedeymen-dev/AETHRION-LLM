@@ -56,7 +56,8 @@ def read_progress(directory: Path) -> dict[str, Any]:
 
 
 def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = None, environ=None,
-                runner: Callable[..., Any] | None = None, timeout: int = 3300) -> dict[str, Any]:
+                runner: Callable[..., Any] | None = None, timeout: int = 3300,
+                prepare_chat: bool = False) -> dict[str, Any]:
     # artifact_sync retains a legacy "base" identifier for artifact operations,
     # but train_family does not expose it as a trainable model. Reject it before
     # downloading anything so the session API and trainer share one model list.
@@ -85,6 +86,15 @@ def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = No
     except ValueError as exc:
         raise artifact_sync.ArtifactSyncError(f"Unsafe training output directory: {exc}") from exc
     pulled = artifact_sync.pull_model_artifacts(model, directory, api=api, environ=environ)
+    if model == "chat" and prepare_chat:
+        # Deterministic, gate-checked BASE corpus + HMAC-signed audit + tokenizer (needs the Space secret key).
+        prep = subprocess.run([sys.executable, "scripts/prepare_base.py"], cwd=str(repo_root),
+                              capture_output=True, text=True, timeout=300)
+        if prep.returncode != 0:
+            return {"model": model, "steps": steps, "pulled": pulled, "pushed": [], "trainer_ok": False, "released": False,
+                    "progress": {"status": "base_preparation_failed", "step": None, "complete": False},
+                    "note": "BASE corpus preparation failed; nothing was trained.",
+                    "trainer_tail": (prep.stderr or prep.stdout or "")[-400:]}
     cmd = [sys.executable, "-m", "aethrion.train_family", "--execute", "--models", model, "--session-steps", str(steps)]
     result = (runner or subprocess.run)(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=timeout)
     ok = getattr(result, "returncode", 1) == 0

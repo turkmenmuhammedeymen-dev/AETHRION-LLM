@@ -122,7 +122,7 @@ def training_readiness():
     except Exception as exc:
         return "### Training readiness unavailable\n- " + type(exc).__name__ + ": " + str(exc)[:240]
 
-TRAIN_SESSION_MODELS = ["code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document"]
+TRAIN_SESSION_MODELS = ["chat", "code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document"]
 
 
 def training_setup_status():
@@ -142,7 +142,7 @@ def training_setup_status():
 def _gpu_training_session(model, steps):
     from aethrion.space_session import run_session, graceful_runner
     return run_session(model, int(steps), root=Path(__file__).resolve().parent, timeout=85,
-                       runner=graceful_runner)
+                       runner=graceful_runner, prepare_chat=True)
 
 
 def training_session(model, steps):

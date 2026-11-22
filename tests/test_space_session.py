@@ -74,3 +74,30 @@ class SessionTests(unittest.TestCase):
                 self._run_session(m, n, api=Fake(), environ=ENV)
 
 if __name__ == "__main__": unittest.main()
+
+
+class ChatPrepareTests(unittest.TestCase):
+    def test_failed_base_preparation_trains_nothing(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            cfg = Path(d, "configs"); cfg.mkdir()
+            (cfg / "small.json").write_text(json.dumps({"output_dir": "artifacts"}), encoding="utf-8")
+            called = []
+            with patch("aethrion.space_session.subprocess.run",
+                       return_value=SimpleNamespace(returncode=1, stdout="", stderr="no hmac key")):
+                r = ss.run_session("chat", 5, root=d, api=Fake(), environ=ENV, prepare_chat=True,
+                                   runner=lambda *a, **k: called.append(1))
+            self.assertFalse(r["trainer_ok"]); self.assertEqual(called, []); self.assertFalse(r["released"])
+            self.assertEqual(r["progress"]["status"], "base_preparation_failed")
+
+
+def test_authored_base_sources_meet_corpus_gate():
+    import json as j
+    from pathlib import Path
+    base = Path(__file__).resolve().parents[1] / "data" / "authored" / "base"
+    texts, groups = [], 0
+    for name in ("bilim", "teknoloji", "gunluk", "dil", "diyalog"):
+        recs = [j.loads(l)["text"] for l in (base / f"{name}.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+        assert recs; groups += 1; texts += recs
+    assert groups >= 3 and len(texts) >= 100 and len(set(texts)) == len(texts)
