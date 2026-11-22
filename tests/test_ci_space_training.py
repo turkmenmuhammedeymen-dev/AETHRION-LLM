@@ -67,5 +67,22 @@ class ClientCompatTests(unittest.TestCase):
         self.assertEqual(make_client("s", "t", ("u", "p"), Old).kw, ("hf_token", "t", ("u", "p")))
 
 
+class LoginRetryTests(unittest.TestCase):
+    def test_retries_with_trimmed_password(self):
+        class C:
+            def __init__(self, src, token=None, auth=None):
+                if auth != ("u", "pw"):
+                    raise ValueError("Could not login")
+        self.assertIsInstance(make_client("o/s", "t", ("u ", "pw\n"), C), C)
+
+    def test_reports_readable_error_when_all_fail(self):
+        class C:
+            def __init__(self, src, token=None, auth=None): raise ValueError("Could not login")
+        with self.assertRaises(RuntimeError) as ctx:
+            make_client("o/s", "t", ("u", "pw"), C)
+        self.assertIn("Space login rejected", str(ctx.exception))
+        self.assertNotIn("pw", str(ctx.exception).replace("password", ""))
+
+
 if __name__ == "__main__":
     unittest.main()

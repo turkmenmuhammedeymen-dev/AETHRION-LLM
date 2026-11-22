@@ -21,14 +21,45 @@ def run(client, models, steps, rounds):
     return summary
 
 
+def _credential_candidates(user, pw):
+    """The Space compares the password exactly (the username is stripped there), so try raw and trimmed values."""
+    out = []
+    for cand in ((user.strip(), pw), (user.strip(), pw.strip()), (user.strip(), pw.rstrip("\r\n"))):
+        if cand not in out:
+            out.append(cand)
+    return out
+
+
+def _probe_login(space_url, token, user, pw):
+    try:
+        import requests
+        r = requests.post(space_url.rstrip("/") + "/login", data={"username": user, "password": pw},
+                          headers={"Authorization": f"Bearer {token}"}, timeout=30)
+        return f"HTTP {r.status_code} {r.text[:120]!r}"
+    except Exception as exc:  # diagnostics only
+        return f"probe failed: {type(exc).__name__}"
+
+
 def make_client(space_id, token, auth, client_cls=None):
-    """gradio_client renamed `hf_token` to `token` in newer releases; support both."""
+    """gradio_client renamed `hf_token` to `token` in newer releases; support both. Retries credential variants."""
     import inspect
     if client_cls is None:
         from gradio_client import Client as client_cls
     params = inspect.signature(client_cls.__init__).parameters
     key = "token" if "token" in params else "hf_token"
-    return client_cls(space_id, auth=auth, **{key: token})
+    last = None
+    for user, pw in _credential_candidates(*auth):
+        try:
+            return client_cls(space_id, auth=(user, pw), **{key: token})
+        except ValueError as exc:  # "Could not login"
+            last = exc
+    user, pw = auth
+    url = "https://" + space_id.replace("/", "-").replace("_", "-").lower() + ".hf.space"
+    raise RuntimeError(
+        "Space login rejected. Check that AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in the CircleCI context are "
+        f"EXACTLY the Space secrets of the same names. (username length {len(user)}, password length {len(pw)}; "
+        f"server answer: {_probe_login(url, token, user.strip(), pw)})"
+    ) from last
 
 
 def main() -> int:
