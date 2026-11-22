@@ -140,8 +140,9 @@ def training_setup_status():
 
 @spaces.GPU(duration=110)
 def _gpu_training_session(model, steps):
-    from aethrion.space_session import run_session
-    return run_session(model, int(steps), root=Path(__file__).resolve().parent, timeout=100)
+    from aethrion.space_session import run_session, graceful_runner
+    return run_session(model, int(steps), root=Path(__file__).resolve().parent, timeout=85,
+                       runner=graceful_runner)
 
 
 def training_session(model, steps):
@@ -160,6 +161,7 @@ def training_session(model, steps):
         "### Training session finished\n"
         f"- Model: {result['model']} | steps requested: {result['steps']}\n"
         f"- Trainer ok: {result['trainer_ok']} | pulled: {len(result['pulled'])} files | pushed: {len(result['pushed'])} files\n"
+        f"- Progress: {result.get('progress', {}).get('status', 'unknown')} step {result.get('progress', {}).get('step')} | complete: {result.get('progress', {}).get('complete', False)}\n"
         "- Released: NO — a session is not a release; evaluation and human approval are still required.\n"
         f"```\n{result['trainer_tail']}\n```"
     )
@@ -481,7 +483,7 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
         setup_report = gr.Markdown("Setup has not been checked in this session.")
         gr.Button("Check training setup (booleans only)").click(training_setup_status, inputs=[], outputs=setup_report)
         train_model = gr.Dropdown(TRAIN_SESSION_MODELS, value="code", label="Model")
-        train_steps = gr.Slider(1, 100, value=25, step=1, label="Optimizer steps this session")
+        train_steps = gr.Slider(1, 500, value=200, step=1, label="Optimizer steps this session")
         train_report = gr.Markdown()
         gr.Button("Run one training session").click(training_session, inputs=[train_model, train_steps], outputs=train_report)
     with gr.Tabs():

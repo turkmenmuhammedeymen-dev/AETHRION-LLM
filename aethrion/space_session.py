@@ -7,8 +7,10 @@ never trains more than one model per call and never marks a model trained/releas
 from __future__ import annotations
 
 import json
+import signal
 import subprocess
 import sys
+from types import SimpleNamespace
 from pathlib import Path
 from typing import Any, Callable
 
@@ -16,6 +18,41 @@ from aethrion import artifact_sync
 from aethrion.train_family import MODEL_IDS, _resolve_output_dir
 
 MAX_SESSION_STEPS = 500
+
+
+def graceful_runner(cmd, *, cwd=None, capture_output=True, text=True, timeout=85, grace=15, **_):
+    """Run the trainer; at the deadline send SIGTERM so it pauses cleanly after a verified
+    checkpoint (status ``training_interrupted_not_released``) instead of being killed."""
+    proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    try:
+        out, err = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.send_signal(signal.SIGTERM)
+        try:
+            out, err = proc.communicate(timeout=grace)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            out, err = proc.communicate()
+            return SimpleNamespace(returncode=124, stdout=out or "", stderr=(err or "") + "\nkilled after grace period")
+    return SimpleNamespace(returncode=proc.returncode, stdout=out or "", stderr=err or "")
+
+
+def read_progress(directory: Path) -> dict[str, Any]:
+    """Summarise training_report.json (read-only). Never claims release."""
+    try:
+        report = json.loads((Path(directory) / "training_report.json").read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return {"status": "unknown", "step": None}
+    if not isinstance(report, dict):
+        return {"status": "unknown", "step": None}
+    step = report.get("steps", report.get("step"))
+    if report.get("status") == "training_in_progress_not_released" and isinstance(step, int):
+        step += 1
+    return {"status": str(report.get("status", "unknown")),
+            "step": step if isinstance(step, int) else None,
+            "validation_loss": report.get("validation_loss"),
+            "held_out_test_loss": report.get("held_out_test_loss"),
+            "complete": report.get("status") == "training_complete_not_released"}
 
 
 def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = None, environ=None,
@@ -53,5 +90,6 @@ def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = No
     ok = getattr(result, "returncode", 1) == 0
     pushed = artifact_sync.push_model_artifacts(model, directory, api=api, environ=environ) if ok and directory.is_dir() else []
     return {"model": model, "steps": steps, "pulled": pulled, "pushed": pushed, "trainer_ok": ok,
-            "released": False, "note": "A session is not a release; evaluation and human approval are still required.",
+            "released": False, "progress": read_progress(directory) if directory.is_dir() else {"status": "unknown", "step": None},
+            "note": "A session is not a release; evaluation and human approval are still required.",
             "trainer_tail": (getattr(result, "stdout", "") or "")[-400:] if ok else (getattr(result, "stderr", "") or "")[-400:]}

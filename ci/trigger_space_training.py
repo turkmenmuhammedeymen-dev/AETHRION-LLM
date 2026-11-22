@@ -3,6 +3,7 @@ Needs: HF_TOKEN (CircleCI context) and the Space login AETHRION_SPACE_USERNAME /
 Usage: python ci/trigger_space_training.py [--models code research ...] [--steps 25] [--rounds 1]"""
 from __future__ import annotations
 import argparse
+import re
 import os
 import sys
 
@@ -19,6 +20,45 @@ def run(client, models, steps, rounds):
             print(f"[{model}] {'OK' if ok else 'NOT OK'}\n{str(out)[:600]}\n", flush=True)
             summary.append((model, ok))
     return summary
+
+
+_PROGRESS = re.compile(r"Progress: (\S+) step (\d+|None) \| complete: (True|False)")
+
+
+def parse_progress(out):
+    m = _PROGRESS.search(str(out))
+    if not m:
+        return None
+    return {"status": m.group(1), "step": None if m.group(2) == "None" else int(m.group(2)),
+            "complete": m.group(3) == "True"}
+
+
+def run_until_complete(client, models, steps, max_rounds, min_steps=25):
+    """Resumable sessions per model until training_complete_not_released or max_rounds.
+    Steps are halved after a failed session (shorter sessions fit the GPU window).
+    Completion never means release."""
+    results = {}
+    for model in models:
+        cur, state = steps, {"ok": False, "complete": False, "step": None, "rounds": 0}
+        for _ in range(max_rounds):
+            state["rounds"] += 1
+            try:
+                out = client.predict(model, cur, api_name="/training_session")
+            except Exception as exc:  # network/quota hiccup: retry smaller
+                print(f"[{model}] call failed: {type(exc).__name__}: {str(exc)[:200]}", flush=True)
+                cur = max(min_steps, cur // 2)
+                continue
+            ok = "Training session finished" in str(out) and "Trainer ok: True" in str(out)
+            prog = parse_progress(out) or {}
+            print(f"[{model}] round {state['rounds']} ok={ok} progress={prog}", flush=True)
+            if not ok:
+                cur = max(min_steps, cur // 2)
+                continue
+            state.update(ok=True, step=prog.get("step"), complete=bool(prog.get("complete")))
+            if state["complete"]:
+                break
+        results[model] = state
+    return results
 
 
 def _credential_candidates(user, pw):
@@ -74,12 +114,17 @@ def main() -> int:
     ap.add_argument("--models", nargs="+", default=DEFAULT_MODELS)
     ap.add_argument("--steps", type=int, default=25)
     ap.add_argument("--rounds", type=int, default=1)
+    ap.add_argument("--until-complete", action="store_true")
     a = ap.parse_args()
     token, user, pw = os.environ.get("HF_TOKEN"), os.environ.get("AETHRION_SPACE_USERNAME"), os.environ.get("AETHRION_SPACE_PASSWORD")
     if not (token and user and pw):
         print("Missing HF_TOKEN / AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in the CircleCI context 'aethrion-deploy'.", file=sys.stderr)
         return 2
     client = make_client(SPACE_ID, token, (user, pw))
+    if a.until_complete:
+        res = run_until_complete(client, a.models, a.steps, a.rounds)
+        print("SUMMARY", res)
+        return 0 if all(v["ok"] for v in res.values()) else 1
     results = run(client, a.models, a.steps, a.rounds)
     failed = [m for m, ok in results if not ok]
     print("SUMMARY", {"ok": [m for m, ok in results if ok], "failed": failed})

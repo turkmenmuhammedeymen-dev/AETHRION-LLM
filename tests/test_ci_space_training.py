@@ -101,3 +101,16 @@ class LoginCookieTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_run_until_complete_loops_and_stops():
+    from ci.trigger_space_training import run_until_complete, parse_progress
+    outs = iter([
+        "### Training session finished\n- Trainer ok: True | x\n- Progress: training_interrupted_not_released step 200 | complete: False\n",
+        "### Training session finished\n- Trainer ok: True | x\n- Progress: training_complete_not_released step 2000 | complete: True\n",
+    ])
+    class C:
+        def predict(self, *a, **k): return next(outs)
+    res = run_until_complete(C(), ["code"], 200, 5)
+    assert res["code"]["complete"] and res["code"]["rounds"] == 2 and res["code"]["step"] == 2000
+    assert parse_progress("nothing") is None
