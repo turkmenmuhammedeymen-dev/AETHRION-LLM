@@ -94,6 +94,23 @@ jobs:
           command: python ci/trigger_space_training.py --until-complete --steps 200 --rounds 40
           no_output_timeout: 120m
 
+  audit-and-evaluate:
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+      - run:
+          name: Install AETHRION-LLM runtime
+          command: |
+            python -m pip install --upgrade pip
+            python -m pip install -e ".[api,visual,documents,space,data]" "huggingface-hub>=0.30,<1.0"
+      - run:
+          name: Read-only checkpoint audit and held-out evaluation (no training, no push)
+          command: python ci/audit_and_evaluate.py --output /tmp/aethrion-specialist-evaluation.json
+      - store_artifacts:
+          path: /tmp/aethrion-specialist-evaluation.json
+          destination: reports/aethrion-specialist-evaluation.json
+
 workflows:
   aethrion-ci:
     jobs:
@@ -139,6 +156,14 @@ workflows:
       - train-space-complete:
           requires:
             - approve-complete-training
+          context:
+            - aethrion-deploy
+          filters:
+            branches:
+              only: [main]
+      - audit-and-evaluate:
+          requires:
+            - provision-space-training
           context:
             - aethrion-deploy
           filters:
