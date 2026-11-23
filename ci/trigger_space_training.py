@@ -111,15 +111,20 @@ def make_client(space_id, token, auth, client_cls=None):
     key = "token" if "token" in params else "hf_token"
     try:
         return client_cls(space_id, auth=(auth[0].strip(), auth[1]), **{key: token})
-    except (SpaceAuthenticationError, ValueError):
-        # gradio_client versions may raise ValueError directly from their
-        # internal login implementation. Never forward its message: it may
-        # contain server response details.
+    except SpaceAuthenticationError as exc:
+        # Preserve only the HTTP status; never log response bodies or credentials.
         raise RuntimeError(
-            "Space login rejected. Verify GitHub Actions secrets "
-            "AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD against the "
-            "matching Hugging Face Space Settings > Secrets. "
-            "No credentials or response details were logged."
+            f"Space login rejected ({exc}). Verify the matching GitHub Actions "
+            "and Hugging Face Space secrets. No credentials or response details "
+            "were logged."
+        ) from None
+    except ValueError:
+        # Some gradio_client versions raise ValueError internally. Do not expose
+        # its message because it may contain server response details.
+        raise RuntimeError(
+            "Space login rejected by gradio_client before an HTTP status was "
+            "available. Verify the matching GitHub Actions and Hugging Face "
+            "Space secrets. No credentials or response details were logged."
         ) from None
 
 
