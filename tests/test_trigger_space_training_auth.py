@@ -17,7 +17,7 @@ class FakeResponse:
         self.text = text
 
 
-def test_login_posts_gradio_form_without_forwarding_hf_token():
+def test_login_sends_hf_token_only_as_authorization_header_for_private_space():
     calls = []
 
     def fake_post(url, **kwargs):
@@ -28,6 +28,7 @@ def test_login_posts_gradio_form_without_forwarding_hf_token():
         "https://example.hf.space/",
         " owner ",
         " exact password ",
+        "hf-test-token",
         post=fake_post,
     )
 
@@ -38,9 +39,11 @@ def test_login_posts_gradio_form_without_forwarding_hf_token():
             {
                 "data": {"username": " owner ", "password": " exact password "},
                 "timeout": 30,
+                "headers": {"Authorization": "Bearer hf-test-token"},
             },
         )
     ]
+    assert "hf-test-token" not in str(calls[0][1]["data"])
 
 
 def test_login_400_is_classified_without_echoing_response_or_credentials():

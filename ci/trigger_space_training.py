@@ -72,11 +72,11 @@ class SpaceAuthenticationError(RuntimeError):
 def login_cookies(src, user, pw, token=None, post=None):
     """Authenticate against Gradio's form-based /login endpoint and return session cookies.
 
-    The HF token is used by gradio_client to resolve/access a private Space; it is
-    not a Gradio login credential and must not be sent to this endpoint.
+    The Space is PRIVATE: Hugging Face's front proxy answers 404 to requests without
+    the owner's HF token, so the token is sent ONLY as an Authorization header to the
+    Space's own host (never in the form body, never logged). The Gradio login pair is
+    the form data.
     """
-    # token is accepted only for backwards compatibility with older callers.
-    # It is deliberately never forwarded to Gradio's form-login endpoint.
     if post is None and callable(token):
         # Also tolerate the former fourth-positional-argument test/client hook.
         post, token = token, None
@@ -87,17 +87,10 @@ def login_cookies(src, user, pw, token=None, post=None):
     # configurations resolve the slash form differently. Retry only a 404;
     # never retry rejected credentials or redirect-based auth diagnostics.
     login_base = src.rstrip("/")
-    resp = post(
-        login_base + "/login",
-        data={"username": user, "password": pw},
-        timeout=30,
-    )
+    extra = {"headers": {"Authorization": f"Bearer {token}"}} if isinstance(token, str) and token else {}
+    resp = post(login_base + "/login", data={"username": user, "password": pw}, timeout=30, **extra)
     if resp.status_code == 404:
-        resp = post(
-            login_base + "/login/",
-            data={"username": user, "password": pw},
-            timeout=30,
-        )
+        resp = post(login_base + "/login/", data={"username": user, "password": pw}, timeout=30, **extra)
     if resp.status_code != 200:
         raise SpaceAuthenticationError(resp.status_code)
     return {name: value for name, value in resp.cookies.items() if value is not None}
@@ -116,7 +109,7 @@ def make_client(space_id, token, auth, client_cls=None):
 
         class client_cls(_Base):  # noqa: N801 - local subclass
             def _login(self, auth):
-                self.cookies = login_cookies(self.src, auth[0], auth[1])
+                self.cookies = login_cookies(self.src, auth[0], auth[1], token)
     params = inspect.signature(client_cls.__init__).parameters
     key = "token" if "token" in params else "hf_token"
     try:

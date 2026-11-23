@@ -84,7 +84,7 @@ class LoginRetryTests(unittest.TestCase):
 
 
 class LoginCookieTests(unittest.TestCase):
-    def test_login_does_not_forward_bearer_token_and_returns_cookies(self):
+    def test_login_sends_bearer_header_for_private_space_and_returns_cookies(self):
         seen = {}
         def fake_post(url, **kwargs):
             seen.update(url=url, **kwargs)
@@ -93,7 +93,8 @@ class LoginCookieTests(unittest.TestCase):
         self.assertEqual(out, {"access-token": "abc"})
         self.assertEqual(seen["url"], "https://x.hf.space/login")
         self.assertEqual(seen["data"], {"username": "u", "password": "p"})
-        self.assertNotIn("headers", seen)
+        self.assertEqual(seen["headers"], {"Authorization": "Bearer hf_tok"})  # private Space: proxy 404s without it
+        self.assertNotIn("hf_tok", str(seen["data"]))
 
     def test_retries_trailing_slash_only_after_404(self):
         seen = []
