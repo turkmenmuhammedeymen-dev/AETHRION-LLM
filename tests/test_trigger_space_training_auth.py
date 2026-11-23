@@ -1,4 +1,4 @@
-"""Safe, offline tests for the CircleCI -> Gradio Space authentication bridge."""
+"""Safe, offline tests for the GitHub Actions -> Gradio Space authentication bridge."""
 from __future__ import annotations
 
 import pytest
