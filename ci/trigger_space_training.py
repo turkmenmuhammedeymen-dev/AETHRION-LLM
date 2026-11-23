@@ -61,52 +61,57 @@ def run_until_complete(client, models, steps, max_rounds, min_steps=25):
     return results
 
 
-def _credential_candidates(user, pw):
-    """The Space compares the password exactly (the username is stripped there), so try raw and trimmed values."""
-    out = []
-    for cand in ((user.strip(), pw), (user.strip(), pw.strip()), (user.strip(), pw.rstrip("\r\n"))):
-        if cand not in out:
-            out.append(cand)
-    return out
+class SpaceAuthenticationError(RuntimeError):
+    """A Gradio login failure, reported without response bodies or credentials."""
 
 
-def login_cookies(src, user, pw, token, post=None):
-    """Log in to a Gradio-auth Space that is PRIVATE: the request must carry the HF token (gradio_client's own
-    login does not, so Hugging Face answers 401/404). Returns the session cookies."""
+def login_cookies(src, user, pw, post=None):
+    """Authenticate against Gradio's form-based /login endpoint and return session cookies.
+
+    The HF token is used by gradio_client to resolve/access a private Space; it is
+    not a Gradio login credential and must not be sent to this endpoint.
+    """
     if post is None:
         import httpx
         post = httpx.post
-    resp = post(src.rstrip("/") + "/login", data={"username": user, "password": pw},
-                headers={"Authorization": f"Bearer {token}"}, timeout=30)
+    resp = post(
+        src.rstrip("/") + "/login",
+        data={"username": user, "password": pw},
+        timeout=30,
+    )
     if resp.status_code != 200:
-        raise ValueError(f"login HTTP {resp.status_code}")
-    return {name: value for name, value in resp.cookies.items()}
+        raise SpaceAuthenticationError(
+            f"Gradio rejected the Space login (HTTP {resp.status_code}). "
+            "Verify the CircleCI aethrion-deploy context values against the "
+            "AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD Space Secrets."
+        )
+    return {name: value for name, value in resp.cookies.items() if value is not None}
 
 
 def make_client(space_id, token, auth, client_cls=None):
-    """Build a gradio_client Client that can use a private Space with Gradio auth. Supports both the old
-    (`hf_token`) and new (`token`) keyword names and retries trimmed credential variants."""
+    """Build a gradio_client Client for a private Space protected by Gradio auth.
+
+    Supports gradio_client releases exposing either the `token` or legacy
+    `hf_token` constructor keyword. Credentials are passed unchanged except
+    for the username whitespace normalization performed by the Space itself.
+    """
     import inspect
     if client_cls is None:
         from gradio_client import Client as _Base
 
         class client_cls(_Base):  # noqa: N801 - local subclass
             def _login(self, auth):
-                self.cookies = login_cookies(self.src, auth[0], auth[1], token)
+                self.cookies = login_cookies(self.src, auth[0], auth[1])
     params = inspect.signature(client_cls.__init__).parameters
     key = "token" if "token" in params else "hf_token"
-    last = None
-    for user, pw in _credential_candidates(*auth):
-        try:
-            return client_cls(space_id, auth=(user, pw), **{key: token})
-        except ValueError as exc:
-            last = exc
-    user, pw = auth
-    raise RuntimeError(
-        "Space login rejected. Check that AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in the CircleCI context are "
-        f"EXACTLY the Space secrets of the same names. (username length {len(user)}, password length {len(pw)}; "
-        f"last error: {last})"
-    ) from last
+    try:
+        return client_cls(space_id, auth=(auth[0].strip(), auth[1]), **{key: token})
+    except SpaceAuthenticationError as exc:
+        raise RuntimeError(
+            "Space login failed: Gradio rejected the configured username/password. "
+            "Update the matching secrets in CircleCI context 'aethrion-deploy' "
+            "and Hugging Face Space Settings > Secrets. Do not paste credentials into logs."
+        ) from exc
 
 
 def main() -> int:
