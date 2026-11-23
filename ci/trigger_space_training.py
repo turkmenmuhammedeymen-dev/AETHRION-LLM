@@ -139,8 +139,9 @@ def make_client(space_id, token, auth, client_cls=None):
     except ValueError:
         # Other gradio_client ValueErrors may contain server details.
         raise RuntimeError(
-            "Gradio client initialization failed before authentication could "
-            "be confirmed. No response details or credentials were logged."
+            "Space login rejected: Gradio client initialization failed before "
+            "authentication could be confirmed. No response details or "
+            "credentials were logged."
         ) from None
 
 
