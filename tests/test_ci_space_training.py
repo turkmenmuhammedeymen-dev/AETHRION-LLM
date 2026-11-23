@@ -68,10 +68,10 @@ class ClientCompatTests(unittest.TestCase):
 
 
 class LoginRetryTests(unittest.TestCase):
-    def test_retries_with_trimmed_password(self):
+    def test_preserves_password_exactly_and_normalizes_only_username(self):
         class C:
             def __init__(self, src, token=None, auth=None):
-                if auth != ("u", "pw"):
+                if auth != ("u", "pw\n"):
                     raise ValueError("Could not login")
         self.assertIsInstance(make_client("o/s", "t", ("u ", "pw\n"), C), C)
 
@@ -84,18 +84,20 @@ class LoginRetryTests(unittest.TestCase):
 
 
 class LoginCookieTests(unittest.TestCase):
-    def test_login_sends_bearer_token_and_returns_cookies(self):
+    def test_login_does_not_forward_bearer_token_and_returns_cookies(self):
         seen = {}
-        def fake_post(url, data, headers, timeout):
-            seen.update(url=url, data=data, headers=headers)
+        def fake_post(url, **kwargs):
+            seen.update(url=url, **kwargs)
             return SimpleNamespace(status_code=200, cookies={"access-token": "abc"})
         out = login_cookies("https://x.hf.space/", "u", "p", "hf_tok", post=fake_post)
         self.assertEqual(out, {"access-token": "abc"})
         self.assertEqual(seen["url"], "https://x.hf.space/login")
-        self.assertEqual(seen["headers"]["Authorization"], "Bearer hf_tok")
+        self.assertEqual(seen["data"], {"username": "u", "password": "p"})
+        self.assertNotIn("headers", seen)
 
-    def test_login_failure_raises_value_error(self):
-        with self.assertRaises(ValueError):
+    def test_login_failure_raises_sanitized_authentication_error(self):
+        from ci.trigger_space_training import SpaceAuthenticationError
+        with self.assertRaises(SpaceAuthenticationError):
             login_cookies("https://x.hf.space", "u", "p", "t", post=lambda *a, **k: SimpleNamespace(status_code=401, cookies={}))
 
 

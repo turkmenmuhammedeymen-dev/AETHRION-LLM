@@ -1,5 +1,5 @@
-"""Ask the running Space to run bounded training sessions (CircleCI, approval-gated).
-Needs: HF_TOKEN (CircleCI context) and the Space login AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in the same context.
+"""Ask the running Space to run bounded training sessions (GitHub Actions, approval-gated).
+Needs: HF_TOKEN, AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD from GitHub Actions repository/environment secrets.
 Usage: python ci/trigger_space_training.py [--models code research ...] [--steps 25] [--rounds 1]"""
 from __future__ import annotations
 import argparse
@@ -61,52 +61,66 @@ def run_until_complete(client, models, steps, max_rounds, min_steps=25):
     return results
 
 
-def _credential_candidates(user, pw):
-    """The Space compares the password exactly (the username is stripped there), so try raw and trimmed values."""
-    out = []
-    for cand in ((user.strip(), pw), (user.strip(), pw.strip()), (user.strip(), pw.rstrip("\r\n"))):
-        if cand not in out:
-            out.append(cand)
-    return out
+class SpaceAuthenticationError(RuntimeError):
+    """A Gradio login failure, reported without response bodies or credentials."""
 
 
-def login_cookies(src, user, pw, token, post=None):
-    """Log in to a Gradio-auth Space that is PRIVATE: the request must carry the HF token (gradio_client's own
-    login does not, so Hugging Face answers 401/404). Returns the session cookies."""
+def login_cookies(src, user, pw, token=None, post=None):
+    """Authenticate against Gradio's form-based /login endpoint and return session cookies.
+
+    The HF token is used by gradio_client to resolve/access a private Space; it is
+    not a Gradio login credential and must not be sent to this endpoint.
+    """
+    # token is accepted only for backwards compatibility with older callers.
+    # It is deliberately never forwarded to Gradio's form-login endpoint.
+    if post is None and callable(token):
+        # Also tolerate the former fourth-positional-argument test/client hook.
+        post, token = token, None
     if post is None:
         import httpx
         post = httpx.post
-    resp = post(src.rstrip("/") + "/login", data={"username": user, "password": pw},
-                headers={"Authorization": f"Bearer {token}"}, timeout=30)
+    resp = post(
+        src.rstrip("/") + "/login",
+        data={"username": user, "password": pw},
+        timeout=30,
+    )
     if resp.status_code != 200:
-        raise ValueError(f"login HTTP {resp.status_code}")
-    return {name: value for name, value in resp.cookies.items()}
+        raise SpaceAuthenticationError(
+            f"Gradio rejected the Space login (HTTP {resp.status_code}). "
+            "Verify GitHub Actions secrets AETHRION_SPACE_USERNAME and "
+            "AETHRION_SPACE_PASSWORD against the matching Hugging Face Space Secrets."
+        )
+    return {name: value for name, value in resp.cookies.items() if value is not None}
 
 
 def make_client(space_id, token, auth, client_cls=None):
-    """Build a gradio_client Client that can use a private Space with Gradio auth. Supports both the old
-    (`hf_token`) and new (`token`) keyword names and retries trimmed credential variants."""
+    """Build a gradio_client Client for a private Space protected by Gradio auth.
+
+    Supports gradio_client releases exposing either the `token` or legacy
+    `hf_token` constructor keyword. Credentials are passed unchanged except
+    for the username whitespace normalization performed by the Space itself.
+    """
     import inspect
     if client_cls is None:
         from gradio_client import Client as _Base
 
         class client_cls(_Base):  # noqa: N801 - local subclass
             def _login(self, auth):
-                self.cookies = login_cookies(self.src, auth[0], auth[1], token)
+                self.cookies = login_cookies(self.src, auth[0], auth[1])
     params = inspect.signature(client_cls.__init__).parameters
     key = "token" if "token" in params else "hf_token"
-    last = None
-    for user, pw in _credential_candidates(*auth):
-        try:
-            return client_cls(space_id, auth=(user, pw), **{key: token})
-        except ValueError as exc:
-            last = exc
-    user, pw = auth
-    raise RuntimeError(
-        "Space login rejected. Check that AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in the CircleCI context are "
-        f"EXACTLY the Space secrets of the same names. (username length {len(user)}, password length {len(pw)}; "
-        f"last error: {last})"
-    ) from last
+    try:
+        return client_cls(space_id, auth=(auth[0].strip(), auth[1]), **{key: token})
+    except (SpaceAuthenticationError, ValueError):
+        # gradio_client versions may raise ValueError directly from their
+        # internal login implementation. Never forward its message: it may
+        # contain server response details.
+        raise RuntimeError(
+            "Space login rejected. Verify GitHub Actions secrets "
+            "AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD against the "
+            "matching Hugging Face Space Settings > Secrets. "
+            "No credentials or response details were logged."
+        ) from None
 
 
 def main() -> int:
@@ -118,7 +132,7 @@ def main() -> int:
     a = ap.parse_args()
     token, user, pw = os.environ.get("HF_TOKEN"), os.environ.get("AETHRION_SPACE_USERNAME"), os.environ.get("AETHRION_SPACE_PASSWORD")
     if not (token and user and pw):
-        print("Missing HF_TOKEN / AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in the CircleCI context 'aethrion-deploy'.", file=sys.stderr)
+        print("Missing HF_TOKEN / AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in GitHub Actions secrets.", file=sys.stderr)
         return 2
     client = make_client(SPACE_ID, token, (user, pw))
     if a.until_complete:
