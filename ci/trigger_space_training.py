@@ -83,11 +83,21 @@ def login_cookies(src, user, pw, token=None, post=None):
     if post is None:
         import httpx
         post = httpx.post
+    # Gradio exposes both /login and /login/. Some Space front-proxy
+    # configurations resolve the slash form differently. Retry only a 404;
+    # never retry rejected credentials or redirect-based auth diagnostics.
+    login_base = src.rstrip("/")
     resp = post(
-        src.rstrip("/") + "/login",
+        login_base + "/login",
         data={"username": user, "password": pw},
         timeout=30,
     )
+    if resp.status_code == 404:
+        resp = post(
+            login_base + "/login/",
+            data={"username": user, "password": pw},
+            timeout=30,
+        )
     if resp.status_code != 200:
         raise SpaceAuthenticationError(resp.status_code)
     return {name: value for name, value in resp.cookies.items() if value is not None}
