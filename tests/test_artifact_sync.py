@@ -50,3 +50,24 @@ class ArtifactSyncTests(unittest.TestCase):
             with self.assertRaises(s.ArtifactSyncError): s._safe("chat", n)
 
 if __name__ == "__main__": unittest.main()
+
+
+class SingleCommitTests(unittest.TestCase):
+    def test_push_uses_one_commit_for_all_files(self):
+        try:
+            import huggingface_hub  # noqa: F401
+        except ImportError:
+            self.skipTest('huggingface_hub is validated in CI')
+        import tempfile
+        s = __import__("aethrion.artifact_sync", fromlist=["x"])
+        class C(Fake):
+            commits = []
+            def create_commit(self, **k): self.commits.append(k)
+        with tempfile.TemporaryDirectory() as d:
+            for name in ("checkpoint_last.pt", "checkpoint_last.pt.sha256"):
+                (Path(d) / name).write_bytes(b"x")
+            c = C()
+            sent = s.push_model_artifacts("code", d, api=c, environ=ENV)
+        self.assertEqual(len(C.commits), 1)
+        self.assertEqual(sorted(sent), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
+        self.assertEqual(c.up, [])

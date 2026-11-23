@@ -14,6 +14,10 @@ on:
         default: audit
         type: choice
         options: [audit, train-complete, train-pilot, train-runner]
+      models:
+        description: "train-runner only: models to continue (space separated)"
+        required: false
+        default: "image asr tts vocoder 3d document"
 permissions:
   contents: read
 jobs:
@@ -78,13 +82,14 @@ jobs:
     env:
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
       AETHRION_BASE_AUDIT_HMAC_KEY: ${{ secrets.AETHRION_BASE_AUDIT_HMAC_KEY }}
+      MODELS: ${{ github.event.inputs.models }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: python -m pip install --upgrade pip && python -m pip install -e ".[api,visual,documents,space,data]" "huggingface-hub>=0.30,<1.0"
       - name: CPU training on the runner (resumable; never a release)
-        run: python -u ci/train_on_runner.py --steps 250
+        run: python -u ci/train_on_runner.py --steps 250 --models $MODELS
   audit:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'audit'
     runs-on: ubuntu-latest

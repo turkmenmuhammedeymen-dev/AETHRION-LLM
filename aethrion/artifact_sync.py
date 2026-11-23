@@ -86,6 +86,13 @@ def push_model_artifacts(model: str, directory: str | Path, *, api: Any = None, 
         _safe(model, path.name)
         candidates.append(path)
     sent = []
+    if candidates and hasattr(client, "create_commit"):
+        # One commit per push: the Hub limits repository commits (128/hour), so per-file commits exhaust it.
+        from huggingface_hub import CommitOperationAdd
+        ops = [CommitOperationAdd(path_in_repo=f"{model}/{path.name}", path_or_fileobj=str(path)) for path in candidates]
+        client.create_commit(repo_id=repo, repo_type="model", operations=ops,
+                             commit_message=f"{model}: verified training artifacts (not a release)")
+        return [path.name for path in candidates]
     for path in candidates:
         client.upload_file(path_or_fileobj=str(path), path_in_repo=f"{model}/{path.name}", repo_id=repo, repo_type="model")
         sent.append(path.name)

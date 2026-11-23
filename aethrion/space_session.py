@@ -94,7 +94,7 @@ def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = No
             return {"model": model, "steps": steps, "pulled": pulled, "pushed": [], "trainer_ok": False, "released": False,
                     "progress": {"status": "base_preparation_failed", "step": None, "complete": False},
                     "note": "BASE corpus preparation failed; nothing was trained.",
-                    "trainer_tail": (prep.stderr or prep.stdout or "")[-400:]}
+                    "trainer_tail": (prep.stderr or prep.stdout or "")[-1500:]}
     cmd = [sys.executable, "-m", "aethrion.train_family", "--execute", "--models", model, "--session-steps", str(steps)]
     result = (runner or subprocess.run)(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=timeout)
     ok = getattr(result, "returncode", 1) == 0

@@ -37,13 +37,19 @@ def main() -> int:
     for model in a.models:
         state = {"ok": False, "complete": False, "step": None, "rounds": 0}
         failures = 0
-        for _ in range(a.max_rounds):
+        waits = 0
+        for _ in range(a.max_rounds + 8):
             if time.time() - t0 > a.deadline_minutes * 60:
                 print(f"[{model}] stopping: job deadline reached (resume by running again)", flush=True); break
+            if state["rounds"] >= a.max_rounds: break
             state["rounds"] += 1
             try:
                 res = run_session(model, a.steps, root=ROOT, api=api, prepare_chat=True, timeout=a.session_timeout)
             except Exception as exc:
+                if "429" in str(exc) and waits < 8:  # Hub commit rate limit: wait, then retry the same round
+                    waits += 1; state["rounds"] -= 1
+                    print(f"[{model}] Hub rate limit (429); waiting 10 min (wait {waits}/8)", flush=True)
+                    time.sleep(600); continue
                 print(f"[{model}] session error: {type(exc).__name__}: {str(exc)[:300]}", flush=True)
                 failures += 1
                 if failures >= 2: break

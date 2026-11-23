@@ -28,6 +28,10 @@ def _sha(path: Path) -> str:
 
 
 def build(force: bool = False) -> dict:
+    import os
+    if len(os.environ.get("AETHRION_BASE_AUDIT_HMAC_KEY", "").encode()) < 32:
+        raise SystemExit("AETHRION_BASE_AUDIT_HMAC_KEY (>=32 bytes) is not set in this environment; "
+                         "add it as a secret to sign the BASE audit report. Nothing was trained.")
     files = [AUTH / f"{g}.jsonl" for g in GROUPS]
     if not all(f.is_file() for f in files):
         subprocess.run([sys.executable, str(AUTH / "make_base.py")], check=True, cwd=ROOT)
