@@ -64,6 +64,10 @@ def run_until_complete(client, models, steps, max_rounds, min_steps=25):
 class SpaceAuthenticationError(RuntimeError):
     """A Gradio login failure, reported without response bodies or credentials."""
 
+    def __init__(self, status_code: int):
+        self.status_code = int(status_code)
+        super().__init__(f"Gradio login returned HTTP {self.status_code}.")
+
 
 def login_cookies(src, user, pw, token=None, post=None):
     """Authenticate against Gradio's form-based /login endpoint and return session cookies.
@@ -85,11 +89,7 @@ def login_cookies(src, user, pw, token=None, post=None):
         timeout=30,
     )
     if resp.status_code != 200:
-        raise SpaceAuthenticationError(
-            f"Gradio rejected the Space login (HTTP {resp.status_code}). "
-            "Verify GitHub Actions secrets AETHRION_SPACE_USERNAME and "
-            "AETHRION_SPACE_PASSWORD against the matching Hugging Face Space Secrets."
-        )
+        raise SpaceAuthenticationError(resp.status_code)
     return {name: value for name, value in resp.cookies.items() if value is not None}
 
 
@@ -111,15 +111,37 @@ def make_client(space_id, token, auth, client_cls=None):
     key = "token" if "token" in params else "hf_token"
     try:
         return client_cls(space_id, auth=(auth[0].strip(), auth[1]), **{key: token})
-    except (SpaceAuthenticationError, ValueError):
-        # gradio_client versions may raise ValueError directly from their
-        # internal login implementation. Never forward its message: it may
-        # contain server response details.
+    except SpaceAuthenticationError as exc:
+        # Gradio's /login route returns 302 when auth is not configured and
+        # 400 when auth is configured but the submitted pair is rejected.
+        # Report only the status code; never log response bodies or secrets.
+        if exc.status_code == 302:
+            detail = (
+                "The running Space has no Gradio auth configured. Confirm both "
+                "AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD exist as "
+                "Space Secrets, then restart the Space so app.py reloads them."
+            )
+        elif exc.status_code == 400:
+            detail = (
+                "Gradio auth is active but rejected the submitted credentials. "
+                "The GitHub Actions pair does not match the pair loaded by the "
+                "running Space, or the Space is still running with old secrets."
+            )
+        else:
+            detail = (
+                f"Gradio login returned HTTP {exc.status_code}. Check Space "
+                "runtime health and authentication configuration."
+            )
         raise RuntimeError(
-            "Space login rejected. Verify GitHub Actions secrets "
-            "AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD against the "
-            "matching Hugging Face Space Settings > Secrets. "
-            "No credentials or response details were logged."
+            "Space login failed (safe diagnostic): " + detail +
+            " No credentials or response bodies were logged."
+        ) from None
+    except ValueError:
+        # Other gradio_client ValueErrors may contain server details.
+        raise RuntimeError(
+            "Space login rejected: Gradio client initialization failed before "
+            "authentication could be confirmed. No response details or "
+            "credentials were logged."
         ) from None
 
 
