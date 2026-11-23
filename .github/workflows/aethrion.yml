@@ -1,0 +1,85 @@
+# GitHub Actions twin of the CircleCI pipeline (CircleCI free credits are exhausted).
+# Secrets needed (Settings -> Secrets and variables -> Actions): HF_TOKEN, AETHRION_SPACE_USERNAME, AETHRION_SPACE_PASSWORD.
+name: aethrion
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "train-complete (resume ZeroGPU sessions until done), audit (read-only evaluation) or train-pilot"
+        required: true
+        default: audit
+        type: choice
+        options: [audit, train-complete, train-pilot]
+permissions:
+  contents: read
+jobs:
+  test:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m pip install --upgrade pip && python -m pip install -e ".[api,visual,documents,space,data]" pytest
+      - run: python -m pytest -q
+      - run: python ci/space_smoke.py
+      - run: python ci/run_model_family_audit.py --output /tmp/aethrion-model-family-readiness.json
+  deploy:
+    if: github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m pip install --upgrade "huggingface-hub>=0.30,<1.0"
+      - name: Stage the complete Space project
+        run: |
+          rm -rf hf_space/aethrion && cp -R aethrion hf_space/aethrion
+          for d in configs docs tests data ci scripts; do rm -rf "hf_space/$d"; cp -R "$d" "hf_space/$d"; done
+          cp pyproject.toml hf_space/pyproject.toml
+          mkdir -p hf_space/models
+          cp models/manifest.example.json hf_space/models/manifest.example.json
+          cp models/manifest.json hf_space/models/manifest.json
+          rm -f hf_space/docs/OWNER_DATA_REVIEW_AUTHORIZATION_2026-11-17.md
+          cp README.md hf_space/docs/REPOSITORY_README.md
+      - run: python ci/verify_hf_deploy.py
+      - run: python ci/provision_space_training.py
+  train:
+    if: github.event_name == 'workflow_dispatch' && startsWith(github.event.inputs.action, 'train')
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      AETHRION_SPACE_USERNAME: ${{ secrets.AETHRION_SPACE_USERNAME }}
+      AETHRION_SPACE_PASSWORD: ${{ secrets.AETHRION_SPACE_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m pip install --upgrade "huggingface-hub>=0.30,<1.0" gradio_client
+      - name: Complete training (never a release)
+        run: |
+          if [ "${{ github.event.inputs.action }}" = "train-complete" ]; then
+            python ci/trigger_space_training.py --until-complete --steps 200 --rounds 40
+          else
+            python ci/trigger_space_training.py --steps 25 --rounds 1
+          fi
+  audit:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'audit'
+    runs-on: ubuntu-latest
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m pip install --upgrade pip && python -m pip install -e ".[api,visual,documents,space,data]" "huggingface-hub>=0.30,<1.0"
+      - run: python ci/audit_and_evaluate.py --output aethrion-specialist-evaluation.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: aethrion-specialist-evaluation, path: aethrion-specialist-evaluation.json}
