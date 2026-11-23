@@ -33,27 +33,43 @@ def parse_progress(out):
             "complete": m.group(3) == "True"}
 
 
-def run_until_complete(client, models, steps, max_rounds, min_steps=25):
+def _tail(out, n=500):
+    text = " ".join(str(out).split())
+    return text[:n]
+
+
+def run_until_complete(client, models, steps, max_rounds, min_steps=25, max_consecutive_failures=3):
     """Resumable sessions per model until training_complete_not_released or max_rounds.
     Steps are halved after a failed session (shorter sessions fit the GPU window).
     Completion never means release."""
     results = {}
     for model in models:
         cur, state = steps, {"ok": False, "complete": False, "step": None, "rounds": 0}
+        failures = 0
         for _ in range(max_rounds):
             state["rounds"] += 1
             try:
                 out = client.predict(model, cur, api_name="/training_session")
             except Exception as exc:  # network/quota hiccup: retry smaller
                 print(f"[{model}] call failed: {type(exc).__name__}: {str(exc)[:200]}", flush=True)
+                failures += 1
                 cur = max(min_steps, cur // 2)
+                if failures >= max_consecutive_failures:
+                    print(f"[{model}] stopping after {failures} consecutive failed sessions", flush=True)
+                    break
                 continue
             ok = "Training session finished" in str(out) and "Trainer ok: True" in str(out)
             prog = parse_progress(out) or {}
             print(f"[{model}] round {state['rounds']} ok={ok} progress={prog}", flush=True)
             if not ok:
+                failures += 1
+                print(f"[{model}] session output (no credentials): {_tail(out)}", flush=True)
                 cur = max(min_steps, cur // 2)
+                if failures >= max_consecutive_failures:
+                    print(f"[{model}] stopping after {failures} consecutive failed sessions", flush=True)
+                    break
                 continue
+            failures = 0
             state.update(ok=True, step=prog.get("step"), complete=bool(prog.get("complete")))
             if state["complete"]:
                 break
