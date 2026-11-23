@@ -65,12 +65,17 @@ class SpaceAuthenticationError(RuntimeError):
     """A Gradio login failure, reported without response bodies or credentials."""
 
 
-def login_cookies(src, user, pw, post=None):
+def login_cookies(src, user, pw, token=None, post=None):
     """Authenticate against Gradio's form-based /login endpoint and return session cookies.
 
     The HF token is used by gradio_client to resolve/access a private Space; it is
     not a Gradio login credential and must not be sent to this endpoint.
     """
+    # token is accepted only for backwards compatibility with older callers.
+    # It is deliberately never forwarded to Gradio's form-login endpoint.
+    if post is None and callable(token):
+        # Also tolerate the former fourth-positional-argument test/client hook.
+        post, token = token, None
     if post is None:
         import httpx
         post = httpx.post
@@ -106,12 +111,16 @@ def make_client(space_id, token, auth, client_cls=None):
     key = "token" if "token" in params else "hf_token"
     try:
         return client_cls(space_id, auth=(auth[0].strip(), auth[1]), **{key: token})
-    except SpaceAuthenticationError as exc:
+    except (SpaceAuthenticationError, ValueError):
+        # gradio_client versions may raise ValueError directly from their
+        # internal login implementation. Never forward its message: it may
+        # contain server response details.
         raise RuntimeError(
-            "Space login failed: Gradio rejected the configured username/password. "
-            "Update repository/environment secrets in GitHub Settings > Secrets and variables > Actions "
-            "and the matching Hugging Face Space Settings > Secrets. Do not paste credentials into logs."
-        ) from exc
+            "Space login rejected. Verify GitHub Actions secrets "
+            "AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD against the "
+            "matching Hugging Face Space Settings > Secrets. "
+            "No credentials or response details were logged."
+        ) from None
 
 
 def main() -> int:
