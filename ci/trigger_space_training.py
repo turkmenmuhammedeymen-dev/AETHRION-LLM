@@ -1,5 +1,5 @@
-"""Ask the running Space to run bounded training sessions (CircleCI, approval-gated).
-Needs: HF_TOKEN (CircleCI context) and the Space login AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in the same context.
+"""Ask the running Space to run bounded training sessions (GitHub Actions, approval-gated).
+Needs: HF_TOKEN, AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD from GitHub Actions repository/environment secrets.
 Usage: python ci/trigger_space_training.py [--models code research ...] [--steps 25] [--rounds 1]"""
 from __future__ import annotations
 import argparse
@@ -82,8 +82,8 @@ def login_cookies(src, user, pw, post=None):
     if resp.status_code != 200:
         raise SpaceAuthenticationError(
             f"Gradio rejected the Space login (HTTP {resp.status_code}). "
-            "Verify the CircleCI aethrion-deploy context values against the "
-            "AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD Space Secrets."
+            "Verify GitHub Actions secrets AETHRION_SPACE_USERNAME and "
+            "AETHRION_SPACE_PASSWORD against the matching Hugging Face Space Secrets."
         )
     return {name: value for name, value in resp.cookies.items() if value is not None}
 
@@ -109,8 +109,8 @@ def make_client(space_id, token, auth, client_cls=None):
     except SpaceAuthenticationError as exc:
         raise RuntimeError(
             "Space login failed: Gradio rejected the configured username/password. "
-            "Update the matching secrets in CircleCI context 'aethrion-deploy' "
-            "and Hugging Face Space Settings > Secrets. Do not paste credentials into logs."
+            "Update repository/environment secrets in GitHub Settings > Secrets and variables > Actions "
+            "and the matching Hugging Face Space Settings > Secrets. Do not paste credentials into logs."
         ) from exc
 
 
@@ -123,7 +123,7 @@ def main() -> int:
     a = ap.parse_args()
     token, user, pw = os.environ.get("HF_TOKEN"), os.environ.get("AETHRION_SPACE_USERNAME"), os.environ.get("AETHRION_SPACE_PASSWORD")
     if not (token and user and pw):
-        print("Missing HF_TOKEN / AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in the CircleCI context 'aethrion-deploy'.", file=sys.stderr)
+        print("Missing HF_TOKEN / AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in GitHub Actions secrets.", file=sys.stderr)
         return 2
     client = make_client(SPACE_ID, token, (user, pw))
     if a.until_complete:
