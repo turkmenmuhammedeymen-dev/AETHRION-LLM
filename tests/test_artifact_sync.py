@@ -71,3 +71,14 @@ class SingleCommitTests(unittest.TestCase):
         self.assertEqual(len(C.commits), 1)
         self.assertEqual(sorted(sent), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
         self.assertEqual(c.up, [])
+
+
+class TokenizerStaysLocalTests(unittest.TestCase):
+    def test_chat_push_ignores_regenerated_tokenizer_files(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            for name in ("checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json"):
+                (Path(d) / name).write_bytes(b"x")
+            f = Fake()
+            sent = s.push_model_artifacts("chat", d, api=f, environ=ENV)
+        self.assertEqual(sorted(sent), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])

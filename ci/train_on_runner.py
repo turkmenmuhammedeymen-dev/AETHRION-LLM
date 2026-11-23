@@ -20,7 +20,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", default=MODELS)
     ap.add_argument("--steps", type=int, default=250)
-    ap.add_argument("--max-rounds", type=int, default=12)
+    ap.add_argument("--max-rounds", type=int, default=60)
     ap.add_argument("--session-timeout", type=int, default=1500)
     ap.add_argument("--deadline-minutes", type=int, default=330)
     a = ap.parse_args()

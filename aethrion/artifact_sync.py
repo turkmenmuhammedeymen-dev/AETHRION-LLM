@@ -23,7 +23,9 @@ ALLOWED_ARTIFACT_NAMES = frozenset({
     "checkpoint_last.pt.previous",
     "checkpoint_last.pt.previous.sha256",
 })
-RUNTIME_FILES = frozenset({"metrics.jsonl", "training_report.json", "progress.json"})
+# tokenizer files are regenerated deterministically from the attested corpus each session, so they stay local.
+RUNTIME_FILES = frozenset({"metrics.jsonl", "training_report.json", "progress.json",
+                           "tokenizer.json", "tokenizer.json.provenance.json"})
 
 
 class ArtifactSyncError(RuntimeError):
