@@ -23,7 +23,7 @@ ALLOWED_ARTIFACT_NAMES = frozenset({
     "checkpoint_last.pt.previous",
     "checkpoint_last.pt.previous.sha256",
 })
-RUNTIME_FILES = frozenset({"metrics.jsonl", "training_report.json"})
+RUNTIME_FILES = frozenset({"metrics.jsonl", "training_report.json", "progress.json"})
 
 
 class ArtifactSyncError(RuntimeError):
@@ -75,8 +75,8 @@ def push_model_artifacts(model: str, directory: str | Path, *, api: Any = None, 
     if not directory.is_dir():
         raise ArtifactSyncError("Artifact directory does not exist.")
     # Validate the complete upload set before the first network write. The
-    # trainer also emits metrics.jsonl and training_report.json; these are
-    # runtime telemetry, not resumable model state, so keep them local.
+    # trainer also emits progress.json, metrics.jsonl, and training_report.json;
+    # these are runtime telemetry, not resumable model state, so keep them local.
     candidates = []
     for path in sorted(directory.iterdir()):
         if not path.is_file() or path.is_symlink():
