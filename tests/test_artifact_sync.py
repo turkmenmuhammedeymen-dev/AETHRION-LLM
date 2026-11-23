@@ -21,6 +21,7 @@ class ArtifactSyncTests(unittest.TestCase):
             (src / "notes.txt").write_text("must be rejected")
             (src / "metrics.jsonl").write_text('{"step":1,"train_loss":0.5}\\n')
             (src / "training_report.json").write_text('{"status":"training_in_progress_not_released"}')
+            (src / "progress.json").write_text('{"step":1500}')
             f = Fake()
             with self.assertRaises(s.ArtifactSyncError): s.push_model_artifacts("chat", src, api=f, environ=ENV)
             (src / "notes.txt").unlink()
