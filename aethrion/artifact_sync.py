@@ -13,7 +13,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-ALLOWED_MODELS = frozenset({"chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d", "research", "document", "safety", "base"})
+ALLOWED_MODELS = frozenset({"chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d", "research", "document", "safety", "base", "chat_instruct"})
 _NAME = re.compile(r"^[A-Za-z0-9._-]{1,120}$")
 # Only resumable model state is mirrored. Runtime telemetry stays in the Space
 # workspace and is not uploaded as a model artifact.
