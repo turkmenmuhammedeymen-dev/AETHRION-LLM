@@ -4,6 +4,8 @@ name: aethrion
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       action:
@@ -16,7 +18,7 @@ permissions:
   contents: read
 jobs:
   test:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
