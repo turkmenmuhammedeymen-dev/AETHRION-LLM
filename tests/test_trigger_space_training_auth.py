@@ -107,3 +107,31 @@ def test_make_client_supports_legacy_hf_token_keyword():
         "auth": ("owner", "password"),
         "hf_token": "hf-test-token",
     }
+
+
+
+def test_make_client_reports_only_safe_http_status_on_login_failure():
+    username = "private-user"
+    password = "never-print-this"
+    response_body = f"Incorrect credentials: {username} {password}"
+
+    class FailingClient:
+        def __init__(self, src, auth=None, token=None):
+            from ci.trigger_space_training import login_cookies
+            def fake_post(url, **kwargs):
+                return FakeResponse(401, text=response_body)
+            login_cookies(src, auth[0], auth[1], post=fake_post)
+
+    with pytest.raises(RuntimeError) as exc_info:
+        make_client(
+            "owner/private-space",
+            "hf-test-token",
+            (username, password),
+            client_cls=FailingClient,
+        )
+
+    message = str(exc_info.value)
+    assert "HTTP 401" in message
+    assert username not in message
+    assert password not in message
+    assert response_body not in message
