@@ -95,10 +95,35 @@ class LoginCookieTests(unittest.TestCase):
         self.assertEqual(seen["data"], {"username": "u", "password": "p"})
         self.assertNotIn("headers", seen)
 
+    def test_retries_trailing_slash_only_after_404(self):
+        seen = []
+        responses = iter([
+            SimpleNamespace(status_code=404, cookies={}),
+            SimpleNamespace(status_code=200, cookies={"access-token": "ok"}),
+        ])
+
+        def fake_post(url, **kwargs):
+            seen.append(url)
+            return next(responses)
+
+        out = login_cookies("https://x.hf.space/", "u", "p", post=fake_post)
+        self.assertEqual(out, {"access-token": "ok"})
+        self.assertEqual(
+            seen,
+            ["https://x.hf.space/login", "https://x.hf.space/login/"],
+        )
+
     def test_login_failure_raises_sanitized_authentication_error(self):
         from ci.trigger_space_training import SpaceAuthenticationError
-        with self.assertRaises(SpaceAuthenticationError):
-            login_cookies("https://x.hf.space", "u", "p", "t", post=lambda *a, **k: SimpleNamespace(status_code=401, cookies={}))
+        statuses = iter([404, 404])
+        with self.assertRaises(SpaceAuthenticationError) as ctx:
+            login_cookies(
+                "https://x.hf.space", "u", "p",
+                post=lambda *a, **k: SimpleNamespace(
+                    status_code=next(statuses), cookies={}
+                ),
+            )
+        self.assertEqual(ctx.exception.status_code, 404)
 
 
 if __name__ == "__main__":
