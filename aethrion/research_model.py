@@ -61,13 +61,26 @@ class AETHRIONResearch(nn.Module):
         self.query_encoder = ResearchTextEncoder(config)
         self.passage_encoder = ResearchTextEncoder(config)
         self.logit_scale = nn.Parameter(torch.tensor(2.0))
+        # Hybrid retrieval: learned dense similarity + exact token overlap (generalises to unseen words).
+        self.lexical_weight = nn.Parameter(torch.tensor(6.0))
 
-    def forward(self, query_ids, passage_ids, query_mask=None, passage_mask=None):
+    @staticmethod
+    def lexical_overlap(query_ids, passage_ids):
+        """Fraction of distinct non-pad query tokens found in each passage -> [queries, passages]."""
+        qvalid = query_ids != 0
+        hit = (query_ids[:, None, :, None] == passage_ids[None, :, None, :]).any(-1) & qvalid[:, None, :]
+        return hit.sum(-1).to(torch.float32) / qvalid.sum(-1).clamp_min(1).to(torch.float32)[:, None]
+
+    def score_matrix(self, query_ids, passage_ids, query_mask=None, passage_mask=None):
         q = self.query_encoder(query_ids, query_mask)
         p = self.passage_encoder(passage_ids, passage_mask)
-        if q.size(0) != p.size(0):
+        dense = self.logit_scale.exp().clamp(max=100) * q @ p.T
+        return q, p, dense + self.lexical_weight * self.lexical_overlap(query_ids, passage_ids)
+
+    def forward(self, query_ids, passage_ids, query_mask=None, passage_mask=None):
+        if query_ids.size(0) != passage_ids.size(0):
             raise ValueError("query and passage batch sizes must match")
-        logits = self.logit_scale.exp().clamp(max=100) * q @ p.T
+        q, p, logits = self.score_matrix(query_ids, passage_ids, query_mask, passage_mask)
         labels = torch.arange(q.size(0), device=q.device)
         loss = (F.cross_entropy(logits, labels) + F.cross_entropy(logits.T, labels)) / 2
         return {"query_embeddings": q, "passage_embeddings": p, "scores": logits, "loss": loss}
@@ -76,9 +89,7 @@ class AETHRIONResearch(nn.Module):
     def retrieve(self, query_ids, passage_ids, passage_mask=None, top_k=5):
         if top_k < 1:
             raise ValueError("top_k must be positive")
-        q = self.query_encoder(query_ids)
-        p = self.passage_encoder(passage_ids, passage_mask)
-        scores = q @ p.T
+        _, _, scores = self.score_matrix(query_ids, passage_ids, None, passage_mask)
         return torch.topk(scores, min(top_k, scores.size(-1)), dim=-1)
 
     def config_dict(self):

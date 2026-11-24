@@ -10,7 +10,7 @@
   },
   "output_dir": "artifacts/models/research",
   "seed": 42,
-  "max_steps": 1500,
+  "max_steps": 800,
   "batch_size": 32,
   "learning_rate": 0.0005,
   "weight_decay": 0.05,

@@ -35,16 +35,15 @@ def _research_metrics(model, arrays, idx, device) -> dict[str, Any]:
     if len(idx) < 2:
         return {}
     model.eval()
-    def _enc(encoder, key):
+    def _ids(key):
         ids = torch.from_numpy(np.asarray(arrays[key][idx]).copy()).long().to(device)
         mask = ids != 0
         mask[:, 0] = True
         length = max(1, int(mask.sum(1).max()))
-        ids, mask = ids[:, :length], mask[:, :length]
-        with torch.no_grad():
-            return encoder(ids, mask)
-    q = _enc(model.query_encoder, "query_ids"); p = _enc(model.passage_encoder, "passage_ids")
-    scores = (q @ p.T).cpu().numpy()
+        return ids[:, :length], mask[:, :length]
+    (qi, qm), (pi, pm) = _ids("query_ids"), _ids("passage_ids")
+    with torch.no_grad():
+        scores = model.score_matrix(qi, pi, qm, pm)[2].cpu().numpy()
     groups = np.asarray(arrays["group_id"][idx]).astype(str)
     ranks = []
     for i in range(len(idx)):
