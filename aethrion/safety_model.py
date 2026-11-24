@@ -51,7 +51,11 @@ class AETHRIONSafe(nn.Module):
         if token_ids.min().item() < 0 or token_ids.max().item() >= self.config.vocab_size:
             raise ValueError("safety token outside vocabulary")
         pos = torch.arange(length, device=token_ids.device).unsqueeze(0)
-        mask = None if attention_mask is None else ~attention_mask.bool()
+        if attention_mask is None:
+            # Right-padded with id 0: never pool or attend over padding positions.
+            attention_mask = token_ids != 0
+            attention_mask[:, 0] = True
+        mask = ~attention_mask.bool()
         hidden = self.encoder(self.token(token_ids) + self.position(pos), src_key_padding_mask=mask)
         if attention_mask is None:
             pooled = hidden.mean(1)
