@@ -96,3 +96,36 @@ class RuntimeArtifactPersistenceTests(unittest.TestCase):
             f = Fake()
             sent = s.push_model_artifacts("vision", d, api=f, environ=ENV)
         self.assertEqual(sorted(sent), sorted(names))
+
+
+class SpecialistTokenizerStagingTests(unittest.TestCase):
+    def test_stages_only_manifest_verified_tokenizer_with_sha_sidecar(self):
+        import hashlib
+        from unittest.mock import patch
+        from aethrion.space_session import _stage_specialist_tokenizer
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            source = root / "data" / "specialists" / "manifests" / "code" / "tokenizer.json"
+            source.parent.mkdir(parents=True)
+            source.write_text('{"format":"aethrion-byte-bpe-v1","merges":[]}', encoding="utf-8")
+            digest = hashlib.sha256(source.read_bytes()).hexdigest()
+            approval = {"tokenizer_path": str(source), "tokenizer_sha256": digest}
+            with patch("aethrion.specialist_data.validate_specialist_dataset", return_value=approval):
+                sent = _stage_specialist_tokenizer(root, "code", root / "artifacts" / "models" / "code")
+            target = root / "artifacts" / "models" / "code" / "tokenizer.json"
+            self.assertEqual(target.read_bytes(), source.read_bytes())
+            self.assertEqual((target.parent / "tokenizer.json.sha256").read_text().strip(), digest)
+            self.assertEqual(sorted(sent), ["tokenizer.json", "tokenizer.json.sha256"])
+
+    def test_rejects_tokenizer_outside_repository(self):
+        from unittest.mock import patch
+        from aethrion.space_session import _stage_specialist_tokenizer
+        with tempfile.TemporaryDirectory() as d, tempfile.TemporaryDirectory() as outside:
+            root = Path(d)
+            source = Path(outside) / "tokenizer.json"
+            source.write_text("{}", encoding="utf-8")
+            with patch("aethrion.specialist_data.validate_specialist_dataset",
+                       return_value={"tokenizer_path": str(source), "tokenizer_sha256": "0" * 64}):
+                with self.assertRaises(s.ArtifactSyncError):
+                    _stage_specialist_tokenizer(root, "code", root / "artifacts" / "models" / "code")
+
