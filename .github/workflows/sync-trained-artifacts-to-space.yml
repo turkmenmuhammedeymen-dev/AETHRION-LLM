@@ -31,7 +31,12 @@ jobs:
           python-version: "3.11"
 
       - name: Install Hugging Face client
-        run: python -m pip install --upgrade "huggingface_hub>=0.30,<1.0"
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[data]" "huggingface_hub>=0.30,<1.0"
+
+      - name: Rebuild the deterministic, attested Chat tokenizer
+        env:
+          AETHRION_BASE_AUDIT_HMAC_KEY: ${{ secrets.AETHRION_BASE_AUDIT_HMAC_KEY }}
+        run: python scripts/prepare_base.py --force
 
       - name: Publish verified checkpoints and tokenizer files to Space
         env:
