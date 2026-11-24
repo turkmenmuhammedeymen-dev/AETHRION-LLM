@@ -12,7 +12,7 @@ from typing import Any
 
 import torch
 
-from aethrion.checkpoint import load_checkpoint
+from aethrion.checkpoint import load_checkpoint, verify_checkpoint
 from aethrion.model import AETHRIONLM, ModelConfig
 from aethrion.tokenizer import ByteBPETokenizer
 
@@ -68,7 +68,9 @@ def load_experimental_chat(root: str | Path, device: str | torch.device | None =
     if not tokenizer_path.is_file() or _sha256(tokenizer_path) != expected_tokenizer:
         raise ExperimentalChatError("Chat tokenizer SHA-256 does not match the sync manifest.")
 
-    # load_checkpoint verifies the adjacent SHA sidecar and uses weights_only=True.
+    # Verify the primary generation first so load_checkpoint cannot silently fall back
+    # to an older .previous checkpoint while the sync manifest attests the latest one.
+    verify_checkpoint(checkpoint)
     state = load_checkpoint(checkpoint, map_location="cpu")
     config_data = state.get("model_config")
     if not isinstance(config_data, dict) or config_data != model_entry.get("model_config"):
