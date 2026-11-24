@@ -42,6 +42,16 @@ def read_progress(directory: Path) -> dict[str, Any]:
     try:
         report = json.loads((Path(directory) / "training_report.json").read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError):
+        # BASE (CHAT) trainer writes progress.json while a session is paused; the report appears only at the end.
+        try:
+            prog = json.loads((Path(directory) / "progress.json").read_text(encoding="utf-8"))
+            step = prog.get("step")
+            if prog.get("status") == "interrupted" and isinstance(step, int):
+                return {"status": "training_interrupted_not_released", "step": step + 1,
+                        "validation_loss": prog.get("val_loss", prog.get("validation_loss")),
+                        "held_out_test_loss": None, "complete": False}
+        except (OSError, UnicodeError, json.JSONDecodeError, AttributeError):
+            pass
         return {"status": "unknown", "step": None}
     if not isinstance(report, dict):
         return {"status": "unknown", "step": None}

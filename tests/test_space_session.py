@@ -101,3 +101,9 @@ def test_authored_base_sources_meet_corpus_gate():
         recs = [j.loads(l)["text"] for l in (base / f"{name}.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
         assert recs; groups += 1; texts += recs
     assert groups >= 3 and len(texts) >= 100 and len(set(texts)) == len(texts)
+
+
+def test_read_progress_falls_back_to_base_progress_json(tmp_path):
+    (tmp_path / "progress.json").write_text('{"status": "interrupted", "step": 249}', encoding="utf-8")
+    p = ss.read_progress(tmp_path)
+    assert p["status"] == "training_interrupted_not_released" and p["step"] == 250 and not p["complete"]
