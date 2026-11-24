@@ -65,6 +65,45 @@ def read_progress(directory: Path) -> dict[str, Any]:
             "complete": report.get("status") == "training_complete_not_released"}
 
 
+def _stage_specialist_tokenizer(repo_root: Path, model: str, output_dir: Path) -> list[str]:
+    """Stage only the tokenizer already approved and SHA-verified by the dataset manifest."""
+    if model == "vocoder":
+        return []
+    from aethrion.specialist_data import validate_specialist_dataset, sha256_file
+
+    manifest = repo_root / "data" / "specialists" / "manifests" / f"{model}.json"
+    approval = validate_specialist_dataset(manifest, require_training_approval=True)
+    source_value = approval.get("tokenizer_path")
+    expected_hash = approval.get("tokenizer_sha256")
+    if not isinstance(source_value, str) or not source_value:
+        raise artifact_sync.ArtifactSyncError("Validated specialist manifest did not return a tokenizer path.")
+    source = Path(source_value).resolve()
+    try:
+        source.relative_to(repo_root.resolve())
+    except ValueError as exc:
+        raise artifact_sync.ArtifactSyncError("Validated tokenizer path escapes the repository root.") from exc
+    if not source.is_file() or not isinstance(expected_hash, str) or sha256_file(source) != expected_hash.lower():
+        raise artifact_sync.ArtifactSyncError("Specialist tokenizer is missing or its approved SHA-256 changed.")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    target = output_dir / "tokenizer.json"
+    target_tmp = output_dir / "tokenizer.json.part"
+    sidecar = output_dir / "tokenizer.json.sha256"
+    sidecar_tmp = output_dir / "tokenizer.json.sha256.part"
+    try:
+        import shutil
+        shutil.copyfile(source, target_tmp)
+        if sha256_file(target_tmp) != expected_hash.lower():
+            raise artifact_sync.ArtifactSyncError("Staged specialist tokenizer failed SHA-256 verification.")
+        sidecar_tmp.write_text(expected_hash.lower() + "\n", encoding="ascii")
+        target_tmp.replace(target)
+        sidecar_tmp.replace(sidecar)
+    finally:
+        target_tmp.unlink(missing_ok=True)
+        sidecar_tmp.unlink(missing_ok=True)
+    return ["tokenizer.json", "tokenizer.json.sha256"]
+
+
 def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = None, environ=None,
                 runner: Callable[..., Any] | None = None, timeout: int = 3300,
                 prepare_chat: bool = False) -> dict[str, Any]:
@@ -108,6 +147,8 @@ def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = No
     cmd = [sys.executable, "-m", "aethrion.train_family", "--execute", "--models", model, "--session-steps", str(steps)]
     result = (runner or subprocess.run)(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=timeout)
     ok = getattr(result, "returncode", 1) == 0
+    if ok and directory.is_dir() and model != "vocoder":
+        _stage_specialist_tokenizer(repo_root, model, directory)
     pushed = artifact_sync.push_model_artifacts(model, directory, api=api, environ=environ) if ok and directory.is_dir() else []
     return {"model": model, "steps": steps, "pulled": pulled, "pushed": pushed, "trainer_ok": ok,
             "released": False, "progress": read_progress(directory) if directory.is_dir() else {"status": "unknown", "step": None},
