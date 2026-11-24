@@ -29,7 +29,34 @@ def _macro_f1(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(sum(scores) / len(scores)) if scores else 0.0
 
 
+def _research_metrics(model, arrays, idx, device) -> dict[str, Any]:
+    """Retrieval over the held-out test passages: top-1 / MRR versus random ranking."""
+    idx = np.asarray(idx)
+    if len(idx) < 2:
+        return {}
+    model.eval()
+    def _enc(encoder, key):
+        ids = torch.from_numpy(np.asarray(arrays[key][idx]).copy()).long().to(device)
+        mask = ids != 0
+        mask[:, 0] = True
+        with torch.no_grad():
+            return encoder(ids, mask)
+    q = _enc(model.query_encoder, "query_ids"); p = _enc(model.passage_encoder, "passage_ids")
+    scores = (q @ p.T).cpu().numpy()
+    groups = np.asarray(arrays["group_id"][idx]).astype(str)
+    ranks = []
+    for i in range(len(idx)):
+        order = np.argsort(-scores[i])
+        ranks.append(next(r for r, j in enumerate(order, 1) if i == j or groups[j] == groups[i]))
+    ranks = np.asarray(ranks, dtype=np.float64)
+    n = len(idx)
+    return {"task_metrics": {"accuracy": float((ranks == 1).mean()), "majority_baseline_accuracy": float(1.0 / n),
+                             "mrr": float((1.0 / ranks).mean()), "support": int(n)}}
+
+
 def _task_metrics(model, model_id, arrays, keys, idx, device, batch_size) -> dict[str, Any]:
+    if model_id == "research":
+        return _research_metrics(model, arrays, idx, device)
     if model_id not in {"safety", "document", "code"}:
         return {}
     model.eval()
