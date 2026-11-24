@@ -195,9 +195,6 @@ def chat(message, history):
         return _gpu_local_chat(prompt)
     except CapabilityUnavailable:
         return "AETHRION's own trained checkpoint/tokenizer is not available. No third-party model is silently substituted."
-@spaces.GPU(duration=60)
-
-
 # Private preview is separate from the production router and release registry.
 _EXPERIMENTAL_CHAT_MODEL = None
 _EXPERIMENTAL_CHAT_TOKENIZER = None
