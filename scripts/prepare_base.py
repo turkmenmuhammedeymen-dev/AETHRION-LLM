@@ -16,11 +16,10 @@ ROOT = Path(__file__).resolve().parents[1]
 AUTH = ROOT / "data" / "authored" / "base"
 RAW = ROOT / "data" / "raw" / "cosmos"
 PROC = ROOT / "data" / "processed"
-GROUPS = ["bilim", "teknoloji", "gunluk", "dil", "diyalog"]
-STATEMENT = ("BASE derlemini (bilim, teknoloji, gunluk, dil, diyalog) inceledim; içerikler projeye aittir "
+STATEMENT = ("BASE derlemini (bilim, teknoloji, günlük, dil, coğrafya, hayvanlar, takvim, matematik, diyalog; küçük kaynak gruplarına bölünmüş) inceledim; içerikler projeye aittir "
              "(Claude tarafından özgün olarak yazılmış ve CHAT kayıtlarından türetilmiş sentetik veridir); "
              "eğitimde kullanılmasına izin veriyorum; gizlilik ve kalite incelemesi sorumluluğunu kabul ediyorum. "
-             "(Proje sahibi beyanı: 'BEYAN BENİM ONAY VERİYORUM', 2026-11-22.)")
+             "(Proje sahibi beyanı: 'BEYAN BENİM ONAY VERİYORUM', 2026-11-24.)")
 
 
 def _sha(path: Path) -> str:
@@ -32,14 +31,16 @@ def build(force: bool = False) -> dict:
     if len(os.environ.get("AETHRION_BASE_AUDIT_HMAC_KEY", "").encode()) < 32:
         raise SystemExit("AETHRION_BASE_AUDIT_HMAC_KEY (>=32 bytes) is not set in this environment; "
                          "add it as a secret to sign the BASE audit report. Nothing was trained.")
-    files = [AUTH / f"{g}.jsonl" for g in GROUPS]
-    if not all(f.is_file() for f in files):
-        subprocess.run([sys.executable, str(AUTH / "make_base.py")], check=True, cwd=ROOT)
+    subprocess.run([sys.executable, str(AUTH / "make_base.py")], check=True, cwd=ROOT, stdout=subprocess.DEVNULL)
+    files = sorted(AUTH.glob("*.jsonl"))
+    GROUPS = [f.stem for f in files]
     combined = hashlib.sha256(b"".join(_sha(f).encode() for f in files)).hexdigest()
     tok = ROOT / "artifacts" / "tokenizer.json"
     if not force and (PROC / "corpus.txt").is_file() and tok.is_file() and (PROC / ".base_inputs_sha256").read_text().strip() == combined:
         return {"status": "already_prepared", "inputs_sha256": combined}
     RAW.mkdir(parents=True, exist_ok=True)
+    for stale in RAW.glob("*.jsonl"):
+        stale.unlink()
     sources = []
     for g, f in zip(GROUPS, files):
         shutil.copyfile(f, RAW / f.name)

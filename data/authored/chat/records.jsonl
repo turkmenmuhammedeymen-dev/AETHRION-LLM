@@ -348,3 +348,471 @@
 {"id": "chat-0348", "group_id": "chat-dil-r05_dil-10", "prompt": "Biraz kaba ol.", "response": "Kaba olmayacağım; nazik ve açık sözlü olabilirim. Doğrudan geri bildirim mi istiyorsun? Bana metnini ya da fikrini gönder, dürüst ve saygılı biçimde yorumlayayım."}
 {"id": "chat-0349", "group_id": "chat-dil-r05_dil-10", "prompt": "Kızdığım birine ne diyebilirim?", "response": "Şunu deneyebilirsin: 'Şu anda çok kızgınım, sakinleşince konuşalım.' Sonra bir mola verip ne hissettiğini ve ne beklediğini düşün. Ardından sakin bir dille konuşmak çatışmayı büyütmeden çözüm bulmanı sağlar."}
 {"id": "chat-0350", "group_id": "chat-empati-r05_dil-1", "prompt": "Yaramaz çocuklara ne söylemeliyim?", "response": "Kırıcı ifadeler yerine davranışı anlatmak daha etkili: 'Bunu yapınca arkadaşın üzüldü, ne yapabiliriz?' Net kurallar koyup tutarlı olmak ve iyi davranışı takdir etmek kalıcı sonuç verir."}
+{"id": "chat-fact-bilim-000-0", "group_id": "fact-bilim-000", "prompt": "Su nedir?", "response": "Su, deniz seviyesinde yaklaşık yüz derecede kaynar ve sıfır derecede donar."}
+{"id": "chat-fact-bilim-000-1", "group_id": "fact-bilim-000", "prompt": "Su hakkında kısaca bilgi verir misin?", "response": "Su, deniz seviyesinde yaklaşık yüz derecede kaynar ve sıfır derecede donar."}
+{"id": "chat-fact-bilim-001-0", "group_id": "fact-bilim-001", "prompt": "Güneş nedir?", "response": "Güneş, Dünya'ya ışık ve ısı sağlayan yıldızdır."}
+{"id": "chat-fact-bilim-001-1", "group_id": "fact-bilim-001", "prompt": "Güneş hakkında kısaca bilgi verir misin?", "response": "Güneş, Dünya'ya ışık ve ısı sağlayan yıldızdır."}
+{"id": "chat-fact-bilim-002-0", "group_id": "fact-bilim-002", "prompt": "Dünya nedir?", "response": "Dünya, Güneş'in çevresindeki bir turunu yaklaşık üç yüz altmış beş gün altı saatte tamamlar."}
+{"id": "chat-fact-bilim-002-1", "group_id": "fact-bilim-002", "prompt": "Dünya hakkında kısaca bilgi verir misin?", "response": "Dünya, Güneş'in çevresindeki bir turunu yaklaşık üç yüz altmış beş gün altı saatte tamamlar."}
+{"id": "chat-fact-bilim-003-0", "group_id": "fact-bilim-003", "prompt": "Ay nedir?", "response": "Ay, Dünya'nın tek doğal uydusudur ve gelgitleri etkiler."}
+{"id": "chat-fact-bilim-003-1", "group_id": "fact-bilim-003", "prompt": "Ay hakkında kısaca bilgi verir misin?", "response": "Ay, Dünya'nın tek doğal uydusudur ve gelgitleri etkiler."}
+{"id": "chat-fact-bilim-004-0", "group_id": "fact-bilim-004", "prompt": "Bitkiler nedir?", "response": "Bitkiler, fotosentez sırasında ışık enerjisini kullanarak karbondioksit ve sudan besin üretir."}
+{"id": "chat-fact-bilim-004-1", "group_id": "fact-bilim-004", "prompt": "Bitkiler hakkında kısaca bilgi verir misin?", "response": "Bitkiler, fotosentez sırasında ışık enerjisini kullanarak karbondioksit ve sudan besin üretir."}
+{"id": "chat-fact-bilim-005-0", "group_id": "fact-bilim-005", "prompt": "Oksijen nedir?", "response": "Oksijen, canlıların solunumu için gerekli olan gazdır."}
+{"id": "chat-fact-bilim-005-1", "group_id": "fact-bilim-005", "prompt": "Oksijen hakkında kısaca bilgi verir misin?", "response": "Oksijen, canlıların solunumu için gerekli olan gazdır."}
+{"id": "chat-fact-bilim-006-0", "group_id": "fact-bilim-006", "prompt": "Hava nedir?", "response": "Hava, büyük ölçüde azot ve oksijen gazlarından oluşur."}
+{"id": "chat-fact-bilim-006-1", "group_id": "fact-bilim-006", "prompt": "Hava hakkında kısaca bilgi verir misin?", "response": "Hava, büyük ölçüde azot ve oksijen gazlarından oluşur."}
+{"id": "chat-fact-bilim-007-0", "group_id": "fact-bilim-007", "prompt": "Ses nedir?", "response": "Ses, titreşimlerin hava gibi bir ortamda yayılmasıyla oluşan dalgadır."}
+{"id": "chat-fact-bilim-007-1", "group_id": "fact-bilim-007", "prompt": "Ses hakkında kısaca bilgi verir misin?", "response": "Ses, titreşimlerin hava gibi bir ortamda yayılmasıyla oluşan dalgadır."}
+{"id": "chat-fact-bilim-009-0", "group_id": "fact-bilim-009", "prompt": "Yerçekimi nedir?", "response": "Yerçekimi, kütleye sahip cisimlerin birbirini çekmesine neden olan kuvvettir."}
+{"id": "chat-fact-bilim-009-1", "group_id": "fact-bilim-009", "prompt": "Yerçekimi hakkında kısaca bilgi verir misin?", "response": "Yerçekimi, kütleye sahip cisimlerin birbirini çekmesine neden olan kuvvettir."}
+{"id": "chat-fact-bilim-010-0", "group_id": "fact-bilim-010", "prompt": "elementin atom numarası nedir?", "response": "Bir elementin atom numarası, çekirdeğindeki proton sayısına eşittir."}
+{"id": "chat-fact-bilim-010-1", "group_id": "fact-bilim-010", "prompt": "elementin atom numarası hakkında kısaca bilgi verir misin?", "response": "Bir elementin atom numarası, çekirdeğindeki proton sayısına eşittir."}
+{"id": "chat-fact-bilim-011-0", "group_id": "fact-bilim-011", "prompt": "Hidrojen nedir?", "response": "Hidrojen, evrendeki en hafif ve en bol bulunan elementtir."}
+{"id": "chat-fact-bilim-011-1", "group_id": "fact-bilim-011", "prompt": "Hidrojen hakkında kısaca bilgi verir misin?", "response": "Hidrojen, evrendeki en hafif ve en bol bulunan elementtir."}
+{"id": "chat-fact-bilim-012-0", "group_id": "fact-bilim-012", "prompt": "hücre nedir?", "response": "Bir hücre, canlıların yapı ve işlev bakımından en küçük birimidir."}
+{"id": "chat-fact-bilim-012-1", "group_id": "fact-bilim-012", "prompt": "hücre hakkında kısaca bilgi verir misin?", "response": "Bir hücre, canlıların yapı ve işlev bakımından en küçük birimidir."}
+{"id": "chat-fact-bilim-013-0", "group_id": "fact-bilim-013", "prompt": "DNA nedir?", "response": "DNA, canlıların kalıtsal bilgisini taşıyan çift sarmal yapıdaki moleküldür."}
+{"id": "chat-fact-bilim-013-1", "group_id": "fact-bilim-013", "prompt": "DNA hakkında kısaca bilgi verir misin?", "response": "DNA, canlıların kalıtsal bilgisini taşıyan çift sarmal yapıdaki moleküldür."}
+{"id": "chat-fact-bilim-014-0", "group_id": "fact-bilim-014", "prompt": "Kalp nedir?", "response": "Kalp, kanı vücutta dolaştıran kasılan bir organdır."}
+{"id": "chat-fact-bilim-014-1", "group_id": "fact-bilim-014", "prompt": "Kalp hakkında kısaca bilgi verir misin?", "response": "Kalp, kanı vücutta dolaştıran kasılan bir organdır."}
+{"id": "chat-fact-bilim-015-0", "group_id": "fact-bilim-015", "prompt": "Akciğerler nedir?", "response": "Akciğerler, solunum sırasında kana oksijen verir ve karbondioksiti dışarı atar."}
+{"id": "chat-fact-bilim-015-1", "group_id": "fact-bilim-015", "prompt": "Akciğerler hakkında kısaca bilgi verir misin?", "response": "Akciğerler, solunum sırasında kana oksijen verir ve karbondioksiti dışarı atar."}
+{"id": "chat-fact-bilim-016-0", "group_id": "fact-bilim-016", "prompt": "Mevsimler nedir?", "response": "Mevsimler, Dünya'nın eksen eğikliği nedeniyle oluşur."}
+{"id": "chat-fact-bilim-016-1", "group_id": "fact-bilim-016", "prompt": "Mevsimler hakkında kısaca bilgi verir misin?", "response": "Mevsimler, Dünya'nın eksen eğikliği nedeniyle oluşur."}
+{"id": "chat-fact-bilim-017-0", "group_id": "fact-bilim-017", "prompt": "Gece ve gündüz nedir?", "response": "Gece ve gündüz, Dünya'nın kendi ekseni etrafında dönmesiyle oluşur."}
+{"id": "chat-fact-bilim-017-1", "group_id": "fact-bilim-017", "prompt": "Gece ve gündüz hakkında kısaca bilgi verir misin?", "response": "Gece ve gündüz, Dünya'nın kendi ekseni etrafında dönmesiyle oluşur."}
+{"id": "chat-fact-bilim-018-0", "group_id": "fact-bilim-018", "prompt": "yıldız nedir?", "response": "Bir yıldız, merkezindeki füzyon tepkimeleriyle enerji üretir."}
+{"id": "chat-fact-bilim-018-1", "group_id": "fact-bilim-018", "prompt": "yıldız hakkında kısaca bilgi verir misin?", "response": "Bir yıldız, merkezindeki füzyon tepkimeleriyle enerji üretir."}
+{"id": "chat-fact-bilim-019-0", "group_id": "fact-bilim-019", "prompt": "Samanyolu nedir?", "response": "Samanyolu, Güneş Sistemi'ni de içeren bir gökadadır."}
+{"id": "chat-fact-bilim-019-1", "group_id": "fact-bilim-019", "prompt": "Samanyolu hakkında kısaca bilgi verir misin?", "response": "Samanyolu, Güneş Sistemi'ni de içeren bir gökadadır."}
+{"id": "chat-fact-bilim-020-0", "group_id": "fact-bilim-020", "prompt": "Merkür nedir?", "response": "Merkür, Güneş'e en yakın gezegendir."}
+{"id": "chat-fact-bilim-020-1", "group_id": "fact-bilim-020", "prompt": "Merkür hakkında kısaca bilgi verir misin?", "response": "Merkür, Güneş'e en yakın gezegendir."}
+{"id": "chat-fact-bilim-021-0", "group_id": "fact-bilim-021", "prompt": "Jüpiter nedir?", "response": "Jüpiter, Güneş Sistemi'ndeki en büyük gezegendir."}
+{"id": "chat-fact-bilim-021-1", "group_id": "fact-bilim-021", "prompt": "Jüpiter hakkında kısaca bilgi verir misin?", "response": "Jüpiter, Güneş Sistemi'ndeki en büyük gezegendir."}
+{"id": "chat-fact-bilim-023-0", "group_id": "fact-bilim-023", "prompt": "Kütle nedir?", "response": "Kütle, bir cisimdeki madde miktarının ölçüsüdür."}
+{"id": "chat-fact-bilim-023-1", "group_id": "fact-bilim-023", "prompt": "Kütle hakkında kısaca bilgi verir misin?", "response": "Kütle, bir cisimdeki madde miktarının ölçüsüdür."}
+{"id": "chat-fact-bilim-024-0", "group_id": "fact-bilim-024", "prompt": "Hız nedir?", "response": "Hız, bir cismin birim zamanda aldığı yoldur."}
+{"id": "chat-fact-bilim-024-1", "group_id": "fact-bilim-024", "prompt": "Hız hakkında kısaca bilgi verir misin?", "response": "Hız, bir cismin birim zamanda aldığı yoldur."}
+{"id": "chat-fact-bilim-025-0", "group_id": "fact-bilim-025", "prompt": "Isı nedir?", "response": "Isı, sıcaklık farkı nedeniyle bir cisimden diğerine geçen enerjidir."}
+{"id": "chat-fact-bilim-025-1", "group_id": "fact-bilim-025", "prompt": "Isı hakkında kısaca bilgi verir misin?", "response": "Isı, sıcaklık farkı nedeniyle bir cisimden diğerine geçen enerjidir."}
+{"id": "chat-fact-bilim-026-0", "group_id": "fact-bilim-026", "prompt": "Elektrik akımı nedir?", "response": "Elektrik akımı, yük taşıyıcıların bir iletken içinde düzenli hareketidir."}
+{"id": "chat-fact-bilim-026-1", "group_id": "fact-bilim-026", "prompt": "Elektrik akımı hakkında kısaca bilgi verir misin?", "response": "Elektrik akımı, yük taşıyıcıların bir iletken içinde düzenli hareketidir."}
+{"id": "chat-fact-bilim-028-0", "group_id": "fact-bilim-028", "prompt": "Buharlaşma nedir?", "response": "Buharlaşma, bir sıvının gaz haline geçmesidir."}
+{"id": "chat-fact-bilim-028-1", "group_id": "fact-bilim-028", "prompt": "Buharlaşma hakkında kısaca bilgi verir misin?", "response": "Buharlaşma, bir sıvının gaz haline geçmesidir."}
+{"id": "chat-fact-bilim-029-0", "group_id": "fact-bilim-029", "prompt": "Yağmur nedir?", "response": "Yağmur, bulutlardaki su damlacıklarının birleşip ağırlaşarak yere düşmesidir."}
+{"id": "chat-fact-bilim-029-1", "group_id": "fact-bilim-029", "prompt": "Yağmur hakkında kısaca bilgi verir misin?", "response": "Yağmur, bulutlardaki su damlacıklarının birleşip ağırlaşarak yere düşmesidir."}
+{"id": "chat-fact-bilim-030-0", "group_id": "fact-bilim-030", "prompt": "Deprem nedir?", "response": "Deprem, yer kabuğundaki enerjinin ani boşalmasıyla oluşan sarsıntıdır."}
+{"id": "chat-fact-bilim-030-1", "group_id": "fact-bilim-030", "prompt": "Deprem hakkında kısaca bilgi verir misin?", "response": "Deprem, yer kabuğundaki enerjinin ani boşalmasıyla oluşan sarsıntıdır."}
+{"id": "chat-fact-bilim-031-0", "group_id": "fact-bilim-031", "prompt": "Volkanlar nedir?", "response": "Volkanlar, yer altındaki erimiş kayaçların yüzeye çıktığı noktalardır."}
+{"id": "chat-fact-bilim-031-1", "group_id": "fact-bilim-031", "prompt": "Volkanlar hakkında kısaca bilgi verir misin?", "response": "Volkanlar, yer altındaki erimiş kayaçların yüzeye çıktığı noktalardır."}
+{"id": "chat-fact-bilim-032-0", "group_id": "fact-bilim-032", "prompt": "Okyanuslar nedir?", "response": "Okyanuslar, Dünya yüzeyinin yaklaşık yüzde yetmişini kaplar."}
+{"id": "chat-fact-bilim-032-1", "group_id": "fact-bilim-032", "prompt": "Okyanuslar hakkında kısaca bilgi verir misin?", "response": "Okyanuslar, Dünya yüzeyinin yaklaşık yüzde yetmişini kaplar."}
+{"id": "chat-fact-bilim-033-0", "group_id": "fact-bilim-033", "prompt": "Mercan resifleri nedir?", "response": "Mercan resifleri, denizlerde pek çok canlıya yuva olan zengin ekosistemlerdir."}
+{"id": "chat-fact-bilim-033-1", "group_id": "fact-bilim-033", "prompt": "Mercan resifleri hakkında kısaca bilgi verir misin?", "response": "Mercan resifleri, denizlerde pek çok canlıya yuva olan zengin ekosistemlerdir."}
+{"id": "chat-fact-bilim-034-0", "group_id": "fact-bilim-034", "prompt": "Ormanlar nedir?", "response": "Ormanlar, karbondioksiti soğurarak iklimin dengelenmesine yardımcı olur."}
+{"id": "chat-fact-bilim-034-1", "group_id": "fact-bilim-034", "prompt": "Ormanlar hakkında kısaca bilgi verir misin?", "response": "Ormanlar, karbondioksiti soğurarak iklimin dengelenmesine yardımcı olur."}
+{"id": "chat-fact-bilim-035-0", "group_id": "fact-bilim-035", "prompt": "Arılar nedir?", "response": "Arılar, çiçekleri tozlaştırarak birçok bitkinin üremesine katkı sağlar."}
+{"id": "chat-fact-bilim-035-1", "group_id": "fact-bilim-035", "prompt": "Arılar hakkında kısaca bilgi verir misin?", "response": "Arılar, çiçekleri tozlaştırarak birçok bitkinin üremesine katkı sağlar."}
+{"id": "chat-fact-bilim-036-0", "group_id": "fact-bilim-036", "prompt": "Besin zinciri nedir?", "response": "Besin zinciri, canlılar arasındaki enerji aktarımını gösterir."}
+{"id": "chat-fact-bilim-036-1", "group_id": "fact-bilim-036", "prompt": "Besin zinciri hakkında kısaca bilgi verir misin?", "response": "Besin zinciri, canlılar arasındaki enerji aktarımını gösterir."}
+{"id": "chat-fact-bilim-037-0", "group_id": "fact-bilim-037", "prompt": "ekosistem nedir?", "response": "Bir ekosistem, canlıların ve çevrelerinin birlikte oluşturduğu bütündür."}
+{"id": "chat-fact-bilim-037-1", "group_id": "fact-bilim-037", "prompt": "ekosistem hakkında kısaca bilgi verir misin?", "response": "Bir ekosistem, canlıların ve çevrelerinin birlikte oluşturduğu bütündür."}
+{"id": "chat-fact-bilim-038-0", "group_id": "fact-bilim-038", "prompt": "Fosiller nedir?", "response": "Fosiller, geçmişte yaşamış canlıların kayaçlarda korunmuş izleridir."}
+{"id": "chat-fact-bilim-038-1", "group_id": "fact-bilim-038", "prompt": "Fosiller hakkında kısaca bilgi verir misin?", "response": "Fosiller, geçmişte yaşamış canlıların kayaçlarda korunmuş izleridir."}
+{"id": "chat-fact-bilim-039-0", "group_id": "fact-bilim-039", "prompt": "Bilimsel yöntem nedir?", "response": "Bilimsel yöntem, gözlem yapmayı, hipotez kurmayı ve deneyle sınamayı içerir."}
+{"id": "chat-fact-bilim-039-1", "group_id": "fact-bilim-039", "prompt": "Bilimsel yöntem hakkında kısaca bilgi verir misin?", "response": "Bilimsel yöntem, gözlem yapmayı, hipotez kurmayı ve deneyle sınamayı içerir."}
+{"id": "chat-fact-bilim-041-0", "group_id": "fact-bilim-041", "prompt": "Mikroskop nedir?", "response": "Mikroskop, gözle görülemeyen küçük yapıları büyüterek incelememizi sağlar."}
+{"id": "chat-fact-bilim-041-1", "group_id": "fact-bilim-041", "prompt": "Mikroskop hakkında kısaca bilgi verir misin?", "response": "Mikroskop, gözle görülemeyen küçük yapıları büyüterek incelememizi sağlar."}
+{"id": "chat-fact-bilim-042-0", "group_id": "fact-bilim-042", "prompt": "Teleskop nedir?", "response": "Teleskop, uzaktaki gök cisimlerini daha yakın ve parlak göstermek için kullanılır."}
+{"id": "chat-fact-bilim-042-1", "group_id": "fact-bilim-042", "prompt": "Teleskop hakkında kısaca bilgi verir misin?", "response": "Teleskop, uzaktaki gök cisimlerini daha yakın ve parlak göstermek için kullanılır."}
+{"id": "chat-fact-bilim-043-0", "group_id": "fact-bilim-043", "prompt": "Termometre sıcaklığı nedir?", "response": "Termometre sıcaklığı, barometre hava basıncını ölçer."}
+{"id": "chat-fact-bilim-043-1", "group_id": "fact-bilim-043", "prompt": "Termometre sıcaklığı hakkında kısaca bilgi verir misin?", "response": "Termometre sıcaklığı, barometre hava basıncını ölçer."}
+{"id": "chat-fact-bilim-044-0", "group_id": "fact-bilim-044", "prompt": "Karışım nedir?", "response": "Karışım, birden fazla maddenin kimyasal bağ kurmadan bir araya gelmesidir."}
+{"id": "chat-fact-bilim-044-1", "group_id": "fact-bilim-044", "prompt": "Karışım hakkında kısaca bilgi verir misin?", "response": "Karışım, birden fazla maddenin kimyasal bağ kurmadan bir araya gelmesidir."}
+{"id": "chat-fact-bilim-047-0", "group_id": "fact-bilim-047", "prompt": "Cam nedir?", "response": "Cam, kumun yüksek sıcaklıkta eritilip soğutulmasıyla elde edilir."}
+{"id": "chat-fact-bilim-047-1", "group_id": "fact-bilim-047", "prompt": "Cam hakkında kısaca bilgi verir misin?", "response": "Cam, kumun yüksek sıcaklıkta eritilip soğutulmasıyla elde edilir."}
+{"id": "chat-fact-bilim-048-0", "group_id": "fact-bilim-048", "prompt": "Geri dönüşüm nedir?", "response": "Geri dönüşüm, kullanılmış malzemelerin yeniden hammadde olarak değerlendirilmesidir."}
+{"id": "chat-fact-bilim-048-1", "group_id": "fact-bilim-048", "prompt": "Geri dönüşüm hakkında kısaca bilgi verir misin?", "response": "Geri dönüşüm, kullanılmış malzemelerin yeniden hammadde olarak değerlendirilmesidir."}
+{"id": "chat-fact-teknoloji-000-0", "group_id": "fact-teknoloji-000", "prompt": "Bilgisayar nedir?", "response": "Bilgisayar, verileri alıp işleyen ve sonuç üreten bir makinedir."}
+{"id": "chat-fact-teknoloji-000-1", "group_id": "fact-teknoloji-000", "prompt": "Bilgisayar hakkında kısaca bilgi verir misin?", "response": "Bilgisayar, verileri alıp işleyen ve sonuç üreten bir makinedir."}
+{"id": "chat-fact-teknoloji-001-0", "group_id": "fact-teknoloji-001", "prompt": "program nedir?", "response": "Bir program, bilgisayara ne yapacağını anlatan komutlar dizisidir."}
+{"id": "chat-fact-teknoloji-001-1", "group_id": "fact-teknoloji-001", "prompt": "program hakkında kısaca bilgi verir misin?", "response": "Bir program, bilgisayara ne yapacağını anlatan komutlar dizisidir."}
+{"id": "chat-fact-teknoloji-002-0", "group_id": "fact-teknoloji-002", "prompt": "Algoritma nedir?", "response": "Algoritma, bir problemi çözmek için izlenen adım adım yöntemdir."}
+{"id": "chat-fact-teknoloji-002-1", "group_id": "fact-teknoloji-002", "prompt": "Algoritma hakkında kısaca bilgi verir misin?", "response": "Algoritma, bir problemi çözmek için izlenen adım adım yöntemdir."}
+{"id": "chat-fact-teknoloji-003-0", "group_id": "fact-teknoloji-003", "prompt": "İşlemci nedir?", "response": "İşlemci, bilgisayarda komutları çalıştıran ana bileşendir."}
+{"id": "chat-fact-teknoloji-003-1", "group_id": "fact-teknoloji-003", "prompt": "İşlemci hakkında kısaca bilgi verir misin?", "response": "İşlemci, bilgisayarda komutları çalıştıran ana bileşendir."}
+{"id": "chat-fact-teknoloji-004-0", "group_id": "fact-teknoloji-004", "prompt": "Bellek nedir?", "response": "Bellek, çalışan programların geçici verilerini hızlıca saklar."}
+{"id": "chat-fact-teknoloji-004-1", "group_id": "fact-teknoloji-004", "prompt": "Bellek hakkında kısaca bilgi verir misin?", "response": "Bellek, çalışan programların geçici verilerini hızlıca saklar."}
+{"id": "chat-fact-teknoloji-005-0", "group_id": "fact-teknoloji-005", "prompt": "Depolama birimleri nedir?", "response": "Depolama birimleri, dosyaları kapatıldıktan sonra da saklar."}
+{"id": "chat-fact-teknoloji-005-1", "group_id": "fact-teknoloji-005", "prompt": "Depolama birimleri hakkında kısaca bilgi verir misin?", "response": "Depolama birimleri, dosyaları kapatıldıktan sonra da saklar."}
+{"id": "chat-fact-teknoloji-006-0", "group_id": "fact-teknoloji-006", "prompt": "İşletim sistemi nedir?", "response": "İşletim sistemi, donanımı yönetir ve programların çalışmasını sağlar."}
+{"id": "chat-fact-teknoloji-006-1", "group_id": "fact-teknoloji-006", "prompt": "İşletim sistemi hakkında kısaca bilgi verir misin?", "response": "İşletim sistemi, donanımı yönetir ve programların çalışmasını sağlar."}
+{"id": "chat-fact-teknoloji-007-0", "group_id": "fact-teknoloji-007", "prompt": "İnternet nedir?", "response": "İnternet, dünyadaki bilgisayar ağlarını birbirine bağlayan küresel bir ağdır."}
+{"id": "chat-fact-teknoloji-007-1", "group_id": "fact-teknoloji-007", "prompt": "İnternet hakkında kısaca bilgi verir misin?", "response": "İnternet, dünyadaki bilgisayar ağlarını birbirine bağlayan küresel bir ağdır."}
+{"id": "chat-fact-teknoloji-008-0", "group_id": "fact-teknoloji-008", "prompt": "web tarayıcısı nedir?", "response": "Bir web tarayıcısı, internet sayfalarını görüntülemeye yarayan programdır."}
+{"id": "chat-fact-teknoloji-008-1", "group_id": "fact-teknoloji-008", "prompt": "web tarayıcısı hakkında kısaca bilgi verir misin?", "response": "Bir web tarayıcısı, internet sayfalarını görüntülemeye yarayan programdır."}
+{"id": "chat-fact-teknoloji-009-0", "group_id": "fact-teknoloji-009", "prompt": "E-posta nedir?", "response": "E-posta, elektronik ortamda mesaj göndermeye yarayan bir iletişim yöntemidir."}
+{"id": "chat-fact-teknoloji-009-1", "group_id": "fact-teknoloji-009", "prompt": "E-posta hakkında kısaca bilgi verir misin?", "response": "E-posta, elektronik ortamda mesaj göndermeye yarayan bir iletişim yöntemidir."}
+{"id": "chat-fact-teknoloji-011-0", "group_id": "fact-teknoloji-011", "prompt": "İki adımlı doğrulama nedir?", "response": "İki adımlı doğrulama, hesabı yalnızca parolaya bağlı olmaktan kurtarır."}
+{"id": "chat-fact-teknoloji-011-1", "group_id": "fact-teknoloji-011", "prompt": "İki adımlı doğrulama hakkında kısaca bilgi verir misin?", "response": "İki adımlı doğrulama, hesabı yalnızca parolaya bağlı olmaktan kurtarır."}
+{"id": "chat-fact-teknoloji-012-0", "group_id": "fact-teknoloji-012", "prompt": "Yedekleme nedir?", "response": "Yedekleme, önemli dosyaların bir kopyasını güvenli bir yerde saklamaktır."}
+{"id": "chat-fact-teknoloji-012-1", "group_id": "fact-teknoloji-012", "prompt": "Yedekleme hakkında kısaca bilgi verir misin?", "response": "Yedekleme, önemli dosyaların bir kopyasını güvenli bir yerde saklamaktır."}
+{"id": "chat-fact-teknoloji-013-0", "group_id": "fact-teknoloji-013", "prompt": "Şifreleme nedir?", "response": "Şifreleme, veriyi anahtarı olmayanların okuyamayacağı hale getirir."}
+{"id": "chat-fact-teknoloji-013-1", "group_id": "fact-teknoloji-013", "prompt": "Şifreleme hakkında kısaca bilgi verir misin?", "response": "Şifreleme, veriyi anahtarı olmayanların okuyamayacağı hale getirir."}
+{"id": "chat-fact-teknoloji-014-0", "group_id": "fact-teknoloji-014", "prompt": "Kimlik avı mesajları nedir?", "response": "Kimlik avı mesajları, kullanıcıyı sahte bir sayfada bilgi girmeye yönlendirmeye çalışır."}
+{"id": "chat-fact-teknoloji-014-1", "group_id": "fact-teknoloji-014", "prompt": "Kimlik avı mesajları hakkında kısaca bilgi verir misin?", "response": "Kimlik avı mesajları, kullanıcıyı sahte bir sayfada bilgi girmeye yönlendirmeye çalışır."}
+{"id": "chat-fact-teknoloji-015-0", "group_id": "fact-teknoloji-015", "prompt": "Yazılım güncellemeleri nedir?", "response": "Yazılım güncellemeleri, güvenlik açıklarını kapatmaya yardımcı olur."}
+{"id": "chat-fact-teknoloji-015-1", "group_id": "fact-teknoloji-015", "prompt": "Yazılım güncellemeleri hakkında kısaca bilgi verir misin?", "response": "Yazılım güncellemeleri, güvenlik açıklarını kapatmaya yardımcı olur."}
+{"id": "chat-fact-teknoloji-016-0", "group_id": "fact-teknoloji-016", "prompt": "değişken nedir?", "response": "Bir değişken, programda değer saklayan adlandırılmış alandır."}
+{"id": "chat-fact-teknoloji-016-1", "group_id": "fact-teknoloji-016", "prompt": "değişken hakkında kısaca bilgi verir misin?", "response": "Bir değişken, programda değer saklayan adlandırılmış alandır."}
+{"id": "chat-fact-teknoloji-017-0", "group_id": "fact-teknoloji-017", "prompt": "Döngü nedir?", "response": "Döngü, belirli komutların tekrar tekrar çalışmasını sağlar."}
+{"id": "chat-fact-teknoloji-017-1", "group_id": "fact-teknoloji-017", "prompt": "Döngü hakkında kısaca bilgi verir misin?", "response": "Döngü, belirli komutların tekrar tekrar çalışmasını sağlar."}
+{"id": "chat-fact-teknoloji-018-0", "group_id": "fact-teknoloji-018", "prompt": "Fonksiyon nedir?", "response": "Fonksiyon, tekrar kullanılabilen ve adı olan bir kod parçasıdır."}
+{"id": "chat-fact-teknoloji-018-1", "group_id": "fact-teknoloji-018", "prompt": "Fonksiyon hakkında kısaca bilgi verir misin?", "response": "Fonksiyon, tekrar kullanılabilen ve adı olan bir kod parçasıdır."}
+{"id": "chat-fact-teknoloji-019-0", "group_id": "fact-teknoloji-019", "prompt": "Hata ayıklama nedir?", "response": "Hata ayıklama, programdaki hatanın nedenini bulup düzeltme sürecidir."}
+{"id": "chat-fact-teknoloji-019-1", "group_id": "fact-teknoloji-019", "prompt": "Hata ayıklama hakkında kısaca bilgi verir misin?", "response": "Hata ayıklama, programdaki hatanın nedenini bulup düzeltme sürecidir."}
+{"id": "chat-fact-teknoloji-020-0", "group_id": "fact-teknoloji-020", "prompt": "Test yazmak nedir?", "response": "Test yazmak, kodun beklenen sonucu verdiğini otomatik olarak denetler."}
+{"id": "chat-fact-teknoloji-020-1", "group_id": "fact-teknoloji-020", "prompt": "Test yazmak hakkında kısaca bilgi verir misin?", "response": "Test yazmak, kodun beklenen sonucu verdiğini otomatik olarak denetler."}
+{"id": "chat-fact-teknoloji-021-0", "group_id": "fact-teknoloji-021", "prompt": "Sürüm kontrol sistemi nedir?", "response": "Sürüm kontrol sistemi, dosyalardaki değişikliklerin geçmişini tutar."}
+{"id": "chat-fact-teknoloji-021-1", "group_id": "fact-teknoloji-021", "prompt": "Sürüm kontrol sistemi hakkında kısaca bilgi verir misin?", "response": "Sürüm kontrol sistemi, dosyalardaki değişikliklerin geçmişini tutar."}
+{"id": "chat-fact-teknoloji-022-0", "group_id": "fact-teknoloji-022", "prompt": "Veritabanı nedir?", "response": "Veritabanı, düzenli biçimde saklanan ve sorgulanabilen veri koleksiyonudur."}
+{"id": "chat-fact-teknoloji-022-1", "group_id": "fact-teknoloji-022", "prompt": "Veritabanı hakkında kısaca bilgi verir misin?", "response": "Veritabanı, düzenli biçimde saklanan ve sorgulanabilen veri koleksiyonudur."}
+{"id": "chat-fact-teknoloji-023-0", "group_id": "fact-teknoloji-023", "prompt": "API nedir?", "response": "Bir API, iki yazılımın birbiriyle konuşmasını sağlayan kurallar bütünüdür."}
+{"id": "chat-fact-teknoloji-023-1", "group_id": "fact-teknoloji-023", "prompt": "API hakkında kısaca bilgi verir misin?", "response": "Bir API, iki yazılımın birbiriyle konuşmasını sağlayan kurallar bütünüdür."}
+{"id": "chat-fact-teknoloji-024-0", "group_id": "fact-teknoloji-024", "prompt": "Bulut bilişim nedir?", "response": "Bulut bilişim, sunucuların ve depolamanın internet üzerinden kullanılmasıdır."}
+{"id": "chat-fact-teknoloji-024-1", "group_id": "fact-teknoloji-024", "prompt": "Bulut bilişim hakkında kısaca bilgi verir misin?", "response": "Bulut bilişim, sunucuların ve depolamanın internet üzerinden kullanılmasıdır."}
+{"id": "chat-fact-teknoloji-025-0", "group_id": "fact-teknoloji-025", "prompt": "Yapay zekâ nedir?", "response": "Yapay zekâ, insan zekâsını gerektiren bazı işleri yapabilen sistemlerin genel adıdır."}
+{"id": "chat-fact-teknoloji-025-1", "group_id": "fact-teknoloji-025", "prompt": "Yapay zekâ hakkında kısaca bilgi verir misin?", "response": "Yapay zekâ, insan zekâsını gerektiren bazı işleri yapabilen sistemlerin genel adıdır."}
+{"id": "chat-fact-teknoloji-026-0", "group_id": "fact-teknoloji-026", "prompt": "Makine öğrenmesi nedir?", "response": "Makine öğrenmesi, bir sistemin örneklerden kalıp öğrenmesine dayanır."}
+{"id": "chat-fact-teknoloji-026-1", "group_id": "fact-teknoloji-026", "prompt": "Makine öğrenmesi hakkında kısaca bilgi verir misin?", "response": "Makine öğrenmesi, bir sistemin örneklerden kalıp öğrenmesine dayanır."}
+{"id": "chat-fact-teknoloji-027-0", "group_id": "fact-teknoloji-027", "prompt": "dil modeli nedir?", "response": "Bir dil modeli, metindeki sonraki parçayı tahmin etmeyi öğrenerek eğitilir."}
+{"id": "chat-fact-teknoloji-027-1", "group_id": "fact-teknoloji-027", "prompt": "dil modeli hakkında kısaca bilgi verir misin?", "response": "Bir dil modeli, metindeki sonraki parçayı tahmin etmeyi öğrenerek eğitilir."}
+{"id": "chat-fact-teknoloji-028-0", "group_id": "fact-teknoloji-028", "prompt": "Eğitim verisinin kalitesi nedir?", "response": "Eğitim verisinin kalitesi, bir modelin davranışını doğrudan etkiler."}
+{"id": "chat-fact-teknoloji-028-1", "group_id": "fact-teknoloji-028", "prompt": "Eğitim verisinin kalitesi hakkında kısaca bilgi verir misin?", "response": "Eğitim verisinin kalitesi, bir modelin davranışını doğrudan etkiler."}
+{"id": "chat-fact-teknoloji-029-0", "group_id": "fact-teknoloji-029", "prompt": "model nedir?", "response": "Bir model, eğitim verisinde olmayan konularda yanılabilir."}
+{"id": "chat-fact-teknoloji-029-1", "group_id": "fact-teknoloji-029", "prompt": "model hakkında kısaca bilgi verir misin?", "response": "Bir model, eğitim verisinde olmayan konularda yanılabilir."}
+{"id": "chat-fact-teknoloji-030-0", "group_id": "fact-teknoloji-030", "prompt": "Doğrulama kümesi nedir?", "response": "Doğrulama kümesi, eğitim sırasında modelin gelişimini izlemek için ayrılır."}
+{"id": "chat-fact-teknoloji-030-1", "group_id": "fact-teknoloji-030", "prompt": "Doğrulama kümesi hakkında kısaca bilgi verir misin?", "response": "Doğrulama kümesi, eğitim sırasında modelin gelişimini izlemek için ayrılır."}
+{"id": "chat-fact-teknoloji-031-0", "group_id": "fact-teknoloji-031", "prompt": "Test kümesi nedir?", "response": "Test kümesi, eğitim bittikten sonra modelin başarısını tarafsızca ölçmek içindir."}
+{"id": "chat-fact-teknoloji-031-1", "group_id": "fact-teknoloji-031", "prompt": "Test kümesi hakkında kısaca bilgi verir misin?", "response": "Test kümesi, eğitim bittikten sonra modelin başarısını tarafsızca ölçmek içindir."}
+{"id": "chat-fact-teknoloji-032-0", "group_id": "fact-teknoloji-032", "prompt": "Aşırı öğrenme nedir?", "response": "Aşırı öğrenme, modelin örnekleri ezberleyip yeni verilerde başarısız olmasıdır."}
+{"id": "chat-fact-teknoloji-032-1", "group_id": "fact-teknoloji-032", "prompt": "Aşırı öğrenme hakkında kısaca bilgi verir misin?", "response": "Aşırı öğrenme, modelin örnekleri ezberleyip yeni verilerde başarısız olmasıdır."}
+{"id": "chat-fact-teknoloji-033-0", "group_id": "fact-teknoloji-033", "prompt": "Kayıp değeri nedir?", "response": "Kayıp değeri, modelin tahminlerinin doğru cevaptan ne kadar uzak olduğunu gösterir."}
+{"id": "chat-fact-teknoloji-033-1", "group_id": "fact-teknoloji-033", "prompt": "Kayıp değeri hakkında kısaca bilgi verir misin?", "response": "Kayıp değeri, modelin tahminlerinin doğru cevaptan ne kadar uzak olduğunu gösterir."}
+{"id": "chat-fact-teknoloji-034-0", "group_id": "fact-teknoloji-034", "prompt": "belirteç nedir?", "response": "Bir belirteç, metnin modelin işlediği küçük parçalarından biridir."}
+{"id": "chat-fact-teknoloji-034-1", "group_id": "fact-teknoloji-034", "prompt": "belirteç hakkında kısaca bilgi verir misin?", "response": "Bir belirteç, metnin modelin işlediği küçük parçalarından biridir."}
+{"id": "chat-fact-teknoloji-035-0", "group_id": "fact-teknoloji-035", "prompt": "Ekran okuyucular nedir?", "response": "Ekran okuyucular, görme engelli kullanıcıların sayfaları dinlemesine yardımcı olur."}
+{"id": "chat-fact-teknoloji-035-1", "group_id": "fact-teknoloji-035", "prompt": "Ekran okuyucular hakkında kısaca bilgi verir misin?", "response": "Ekran okuyucular, görme engelli kullanıcıların sayfaları dinlemesine yardımcı olur."}
+{"id": "chat-fact-teknoloji-036-0", "group_id": "fact-teknoloji-036", "prompt": "pikselin rengi kırmızı nedir?", "response": "Bir pikselin rengi kırmızı, yeşil ve mavi değerlerinin birleşimiyle belirlenir."}
+{"id": "chat-fact-teknoloji-036-1", "group_id": "fact-teknoloji-036", "prompt": "pikselin rengi kırmızı hakkında kısaca bilgi verir misin?", "response": "Bir pikselin rengi kırmızı, yeşil ve mavi değerlerinin birleşimiyle belirlenir."}
+{"id": "chat-fact-teknoloji-037-0", "group_id": "fact-teknoloji-037", "prompt": "Ses dosyaları nedir?", "response": "Ses dosyaları, havadaki titreşimlerin sayısal örneklerle kaydedilmesiyle oluşur."}
+{"id": "chat-fact-teknoloji-037-1", "group_id": "fact-teknoloji-037", "prompt": "Ses dosyaları hakkında kısaca bilgi verir misin?", "response": "Ses dosyaları, havadaki titreşimlerin sayısal örneklerle kaydedilmesiyle oluşur."}
+{"id": "chat-fact-teknoloji-038-0", "group_id": "fact-teknoloji-038", "prompt": "görüntü nedir?", "response": "Bir görüntü, satır ve sütunlara dizilmiş piksellerden oluşur."}
+{"id": "chat-fact-teknoloji-038-1", "group_id": "fact-teknoloji-038", "prompt": "görüntü hakkında kısaca bilgi verir misin?", "response": "Bir görüntü, satır ve sütunlara dizilmiş piksellerden oluşur."}
+{"id": "chat-fact-teknoloji-039-0", "group_id": "fact-teknoloji-039", "prompt": "Pil nedir?", "response": "Pil, kimyasal enerjiyi elektrik enerjisine çeviren bir kaynaktır."}
+{"id": "chat-fact-teknoloji-039-1", "group_id": "fact-teknoloji-039", "prompt": "Pil hakkında kısaca bilgi verir misin?", "response": "Pil, kimyasal enerjiyi elektrik enerjisine çeviren bir kaynaktır."}
+{"id": "chat-fact-teknoloji-040-0", "group_id": "fact-teknoloji-040", "prompt": "Sensörler nedir?", "response": "Sensörler, ortamdaki ısı, ışık veya hareket gibi değişimleri ölçer."}
+{"id": "chat-fact-teknoloji-040-1", "group_id": "fact-teknoloji-040", "prompt": "Sensörler hakkında kısaca bilgi verir misin?", "response": "Sensörler, ortamdaki ısı, ışık veya hareket gibi değişimleri ölçer."}
+{"id": "chat-fact-teknoloji-041-0", "group_id": "fact-teknoloji-041", "prompt": "Robotlar nedir?", "response": "Robotlar, algıladıkları bilgiye göre hareket edebilen makinelerdir."}
+{"id": "chat-fact-teknoloji-041-1", "group_id": "fact-teknoloji-041", "prompt": "Robotlar hakkında kısaca bilgi verir misin?", "response": "Robotlar, algıladıkları bilgiye göre hareket edebilen makinelerdir."}
+{"id": "chat-fact-teknoloji-042-0", "group_id": "fact-teknoloji-042", "prompt": "Üç boyutlu bir model nedir?", "response": "Üç boyutlu bir model, uzayda nokta ve yüzeylerle tanımlanır."}
+{"id": "chat-fact-teknoloji-042-1", "group_id": "fact-teknoloji-042", "prompt": "Üç boyutlu bir model hakkında kısaca bilgi verir misin?", "response": "Üç boyutlu bir model, uzayda nokta ve yüzeylerle tanımlanır."}
+{"id": "chat-fact-teknoloji-043-0", "group_id": "fact-teknoloji-043", "prompt": "belge dosyası metni nedir?", "response": "Bir belge dosyası metni, başlıkları ve tabloları birlikte saklayabilir."}
+{"id": "chat-fact-teknoloji-043-1", "group_id": "fact-teknoloji-043", "prompt": "belge dosyası metni hakkında kısaca bilgi verir misin?", "response": "Bir belge dosyası metni, başlıkları ve tabloları birlikte saklayabilir."}
+{"id": "chat-fact-teknoloji-045-0", "group_id": "fact-teknoloji-045", "prompt": "Ağ bağlantısı koptuğunda nedir?", "response": "Ağ bağlantısı koptuğunda, çevrimiçi hizmetler geçici olarak çalışmayabilir."}
+{"id": "chat-fact-teknoloji-045-1", "group_id": "fact-teknoloji-045", "prompt": "Ağ bağlantısı koptuğunda hakkında kısaca bilgi verir misin?", "response": "Ağ bağlantısı koptuğunda, çevrimiçi hizmetler geçici olarak çalışmayabilir."}
+{"id": "chat-fact-teknoloji-046-0", "group_id": "fact-teknoloji-046", "prompt": "Gizlilik ayarları nedir?", "response": "Gizlilik ayarları, hangi bilgilerin kimlerle paylaşılacağını belirler."}
+{"id": "chat-fact-teknoloji-046-1", "group_id": "fact-teknoloji-046", "prompt": "Gizlilik ayarları hakkında kısaca bilgi verir misin?", "response": "Gizlilik ayarları, hangi bilgilerin kimlerle paylaşılacağını belirler."}
+{"id": "chat-fact-teknoloji-048-0", "group_id": "fact-teknoloji-048", "prompt": "lisans nedir?", "response": "Bir lisans, yazılımın nasıl kullanılabileceğini belirleyen kurallardır."}
+{"id": "chat-fact-teknoloji-048-1", "group_id": "fact-teknoloji-048", "prompt": "lisans hakkında kısaca bilgi verir misin?", "response": "Bir lisans, yazılımın nasıl kullanılabileceğini belirleyen kurallardır."}
+{"id": "chat-fact-teknoloji-049-0", "group_id": "fact-teknoloji-049", "prompt": "Kullanıcı arayüzü nedir?", "response": "Kullanıcı arayüzü, kişinin bir programla etkileşim kurduğu görünür kısımdır."}
+{"id": "chat-fact-teknoloji-049-1", "group_id": "fact-teknoloji-049", "prompt": "Kullanıcı arayüzü hakkında kısaca bilgi verir misin?", "response": "Kullanıcı arayüzü, kişinin bir programla etkileşim kurduğu görünür kısımdır."}
+{"id": "chat-fact-gunluk-000-0", "group_id": "fact-gunluk-000", "prompt": "Düzenli uyku nedir?", "response": "Düzenli uyku, dikkat ve ruh hali için önemlidir."}
+{"id": "chat-fact-gunluk-000-1", "group_id": "fact-gunluk-000", "prompt": "Düzenli uyku hakkında kısaca bilgi verir misin?", "response": "Düzenli uyku, dikkat ve ruh hali için önemlidir."}
+{"id": "chat-fact-gunluk-002-0", "group_id": "fact-gunluk-002", "prompt": "Dengeli beslenme nedir?", "response": "Dengeli beslenme, sebze, meyve, tahıl ve proteinin birlikte tüketilmesini içerir."}
+{"id": "chat-fact-gunluk-002-1", "group_id": "fact-gunluk-002", "prompt": "Dengeli beslenme hakkında kısaca bilgi verir misin?", "response": "Dengeli beslenme, sebze, meyve, tahıl ve proteinin birlikte tüketilmesini içerir."}
+{"id": "chat-fact-gunluk-003-0", "group_id": "fact-gunluk-003", "prompt": "Yürüyüş nedir?", "response": "Yürüyüş, özel bir ekipman gerektirmeyen kolay bir egzersizdir."}
+{"id": "chat-fact-gunluk-003-1", "group_id": "fact-gunluk-003", "prompt": "Yürüyüş hakkında kısaca bilgi verir misin?", "response": "Yürüyüş, özel bir ekipman gerektirmeyen kolay bir egzersizdir."}
+{"id": "chat-fact-gunluk-004-0", "group_id": "fact-gunluk-004", "prompt": "Ellerin sabunla yıkanması nedir?", "response": "Ellerin sabunla yıkanması, mikropların yayılmasını azaltır."}
+{"id": "chat-fact-gunluk-004-1", "group_id": "fact-gunluk-004", "prompt": "Ellerin sabunla yıkanması hakkında kısaca bilgi verir misin?", "response": "Ellerin sabunla yıkanması, mikropların yayılmasını azaltır."}
+{"id": "chat-fact-gunluk-005-0", "group_id": "fact-gunluk-005", "prompt": "bütçe hazırlamak nedir?", "response": "Bir bütçe hazırlamak, gelir ve giderleri birlikte görmenin yoludur."}
+{"id": "chat-fact-gunluk-005-1", "group_id": "fact-gunluk-005", "prompt": "bütçe hazırlamak hakkında kısaca bilgi verir misin?", "response": "Bir bütçe hazırlamak, gelir ve giderleri birlikte görmenin yoludur."}
+{"id": "chat-fact-gunluk-007-0", "group_id": "fact-gunluk-007", "prompt": "Alışveriş listesi hazırlamak nedir?", "response": "Alışveriş listesi hazırlamak, gereksiz harcamaları azaltabilir."}
+{"id": "chat-fact-gunluk-007-1", "group_id": "fact-gunluk-007", "prompt": "Alışveriş listesi hazırlamak hakkında kısaca bilgi verir misin?", "response": "Alışveriş listesi hazırlamak, gereksiz harcamaları azaltabilir."}
+{"id": "chat-fact-gunluk-008-0", "group_id": "fact-gunluk-008", "prompt": "toplantıya zamanında gelmek nedir?", "response": "Bir toplantıya zamanında gelmek, diğer insanlara saygının bir göstergesidir."}
+{"id": "chat-fact-gunluk-008-1", "group_id": "fact-gunluk-008", "prompt": "toplantıya zamanında gelmek hakkında kısaca bilgi verir misin?", "response": "Bir toplantıya zamanında gelmek, diğer insanlara saygının bir göstergesidir."}
+{"id": "chat-fact-gunluk-010-0", "group_id": "fact-gunluk-010", "prompt": "Toplu taşıma nedir?", "response": "Toplu taşıma, kalabalık şehirlerde trafiği azaltmaya yardımcı olur."}
+{"id": "chat-fact-gunluk-010-1", "group_id": "fact-gunluk-010", "prompt": "Toplu taşıma hakkında kısaca bilgi verir misin?", "response": "Toplu taşıma, kalabalık şehirlerde trafiği azaltmaya yardımcı olur."}
+{"id": "chat-fact-gunluk-011-0", "group_id": "fact-gunluk-011", "prompt": "Bisiklet nedir?", "response": "Bisiklet, kısa mesafeler için sağlıklı ve çevre dostu bir ulaşım aracıdır."}
+{"id": "chat-fact-gunluk-011-1", "group_id": "fact-gunluk-011", "prompt": "Bisiklet hakkında kısaca bilgi verir misin?", "response": "Bisiklet, kısa mesafeler için sağlıklı ve çevre dostu bir ulaşım aracıdır."}
+{"id": "chat-fact-gunluk-013-0", "group_id": "fact-gunluk-013", "prompt": "Çorba nedir?", "response": "Çorba, sebze ve baklagillerle kolayca hazırlanabilen sıcak bir yemektir."}
+{"id": "chat-fact-gunluk-013-1", "group_id": "fact-gunluk-013", "prompt": "Çorba hakkında kısaca bilgi verir misin?", "response": "Çorba, sebze ve baklagillerle kolayca hazırlanabilen sıcak bir yemektir."}
+{"id": "chat-fact-gunluk-015-0", "group_id": "fact-gunluk-015", "prompt": "Ekmek nedir?", "response": "Ekmek, un, su, tuz ve mayadan yapılan temel bir gıdadır."}
+{"id": "chat-fact-gunluk-015-1", "group_id": "fact-gunluk-015", "prompt": "Ekmek hakkında kısaca bilgi verir misin?", "response": "Ekmek, un, su, tuz ve mayadan yapılan temel bir gıdadır."}
+{"id": "chat-fact-gunluk-024-0", "group_id": "fact-gunluk-024", "prompt": "Mola vermek nedir?", "response": "Mola vermek, uzun çalışma saatlerinde verimi korumaya yardım eder."}
+{"id": "chat-fact-gunluk-024-1", "group_id": "fact-gunluk-024", "prompt": "Mola vermek hakkında kısaca bilgi verir misin?", "response": "Mola vermek, uzun çalışma saatlerinde verimi korumaya yardım eder."}
+{"id": "chat-fact-gunluk-025-0", "group_id": "fact-gunluk-025", "prompt": "işi küçük adımlara bölmek nedir?", "response": "Bir işi küçük adımlara bölmek, zor görünen hedefleri yönetilebilir yapar."}
+{"id": "chat-fact-gunluk-025-1", "group_id": "fact-gunluk-025", "prompt": "işi küçük adımlara bölmek hakkında kısaca bilgi verir misin?", "response": "Bir işi küçük adımlara bölmek, zor görünen hedefleri yönetilebilir yapar."}
+{"id": "chat-fact-gunluk-026-0", "group_id": "fact-gunluk-026", "prompt": "Yapılacaklar listesi nedir?", "response": "Yapılacaklar listesi, günün önceliklerini görmeyi kolaylaştırır."}
+{"id": "chat-fact-gunluk-026-1", "group_id": "fact-gunluk-026", "prompt": "Yapılacaklar listesi hakkında kısaca bilgi verir misin?", "response": "Yapılacaklar listesi, günün önceliklerini görmeyi kolaylaştırır."}
+{"id": "chat-fact-gunluk-027-0", "group_id": "fact-gunluk-027", "prompt": "Okumak nedir?", "response": "Okumak, kelime dağarcığını ve düşünme becerisini geliştirir."}
+{"id": "chat-fact-gunluk-027-1", "group_id": "fact-gunluk-027", "prompt": "Okumak hakkında kısaca bilgi verir misin?", "response": "Okumak, kelime dağarcığını ve düşünme becerisini geliştirir."}
+{"id": "chat-fact-gunluk-029-0", "group_id": "fact-gunluk-029", "prompt": "Not almak nedir?", "response": "Not almak, duyulan bilgiyi daha iyi hatırlamaya yardımcı olabilir."}
+{"id": "chat-fact-gunluk-029-1", "group_id": "fact-gunluk-029", "prompt": "Not almak hakkında kısaca bilgi verir misin?", "response": "Not almak, duyulan bilgiyi daha iyi hatırlamaya yardımcı olabilir."}
+{"id": "chat-fact-gunluk-032-0", "group_id": "fact-gunluk-032", "prompt": "Komşularla iyi ilişki kurmak nedir?", "response": "Komşularla iyi ilişki kurmak, apartman yaşamını kolaylaştırır."}
+{"id": "chat-fact-gunluk-032-1", "group_id": "fact-gunluk-032", "prompt": "Komşularla iyi ilişki kurmak hakkında kısaca bilgi verir misin?", "response": "Komşularla iyi ilişki kurmak, apartman yaşamını kolaylaştırır."}
+{"id": "chat-fact-gunluk-034-0", "group_id": "fact-gunluk-034", "prompt": "Doğum günü kutlamak nedir?", "response": "Doğum günü kutlamak, bir insana değer verdiğini göstermenin yollarından biridir."}
+{"id": "chat-fact-gunluk-034-1", "group_id": "fact-gunluk-034", "prompt": "Doğum günü kutlamak hakkında kısaca bilgi verir misin?", "response": "Doğum günü kutlamak, bir insana değer verdiğini göstermenin yollarından biridir."}
+{"id": "chat-fact-gunluk-036-0", "group_id": "fact-gunluk-036", "prompt": "Misafir ağırlarken sunulan ikram nedir?", "response": "Misafir ağırlarken sunulan ikram, ev sahibinin nezaketini yansıtır."}
+{"id": "chat-fact-gunluk-036-1", "group_id": "fact-gunluk-036", "prompt": "Misafir ağırlarken sunulan ikram hakkında kısaca bilgi verir misin?", "response": "Misafir ağırlarken sunulan ikram, ev sahibinin nezaketini yansıtır."}
+{"id": "chat-fact-gunluk-037-0", "group_id": "fact-gunluk-037", "prompt": "Yolculukta bagajı önceden hazırlamak nedir?", "response": "Yolculukta bagajı önceden hazırlamak, son anda telaşı azaltır."}
+{"id": "chat-fact-gunluk-037-1", "group_id": "fact-gunluk-037", "prompt": "Yolculukta bagajı önceden hazırlamak hakkında kısaca bilgi verir misin?", "response": "Yolculukta bagajı önceden hazırlamak, son anda telaşı azaltır."}
+{"id": "chat-fact-gunluk-039-0", "group_id": "fact-gunluk-039", "prompt": "Mevsime uygun giyinmek nedir?", "response": "Mevsime uygun giyinmek, hava değişimlerinde hasta olma riskini azaltabilir."}
+{"id": "chat-fact-gunluk-039-1", "group_id": "fact-gunluk-039", "prompt": "Mevsime uygun giyinmek hakkında kısaca bilgi verir misin?", "response": "Mevsime uygun giyinmek, hava değişimlerinde hasta olma riskini azaltabilir."}
+{"id": "chat-fact-gunluk-040-0", "group_id": "fact-gunluk-040", "prompt": "Şemsiye nedir?", "response": "Şemsiye, yağmurlu günlerde yanımızda bulundurulması gereken pratik bir eşyadır."}
+{"id": "chat-fact-gunluk-040-1", "group_id": "fact-gunluk-040", "prompt": "Şemsiye hakkında kısaca bilgi verir misin?", "response": "Şemsiye, yağmurlu günlerde yanımızda bulundurulması gereken pratik bir eşyadır."}
+{"id": "chat-fact-gunluk-041-0", "group_id": "fact-gunluk-041", "prompt": "Evi düzenli tutmak nedir?", "response": "Evi düzenli tutmak, aranan şeyi bulmayı kolaylaştırır."}
+{"id": "chat-fact-gunluk-041-1", "group_id": "fact-gunluk-041", "prompt": "Evi düzenli tutmak hakkında kısaca bilgi verir misin?", "response": "Evi düzenli tutmak, aranan şeyi bulmayı kolaylaştırır."}
+{"id": "chat-fact-gunluk-043-0", "group_id": "fact-gunluk-043", "prompt": "Kağıt nedir?", "response": "Kağıt, cam ve plastik atıkları ayırmak geri dönüşüme katkı sağlar."}
+{"id": "chat-fact-gunluk-043-1", "group_id": "fact-gunluk-043", "prompt": "Kağıt hakkında kısaca bilgi verir misin?", "response": "Kağıt, cam ve plastik atıkları ayırmak geri dönüşüme katkı sağlar."}
+{"id": "chat-fact-gunluk-046-0", "group_id": "fact-gunluk-046", "prompt": "Hayvanlara iyi davranmak nedir?", "response": "Hayvanlara iyi davranmak, toplumun merhamet duygusunu gösterir."}
+{"id": "chat-fact-gunluk-046-1", "group_id": "fact-gunluk-046", "prompt": "Hayvanlara iyi davranmak hakkında kısaca bilgi verir misin?", "response": "Hayvanlara iyi davranmak, toplumun merhamet duygusunu gösterir."}
+{"id": "chat-fact-gunluk-047-0", "group_id": "fact-gunluk-047", "prompt": "Gönüllü çalışmalar nedir?", "response": "Gönüllü çalışmalar, insanların birbirine destek olmasını sağlar."}
+{"id": "chat-fact-gunluk-047-1", "group_id": "fact-gunluk-047", "prompt": "Gönüllü çalışmalar hakkında kısaca bilgi verir misin?", "response": "Gönüllü çalışmalar, insanların birbirine destek olmasını sağlar."}
+{"id": "chat-fact-gunluk-050-0", "group_id": "fact-gunluk-050", "prompt": "Hata yapmak nedir?", "response": "Hata yapmak, öğrenme sürecinin doğal bir parçasıdır."}
+{"id": "chat-fact-gunluk-050-1", "group_id": "fact-gunluk-050", "prompt": "Hata yapmak hakkında kısaca bilgi verir misin?", "response": "Hata yapmak, öğrenme sürecinin doğal bir parçasıdır."}
+{"id": "chat-fact-dil-000-0", "group_id": "fact-dil-000", "prompt": "Türkçede ekler nedir?", "response": "Türkçede ekler, kelimenin sonuna eklenerek anlamı ve görevi değiştirir."}
+{"id": "chat-fact-dil-000-1", "group_id": "fact-dil-000", "prompt": "Türkçede ekler hakkında kısaca bilgi verir misin?", "response": "Türkçede ekler, kelimenin sonuna eklenerek anlamı ve görevi değiştirir."}
+{"id": "chat-fact-dil-002-0", "group_id": "fact-dil-002", "prompt": "Büyük ünlü uyumu nedir?", "response": "Büyük ünlü uyumu, bir kelimedeki ünlülerin kalın veya ince olmasına dayanan bir kuraldır."}
+{"id": "chat-fact-dil-002-1", "group_id": "fact-dil-002", "prompt": "Büyük ünlü uyumu hakkında kısaca bilgi verir misin?", "response": "Büyük ünlü uyumu, bir kelimedeki ünlülerin kalın veya ince olmasına dayanan bir kuraldır."}
+{"id": "chat-fact-dil-003-0", "group_id": "fact-dil-003", "prompt": "Noktalama işaretleri nedir?", "response": "Noktalama işaretleri, yazıda duraklama ve anlam ayrımını göstermeye yarar."}
+{"id": "chat-fact-dil-003-1", "group_id": "fact-dil-003", "prompt": "Noktalama işaretleri hakkında kısaca bilgi verir misin?", "response": "Noktalama işaretleri, yazıda duraklama ve anlam ayrımını göstermeye yarar."}
+{"id": "chat-fact-dil-007-0", "group_id": "fact-dil-007", "prompt": "Eş anlamlı kelimeler nedir?", "response": "Eş anlamlı kelimeler, aynı ya da birbirine çok yakın anlamları taşır."}
+{"id": "chat-fact-dil-007-1", "group_id": "fact-dil-007", "prompt": "Eş anlamlı kelimeler hakkında kısaca bilgi verir misin?", "response": "Eş anlamlı kelimeler, aynı ya da birbirine çok yakın anlamları taşır."}
+{"id": "chat-fact-dil-008-0", "group_id": "fact-dil-008", "prompt": "Zıt anlamlı kelimeler nedir?", "response": "Zıt anlamlı kelimeler, birbirine karşıt anlamlar ifade eder."}
+{"id": "chat-fact-dil-008-1", "group_id": "fact-dil-008", "prompt": "Zıt anlamlı kelimeler hakkında kısaca bilgi verir misin?", "response": "Zıt anlamlı kelimeler, birbirine karşıt anlamlar ifade eder."}
+{"id": "chat-fact-dil-009-0", "group_id": "fact-dil-009", "prompt": "Atasözleri nedir?", "response": "Atasözleri, uzun deneyimlerden doğan kısa ve öğüt veren sözlerdir."}
+{"id": "chat-fact-dil-009-1", "group_id": "fact-dil-009", "prompt": "Atasözleri hakkında kısaca bilgi verir misin?", "response": "Atasözleri, uzun deneyimlerden doğan kısa ve öğüt veren sözlerdir."}
+{"id": "chat-fact-dil-010-0", "group_id": "fact-dil-010", "prompt": "Deyimler nedir?", "response": "Deyimler, kelimelerin gerçek anlamlarından farklı bir anlam kazandığı kalıplardır."}
+{"id": "chat-fact-dil-010-1", "group_id": "fact-dil-010", "prompt": "Deyimler hakkında kısaca bilgi verir misin?", "response": "Deyimler, kelimelerin gerçek anlamlarından farklı bir anlam kazandığı kalıplardır."}
+{"id": "chat-fact-dil-011-0", "group_id": "fact-dil-011", "prompt": "paragraf nedir?", "response": "Bir paragraf, tek bir ana düşünce etrafında toplanan cümleler topluluğudur."}
+{"id": "chat-fact-dil-011-1", "group_id": "fact-dil-011", "prompt": "paragraf hakkında kısaca bilgi verir misin?", "response": "Bir paragraf, tek bir ana düşünce etrafında toplanan cümleler topluluğudur."}
+{"id": "chat-fact-dil-012-0", "group_id": "fact-dil-012", "prompt": "Giriş nedir?", "response": "Giriş, gelişme ve sonuç, bir yazının temel bölümleridir."}
+{"id": "chat-fact-dil-012-1", "group_id": "fact-dil-012", "prompt": "Giriş hakkında kısaca bilgi verir misin?", "response": "Giriş, gelişme ve sonuç, bir yazının temel bölümleridir."}
+{"id": "chat-fact-dil-013-0", "group_id": "fact-dil-013", "prompt": "Başlık nedir?", "response": "Başlık, okuyucuya metnin konusu hakkında fikir verir."}
+{"id": "chat-fact-dil-013-1", "group_id": "fact-dil-013", "prompt": "Başlık hakkında kısaca bilgi verir misin?", "response": "Başlık, okuyucuya metnin konusu hakkında fikir verir."}
+{"id": "chat-fact-dil-014-0", "group_id": "fact-dil-014", "prompt": "Özet nedir?", "response": "Özet, bir metnin ana fikrini daha kısa biçimde aktarmaktır."}
+{"id": "chat-fact-dil-014-1", "group_id": "fact-dil-014", "prompt": "Özet hakkında kısaca bilgi verir misin?", "response": "Özet, bir metnin ana fikrini daha kısa biçimde aktarmaktır."}
+{"id": "chat-fact-dil-018-0", "group_id": "fact-dil-018", "prompt": "Nazik bir dil nedir?", "response": "Nazik bir dil, karşıdakine değer verildiğini gösterir."}
+{"id": "chat-fact-dil-018-1", "group_id": "fact-dil-018", "prompt": "Nazik bir dil hakkında kısaca bilgi verir misin?", "response": "Nazik bir dil, karşıdakine değer verildiğini gösterir."}
+{"id": "chat-fact-dil-020-0", "group_id": "fact-dil-020", "prompt": "Hakaret içeren sözler nedir?", "response": "Hakaret içeren sözler, insanların kalbini kırar ve sorunu çözmez."}
+{"id": "chat-fact-dil-020-1", "group_id": "fact-dil-020", "prompt": "Hakaret içeren sözler hakkında kısaca bilgi verir misin?", "response": "Hakaret içeren sözler, insanların kalbini kırar ve sorunu çözmez."}
+{"id": "chat-fact-dil-022-0", "group_id": "fact-dil-022", "prompt": "Özür dilemek nedir?", "response": "Özür dilemek, hatayı kabul etmenin ve ilişkiyi onarmanın bir yoludur."}
+{"id": "chat-fact-dil-022-1", "group_id": "fact-dil-022", "prompt": "Özür dilemek hakkında kısaca bilgi verir misin?", "response": "Özür dilemek, hatayı kabul etmenin ve ilişkiyi onarmanın bir yoludur."}
+{"id": "chat-fact-dil-023-0", "group_id": "fact-dil-023", "prompt": "Teşekkür etmek nedir?", "response": "Teşekkür etmek, yapılan iyiliğin fark edildiğini gösterir."}
+{"id": "chat-fact-dil-023-1", "group_id": "fact-dil-023", "prompt": "Teşekkür etmek hakkında kısaca bilgi verir misin?", "response": "Teşekkür etmek, yapılan iyiliğin fark edildiğini gösterir."}
+{"id": "chat-fact-dil-024-0", "group_id": "fact-dil-024", "prompt": "Lütfen kelimesi nedir?", "response": "Lütfen kelimesi, rica ederken kullanılan kibar bir ifadedir."}
+{"id": "chat-fact-dil-024-1", "group_id": "fact-dil-024", "prompt": "Lütfen kelimesi hakkında kısaca bilgi verir misin?", "response": "Lütfen kelimesi, rica ederken kullanılan kibar bir ifadedir."}
+{"id": "chat-fact-dil-025-0", "group_id": "fact-dil-025", "prompt": "Dinlemek nedir?", "response": "Dinlemek, iyi iletişimin konuşmak kadar önemli bir parçasıdır."}
+{"id": "chat-fact-dil-025-1", "group_id": "fact-dil-025", "prompt": "Dinlemek hakkında kısaca bilgi verir misin?", "response": "Dinlemek, iyi iletişimin konuşmak kadar önemli bir parçasıdır."}
+{"id": "chat-fact-dil-026-0", "group_id": "fact-dil-026", "prompt": "Soru sormak nedir?", "response": "Soru sormak, anlamadığımız bir konuyu öğrenmenin en doğal yoludur."}
+{"id": "chat-fact-dil-026-1", "group_id": "fact-dil-026", "prompt": "Soru sormak hakkında kısaca bilgi verir misin?", "response": "Soru sormak, anlamadığımız bir konuyu öğrenmenin en doğal yoludur."}
+{"id": "chat-fact-dil-028-0", "group_id": "fact-dil-028", "prompt": "Örnek vermek nedir?", "response": "Örnek vermek, soyut bir açıklamayı somut hale getirir."}
+{"id": "chat-fact-dil-028-1", "group_id": "fact-dil-028", "prompt": "Örnek vermek hakkında kısaca bilgi verir misin?", "response": "Örnek vermek, soyut bir açıklamayı somut hale getirir."}
+{"id": "chat-fact-dil-030-0", "group_id": "fact-dil-030", "prompt": "Kısa cümleler nedir?", "response": "Kısa cümleler, karmaşık fikirleri açık anlatmaya yardımcı olur."}
+{"id": "chat-fact-dil-030-1", "group_id": "fact-dil-030", "prompt": "Kısa cümleler hakkında kısaca bilgi verir misin?", "response": "Kısa cümleler, karmaşık fikirleri açık anlatmaya yardımcı olur."}
+{"id": "chat-fact-dil-032-0", "group_id": "fact-dil-032", "prompt": "Kaynak belirtmek nedir?", "response": "Kaynak belirtmek, bilginin nereden geldiğini okuyucunun denetleyebilmesini sağlar."}
+{"id": "chat-fact-dil-032-1", "group_id": "fact-dil-032", "prompt": "Kaynak belirtmek hakkında kısaca bilgi verir misin?", "response": "Kaynak belirtmek, bilginin nereden geldiğini okuyucunun denetleyebilmesini sağlar."}
+{"id": "chat-fact-dil-037-0", "group_id": "fact-dil-037", "prompt": "Madde işaretleri nedir?", "response": "Madde işaretleri, birbirinden ayrı fikirleri düzenli göstermeye yarar."}
+{"id": "chat-fact-dil-037-1", "group_id": "fact-dil-037", "prompt": "Madde işaretleri hakkında kısaca bilgi verir misin?", "response": "Madde işaretleri, birbirinden ayrı fikirleri düzenli göstermeye yarar."}
+{"id": "chat-fact-dil-038-0", "group_id": "fact-dil-038", "prompt": "Tablolar nedir?", "response": "Tablolar, karşılaştırılacak bilgileri satır ve sütunlarda toplar."}
+{"id": "chat-fact-dil-038-1", "group_id": "fact-dil-038", "prompt": "Tablolar hakkında kısaca bilgi verir misin?", "response": "Tablolar, karşılaştırılacak bilgileri satır ve sütunlarda toplar."}
+{"id": "chat-fact-dil-039-0", "group_id": "fact-dil-039", "prompt": "Rakamlarla yazılan tarihlerde gün nedir?", "response": "Rakamlarla yazılan tarihlerde gün, ay ve yıl sırasına dikkat etmek karışıklığı önler."}
+{"id": "chat-fact-dil-039-1", "group_id": "fact-dil-039", "prompt": "Rakamlarla yazılan tarihlerde gün hakkında kısaca bilgi verir misin?", "response": "Rakamlarla yazılan tarihlerde gün, ay ve yıl sırasına dikkat etmek karışıklığı önler."}
+{"id": "chat-fact-dil-043-0", "group_id": "fact-dil-043", "prompt": "Yazılı bir metinde ton nedir?", "response": "Yazılı bir metinde ton, okuyucunun mesajı nasıl algılayacağını etkiler."}
+{"id": "chat-fact-dil-043-1", "group_id": "fact-dil-043", "prompt": "Yazılı bir metinde ton hakkında kısaca bilgi verir misin?", "response": "Yazılı bir metinde ton, okuyucunun mesajı nasıl algılayacağını etkiler."}
+{"id": "chat-fact-dil-047-0", "group_id": "fact-dil-047", "prompt": "Dil nedir?", "response": "Dil, toplumların ortak düşünce ve duygularını aktaran canlı bir sistemdir."}
+{"id": "chat-fact-dil-047-1", "group_id": "fact-dil-047", "prompt": "Dil hakkında kısaca bilgi verir misin?", "response": "Dil, toplumların ortak düşünce ve duygularını aktaran canlı bir sistemdir."}
+{"id": "chat-fact-dil-048-0", "group_id": "fact-dil-048", "prompt": "hikâyede olay nedir?", "response": "Bir hikâyede olay, kişi, yer ve zaman unsurları bulunur."}
+{"id": "chat-fact-dil-048-1", "group_id": "fact-dil-048", "prompt": "hikâyede olay hakkında kısaca bilgi verir misin?", "response": "Bir hikâyede olay, kişi, yer ve zaman unsurları bulunur."}
+{"id": "chat-fact-dil-049-0", "group_id": "fact-dil-049", "prompt": "Şiirde dizeler ve uyak nedir?", "response": "Şiirde dizeler ve uyak, ritim duygusu yaratır."}
+{"id": "chat-fact-dil-049-1", "group_id": "fact-dil-049", "prompt": "Şiirde dizeler ve uyak hakkında kısaca bilgi verir misin?", "response": "Şiirde dizeler ve uyak, ritim duygusu yaratır."}
+{"id": "chat-fact-cografya-000-0", "group_id": "fact-cografya-000", "prompt": "İstanbul nedir?", "response": "İstanbul, Marmara bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-000-1", "group_id": "fact-cografya-000", "prompt": "İstanbul hakkında kısaca bilgi verir misin?", "response": "İstanbul, Marmara bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-002-0", "group_id": "fact-cografya-002", "prompt": "Ankara nedir?", "response": "Ankara, İç Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-002-1", "group_id": "fact-cografya-002", "prompt": "Ankara hakkında kısaca bilgi verir misin?", "response": "Ankara, İç Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-004-0", "group_id": "fact-cografya-004", "prompt": "İzmir nedir?", "response": "İzmir, Ege bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-004-1", "group_id": "fact-cografya-004", "prompt": "İzmir hakkında kısaca bilgi verir misin?", "response": "İzmir, Ege bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-006-0", "group_id": "fact-cografya-006", "prompt": "Bursa nedir?", "response": "Bursa, Marmara bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-006-1", "group_id": "fact-cografya-006", "prompt": "Bursa hakkında kısaca bilgi verir misin?", "response": "Bursa, Marmara bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-008-0", "group_id": "fact-cografya-008", "prompt": "Antalya nedir?", "response": "Antalya, Akdeniz bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-008-1", "group_id": "fact-cografya-008", "prompt": "Antalya hakkında kısaca bilgi verir misin?", "response": "Antalya, Akdeniz bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-010-0", "group_id": "fact-cografya-010", "prompt": "Adana nedir?", "response": "Adana, Akdeniz bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-010-1", "group_id": "fact-cografya-010", "prompt": "Adana hakkında kısaca bilgi verir misin?", "response": "Adana, Akdeniz bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-012-0", "group_id": "fact-cografya-012", "prompt": "Konya nedir?", "response": "Konya, İç Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-012-1", "group_id": "fact-cografya-012", "prompt": "Konya hakkında kısaca bilgi verir misin?", "response": "Konya, İç Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-014-0", "group_id": "fact-cografya-014", "prompt": "Trabzon nedir?", "response": "Trabzon, Karadeniz bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-014-1", "group_id": "fact-cografya-014", "prompt": "Trabzon hakkında kısaca bilgi verir misin?", "response": "Trabzon, Karadeniz bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-016-0", "group_id": "fact-cografya-016", "prompt": "Erzurum nedir?", "response": "Erzurum, Doğu Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-016-1", "group_id": "fact-cografya-016", "prompt": "Erzurum hakkında kısaca bilgi verir misin?", "response": "Erzurum, Doğu Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-018-0", "group_id": "fact-cografya-018", "prompt": "Gaziantep nedir?", "response": "Gaziantep, Güneydoğu Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-018-1", "group_id": "fact-cografya-018", "prompt": "Gaziantep hakkında kısaca bilgi verir misin?", "response": "Gaziantep, Güneydoğu Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-020-0", "group_id": "fact-cografya-020", "prompt": "Samsun nedir?", "response": "Samsun, Karadeniz bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-020-1", "group_id": "fact-cografya-020", "prompt": "Samsun hakkında kısaca bilgi verir misin?", "response": "Samsun, Karadeniz bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-022-0", "group_id": "fact-cografya-022", "prompt": "Eskişehir nedir?", "response": "Eskişehir, İç Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-022-1", "group_id": "fact-cografya-022", "prompt": "Eskişehir hakkında kısaca bilgi verir misin?", "response": "Eskişehir, İç Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-024-0", "group_id": "fact-cografya-024", "prompt": "Mersin nedir?", "response": "Mersin, Akdeniz bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-024-1", "group_id": "fact-cografya-024", "prompt": "Mersin hakkında kısaca bilgi verir misin?", "response": "Mersin, Akdeniz bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-026-0", "group_id": "fact-cografya-026", "prompt": "Diyarbakır nedir?", "response": "Diyarbakır, Güneydoğu Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-026-1", "group_id": "fact-cografya-026", "prompt": "Diyarbakır hakkında kısaca bilgi verir misin?", "response": "Diyarbakır, Güneydoğu Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-028-0", "group_id": "fact-cografya-028", "prompt": "Kayseri nedir?", "response": "Kayseri, İç Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-028-1", "group_id": "fact-cografya-028", "prompt": "Kayseri hakkında kısaca bilgi verir misin?", "response": "Kayseri, İç Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-030-0", "group_id": "fact-cografya-030", "prompt": "Van nedir?", "response": "Van, Doğu Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-030-1", "group_id": "fact-cografya-030", "prompt": "Van hakkında kısaca bilgi verir misin?", "response": "Van, Doğu Anadolu bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-032-0", "group_id": "fact-cografya-032", "prompt": "Edirne nedir?", "response": "Edirne, Marmara bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-032-1", "group_id": "fact-cografya-032", "prompt": "Edirne hakkında kısaca bilgi verir misin?", "response": "Edirne, Marmara bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-034-0", "group_id": "fact-cografya-034", "prompt": "Çanakkale nedir?", "response": "Çanakkale, Marmara bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-034-1", "group_id": "fact-cografya-034", "prompt": "Çanakkale hakkında kısaca bilgi verir misin?", "response": "Çanakkale, Marmara bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-036-0", "group_id": "fact-cografya-036", "prompt": "Muğla nedir?", "response": "Muğla, Ege bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-036-1", "group_id": "fact-cografya-036", "prompt": "Muğla hakkında kısaca bilgi verir misin?", "response": "Muğla, Ege bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-038-0", "group_id": "fact-cografya-038", "prompt": "Denizli nedir?", "response": "Denizli, Ege bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-cografya-038-1", "group_id": "fact-cografya-038", "prompt": "Denizli hakkında kısaca bilgi verir misin?", "response": "Denizli, Ege bölgesinde yer alan bir ilimizdir."}
+{"id": "chat-fact-hayvanlar-000-0", "group_id": "fact-hayvanlar-000", "prompt": "Kedi nedir?", "response": "Kedi, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-000-1", "group_id": "fact-hayvanlar-000", "prompt": "Kedi hakkında kısaca bilgi verir misin?", "response": "Kedi, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-002-0", "group_id": "fact-hayvanlar-002", "prompt": "Köpek nedir?", "response": "Köpek, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-002-1", "group_id": "fact-hayvanlar-002", "prompt": "Köpek hakkında kısaca bilgi verir misin?", "response": "Köpek, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-004-0", "group_id": "fact-hayvanlar-004", "prompt": "At nedir?", "response": "At, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-004-1", "group_id": "fact-hayvanlar-004", "prompt": "At hakkında kısaca bilgi verir misin?", "response": "At, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-006-0", "group_id": "fact-hayvanlar-006", "prompt": "İnek nedir?", "response": "İnek, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-006-1", "group_id": "fact-hayvanlar-006", "prompt": "İnek hakkında kısaca bilgi verir misin?", "response": "İnek, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-008-0", "group_id": "fact-hayvanlar-008", "prompt": "Koyun nedir?", "response": "Koyun, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-008-1", "group_id": "fact-hayvanlar-008", "prompt": "Koyun hakkında kısaca bilgi verir misin?", "response": "Koyun, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-010-0", "group_id": "fact-hayvanlar-010", "prompt": "Yunus nedir?", "response": "Yunus, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-010-1", "group_id": "fact-hayvanlar-010", "prompt": "Yunus hakkında kısaca bilgi verir misin?", "response": "Yunus, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-012-0", "group_id": "fact-hayvanlar-012", "prompt": "Balina nedir?", "response": "Balina, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-012-1", "group_id": "fact-hayvanlar-012", "prompt": "Balina hakkında kısaca bilgi verir misin?", "response": "Balina, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-014-0", "group_id": "fact-hayvanlar-014", "prompt": "Yarasa nedir?", "response": "Yarasa, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-014-1", "group_id": "fact-hayvanlar-014", "prompt": "Yarasa hakkında kısaca bilgi verir misin?", "response": "Yarasa, memeli sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-016-0", "group_id": "fact-hayvanlar-016", "prompt": "Kartal nedir?", "response": "Kartal, kuş sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-016-1", "group_id": "fact-hayvanlar-016", "prompt": "Kartal hakkında kısaca bilgi verir misin?", "response": "Kartal, kuş sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-018-0", "group_id": "fact-hayvanlar-018", "prompt": "Serçe nedir?", "response": "Serçe, kuş sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-018-1", "group_id": "fact-hayvanlar-018", "prompt": "Serçe hakkında kısaca bilgi verir misin?", "response": "Serçe, kuş sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-020-0", "group_id": "fact-hayvanlar-020", "prompt": "Penguen nedir?", "response": "Penguen, kuş sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-020-1", "group_id": "fact-hayvanlar-020", "prompt": "Penguen hakkında kısaca bilgi verir misin?", "response": "Penguen, kuş sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-022-0", "group_id": "fact-hayvanlar-022", "prompt": "Baykuş nedir?", "response": "Baykuş, kuş sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-022-1", "group_id": "fact-hayvanlar-022", "prompt": "Baykuş hakkında kısaca bilgi verir misin?", "response": "Baykuş, kuş sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-024-0", "group_id": "fact-hayvanlar-024", "prompt": "Tavuk nedir?", "response": "Tavuk, kuş sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-024-1", "group_id": "fact-hayvanlar-024", "prompt": "Tavuk hakkında kısaca bilgi verir misin?", "response": "Tavuk, kuş sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-026-0", "group_id": "fact-hayvanlar-026", "prompt": "Yılan nedir?", "response": "Yılan, sürüngen sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-026-1", "group_id": "fact-hayvanlar-026", "prompt": "Yılan hakkında kısaca bilgi verir misin?", "response": "Yılan, sürüngen sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-028-0", "group_id": "fact-hayvanlar-028", "prompt": "Kaplumbağa nedir?", "response": "Kaplumbağa, sürüngen sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-028-1", "group_id": "fact-hayvanlar-028", "prompt": "Kaplumbağa hakkında kısaca bilgi verir misin?", "response": "Kaplumbağa, sürüngen sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-030-0", "group_id": "fact-hayvanlar-030", "prompt": "Timsah nedir?", "response": "Timsah, sürüngen sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-030-1", "group_id": "fact-hayvanlar-030", "prompt": "Timsah hakkında kısaca bilgi verir misin?", "response": "Timsah, sürüngen sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-032-0", "group_id": "fact-hayvanlar-032", "prompt": "Kertenkele nedir?", "response": "Kertenkele, sürüngen sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-032-1", "group_id": "fact-hayvanlar-032", "prompt": "Kertenkele hakkında kısaca bilgi verir misin?", "response": "Kertenkele, sürüngen sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-034-0", "group_id": "fact-hayvanlar-034", "prompt": "Somon nedir?", "response": "Somon, balık sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-034-1", "group_id": "fact-hayvanlar-034", "prompt": "Somon hakkında kısaca bilgi verir misin?", "response": "Somon, balık sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-036-0", "group_id": "fact-hayvanlar-036", "prompt": "Köpekbalığı nedir?", "response": "Köpekbalığı, balık sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-036-1", "group_id": "fact-hayvanlar-036", "prompt": "Köpekbalığı hakkında kısaca bilgi verir misin?", "response": "Köpekbalığı, balık sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-038-0", "group_id": "fact-hayvanlar-038", "prompt": "Hamsi nedir?", "response": "Hamsi, balık sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-038-1", "group_id": "fact-hayvanlar-038", "prompt": "Hamsi hakkında kısaca bilgi verir misin?", "response": "Hamsi, balık sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-040-0", "group_id": "fact-hayvanlar-040", "prompt": "Kurbağa nedir?", "response": "Kurbağa, iki yaşamlı sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-040-1", "group_id": "fact-hayvanlar-040", "prompt": "Kurbağa hakkında kısaca bilgi verir misin?", "response": "Kurbağa, iki yaşamlı sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-042-0", "group_id": "fact-hayvanlar-042", "prompt": "Semender nedir?", "response": "Semender, iki yaşamlı sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-042-1", "group_id": "fact-hayvanlar-042", "prompt": "Semender hakkında kısaca bilgi verir misin?", "response": "Semender, iki yaşamlı sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-044-0", "group_id": "fact-hayvanlar-044", "prompt": "Arı nedir?", "response": "Arı, böcek sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-044-1", "group_id": "fact-hayvanlar-044", "prompt": "Arı hakkında kısaca bilgi verir misin?", "response": "Arı, böcek sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-046-0", "group_id": "fact-hayvanlar-046", "prompt": "Karınca nedir?", "response": "Karınca, böcek sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-046-1", "group_id": "fact-hayvanlar-046", "prompt": "Karınca hakkında kısaca bilgi verir misin?", "response": "Karınca, böcek sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-048-0", "group_id": "fact-hayvanlar-048", "prompt": "Kelebek nedir?", "response": "Kelebek, böcek sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-hayvanlar-048-1", "group_id": "fact-hayvanlar-048", "prompt": "Kelebek hakkında kısaca bilgi verir misin?", "response": "Kelebek, böcek sınıfında yer alan bir canlıdır."}
+{"id": "chat-fact-takvim-000-0", "group_id": "fact-takvim-000", "prompt": "Ocak nedir?", "response": "Ocak, yılın bir. ayıdır."}
+{"id": "chat-fact-takvim-000-1", "group_id": "fact-takvim-000", "prompt": "Ocak hakkında kısaca bilgi verir misin?", "response": "Ocak, yılın bir. ayıdır."}
+{"id": "chat-fact-takvim-001-0", "group_id": "fact-takvim-001", "prompt": "Şubat nedir?", "response": "Şubat, yılın iki. ayıdır."}
+{"id": "chat-fact-takvim-001-1", "group_id": "fact-takvim-001", "prompt": "Şubat hakkında kısaca bilgi verir misin?", "response": "Şubat, yılın iki. ayıdır."}
+{"id": "chat-fact-takvim-002-0", "group_id": "fact-takvim-002", "prompt": "Mart nedir?", "response": "Mart, yılın üç. ayıdır."}
+{"id": "chat-fact-takvim-002-1", "group_id": "fact-takvim-002", "prompt": "Mart hakkında kısaca bilgi verir misin?", "response": "Mart, yılın üç. ayıdır."}
+{"id": "chat-fact-takvim-003-0", "group_id": "fact-takvim-003", "prompt": "Nisan nedir?", "response": "Nisan, yılın dört. ayıdır."}
+{"id": "chat-fact-takvim-003-1", "group_id": "fact-takvim-003", "prompt": "Nisan hakkında kısaca bilgi verir misin?", "response": "Nisan, yılın dört. ayıdır."}
+{"id": "chat-fact-takvim-004-0", "group_id": "fact-takvim-004", "prompt": "Mayıs nedir?", "response": "Mayıs, yılın beş. ayıdır."}
+{"id": "chat-fact-takvim-004-1", "group_id": "fact-takvim-004", "prompt": "Mayıs hakkında kısaca bilgi verir misin?", "response": "Mayıs, yılın beş. ayıdır."}
+{"id": "chat-fact-takvim-005-0", "group_id": "fact-takvim-005", "prompt": "Haziran nedir?", "response": "Haziran, yılın altı. ayıdır."}
+{"id": "chat-fact-takvim-005-1", "group_id": "fact-takvim-005", "prompt": "Haziran hakkında kısaca bilgi verir misin?", "response": "Haziran, yılın altı. ayıdır."}
+{"id": "chat-fact-takvim-006-0", "group_id": "fact-takvim-006", "prompt": "Temmuz nedir?", "response": "Temmuz, yılın yedi. ayıdır."}
+{"id": "chat-fact-takvim-006-1", "group_id": "fact-takvim-006", "prompt": "Temmuz hakkında kısaca bilgi verir misin?", "response": "Temmuz, yılın yedi. ayıdır."}
+{"id": "chat-fact-takvim-007-0", "group_id": "fact-takvim-007", "prompt": "Ağustos nedir?", "response": "Ağustos, yılın sekiz. ayıdır."}
+{"id": "chat-fact-takvim-007-1", "group_id": "fact-takvim-007", "prompt": "Ağustos hakkında kısaca bilgi verir misin?", "response": "Ağustos, yılın sekiz. ayıdır."}
+{"id": "chat-fact-takvim-008-0", "group_id": "fact-takvim-008", "prompt": "Eylül nedir?", "response": "Eylül, yılın dokuz. ayıdır."}
+{"id": "chat-fact-takvim-008-1", "group_id": "fact-takvim-008", "prompt": "Eylül hakkında kısaca bilgi verir misin?", "response": "Eylül, yılın dokuz. ayıdır."}
+{"id": "chat-fact-takvim-009-0", "group_id": "fact-takvim-009", "prompt": "Ekim nedir?", "response": "Ekim, yılın on. ayıdır."}
+{"id": "chat-fact-takvim-009-1", "group_id": "fact-takvim-009", "prompt": "Ekim hakkında kısaca bilgi verir misin?", "response": "Ekim, yılın on. ayıdır."}
+{"id": "chat-fact-takvim-010-0", "group_id": "fact-takvim-010", "prompt": "Kasım nedir?", "response": "Kasım, yılın on bir. ayıdır."}
+{"id": "chat-fact-takvim-010-1", "group_id": "fact-takvim-010", "prompt": "Kasım hakkında kısaca bilgi verir misin?", "response": "Kasım, yılın on bir. ayıdır."}
+{"id": "chat-fact-takvim-011-0", "group_id": "fact-takvim-011", "prompt": "Aralık nedir?", "response": "Aralık, yılın on iki. ayıdır."}
+{"id": "chat-fact-takvim-011-1", "group_id": "fact-takvim-011", "prompt": "Aralık hakkında kısaca bilgi verir misin?", "response": "Aralık, yılın on iki. ayıdır."}
+{"id": "chat-fact-takvim-012-0", "group_id": "fact-takvim-012", "prompt": "Pazartesi nedir?", "response": "Pazartesi, haftanın bir. günüdür."}
+{"id": "chat-fact-takvim-012-1", "group_id": "fact-takvim-012", "prompt": "Pazartesi hakkında kısaca bilgi verir misin?", "response": "Pazartesi, haftanın bir. günüdür."}
+{"id": "chat-fact-takvim-013-0", "group_id": "fact-takvim-013", "prompt": "Salı nedir?", "response": "Salı, haftanın iki. günüdür."}
+{"id": "chat-fact-takvim-013-1", "group_id": "fact-takvim-013", "prompt": "Salı hakkında kısaca bilgi verir misin?", "response": "Salı, haftanın iki. günüdür."}
+{"id": "chat-fact-takvim-014-0", "group_id": "fact-takvim-014", "prompt": "Çarşamba nedir?", "response": "Çarşamba, haftanın üç. günüdür."}
+{"id": "chat-fact-takvim-014-1", "group_id": "fact-takvim-014", "prompt": "Çarşamba hakkında kısaca bilgi verir misin?", "response": "Çarşamba, haftanın üç. günüdür."}
+{"id": "chat-fact-takvim-015-0", "group_id": "fact-takvim-015", "prompt": "Perşembe nedir?", "response": "Perşembe, haftanın dört. günüdür."}
+{"id": "chat-fact-takvim-015-1", "group_id": "fact-takvim-015", "prompt": "Perşembe hakkında kısaca bilgi verir misin?", "response": "Perşembe, haftanın dört. günüdür."}
+{"id": "chat-fact-takvim-016-0", "group_id": "fact-takvim-016", "prompt": "Cuma nedir?", "response": "Cuma, haftanın beş. günüdür."}
+{"id": "chat-fact-takvim-016-1", "group_id": "fact-takvim-016", "prompt": "Cuma hakkında kısaca bilgi verir misin?", "response": "Cuma, haftanın beş. günüdür."}
+{"id": "chat-fact-takvim-017-0", "group_id": "fact-takvim-017", "prompt": "Cumartesi nedir?", "response": "Cumartesi, haftanın altı. günüdür."}
+{"id": "chat-fact-takvim-017-1", "group_id": "fact-takvim-017", "prompt": "Cumartesi hakkında kısaca bilgi verir misin?", "response": "Cumartesi, haftanın altı. günüdür."}
+{"id": "chat-fact-takvim-018-0", "group_id": "fact-takvim-018", "prompt": "Pazar nedir?", "response": "Pazar, haftanın yedi. günüdür."}
+{"id": "chat-fact-takvim-018-1", "group_id": "fact-takvim-018", "prompt": "Pazar hakkında kısaca bilgi verir misin?", "response": "Pazar, haftanın yedi. günüdür."}
+{"id": "chat-arith-2-3", "group_id": "fact-aritmetik-2-3", "prompt": "iki artı üç kaç eder?", "response": "iki artı üç beş eder."}
+{"id": "chat-arith-2-7", "group_id": "fact-aritmetik-2-7", "prompt": "iki artı yedi kaç eder?", "response": "iki artı yedi dokuz eder."}
+{"id": "chat-arith-2-11", "group_id": "fact-aritmetik-2-11", "prompt": "iki artı on bir kaç eder?", "response": "iki artı on bir on üç eder."}
+{"id": "chat-arith-2-15", "group_id": "fact-aritmetik-2-15", "prompt": "iki artı on beş kaç eder?", "response": "iki artı on beş on yedi eder."}
+{"id": "chat-arith-2-19", "group_id": "fact-aritmetik-2-19", "prompt": "iki artı on dokuz kaç eder?", "response": "iki artı on dokuz yirmi bir eder."}
+{"id": "chat-arith-5-3", "group_id": "fact-aritmetik-5-3", "prompt": "beş artı üç kaç eder?", "response": "beş artı üç sekiz eder."}
+{"id": "chat-arith-5-7", "group_id": "fact-aritmetik-5-7", "prompt": "beş artı yedi kaç eder?", "response": "beş artı yedi on iki eder."}
+{"id": "chat-arith-5-11", "group_id": "fact-aritmetik-5-11", "prompt": "beş artı on bir kaç eder?", "response": "beş artı on bir on altı eder."}
+{"id": "chat-arith-5-15", "group_id": "fact-aritmetik-5-15", "prompt": "beş artı on beş kaç eder?", "response": "beş artı on beş yirmi eder."}
+{"id": "chat-arith-5-19", "group_id": "fact-aritmetik-5-19", "prompt": "beş artı on dokuz kaç eder?", "response": "beş artı on dokuz yirmi dört eder."}
+{"id": "chat-arith-8-3", "group_id": "fact-aritmetik-8-3", "prompt": "sekiz artı üç kaç eder?", "response": "sekiz artı üç on bir eder."}
+{"id": "chat-arith-8-7", "group_id": "fact-aritmetik-8-7", "prompt": "sekiz artı yedi kaç eder?", "response": "sekiz artı yedi on beş eder."}
+{"id": "chat-arith-8-11", "group_id": "fact-aritmetik-8-11", "prompt": "sekiz artı on bir kaç eder?", "response": "sekiz artı on bir on dokuz eder."}
+{"id": "chat-arith-8-15", "group_id": "fact-aritmetik-8-15", "prompt": "sekiz artı on beş kaç eder?", "response": "sekiz artı on beş yirmi üç eder."}
+{"id": "chat-arith-8-19", "group_id": "fact-aritmetik-8-19", "prompt": "sekiz artı on dokuz kaç eder?", "response": "sekiz artı on dokuz yirmi yedi eder."}
+{"id": "chat-arith-11-3", "group_id": "fact-aritmetik-11-3", "prompt": "on bir artı üç kaç eder?", "response": "on bir artı üç on dört eder."}
+{"id": "chat-arith-11-7", "group_id": "fact-aritmetik-11-7", "prompt": "on bir artı yedi kaç eder?", "response": "on bir artı yedi on sekiz eder."}
+{"id": "chat-arith-11-11", "group_id": "fact-aritmetik-11-11", "prompt": "on bir artı on bir kaç eder?", "response": "on bir artı on bir yirmi iki eder."}
+{"id": "chat-arith-11-15", "group_id": "fact-aritmetik-11-15", "prompt": "on bir artı on beş kaç eder?", "response": "on bir artı on beş yirmi altı eder."}
+{"id": "chat-arith-11-19", "group_id": "fact-aritmetik-11-19", "prompt": "on bir artı on dokuz kaç eder?", "response": "on bir artı on dokuz otuz eder."}
+{"id": "chat-arith-14-3", "group_id": "fact-aritmetik-14-3", "prompt": "on dört artı üç kaç eder?", "response": "on dört artı üç on yedi eder."}
+{"id": "chat-arith-14-7", "group_id": "fact-aritmetik-14-7", "prompt": "on dört artı yedi kaç eder?", "response": "on dört artı yedi yirmi bir eder."}
+{"id": "chat-arith-14-11", "group_id": "fact-aritmetik-14-11", "prompt": "on dört artı on bir kaç eder?", "response": "on dört artı on bir yirmi beş eder."}
+{"id": "chat-arith-14-15", "group_id": "fact-aritmetik-14-15", "prompt": "on dört artı on beş kaç eder?", "response": "on dört artı on beş yirmi dokuz eder."}
+{"id": "chat-arith-14-19", "group_id": "fact-aritmetik-14-19", "prompt": "on dört artı on dokuz kaç eder?", "response": "on dört artı on dokuz otuz üç eder."}
+{"id": "chat-arith-17-3", "group_id": "fact-aritmetik-17-3", "prompt": "on yedi artı üç kaç eder?", "response": "on yedi artı üç yirmi eder."}
+{"id": "chat-arith-17-7", "group_id": "fact-aritmetik-17-7", "prompt": "on yedi artı yedi kaç eder?", "response": "on yedi artı yedi yirmi dört eder."}
+{"id": "chat-arith-17-11", "group_id": "fact-aritmetik-17-11", "prompt": "on yedi artı on bir kaç eder?", "response": "on yedi artı on bir yirmi sekiz eder."}
+{"id": "chat-arith-17-15", "group_id": "fact-aritmetik-17-15", "prompt": "on yedi artı on beş kaç eder?", "response": "on yedi artı on beş otuz iki eder."}
+{"id": "chat-arith-17-19", "group_id": "fact-aritmetik-17-19", "prompt": "on yedi artı on dokuz kaç eder?", "response": "on yedi artı on dokuz otuz altı eder."}
+{"id": "chat-arith-20-3", "group_id": "fact-aritmetik-20-3", "prompt": "yirmi artı üç kaç eder?", "response": "yirmi artı üç yirmi üç eder."}
+{"id": "chat-arith-20-7", "group_id": "fact-aritmetik-20-7", "prompt": "yirmi artı yedi kaç eder?", "response": "yirmi artı yedi yirmi yedi eder."}
+{"id": "chat-arith-20-11", "group_id": "fact-aritmetik-20-11", "prompt": "yirmi artı on bir kaç eder?", "response": "yirmi artı on bir otuz bir eder."}
+{"id": "chat-arith-20-15", "group_id": "fact-aritmetik-20-15", "prompt": "yirmi artı on beş kaç eder?", "response": "yirmi artı on beş otuz beş eder."}
+{"id": "chat-arith-20-19", "group_id": "fact-aritmetik-20-19", "prompt": "yirmi artı on dokuz kaç eder?", "response": "yirmi artı on dokuz otuz dokuz eder."}
+{"id": "chat-arith-23-3", "group_id": "fact-aritmetik-23-3", "prompt": "yirmi üç artı üç kaç eder?", "response": "yirmi üç artı üç yirmi altı eder."}
+{"id": "chat-arith-23-7", "group_id": "fact-aritmetik-23-7", "prompt": "yirmi üç artı yedi kaç eder?", "response": "yirmi üç artı yedi otuz eder."}
+{"id": "chat-arith-23-11", "group_id": "fact-aritmetik-23-11", "prompt": "yirmi üç artı on bir kaç eder?", "response": "yirmi üç artı on bir otuz dört eder."}
+{"id": "chat-arith-23-15", "group_id": "fact-aritmetik-23-15", "prompt": "yirmi üç artı on beş kaç eder?", "response": "yirmi üç artı on beş otuz sekiz eder."}
+{"id": "chat-arith-23-19", "group_id": "fact-aritmetik-23-19", "prompt": "yirmi üç artı on dokuz kaç eder?", "response": "yirmi üç artı on dokuz kırk iki eder."}
+{"id": "chat-arith-26-3", "group_id": "fact-aritmetik-26-3", "prompt": "yirmi altı artı üç kaç eder?", "response": "yirmi altı artı üç yirmi dokuz eder."}
+{"id": "chat-arith-26-7", "group_id": "fact-aritmetik-26-7", "prompt": "yirmi altı artı yedi kaç eder?", "response": "yirmi altı artı yedi otuz üç eder."}
+{"id": "chat-arith-26-11", "group_id": "fact-aritmetik-26-11", "prompt": "yirmi altı artı on bir kaç eder?", "response": "yirmi altı artı on bir otuz yedi eder."}
+{"id": "chat-arith-26-15", "group_id": "fact-aritmetik-26-15", "prompt": "yirmi altı artı on beş kaç eder?", "response": "yirmi altı artı on beş kırk bir eder."}
+{"id": "chat-arith-26-19", "group_id": "fact-aritmetik-26-19", "prompt": "yirmi altı artı on dokuz kaç eder?", "response": "yirmi altı artı on dokuz kırk beş eder."}
+{"id": "chat-arith-29-3", "group_id": "fact-aritmetik-29-3", "prompt": "yirmi dokuz artı üç kaç eder?", "response": "yirmi dokuz artı üç otuz iki eder."}
+{"id": "chat-arith-29-7", "group_id": "fact-aritmetik-29-7", "prompt": "yirmi dokuz artı yedi kaç eder?", "response": "yirmi dokuz artı yedi otuz altı eder."}
+{"id": "chat-arith-29-11", "group_id": "fact-aritmetik-29-11", "prompt": "yirmi dokuz artı on bir kaç eder?", "response": "yirmi dokuz artı on bir kırk eder."}
+{"id": "chat-arith-29-15", "group_id": "fact-aritmetik-29-15", "prompt": "yirmi dokuz artı on beş kaç eder?", "response": "yirmi dokuz artı on beş kırk dört eder."}
+{"id": "chat-arith-29-19", "group_id": "fact-aritmetik-29-19", "prompt": "yirmi dokuz artı on dokuz kaç eder?", "response": "yirmi dokuz artı on dokuz kırk sekiz eder."}

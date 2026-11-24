@@ -23,6 +23,7 @@ def main() -> int:
     ap.add_argument("--max-rounds", type=int, default=60)
     ap.add_argument("--session-timeout", type=int, default=1500)
     ap.add_argument("--deadline-minutes", type=int, default=330)
+    ap.add_argument("--fresh", action="store_true", help="delete the model's old remote checkpoints first (dataset changed)")
     a = ap.parse_args()
     import time
     t0 = time.time()
@@ -35,6 +36,13 @@ def main() -> int:
     os.environ.setdefault("AETHRION_ARTIFACT_REPO", f"{api.whoami()['name']}/aethrion-artifacts")
     summary = {}
     for model in a.models:
+        if a.fresh:
+            try:
+                api.delete_folder(path_in_repo=model, repo_id=os.environ["AETHRION_ARTIFACT_REPO"], repo_type="model",
+                                  commit_message=f"fresh retrain: remove stale {model} checkpoints")
+                print(f"[{model}] fresh: old remote checkpoints removed", flush=True)
+            except Exception as exc:
+                print(f"[{model}] fresh: nothing removed ({str(exc)[:120]})", flush=True)
         state = {"ok": False, "complete": False, "step": None, "rounds": 0}
         failures = 0
         waits = 0

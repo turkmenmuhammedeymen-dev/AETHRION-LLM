@@ -212,18 +212,42 @@ Bir hikâyede olay, kişi, yer ve zaman unsurları bulunur.
 }
 
 def paragraphs(lines, size=3):
+    if len(lines) < size:
+        return [" ".join(lines)]
     return [" ".join(lines[i:i + size]) for i in range(0, len(lines) - size + 1, 1)]
 
+
+def chunks(items, n):
+    out = [items[i:i + n] for i in range(0, len(items), n)]
+    if len(out) > 1 and len(out[-1]) < 4:
+        last = out.pop()
+        out[-1] = out[-1] + last
+    return out
+
+
+def write(name, recs):
+    (HERE / f"{name}.jsonl").write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in recs) + "\n", encoding="utf-8")
+
+
 def main():
-    for name, text in GROUPS.items():
-        lines = [l.strip() for l in text.strip().splitlines() if l.strip()]
-        recs = [{"text": p} for p in paragraphs(lines)]
-        (HERE / f"{name}.jsonl").write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in recs) + "\n", encoding="utf-8")
-        print(name, len(lines), "sentences", len(recs), "records")
+    import importlib.util
+    for old in HERE.glob("*.jsonl"):
+        old.unlink()
+    spec = importlib.util.spec_from_file_location("make_expand", HERE.parent / "make_expand.py")
+    me = importlib.util.module_from_spec(spec); spec.loader.exec_module(me)
+    groups = {k: [l.strip() for l in v.strip().splitlines() if l.strip()] for k, v in GROUPS.items()}
+    groups.update(me.extra_groups())
+    total = 0
+    for name, lines in groups.items():
+        for n, part in enumerate(chunks(lines, 12), 1):
+            recs = [{"text": p} for p in paragraphs(part)]
+            write(f"{name}-{n:02d}", recs); total += len(recs)
     chat = [json.loads(l) for l in (HERE.parent / "chat" / "records.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
-    recs = [{"text": f"Kullanıcı: {c['prompt']}\nAETHRION: {c['response']}"} for c in chat]
-    (HERE / "diyalog.jsonl").write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in recs) + "\n", encoding="utf-8")
-    print("diyalog", len(recs), "records")
+    for n, part in enumerate(chunks(chat, 25), 1):
+        recs = [{"text": f"Kullanıcı: {c['prompt']}\nAETHRION: {c['response']}"} for c in part]
+        write(f"diyalog-{n:02d}", recs); total += len(recs)
+    print(len(list(HERE.glob('*.jsonl'))), "source groups,", total, "records")
+
 
 if __name__ == "__main__":
     main()

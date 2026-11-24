@@ -97,10 +97,10 @@ def test_authored_base_sources_meet_corpus_gate():
     from pathlib import Path
     base = Path(__file__).resolve().parents[1] / "data" / "authored" / "base"
     texts, groups = [], 0
-    for name in ("bilim", "teknoloji", "gunluk", "dil", "diyalog"):
-        recs = [j.loads(l)["text"] for l in (base / f"{name}.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    for f in sorted(base.glob("*.jsonl")):
+        recs = [j.loads(l)["text"] for l in f.read_text(encoding="utf-8").splitlines() if l.strip()]
         assert recs; groups += 1; texts += recs
-    assert groups >= 3 and len(texts) >= 100 and len(set(texts)) == len(texts)
+    assert groups >= 20 and len(texts) >= 500 and len(set(texts)) == len(texts)
 
 
 def test_read_progress_falls_back_to_base_progress_json(tmp_path):

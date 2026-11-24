@@ -1,0 +1,25 @@
+{"text": "Kullanıcı: Test yazmak hakkında kısaca bilgi verir misin?\nAETHRION: Test yazmak, kodun beklenen sonucu verdiğini otomatik olarak denetler."}
+{"text": "Kullanıcı: Sürüm kontrol sistemi nedir?\nAETHRION: Sürüm kontrol sistemi, dosyalardaki değişikliklerin geçmişini tutar."}
+{"text": "Kullanıcı: Sürüm kontrol sistemi hakkında kısaca bilgi verir misin?\nAETHRION: Sürüm kontrol sistemi, dosyalardaki değişikliklerin geçmişini tutar."}
+{"text": "Kullanıcı: Veritabanı nedir?\nAETHRION: Veritabanı, düzenli biçimde saklanan ve sorgulanabilen veri koleksiyonudur."}
+{"text": "Kullanıcı: Veritabanı hakkında kısaca bilgi verir misin?\nAETHRION: Veritabanı, düzenli biçimde saklanan ve sorgulanabilen veri koleksiyonudur."}
+{"text": "Kullanıcı: API nedir?\nAETHRION: Bir API, iki yazılımın birbiriyle konuşmasını sağlayan kurallar bütünüdür."}
+{"text": "Kullanıcı: API hakkında kısaca bilgi verir misin?\nAETHRION: Bir API, iki yazılımın birbiriyle konuşmasını sağlayan kurallar bütünüdür."}
+{"text": "Kullanıcı: Bulut bilişim nedir?\nAETHRION: Bulut bilişim, sunucuların ve depolamanın internet üzerinden kullanılmasıdır."}
+{"text": "Kullanıcı: Bulut bilişim hakkında kısaca bilgi verir misin?\nAETHRION: Bulut bilişim, sunucuların ve depolamanın internet üzerinden kullanılmasıdır."}
+{"text": "Kullanıcı: Yapay zekâ nedir?\nAETHRION: Yapay zekâ, insan zekâsını gerektiren bazı işleri yapabilen sistemlerin genel adıdır."}
+{"text": "Kullanıcı: Yapay zekâ hakkında kısaca bilgi verir misin?\nAETHRION: Yapay zekâ, insan zekâsını gerektiren bazı işleri yapabilen sistemlerin genel adıdır."}
+{"text": "Kullanıcı: Makine öğrenmesi nedir?\nAETHRION: Makine öğrenmesi, bir sistemin örneklerden kalıp öğrenmesine dayanır."}
+{"text": "Kullanıcı: Makine öğrenmesi hakkında kısaca bilgi verir misin?\nAETHRION: Makine öğrenmesi, bir sistemin örneklerden kalıp öğrenmesine dayanır."}
+{"text": "Kullanıcı: dil modeli nedir?\nAETHRION: Bir dil modeli, metindeki sonraki parçayı tahmin etmeyi öğrenerek eğitilir."}
+{"text": "Kullanıcı: dil modeli hakkında kısaca bilgi verir misin?\nAETHRION: Bir dil modeli, metindeki sonraki parçayı tahmin etmeyi öğrenerek eğitilir."}
+{"text": "Kullanıcı: Eğitim verisinin kalitesi nedir?\nAETHRION: Eğitim verisinin kalitesi, bir modelin davranışını doğrudan etkiler."}
+{"text": "Kullanıcı: Eğitim verisinin kalitesi hakkında kısaca bilgi verir misin?\nAETHRION: Eğitim verisinin kalitesi, bir modelin davranışını doğrudan etkiler."}
+{"text": "Kullanıcı: model nedir?\nAETHRION: Bir model, eğitim verisinde olmayan konularda yanılabilir."}
+{"text": "Kullanıcı: model hakkında kısaca bilgi verir misin?\nAETHRION: Bir model, eğitim verisinde olmayan konularda yanılabilir."}
+{"text": "Kullanıcı: Doğrulama kümesi nedir?\nAETHRION: Doğrulama kümesi, eğitim sırasında modelin gelişimini izlemek için ayrılır."}
+{"text": "Kullanıcı: Doğrulama kümesi hakkında kısaca bilgi verir misin?\nAETHRION: Doğrulama kümesi, eğitim sırasında modelin gelişimini izlemek için ayrılır."}
+{"text": "Kullanıcı: Test kümesi nedir?\nAETHRION: Test kümesi, eğitim bittikten sonra modelin başarısını tarafsızca ölçmek içindir."}
+{"text": "Kullanıcı: Test kümesi hakkında kısaca bilgi verir misin?\nAETHRION: Test kümesi, eğitim bittikten sonra modelin başarısını tarafsızca ölçmek içindir."}
+{"text": "Kullanıcı: Aşırı öğrenme nedir?\nAETHRION: Aşırı öğrenme, modelin örnekleri ezberleyip yeni verilerde başarısız olmasıdır."}
+{"text": "Kullanıcı: Aşırı öğrenme hakkında kısaca bilgi verir misin?\nAETHRION: Aşırı öğrenme, modelin örnekleri ezberleyip yeni verilerde başarısız olmasıdır."}
