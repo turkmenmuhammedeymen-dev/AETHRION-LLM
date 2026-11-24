@@ -107,6 +107,9 @@ def gpu_model_preflight():
         lines.append(
             f"| {row['model']} | {row['status']} | {row.get('parameters', 0):,} | {row.get('synthetic_loss', '—')} |"
         )
+    for row in report["results"]:
+        if row.get("error"):
+            lines.append(f"\n**{row['model']} error:** `{row['error']}`")
     lines.extend([
         "",
         "**Safety:** synthetic tensors only; no dataset read, no optimizer step, no checkpoint written, no production training started.",
