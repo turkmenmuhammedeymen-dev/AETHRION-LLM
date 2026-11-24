@@ -73,12 +73,26 @@ class SingleCommitTests(unittest.TestCase):
         self.assertEqual(c.up, [])
 
 
-class TokenizerStaysLocalTests(unittest.TestCase):
-    def test_chat_push_ignores_regenerated_tokenizer_files(self):
+class RuntimeArtifactPersistenceTests(unittest.TestCase):
+    def test_chat_push_persists_checkpoint_tokenizer_and_provenance(self):
         import tempfile
         with tempfile.TemporaryDirectory() as d:
-            for name in ("checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json"):
+            names = ("checkpoint_last.pt", "checkpoint_last.pt.sha256",
+                     "tokenizer.json", "tokenizer.json.provenance.json")
+            for name in names:
                 (Path(d) / name).write_bytes(b"x")
             f = Fake()
             sent = s.push_model_artifacts("chat", d, api=f, environ=ENV)
-        self.assertEqual(sorted(sent), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
+        self.assertEqual(sorted(sent), sorted(names))
+
+    def test_specialist_push_persists_processor_and_reports(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            names = ("checkpoint_last.pt", "checkpoint_last.pt.sha256",
+                     "tokenizer.json", "processor.json", "training_report.json",
+                     "evaluation_report.json", "model_card.md")
+            for name in names:
+                (Path(d) / name).write_bytes(b"x")
+            f = Fake()
+            sent = s.push_model_artifacts("vision", d, api=f, environ=ENV)
+        self.assertEqual(sorted(sent), sorted(names))
