@@ -53,7 +53,13 @@ def main() -> int:
     out = ROOT / "artifacts" / "models" / "chat"
     report = json.loads((out / "instruction_tuning_report.json").read_text(encoding="utf-8"))
     print("REPORT", json.dumps({k: report.get(k) for k in ("status", "release_status", "steps", "validation_loss", "test_loss", "held_out_test_loss")}), flush=True)
-    sent = artifact_sync.push_model_artifacts("chat_instruct", out, api=api)
+    import shutil
+    stage = ROOT / "artifacts" / "push_chat_instruct"
+    shutil.rmtree(stage, ignore_errors=True); stage.mkdir(parents=True)
+    for name in sorted(artifact_sync.ALLOWED_ARTIFACT_NAMES):
+        if (out / name).is_file():
+            shutil.copyfile(out / name, stage / name)
+    sent = artifact_sync.push_model_artifacts("chat_instruct", stage, api=api)
     print("pushed", sent, flush=True)
     return 0 if str(report.get("status", "")).startswith("instruction_tuning_") else 1
 
