@@ -25,10 +25,10 @@ class ArtifactSyncTests(unittest.TestCase):
             f = Fake()
             with self.assertRaises(s.ArtifactSyncError): s.push_model_artifacts("chat", src, api=f, environ=ENV)
             (src / "notes.txt").unlink()
-            self.assertEqual(s.push_model_artifacts("chat", src, api=f, environ=ENV), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
+            self.assertEqual(s.push_model_artifacts("chat", src, api=f, environ=ENV), ["checkpoint_last.pt", "checkpoint_last.pt.sha256", "training_report.json"])
             self.assertTrue(f.created["private"])
             dst = Path(d, "dst", "chat")
-            self.assertEqual(sorted(s.pull_model_artifacts("chat", dst, api=f, environ=ENV)), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
+            self.assertEqual(sorted(s.pull_model_artifacts("chat", dst, api=f, environ=ENV)), ["checkpoint_last.pt", "checkpoint_last.pt.sha256", "training_report.json"])
             self.assertEqual((dst / "checkpoint_last.pt").read_bytes(), b"w")
     def test_refuses_public_repo_unknown_model_and_missing_config(self):
         with tempfile.TemporaryDirectory() as d:
