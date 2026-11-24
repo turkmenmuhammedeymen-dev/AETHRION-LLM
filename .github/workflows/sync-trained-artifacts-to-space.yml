@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   publish:
-    if: \${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -35,5 +35,5 @@ jobs:
 
       - name: Publish verified checkpoints and tokenizer files to Space
         env:
-          HF_TOKEN: \${{ secrets.HF_TOKEN }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python ci/publish_artifacts_to_space.py
