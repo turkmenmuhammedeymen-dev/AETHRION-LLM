@@ -15,17 +15,29 @@ from typing import Any
 
 ALLOWED_MODELS = frozenset({"chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d", "research", "document", "safety", "base", "chat_instruct"})
 _NAME = re.compile(r"^[A-Za-z0-9._-]{1,120}$")
-# Only resumable model state is mirrored. Runtime telemetry stays in the Space
-# workspace and is not uploaded as a model artifact.
+# Persist the model state AND the deterministic runtime inputs/attestations needed
+# to reconstruct it in the Space. Reports remain explicitly NOT_RELEASED until
+# the independent evaluation and human-approval gates are satisfied.
 ALLOWED_ARTIFACT_NAMES = frozenset({
     "checkpoint_last.pt",
     "checkpoint_last.pt.sha256",
     "checkpoint_last.pt.previous",
     "checkpoint_last.pt.previous.sha256",
+    "tokenizer.json",
+    "tokenizer.json.sha256",
+    "tokenizer.json.provenance.json",
+    "processor.json",
+    "processor.json.sha256",
+    "training_report.json",
+    "training_report.json.sha256",
+    "evaluation_report.json",
+    "evaluation_report.json.sha256",
+    "model_card.md",
+    "model_card.md.sha256",
 })
-# tokenizer files are regenerated deterministically from the attested corpus each session, so they stay local.
-RUNTIME_FILES = frozenset({"metrics.jsonl", "training_report.json", "progress.json",
-                           "tokenizer.json", "tokenizer.json.provenance.json"})
+# Volatile telemetry is deliberately local; reproducibility and audit files above
+# are retained in the private artifact repository.
+RUNTIME_FILES = frozenset({"metrics.jsonl", "progress.json"})
 
 
 class ArtifactSyncError(RuntimeError):
