@@ -149,17 +149,15 @@ def _loss(model: nn.Module, model_id: str, batch: dict[str, torch.Tensor]) -> to
     if model_id == "research":
         # Datasets are right-padded with id 0 up to max_length; without a mask the encoders
         # mean-pool over hundreds of padding positions and cannot learn (loss stays at chance).
-        def _pad_mask(ids, mask):
-            if mask is not None:
-                return mask
-            mask = ids != 0
-            mask[:, 0] = True
-            return mask
-        return model(
-            batch["query_ids"], batch["passage_ids"],
-            _pad_mask(batch["query_ids"], batch.get("query_mask")),
-            _pad_mask(batch["passage_ids"], batch.get("passage_mask"))
-        )["loss"]
+        def _crop(ids, mask):
+            if mask is None:
+                mask = ids != 0
+                mask[:, 0] = True
+            length = max(1, int(mask.sum(1).max()))
+            return ids[:, :length], mask[:, :length]
+        q_ids, q_mask = _crop(batch["query_ids"], batch.get("query_mask"))
+        p_ids, p_mask = _crop(batch["passage_ids"], batch.get("passage_mask"))
+        return model(q_ids, p_ids, q_mask, p_mask)["loss"]
     if model_id == "document":
         output = model(batch["token_ids"], batch["boxes"], batch["layout_ids"], batch.get("attention_mask"))
         return model.multitask_loss(

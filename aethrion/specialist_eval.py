@@ -39,6 +39,8 @@ def _research_metrics(model, arrays, idx, device) -> dict[str, Any]:
         ids = torch.from_numpy(np.asarray(arrays[key][idx]).copy()).long().to(device)
         mask = ids != 0
         mask[:, 0] = True
+        length = max(1, int(mask.sum(1).max()))
+        ids, mask = ids[:, :length], mask[:, :length]
         with torch.no_grad():
             return encoder(ids, mask)
     q = _enc(model.query_encoder, "query_ids"); p = _enc(model.passage_encoder, "passage_ids")
