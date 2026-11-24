@@ -41,4 +41,5 @@ jobs:
       - name: Publish verified checkpoints and tokenizer files to Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          AETHRION_BASE_AUDIT_HMAC_KEY: ${{ secrets.AETHRION_BASE_AUDIT_HMAC_KEY }}
         run: python ci/publish_artifacts_to_space.py
