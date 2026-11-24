@@ -45,7 +45,7 @@ def main() -> int:
     sh(sys.executable, "-m", "aethrion.specialist_prepare", "--input", "data/authored/chat/records.jsonl",
        "--model", "chat", "--license", "First-party owner-authored", "--permitted-use", "model training permitted",
        "--evidence-uri", "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/chat/GOVERNANCE.json",
-       "--source-uri", "owner-authored:aethrion-llm/data/authored/chat", "--tokenizer", "artifacts/tokenizer.json")
+       "--source-uri", "owner-authored:aethrion-llm/data/authored/chat", "--tokenizer", "artifacts/tokenizer.json", "--max-length", "256")
     sh(sys.executable, "scripts/apply_owner_attestation.py", "chat", "--session", "01CgbDesHhneLFEzEj5NSZrK",
        "--statement", gov["owner_statement"])
     sh(sys.executable, "-m", "aethrion.instruction_tune", "--config", "configs/instruction_tuning.json",
