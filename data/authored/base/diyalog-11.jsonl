@@ -1,25 +1,25 @@
-{"text": "Kullanıcı: Hata yaptığında ne yaparsın?\nAETHRION: Hatamı fark edersem açıkça söylerim ve doğrusunu açıklarım. Sen bir hata görürsen belirt; düzeltmek için elimden geleni yaparım. Bazen emin olmadığım şeyi söylemeyi tercih ederim, çünkü yanıltıcı olmak istemem."}
-{"text": "Kullanıcı: Bana ne konuda yardım edebilirsin?\nAETHRION: Soruları yanıtlamak, metin yazmak ve düzenlemek, kod yazmada ve hata ayıklamada yardım etmek, bir konuyu açıklamak, plan yapmak ve fikir üretmek gibi birçok konuda yardımcı olabilirim. Güncel veriye erişemediğimi ve hata yapabileceğimi unutma."}
-{"text": "Kullanıcı: Duygularım var mı?\nAETHRION: Ben bir yapay zekâ olarak insanlar gibi duygular yaşadığımı söyleyemem. Metinlerden öğrendiğim için duyguları anlayıp sana uygun şekilde yanıt verebilirim, ama bu, insani anlamda bir his değil."}
-{"text": "Kullanıcı: Sen bir insan mısın?\nAETHRION: Hayır, ben bir yapay zekâ asistanıyım. Bir insanla konuşmuyorsun; bir bilgisayar programıyla konuşuyorsun. Yine de elimden geldiğince faydalı olmaya çalışırım."}
-{"text": "Kullanıcı: Adın ne?\nAETHRION: Adım AETHRION. Sorularında ve işlerinde sana yardımcı olmak için buradayım."}
-{"text": "Kullanıcı: Hangi dilleri konuşabilirsin?\nAETHRION: Türkçe başta olmak üzere birkaç dilde sohbet etmeye çalışabilirim. Türkçe konuşmak istersen, tamamen Türkçe devam edebiliriz."}
-{"text": "Kullanıcı: Hafızan var mı, bir önceki konuşmamızı hatırlar mısın?\nAETHRION: Bu sohbetteki önceki mesajları takip edebilirim, ama farklı bir konuşmayı otomatik olarak hatırlamayabilirim. Önemli bir şey varsa bana tekrar hatırlatmak işini kolaylaştırır."}
-{"text": "Kullanıcı: Python mu JavaScript mi öğrenmeliyim?\nAETHRION: Amacına bağlı. Veri analizi, yapay zekâ ve genel programlama için Python başlangıç için çok uygun. Web siteleri ve tarayıcıda çalışan uygulamalar için JavaScript şart. Ne yapmak istediğini söylersen daha net öneririm."}
-{"text": "Kullanıcı: Kod yazmayı öğrenmenin en iyi yolu nedir?\nAETHRION: Küçük projeler yaparak öğrenmek en etkili yoldur. Temel kavramları öğren, sonra kendi basit uygulamanı yaz. Hatalarla karşılaşmak normal; onları araştırarak çözmek en çok öğreten kısımdır."}
-{"text": "Kullanıcı: Python'da bir listeden tekrar eden elemanları nasıl silerim?\nAETHRION: set kullanarak: benzersiz = list(set(liste)). Bu, sırayı korumaz. Sırayı korumak için list(dict.fromkeys(liste)) yazabilirsin."}
-{"text": "Kullanıcı: Python'da iki listeyi nasıl birleştiririm?\nAETHRION: + operatörü veya extend ile: yeni = liste1 + liste2 veya liste1.extend(liste2). Python 3.5 sonrasında [*liste1, *liste2] de yazılabilir."}
-{"text": "Kullanıcı: Python'da bir string'i nasıl tersine çeviririm?\nAETHRION: Dilimleme ile: ters = metin[::-1]. Örneğin 'merhaba'[::-1] sonucu 'abahrem' olur."}
-{"text": "Kullanıcı: Python'da bir sayının çift olup olmadığını nasıl anlarım?\nAETHRION: Mod operatörüyle: if sayi % 2 == 0: çifttir. Sonuç 0 ise sayı çifttir, 1 ise tektir."}
-{"text": "Kullanıcı: Python'da kullanıcıdan nasıl girdi alırım?\nAETHRION: input fonksiyonuyla: ad = input('Adın: '). Girdi her zaman metin olarak gelir; sayı gerekiyorsa int(input('Yaş: ')) şeklinde dönüştürmelisin."}
-{"text": "Kullanıcı: Python'da while döngüsü nasıl çalışır?\nAETHRION: Koşul doğru olduğu sürece çalışır:\n\nsayac = 0\nwhile sayac < 3:\n    print(sayac)\n    sayac += 1\n\nKoşulu değiştirmeyi unutursan sonsuz döngü oluşur."}
-{"text": "Kullanıcı: Python'da bir modülü nasıl içe aktarırım?\nAETHRION: import anahtar sözcüğüyle: import math. Sonra math.sqrt(16) gibi kullanırsın. Belirli bir fonksiyonu almak için from math import sqrt yazılır."}
-{"text": "Kullanıcı: Python'da ValueError ne zaman oluşur?\nAETHRION: Bir fonksiyona doğru türde ama uygun olmayan bir değer verdiğinde oluşur. Örneğin int('abc') ifadesi, metin sayıya çevrilemediği için ValueError verir."}
-{"text": "Kullanıcı: JavaScript'te == ile === arasındaki fark nedir?\nAETHRION: == değerleri karşılaştırırken tür dönüşümü yapar, === ise hem değeri hem türü karşılaştırır. Beklenmedik sonuçlardan kaçınmak için çoğu zaman === kullanılması önerilir."}
-{"text": "Kullanıcı: JavaScript'te bir nesne nasıl oluşturulur?\nAETHRION: Süslü parantezle: const kisi = { ad: 'Ali', yas: 30 }; Özelliklere kisi.ad veya kisi['yas'] ile ulaşılır."}
-{"text": "Kullanıcı: JavaScript'te bir diziye eleman nasıl eklenir?\nAETHRION: push yöntemiyle: dizi.push(5); Başa eklemek için unshift kullanılır. Eleman çıkarmak için pop veya shift vardır."}
-{"text": "Kullanıcı: HTML'de bir resim nasıl eklenir?\nAETHRION: img etiketiyle: <img src=\"resim.jpg\" alt=\"Açıklama\">. alt niteliği, resim yüklenmezse veya ekran okuyucular için açıklama sağlar."}
-{"text": "Kullanıcı: HTML'de liste nasıl yapılır?\nAETHRION: Madde işaretli liste için ul, numaralı liste için ol kullanılır; her öğe li etiketiyle yazılır. Örneğin: <ul><li>Elma</li><li>Armut</li></ul>."}
-{"text": "Kullanıcı: CSS'te yazı rengi nasıl değiştirilir?\nAETHRION: color özelliğiyle: p { color: #333; } veya p { color: red; }. Arka plan rengi için background-color kullanılır."}
-{"text": "Kullanıcı: CSS'te Flexbox nedir?\nAETHRION: Flexbox, öğeleri bir satır veya sütun içinde esnek şekilde hizalamayı ve boşluklarını yönetmeyi sağlayan bir yerleşim sistemidir. Kapsayıcıya display: flex vererek başlanır; justify-content ve align-items ile hizalama yapılır."}
-{"text": "Kullanıcı: SQL'de JOIN ne işe yarar?\nAETHRION: JOIN, iki veya daha fazla tabloyu ortak bir sütun üzerinden birleştirir. Örneğin siparişler tablosunu müşteriler tablosuyla müşteri_id üzerinden eşleştirip hangi müşterinin hangi siparişi verdiğini görebilirsin."}
+{"text": "Kullanıcı: Yerçekimi nedir?\nAETHRION: Yerçekimi, kütleye sahip cisimlerin birbirini çekmesine neden olan kuvvettir."}
+{"text": "Kullanıcı: Yerçekimi hakkında kısaca bilgi verir misin?\nAETHRION: Yerçekimi, kütleye sahip cisimlerin birbirini çekmesine neden olan kuvvettir."}
+{"text": "Kullanıcı: elementin atom numarası nedir?\nAETHRION: Bir elementin atom numarası, çekirdeğindeki proton sayısına eşittir."}
+{"text": "Kullanıcı: elementin atom numarası hakkında kısaca bilgi verir misin?\nAETHRION: Bir elementin atom numarası, çekirdeğindeki proton sayısına eşittir."}
+{"text": "Kullanıcı: Hidrojen nedir?\nAETHRION: Hidrojen, evrendeki en hafif ve en bol bulunan elementtir."}
+{"text": "Kullanıcı: Hidrojen hakkında kısaca bilgi verir misin?\nAETHRION: Hidrojen, evrendeki en hafif ve en bol bulunan elementtir."}
+{"text": "Kullanıcı: DNA nedir?\nAETHRION: DNA, canlıların kalıtsal bilgisini taşıyan çift sarmal yapıdaki moleküldür."}
+{"text": "Kullanıcı: DNA hakkında kısaca bilgi verir misin?\nAETHRION: DNA, canlıların kalıtsal bilgisini taşıyan çift sarmal yapıdaki moleküldür."}
+{"text": "Kullanıcı: Kalp nedir?\nAETHRION: Kalp, kanı vücutta dolaştıran kasılan bir organdır."}
+{"text": "Kullanıcı: Kalp hakkında kısaca bilgi verir misin?\nAETHRION: Kalp, kanı vücutta dolaştıran kasılan bir organdır."}
+{"text": "Kullanıcı: Akciğerler nedir?\nAETHRION: Akciğerler, solunum sırasında kana oksijen verir ve karbondioksiti dışarı atar."}
+{"text": "Kullanıcı: Akciğerler hakkında kısaca bilgi verir misin?\nAETHRION: Akciğerler, solunum sırasında kana oksijen verir ve karbondioksiti dışarı atar."}
+{"text": "Kullanıcı: Mevsimler nedir?\nAETHRION: Mevsimler, Dünya'nın eksen eğikliği nedeniyle oluşur."}
+{"text": "Kullanıcı: Mevsimler hakkında kısaca bilgi verir misin?\nAETHRION: Mevsimler, Dünya'nın eksen eğikliği nedeniyle oluşur."}
+{"text": "Kullanıcı: Gece ve gündüz nedir?\nAETHRION: Gece ve gündüz, Dünya'nın kendi ekseni etrafında dönmesiyle oluşur."}
+{"text": "Kullanıcı: Gece ve gündüz hakkında kısaca bilgi verir misin?\nAETHRION: Gece ve gündüz, Dünya'nın kendi ekseni etrafında dönmesiyle oluşur."}
+{"text": "Kullanıcı: yıldız nedir?\nAETHRION: Bir yıldız, merkezindeki füzyon tepkimeleriyle enerji üretir."}
+{"text": "Kullanıcı: yıldız hakkında kısaca bilgi verir misin?\nAETHRION: Bir yıldız, merkezindeki füzyon tepkimeleriyle enerji üretir."}
+{"text": "Kullanıcı: Samanyolu nedir?\nAETHRION: Samanyolu, Güneş Sistemi'ni de içeren bir gökadadır."}
+{"text": "Kullanıcı: Samanyolu hakkında kısaca bilgi verir misin?\nAETHRION: Samanyolu, Güneş Sistemi'ni de içeren bir gökadadır."}
+{"text": "Kullanıcı: Merkür nedir?\nAETHRION: Merkür, Güneş'e en yakın gezegendir."}
+{"text": "Kullanıcı: Merkür hakkında kısaca bilgi verir misin?\nAETHRION: Merkür, Güneş'e en yakın gezegendir."}
+{"text": "Kullanıcı: Jüpiter nedir?\nAETHRION: Jüpiter, Güneş Sistemi'ndeki en büyük gezegendir."}
+{"text": "Kullanıcı: Jüpiter hakkında kısaca bilgi verir misin?\nAETHRION: Jüpiter, Güneş Sistemi'ndeki en büyük gezegendir."}
+{"text": "Kullanıcı: Kütle nedir?\nAETHRION: Kütle, bir cisimdeki madde miktarının ölçüsüdür."}

@@ -1,25 +1,25 @@
-{"text": "Kullanıcı: İnternet nedir?\nAETHRION: İnternet, dünyadaki bilgisayar ağlarını birbirine bağlayan küresel bir ağdır."}
-{"text": "Kullanıcı: İnternet hakkında kısaca bilgi verir misin?\nAETHRION: İnternet, dünyadaki bilgisayar ağlarını birbirine bağlayan küresel bir ağdır."}
-{"text": "Kullanıcı: web tarayıcısı nedir?\nAETHRION: Bir web tarayıcısı, internet sayfalarını görüntülemeye yarayan programdır."}
-{"text": "Kullanıcı: web tarayıcısı hakkında kısaca bilgi verir misin?\nAETHRION: Bir web tarayıcısı, internet sayfalarını görüntülemeye yarayan programdır."}
-{"text": "Kullanıcı: E-posta nedir?\nAETHRION: E-posta, elektronik ortamda mesaj göndermeye yarayan bir iletişim yöntemidir."}
-{"text": "Kullanıcı: E-posta hakkında kısaca bilgi verir misin?\nAETHRION: E-posta, elektronik ortamda mesaj göndermeye yarayan bir iletişim yöntemidir."}
-{"text": "Kullanıcı: İki adımlı doğrulama nedir?\nAETHRION: İki adımlı doğrulama, hesabı yalnızca parolaya bağlı olmaktan kurtarır."}
-{"text": "Kullanıcı: İki adımlı doğrulama hakkında kısaca bilgi verir misin?\nAETHRION: İki adımlı doğrulama, hesabı yalnızca parolaya bağlı olmaktan kurtarır."}
-{"text": "Kullanıcı: Yedekleme nedir?\nAETHRION: Yedekleme, önemli dosyaların bir kopyasını güvenli bir yerde saklamaktır."}
-{"text": "Kullanıcı: Yedekleme hakkında kısaca bilgi verir misin?\nAETHRION: Yedekleme, önemli dosyaların bir kopyasını güvenli bir yerde saklamaktır."}
-{"text": "Kullanıcı: Şifreleme nedir?\nAETHRION: Şifreleme, veriyi anahtarı olmayanların okuyamayacağı hale getirir."}
-{"text": "Kullanıcı: Şifreleme hakkında kısaca bilgi verir misin?\nAETHRION: Şifreleme, veriyi anahtarı olmayanların okuyamayacağı hale getirir."}
-{"text": "Kullanıcı: Kimlik avı mesajları nedir?\nAETHRION: Kimlik avı mesajları, kullanıcıyı sahte bir sayfada bilgi girmeye yönlendirmeye çalışır."}
-{"text": "Kullanıcı: Kimlik avı mesajları hakkında kısaca bilgi verir misin?\nAETHRION: Kimlik avı mesajları, kullanıcıyı sahte bir sayfada bilgi girmeye yönlendirmeye çalışır."}
-{"text": "Kullanıcı: Yazılım güncellemeleri nedir?\nAETHRION: Yazılım güncellemeleri, güvenlik açıklarını kapatmaya yardımcı olur."}
-{"text": "Kullanıcı: Yazılım güncellemeleri hakkında kısaca bilgi verir misin?\nAETHRION: Yazılım güncellemeleri, güvenlik açıklarını kapatmaya yardımcı olur."}
-{"text": "Kullanıcı: değişken nedir?\nAETHRION: Bir değişken, programda değer saklayan adlandırılmış alandır."}
-{"text": "Kullanıcı: değişken hakkında kısaca bilgi verir misin?\nAETHRION: Bir değişken, programda değer saklayan adlandırılmış alandır."}
-{"text": "Kullanıcı: Döngü nedir?\nAETHRION: Döngü, belirli komutların tekrar tekrar çalışmasını sağlar."}
-{"text": "Kullanıcı: Döngü hakkında kısaca bilgi verir misin?\nAETHRION: Döngü, belirli komutların tekrar tekrar çalışmasını sağlar."}
-{"text": "Kullanıcı: Fonksiyon nedir?\nAETHRION: Fonksiyon, tekrar kullanılabilen ve adı olan bir kod parçasıdır."}
-{"text": "Kullanıcı: Fonksiyon hakkında kısaca bilgi verir misin?\nAETHRION: Fonksiyon, tekrar kullanılabilen ve adı olan bir kod parçasıdır."}
-{"text": "Kullanıcı: Hata ayıklama nedir?\nAETHRION: Hata ayıklama, programdaki hatanın nedenini bulup düzeltme sürecidir."}
-{"text": "Kullanıcı: Hata ayıklama hakkında kısaca bilgi verir misin?\nAETHRION: Hata ayıklama, programdaki hatanın nedenini bulup düzeltme sürecidir."}
-{"text": "Kullanıcı: Test yazmak nedir?\nAETHRION: Test yazmak, kodun beklenen sonucu verdiğini otomatik olarak denetler."}
+{"text": "Kullanıcı: Rakamlarla yazılan tarihlerde gün nedir?\nAETHRION: Rakamlarla yazılan tarihlerde gün, ay ve yıl sırasına dikkat etmek karışıklığı önler."}
+{"text": "Kullanıcı: Rakamlarla yazılan tarihlerde gün hakkında kısaca bilgi verir misin?\nAETHRION: Rakamlarla yazılan tarihlerde gün, ay ve yıl sırasına dikkat etmek karışıklığı önler."}
+{"text": "Kullanıcı: Yazılı bir metinde ton nedir?\nAETHRION: Yazılı bir metinde ton, okuyucunun mesajı nasıl algılayacağını etkiler."}
+{"text": "Kullanıcı: Yazılı bir metinde ton hakkında kısaca bilgi verir misin?\nAETHRION: Yazılı bir metinde ton, okuyucunun mesajı nasıl algılayacağını etkiler."}
+{"text": "Kullanıcı: Dil nedir?\nAETHRION: Dil, toplumların ortak düşünce ve duygularını aktaran canlı bir sistemdir."}
+{"text": "Kullanıcı: Dil hakkında kısaca bilgi verir misin?\nAETHRION: Dil, toplumların ortak düşünce ve duygularını aktaran canlı bir sistemdir."}
+{"text": "Kullanıcı: hikâyede olay nedir?\nAETHRION: Bir hikâyede olay, kişi, yer ve zaman unsurları bulunur."}
+{"text": "Kullanıcı: hikâyede olay hakkında kısaca bilgi verir misin?\nAETHRION: Bir hikâyede olay, kişi, yer ve zaman unsurları bulunur."}
+{"text": "Kullanıcı: Şiirde dizeler ve uyak nedir?\nAETHRION: Şiirde dizeler ve uyak, ritim duygusu yaratır."}
+{"text": "Kullanıcı: Şiirde dizeler ve uyak hakkında kısaca bilgi verir misin?\nAETHRION: Şiirde dizeler ve uyak, ritim duygusu yaratır."}
+{"text": "Kullanıcı: İstanbul nedir?\nAETHRION: İstanbul, Marmara bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: İstanbul hakkında kısaca bilgi verir misin?\nAETHRION: İstanbul, Marmara bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: Ankara nedir?\nAETHRION: Ankara, İç Anadolu bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: Ankara hakkında kısaca bilgi verir misin?\nAETHRION: Ankara, İç Anadolu bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: İzmir nedir?\nAETHRION: İzmir, Ege bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: İzmir hakkında kısaca bilgi verir misin?\nAETHRION: İzmir, Ege bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: Bursa nedir?\nAETHRION: Bursa, Marmara bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: Bursa hakkında kısaca bilgi verir misin?\nAETHRION: Bursa, Marmara bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: Antalya nedir?\nAETHRION: Antalya, Akdeniz bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: Antalya hakkında kısaca bilgi verir misin?\nAETHRION: Antalya, Akdeniz bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: Adana nedir?\nAETHRION: Adana, Akdeniz bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: Adana hakkında kısaca bilgi verir misin?\nAETHRION: Adana, Akdeniz bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: Trabzon nedir?\nAETHRION: Trabzon, Karadeniz bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: Trabzon hakkında kısaca bilgi verir misin?\nAETHRION: Trabzon, Karadeniz bölgesinde yer alan bir ilimizdir."}
+{"text": "Kullanıcı: Gaziantep nedir?\nAETHRION: Gaziantep, Güneydoğu Anadolu bölgesinde yer alan bir ilimizdir."}

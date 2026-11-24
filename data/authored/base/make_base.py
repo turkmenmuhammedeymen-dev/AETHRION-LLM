@@ -238,11 +238,18 @@ def main():
     groups = {k: [l.strip() for l in v.strip().splitlines() if l.strip()] for k, v in GROUPS.items()}
     groups.update(me.extra_groups())
     total = 0
+    chat = [json.loads(l) for l in (HERE.parent / "chat" / "records.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    # Hold out ~25% of chat fact groups from BASE (sentences and dialogues) so that the
+    # instruction-tuning test split measures knowledge the base model never saw.
+    import hashlib
+    held = {c["group_id"] for c in chat if int(hashlib.sha256(c["group_id"].encode()).hexdigest(), 16) % 4 == 0}
+    held_text = {c["response"] for c in chat if c["group_id"] in held}
     for name, lines in groups.items():
+        lines = [l for l in lines if l not in held_text]
         for n, part in enumerate(chunks(lines, 12), 1):
             recs = [{"text": p} for p in paragraphs(part)]
             write(f"{name}-{n:02d}", recs); total += len(recs)
-    chat = [json.loads(l) for l in (HERE.parent / "chat" / "records.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    chat = [c for c in chat if c["group_id"] not in held]
     for n, part in enumerate(chunks(chat, 25), 1):
         recs = [{"text": f"Kullanıcı: {c['prompt']}\nAETHRION: {c['response']}"} for c in part]
         write(f"diyalog-{n:02d}", recs); total += len(recs)
