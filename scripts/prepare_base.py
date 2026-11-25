@@ -19,7 +19,7 @@ PROC = ROOT / "data" / "processed"
 STATEMENT = ("BASE derlemini (bilim, teknoloji, günlük, dil, coğrafya, hayvanlar, takvim, matematik, diyalog; küçük kaynak gruplarına bölünmüş) inceledim; içerikler projeye aittir "
              "(Claude tarafından özgün olarak yazılmış ve CHAT kayıtlarından türetilmiş sentetik veridir); "
              "eğitimde kullanılmasına izin veriyorum; gizlilik ve kalite incelemesi sorumluluğunu kabul ediyorum. "
-             "(Proje sahibi beyanı: 'BEYAN BENİM ONAY VERİYORUM', 2026-11-24.)")
+             "(Proje sahibi beyanı: 'BEYAN BENİM ONAY VERİYORUM', 2026-11-25.)")
 
 
 def _sha(path: Path) -> str:

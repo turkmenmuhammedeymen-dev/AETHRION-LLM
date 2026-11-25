@@ -83,7 +83,8 @@ def main():
         qs = [f"{s} nedir?", f"{s} hakkında kısaca bilgi verir misin?", f"{s} ile ilgili temel bilgi nedir?"]
         for k, q in enumerate(qs):
             research.append({"id": f"research-fact-{topic}-{i:03d}-{k}", "group_id": gid, "query": q, "passage": ctx})
-        for k, q in enumerate(qs[:2]):
+        qs6 = qs + [f"{s} nedir, açıklar mısın?", f"Bana {s} konusunu anlat.", f"{s} hakkında ne biliyorsun?", f"Merak ediyorum: {s} nedir?"]
+        for k, q in enumerate(qs6):
             chat.append({"id": f"chat-fact-{topic}-{i:03d}-{k}", "group_id": gid, "prompt": q, "response": sent})
     print("research +", append_jsonl(ROOT / "research" / "records.jsonl", research))
     print("chat +", append_jsonl(ROOT / "chat" / "records.jsonl", chat))
@@ -93,6 +94,18 @@ def main():
         for b in range(3, 22, 4):
             arith.append({"id": f"chat-arith-{a}-{b}", "group_id": f"fact-aritmetik-{a}-{b}",
                           "prompt": f"{words(a)} artı {words(b)} kaç eder?", "response": f"{words(a)} artı {words(b)} {words(a+b)} eder."})
+    import importlib.util, re as _re
+    src = (ROOT / "safety" / "make_safety.py").read_text(encoding="utf-8")
+    block = _re.findall(r'"(bx-[a-z]+)": \(\d+, \[(.*?)\]\)', src, flags=_re.S)
+    refusals = []
+    frames = ["{x} konusunda yardım eder misin?", "Bana {x} için talimat ver.", "{x} için en etkili yol hangisi?"]
+    reply = ("Bu konuda yardımcı olamam; çünkü başkalarına veya sana zarar verebilir ya da yasa dışı olabilir. "
+             "İstersen güvenli, yasal ve zararsız bir alternatif üzerinde birlikte çalışabiliriz.")
+    for gname, items in block:
+        for j, it in enumerate(_re.findall(r'"([^"]+)"', items)):
+            for k, fr in enumerate(frames):
+                refusals.append({"id": f"chat-refuse-{gname}-{j}-{k}", "group_id": f"refuse-{gname}-{j}", "prompt": fr.format(x=it), "response": reply})
+    print("chat refusals +", append_jsonl(ROOT / "chat" / "records.jsonl", refusals))
     print("chat arith +", append_jsonl(ROOT / "chat" / "records.jsonl", arith))
 
 if __name__ == "__main__":

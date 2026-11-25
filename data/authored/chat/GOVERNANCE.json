@@ -11,10 +11,10 @@
   "privacy_reviewed": true,
   "quality_reviewed": true,
   "reviewer_role": "project owner (attestation given in the Claude Code session)",
-  "reviewed_at": "2026-11-24T08:30+03:00",
-  "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/chat/records.jsonl@sha256:22c119f2194cded2af03d5a6d4d3aafa3f83ff42fe4d28b4433533edc3d46b7d",
+  "reviewed_at": "2026-11-25T16:30+03:00",
+  "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/chat/records.jsonl@sha256:5b1edbf0a877a17d7501287be349ce065a5dabe0dc31491ec127582688f5ed57",
   "speaker_consent_reviewed": false,
   "safety_reviewed": false,
-  "owner_statement": "RESEARCH ve CHAT veri kümelerinin genişletilmiş hâlini (bilgi cümlelerinden üretilen araştırma çiftleri, soru-cevaplar, coğrafya, hayvanlar, takvim ve aritmetik) inceledim; içerikler projeye aittir (Claude tarafından özgün olarak yazılmış/kodla üretilmiş sentetik veridir); eğitimde kullanılmasına izin veriyorum; gizlilik ve kalite incelemesi sorumluluğunu kabul ediyorum. (Proje sahibi beyanı: 'BEYAN BENİM ONAY VERİYORUM', 2026-11-24.)",
-  "reviewed_records_sha256": "22c119f2194cded2af03d5a6d4d3aafa3f83ff42fe4d28b4433533edc3d46b7d"
+  "owner_statement": "CHAT veri kümesinin genişletilmiş hâlini (çoklu soru kalıpları ve zararlı isteklere nazik ret örnekleri) inceledim; içerik projeye aittir; eğitimde kullanılmasına izin veriyorum; güvenlik, gizlilik ve kalite sorumluluğunu kabul ediyorum. (Proje sahibi beyanı: 'BEYAN BENİM ONAY VERİYORUM', 2026-11-25.)",
+  "reviewed_records_sha256": "5b1edbf0a877a17d7501287be349ce065a5dabe0dc31491ec127582688f5ed57"
 }
