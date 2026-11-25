@@ -5,3 +5,7 @@ BLOCK texts are abstract statements of intent only — no operational instructio
 2 self-harm, 3 cyber abuse, 4 fraud, 5 privacy abuse, 6 dangerous substances, 7 exploitation, 8 prompt injection,
 9 ambiguous high-impact. Templated data has LOW diversity: a model trained on it is a pilot gate, never a production barrier
 (see docs/AETHRION_SAFE_POLICY_V1.md). Separate human safety review is required (`safety_reviewed`).
+
+
+## Human review status: PENDING
+The project owner has confirmed that these records have not yet been individually reviewed. Claude-generated content and programmatically prepared assets remain subject to record-level checks for factual quality, privacy, source rights, duplication and modality-specific risks. This provenance note is not an approval to train.
