@@ -3,9 +3,14 @@ Needs: HF_TOKEN, AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD from GitHub
 Usage: python ci/trigger_space_training.py [--models code research ...] [--steps 25] [--rounds 1]"""
 from __future__ import annotations
 import argparse
+import hashlib
+import json
 import re
 import os
 import sys
+from pathlib import Path
+
+from aethrion.data_governance import GovernanceError, validate_governance_record
 
 SPACE_ID = "vizyon2027/AETHRION-LLM"
 DEFAULT_MODELS = ["chat", "code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document"]
@@ -179,6 +184,86 @@ def make_client(space_id, token, auth, client_cls=None):
         ) from None
 
 
+TRAINABLE_MODELS = ("code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document")
+AUDIO_MODELS = {"asr", "tts", "vocoder"}
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def validate_training_approvals(models, root: Path | None = None) -> None:
+    """Fail closed unless every selected family has a complete, hash-bound human review."""
+    root = Path(root) if root is not None else Path(__file__).resolve().parents[1]
+    invalid = sorted(set(models) - set(TRAINABLE_MODELS))
+    if invalid:
+        raise RuntimeError("Unsupported specialist model(s): " + ", ".join(invalid))
+
+    failures = []
+    for model in models:
+        manifest_path = root / "data" / "specialists" / "manifests" / f"{model}.json"
+        governance_path = (
+            root / "data" / "authored" / "audio" / f"GOVERNANCE_{model}.json"
+            if model in AUDIO_MODELS
+            else root / "data" / "authored" / model / "GOVERNANCE.json"
+        )
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            governance = json.loads(governance_path.read_text(encoding="utf-8"))
+            if manifest.get("model_id") != model:
+                raise ValueError("manifest model_id mismatch")
+            for key in ("training_allowed", "owner_approval", "privacy_reviewed"):
+                if manifest.get(key) is not True:
+                    raise ValueError(f"manifest {key} is not true")
+            validate_governance_record(governance, model_id=model)
+            validate_governance_record(manifest.get("governance"), model_id=model)
+            if manifest.get("governance") != governance:
+                raise ValueError("embedded governance does not match the reviewed governance file")
+            if model in AUDIO_MODELS and manifest.get("speaker_consent_reviewed") is not True:
+                raise ValueError("manifest speaker_consent_reviewed is not true")
+
+            sources = manifest.get("sources")
+            if not isinstance(sources, list) or not sources:
+                raise ValueError("manifest has no source inventory")
+            for source in sources:
+                if source.get("allow_training") is not True:
+                    raise ValueError(f"source {source.get('source_id', '<unknown>')} is not approved for training")
+                if source.get("privacy_reviewed") is not True:
+                    raise ValueError(f"source {source.get('source_id', '<unknown>')} lacks privacy review")
+                if model in AUDIO_MODELS and source.get("speaker_consent_verified") is not True:
+                    raise ValueError(f"audio source {source.get('source_id', '<unknown>')} lacks speaker-consent evidence")
+                relative = source.get("source_path")
+                expected = source.get("sha256")
+                if not isinstance(relative, str) or not isinstance(expected, str):
+                    raise ValueError("source path/hash is missing")
+                source_file = root / "data" / "specialists" / relative
+                if not source_file.is_file() or _sha256(source_file) != expected:
+                    raise ValueError(f"source snapshot missing or hash mismatch: {relative}")
+
+            for key in ("dataset_path", "dataset_sha256"):
+                if not manifest.get(key):
+                    raise ValueError(f"manifest {key} is missing")
+            dataset_file = root / "data" / "specialists" / manifest["dataset_path"]
+            if not dataset_file.is_file() or _sha256(dataset_file) != manifest["dataset_sha256"]:
+                raise ValueError("prepared dataset missing or hash mismatch")
+            if manifest.get("tokenizer_path"):
+                tokenizer_file = root / "data" / "specialists" / manifest["tokenizer_path"]
+                if not tokenizer_file.is_file() or _sha256(tokenizer_file) != manifest.get("tokenizer_sha256"):
+                    raise ValueError("tokenizer missing or hash mismatch")
+        except (OSError, ValueError, TypeError, KeyError, GovernanceError) as exc:
+            failures.append(f"{model}: {exc}")
+
+    if failures:
+        raise RuntimeError(
+            "Specialist training blocked by fail-closed approval/data-integrity gate:\\n- "
+            + "\\n- ".join(failures)
+        )
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", default=DEFAULT_MODELS)
@@ -186,6 +271,11 @@ def main() -> int:
     ap.add_argument("--rounds", type=int, default=1)
     ap.add_argument("--until-complete", action="store_true")
     a = ap.parse_args()
+    try:
+        validate_training_approvals(a.models)
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 3
     token, user, pw = os.environ.get("HF_TOKEN"), os.environ.get("AETHRION_SPACE_USERNAME"), os.environ.get("AETHRION_SPACE_PASSWORD")
     if not (token and user and pw):
         print("Missing HF_TOKEN / AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in GitHub Actions secrets.", file=sys.stderr)
