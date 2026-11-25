@@ -1,0 +1,48 @@
+name: AETHRION Approved Specialist Training
+
+on:
+  workflow_run:
+    workflows: ["aethrion"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aethrion-approved-specialist-training
+  cancel-in-progress: false
+
+jobs:
+  train-approved-specialists:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      contains(github.event.workflow_run.head_commit.message, '[train-specialists]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      AETHRION_SPACE_USERNAME: ${{ secrets.AETHRION_SPACE_USERNAME }}
+      AETHRION_SPACE_PASSWORD: ${{ secrets.AETHRION_SPACE_PASSWORD }}
+    steps:
+      - name: Check out the exact verified source revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install training client
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[api,visual,documents,space,data]" "huggingface-hub>=0.30,<1.0" gradio_client
+      - name: Train all ten approved specialist families (never a release)
+        run: |
+          test -n "$HF_TOKEN"
+          test -n "$AETHRION_SPACE_USERNAME"
+          test -n "$AETHRION_SPACE_PASSWORD"
+          python -u ci/trigger_space_training.py --until-complete --steps 200 --rounds 40 \
+            --models code research safety vision image asr tts vocoder 3d document
