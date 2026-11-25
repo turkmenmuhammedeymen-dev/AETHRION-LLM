@@ -110,3 +110,52 @@ def test_make_client_supports_legacy_hf_token_keyword():
         "auth": ("owner", "password"),
         "hf_token": "hf-test-token",
     }
+
+
+def test_parse_session_result_accepts_successful_paused_session():
+    from ci.trigger_space_training import parse_session_result
+
+    output = """### Training session paused / incomplete (not released)
+- Model: code | steps requested: 25
+- Trainer ok: True | pulled: 4 files | pushed: 4 files
+- Progress: training_interrupted_not_released step 25 | complete: False
+- Released: NO — evaluation and human approval are still required.
+"""
+    parsed = parse_session_result(output)
+    assert parsed == {
+        "trainer_ok": True,
+        "progress": {
+            "status": "training_interrupted_not_released",
+            "step": 25,
+            "complete": False,
+        },
+        "complete": False,
+    }
+
+
+def test_parse_session_result_accepts_completed_session():
+    from ci.trigger_space_training import parse_session_result
+
+    output = """### Training session completed (not released)
+- Trainer ok: True | pulled: 4 files | pushed: 4 files
+- Progress: training_complete_not_released step 500 | complete: True
+"""
+    parsed = parse_session_result(output)
+    assert parsed["trainer_ok"] is True
+    assert parsed["complete"] is True
+    assert parsed["progress"]["step"] == 500
+
+
+def test_parse_session_result_rejects_failed_or_unrecognized_session():
+    from ci.trigger_space_training import parse_session_result
+
+    failed = "### Training session failed\n- Trainer ok: False | pulled: 4 files | pushed: 0 files"
+    assert parse_session_result(failed)["trainer_ok"] is False
+    assert parse_session_result("Training session finished successfully")["trainer_ok"] is False
+
+
+def test_tail_returns_the_end_of_long_diagnostics():
+    from ci.trigger_space_training import _tail
+
+    value = "start " + ("x" * 100) + " FINAL_TRACEBACK"
+    assert _tail(value, 20) == " FINAL_TRACEBACK"
