@@ -2,7 +2,7 @@
 
 **Intelligence Without Limits.** AETHRION-LLM is a from-scratch model research and engineering project. Its native inference policy is local-only: AETHRION models must be initialized and trained by this project. It does not load third-party pretrained weights or silently fall back to hosted model APIs.
 
-> **Verified status (2026-11-25 audit):** 10 of 11 model-family data preflights are ready; CHAT/BASE is blocked because its prepared corpus/tokenizer and provenance inputs are missing. The specialist datasets are small pilot sets, not production-scale corpora. All 11 registry entries remain `not_trained`; 0 models are release-ready. Passing software tests or a synthetic architecture preflight is not evidence of trained-model capability.
+> **Verified status (2026-11-25 audit):** 0 of 11 model-family data preflights are approved for training: the ten specialist families are intentionally blocked pending owner-level record review, rights/provenance/privacy/quality checks and modality-specific review; CHAT/BASE is separately blocked because its prepared corpus/tokenizer and provenance inputs are missing. The specialist datasets are small pilot sets, not production-scale corpora. All 11 registry entries remain `not_trained`; 0 models are release-ready. Passing software tests or a synthetic architecture preflight is not evidence of trained-model capability.
 
 ## Model family
 
@@ -22,7 +22,7 @@ The GitHub Actions repository secrets used by deployment/training are `HF_TOKEN`
 
 Only use material you own, public-domain material, or sources whose terms and rights explicitly permit the intended machine-learning training use. Preserve source URLs, licenses, attribution, provenance and SHA-256 hashes. Review privacy and consent; speech datasets require speaker-consent evidence. Dataset-level license labels do not automatically clear embedded third-party web pages, recordings, images, code repositories or 3D assets.
 
-Keep raw data, prepared corpora, NPZ datasets, tokenizers, checkpoints and private evaluation material outside Git unless a separately reviewed release policy explicitly permits publication. Each specialist manifest is independently checked for first-party origin, rights, privacy, quality and safety evidence. The current pilot approvals do not make these small datasets production-ready. The BASE corpus gate remains closed until its prepared corpus, tokenizer and provenance report are present. Automated checks validate recorded evidence; they do not make legal decisions.
+Keep raw data, prepared corpora, NPZ datasets, tokenizers, checkpoints and private evaluation material outside Git unless a separately reviewed release policy explicitly permits publication. Each specialist manifest is independently checked for first-party origin, rights, privacy, quality and safety evidence. The current pilot datasets are not approved for training: see [the 2026-11-25 dataset governance reconciliation](docs/review/DATASET_RECONCILIATION_2026-11-25.md). The BASE corpus gate remains closed until its prepared corpus, tokenizer and provenance report are present. Automated checks validate recorded evidence; they do not make legal decisions.
 
 BASE pretraining, instruction tuning and each specialist training stage have separate data and evaluation requirements. Training reports are not releases. Do not represent a smoke test or synthetic fixture as production training data.
 

@@ -3,9 +3,9 @@
   "dataset_id": "3d-prepared-bab0c95bcf5e",
   "model_id": "3d",
   "modality": "3d",
-  "training_allowed": true,
-  "owner_approval": true,
-  "privacy_reviewed": true,
+  "training_allowed": false,
+  "owner_approval": false,
+  "privacy_reviewed": false,
   "speaker_consent_reviewed": false,
   "dataset_path": "3d/dataset.npz",
   "dataset_sha256": "bab0c95bcf5e5f5e5b196c7a7c32d691f42392accf66de7827e75d2d58e131a2",
@@ -17,2321 +17,2321 @@
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/source.jsonl",
       "sha256": "e3b083a4b997a11a006a38de55d8240246f034db811bfec591860a6585a96da4",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0001-fa090467",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0001-fa090467.npy",
       "sha256": "caf874542816958eed53416aea6ebbad795eeb1348a47f0abcc84f3048bbb829",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0002-47d178ee",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0002-47d178ee.npy",
       "sha256": "c505f26ea84abce095c017e3fd3d6a9b6fd998b816f21702d209cc954e72fa40",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0003-2cfa7d0e",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0003-2cfa7d0e.npy",
       "sha256": "89c9af76a760d11406cfc7d7f8e47f98385b47f804f21a55ddde6d7ba0a1452e",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0004-3419265b",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0004-3419265b.npy",
       "sha256": "8caf5ae3bcb5e89a98830f75086dab0b9dd67610f1b52036adc2df4ffe1862ef",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0005-8268be23",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0005-8268be23.npy",
       "sha256": "74f625b31dab37cd172818520f091c7cfdbfd02ab9f6b14542211cb23b7b1cf0",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0006-db7473f0",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0006-db7473f0.npy",
       "sha256": "228cda7aa92b6e27465893f6dd436a1137f8cc90a79b3968604bb8099c0d6718",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0007-b6c97999",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0007-b6c97999.npy",
       "sha256": "534ff7a75a7752a43faa1bb7efca941ebe090806e4a2817073864ed09dafd6aa",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0008-4c2602a9",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0008-4c2602a9.npy",
       "sha256": "2faa0d5687733f3e58f2611c206b4c035ee8479b814ae1c62aa8dcae4f3f745c",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0009-5a2997bb",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0009-5a2997bb.npy",
       "sha256": "5e6a302d5db14f58ad5b1409de372526e4df835bd521e752f375bf1df05476fe",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0010-b807326d",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0010-b807326d.npy",
       "sha256": "e9adb9f9a043c5a9d78ee3efa72dcd0ea9acab4ea9a078ebc2c71853d03726b3",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0011-da3f5d20",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0011-da3f5d20.npy",
       "sha256": "f8867bb5dc039cc81b1e004a20e5c6b69878c26a1f075a0bd396ff8dfd8f9f03",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0012-e8908cce",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0012-e8908cce.npy",
       "sha256": "da92627b61c3552c2ff0c9916f780af055c16defd5abf0078cc692ff4b4053c6",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0013-8a22f99f",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0013-8a22f99f.npy",
       "sha256": "d581d0142819a67fdde323ed277d9294f78636e26fff1bcae63a605fd55b36fc",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0014-2d681711",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0014-2d681711.npy",
       "sha256": "eac1312ebde95e0e9b6603a0b94ad46f2fc7cfdfcd2abb3476df7597ab9501b8",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0015-e4e4dad6",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0015-e4e4dad6.npy",
       "sha256": "6ce3da0dea6599a96465404a6c740adb00f935c78d79c1a17e3d96b27524745c",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0016-1fde584c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0016-1fde584c.npy",
       "sha256": "5927bc205b07232c298afd6d8e87b374ce53e732de436d8768e51163713cdfa3",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0017-1e52c9c9",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0017-1e52c9c9.npy",
       "sha256": "24fd3fa7b9edb31b4271bcd74b87ed68e9f85ab3ea937f69f7175f4635bb1618",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0018-26e4b1ef",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0018-26e4b1ef.npy",
       "sha256": "8b283e5f0c0bab791994c2f021ed9573deec37db0a6de366e969293e7c6d4f2e",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0019-541cd442",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0019-541cd442.npy",
       "sha256": "9ee91085f1695b0c8d35a5d3895ad44feb9831e4ed0899b6d1e7ad4413d20a47",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0020-bd03fa8a",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0020-bd03fa8a.npy",
       "sha256": "925d5d111c21fd71b71032c9717d24a3f1dc08429cf7effbeff6b80a7352d24c",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0021-fbfc627a",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0021-fbfc627a.npy",
       "sha256": "70490fd5bf19a6e7c1c04517bbd2be997554fce66677adb81b440d7daf10c7fd",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0022-75a2d8ea",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0022-75a2d8ea.npy",
       "sha256": "8ad0c6875d293d9e953aaa5d7d34c6f881ab2c650490201686ef1c236db06b82",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0023-5664b1e5",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0023-5664b1e5.npy",
       "sha256": "7c80e7242c153f11477a2b841078f3f2e7002d1c2588bf1e69e4774d71df61e7",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0024-9ee34036",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0024-9ee34036.npy",
       "sha256": "60bbdbd800a799254aa4acdc99e7c2620829004d11dbbdeeec8f5b870eae5f8b",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0025-d83247f5",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0025-d83247f5.npy",
       "sha256": "9d11290fdcf162481e562362e6e37ad018462350b192ab6c5edb88e62707931b",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0026-7072d0bc",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0026-7072d0bc.npy",
       "sha256": "16fa2922cae5cae4bf70d7e7fb028f166cc7f7fa3851ab5f2cc68e96d7949d01",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0027-157067f1",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0027-157067f1.npy",
       "sha256": "2a3bb5af11b0f0d110c94e1c05eb3f3eb6092cb5b99078b87b36e407860591b9",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0028-f69ce028",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0028-f69ce028.npy",
       "sha256": "89954a08bbd8b30bcb9cf9dda4fa7c1c345fca97ef506f090a13881557102fa0",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0029-2a0d4d14",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0029-2a0d4d14.npy",
       "sha256": "33797dfc76bcabbf218b7d59293c96094b5bc2442fa32917b22cb39f91978a45",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0030-28e8bdf6",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0030-28e8bdf6.npy",
       "sha256": "91c652b1823506b80b7773111f697c6b766ffe6890dfa9564179bfe33c804cad",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0031-110ad2ff",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0031-110ad2ff.npy",
       "sha256": "ab08f3d4e10252ba7a8f7b15c18dd9a5d74255a9669782cadd2f0a6d9640787c",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0032-331f74ea",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0032-331f74ea.npy",
       "sha256": "db9a87e6961ccc6d1746b95a6bc3011ddbc0f5f743bbd6ee7ac424bc5faf1d69",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0033-1bb7ecfc",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0033-1bb7ecfc.npy",
       "sha256": "c85cdf2e78babe36aab7e242cebab4d70f680dac56ae6d3a3be5f7b0815365fb",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0034-2bdd004f",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0034-2bdd004f.npy",
       "sha256": "5be0d1202552c35ebfee1d85550fbce593f8db0ea07ad3ece26971b6865acbe9",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0035-37ead87c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0035-37ead87c.npy",
       "sha256": "eb67ab37e41b6f781df957fb972b70afa9041343f905ccbceb76346a9cf9b390",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0036-057655e4",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0036-057655e4.npy",
       "sha256": "8a3a2677b5d6a5ae6bb67c79587a148b6de53266ca6a35b01cd7105bc5a60d87",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0037-62687092",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0037-62687092.npy",
       "sha256": "680ff6f5b0b44fab22d3d7ec96dabd77f7046dd45b375e132c0435e17dceb52e",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0038-f2abcd06",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0038-f2abcd06.npy",
       "sha256": "64cc74682f4d14d8bb39cc6335b68ae089fcbaa416ee829e37763bb682a0de5e",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0039-bf1ffbe1",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0039-bf1ffbe1.npy",
       "sha256": "afa189aeb61cacfb72fb48228a4293beb227e7f692b5a9e32a0152809de66d64",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0040-134c8bbb",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0040-134c8bbb.npy",
       "sha256": "2b520863d5ffd050528085e1351566d0617ff612d612436ef24d4d5e3be2096d",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0041-6f34a01d",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0041-6f34a01d.npy",
       "sha256": "bcb76bc59e00d9a72dfbe45a5393692d8c935408ea8d0f98e0e5cf0dd6bc3372",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0042-772c04a5",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0042-772c04a5.npy",
       "sha256": "ddfc2026b5cbb302e1a714283d22c40e05a807940f500fad4661bef85af6ed50",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0043-c257da0b",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0043-c257da0b.npy",
       "sha256": "afd6d0859d66169634eaea091b1119c3b1260dc99ef6345e4b2fcd067ede0bea",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0044-a3883d9a",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0044-a3883d9a.npy",
       "sha256": "75e09926b944114750eba6b2eec623d7f2854c591c376e4c655174dd20f51657",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0045-f7245af4",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0045-f7245af4.npy",
       "sha256": "f9c8f26553ff179acac11494bf080c5fbcffe36176d048c3ee9d42688bcdb7e1",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0046-a4924b1f",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0046-a4924b1f.npy",
       "sha256": "3bdbfbe63f0423ee84550509e24a0fcef6f45b21301886f1d1ad19cf574f8023",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0047-4434c4d3",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0047-4434c4d3.npy",
       "sha256": "dce565b38b189cfeb5c43feba98f36df6257345b1b341f96d4e4578c14951946",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0048-fb31a71f",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0048-fb31a71f.npy",
       "sha256": "f335a56eef883e8667d58333f71add217b6f79b1415d524396b439eec828fb46",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0049-1188fd09",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0049-1188fd09.npy",
       "sha256": "d3a3b0e898a77d3a703c5621f543707e43b8623f7d38ef80013f8d2b0f04aa3d",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0050-c5aae518",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0050-c5aae518.npy",
       "sha256": "a6ce59182daccf7ee89079cb57ecb0d8cc44ad549f203bcf656a7f003070d531",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0051-8484ead9",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0051-8484ead9.npy",
       "sha256": "bad9a562f9a3cbb54264a994c5d7eaa76290f9d8edeb520d18a488398e87b393",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0052-8f6422a0",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0052-8f6422a0.npy",
       "sha256": "990e142fabf23dfc134b95d40a35a435af8d5b11552694eba86e507cd7ebccec",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0053-a2be9de8",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0053-a2be9de8.npy",
       "sha256": "382c11f70a8a33560fb711055e6aab759937080b9ebf8299c1c23398f1b2d5f7",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0054-a95918c7",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0054-a95918c7.npy",
       "sha256": "c0dcb6ee103cbdffc55de2361681d4e9a8b097aaaa33d004b38fe12da9eed655",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0055-65f298e3",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0055-65f298e3.npy",
       "sha256": "120debbc01d15a9cd515a4fa2fd3bfca57198b993c6fdae45be0069bbeec3d4d",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0056-79f683be",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0056-79f683be.npy",
       "sha256": "e6adbd86e87de8fd8582a1dd7eb250d27387d03cd77e9516db20ddebd1f51199",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0057-ac9a20a0",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0057-ac9a20a0.npy",
       "sha256": "3631b03e0793dc4ef0c5928e24b93d8f2e64952360669cbb73c582ca6fb07a31",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0058-54edede5",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0058-54edede5.npy",
       "sha256": "76a990675dae02fa6187d1b441eb631aea933f2768ba93abec8a1f70288b2bae",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0059-bc0d10c7",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0059-bc0d10c7.npy",
       "sha256": "b072998a11e48969bc51f15dd0094ec30b19d953d78182c5594f913322c461d5",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0060-a9908dec",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0060-a9908dec.npy",
       "sha256": "9f190887d3d1564ec23bb729c387d4149e86819ec6bac4ce7f898c88ec9d0399",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0061-8e21f0a5",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0061-8e21f0a5.npy",
       "sha256": "efdfc5b9067d7aa8364f5fa5249c826cda34fe6e2680f8985cbc03722da06f20",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0062-8baa352b",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0062-8baa352b.npy",
       "sha256": "4e32a5b6276225c2e44516116337ee89f19f86310f678497522a3d716b2bc8d1",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0063-97c2c767",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0063-97c2c767.npy",
       "sha256": "22ff98361e471f2f06d9ec556e952f449ede4b8d07db9cc03326c1cd9b008095",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0064-1e916445",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0064-1e916445.npy",
       "sha256": "78fd7e2dea6e32ec36a27489ef1119a299638cc7d728812630aebe929057e4b6",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0065-b1d97945",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0065-b1d97945.npy",
       "sha256": "1766f697cc00a54d95eef2ea4432e3cb4f09c76caaece8282008b4dace6ec1b3",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0066-014500f0",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0066-014500f0.npy",
       "sha256": "320edf6e93954a09aea364b3743554bce715fd89d4194732773be4e3d922d8e9",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0067-ff228a68",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0067-ff228a68.npy",
       "sha256": "a111471a5c76df698cf8b0a13e802072b652628bf5452d5663d445710989292b",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0068-2aae42c8",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0068-2aae42c8.npy",
       "sha256": "f28a3e6d986aa03f5f2196726f005eeb83444efa9075a2a1e26e650fba7c2a5f",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0069-792ed5d2",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0069-792ed5d2.npy",
       "sha256": "6a49015834a546676741f3af19dd7e86af7164b015d23db51ba30908e886d8d3",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0070-f0a1750f",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0070-f0a1750f.npy",
       "sha256": "550acf2abc6d796004683951b67c0b5ba44698adfd589e972127cc62457b7b1a",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0071-82f6fbf2",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0071-82f6fbf2.npy",
       "sha256": "6d3e10e477ca2b1056fcd01b263da6b180a127f9bafd64f546d809e8cb81d468",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0072-ed054e2f",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0072-ed054e2f.npy",
       "sha256": "0f06b4bb8964c425a84635b48ff4eaf388ebbca58048ca92aaea4978a7dd5477",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0073-96c89488",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0073-96c89488.npy",
       "sha256": "9d31d8844607922492215386fa725c20edd91cbd669a40a070f8a9cb469e7334",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0074-fcb9b40d",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0074-fcb9b40d.npy",
       "sha256": "e2340144bd38f8bb5be02297a5070f9f2e9f856691db0bdd0c573c64fb3dac1a",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0075-d472552c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0075-d472552c.npy",
       "sha256": "e996bd4771e540bade3a3baa4ca7dbc830352e366826756fc0e35afd38b8292a",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0076-97a9e78a",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0076-97a9e78a.npy",
       "sha256": "9c7a6b1fd77a78422235b274ff54d648ed3165123b28b1f72768287c71472421",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0077-81fcea2e",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0077-81fcea2e.npy",
       "sha256": "dc2fae30c7353548be7d04bc8e2b9e4d647a56d437d9b0fd27bd1981e92c5504",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0078-9b36974b",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0078-9b36974b.npy",
       "sha256": "0b23d0440b642c620ec0efbef1feab22684a2a1f06d763486542f679ad6c4b63",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0079-3f6679a9",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0079-3f6679a9.npy",
       "sha256": "c075f8ef9889e88019f49bb997c0048db8c56a99be1bd249de222c2f6f2fb9c0",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0080-1d50961b",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0080-1d50961b.npy",
       "sha256": "267b778e84618367db4738c0990010be74fc4657c25218327f33ec3ee631e719",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0081-acbdf6b1",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0081-acbdf6b1.npy",
       "sha256": "a4f8ad291d99316ebcb8feed7d048ae721db0fbfc8706ebf849391c8c8267462",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0082-a02b36ad",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0082-a02b36ad.npy",
       "sha256": "5d09095976fd9b680eca659a8a3446bd16b9c6fbcaecdf7215e6dd8c70dc66b1",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0083-5fd84bc0",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0083-5fd84bc0.npy",
       "sha256": "3572f22f5dc1818315e4947a2dd273a45c802161b04bd35aecffcf9116436f74",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0084-3b4484a7",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0084-3b4484a7.npy",
       "sha256": "3254142523fe263c7de293af96f8243a8376a39a0017d3017648b9e4c656eac9",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0085-06b83a3e",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0085-06b83a3e.npy",
       "sha256": "0687eef2a1486fca1d68139bd27d63e7a2de23e3bd3bbe30f9cc5adb358e5ea3",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0086-00b4f29d",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0086-00b4f29d.npy",
       "sha256": "2044bfce3be0dc491c3a42d2152abeea90fa8d49cef3021a6e8549c1907ef3b9",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0087-5aaaa14a",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0087-5aaaa14a.npy",
       "sha256": "5b243231836e68c04d05f3e00d1dbadd962b849803c0c2404b2efeec847a0da8",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0088-c47f5298",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0088-c47f5298.npy",
       "sha256": "f364ac1fd2dda33b8a1ea1e1d0ab3f5c17ad438080c665ac6f7504330c7dbfd8",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0089-27bb45d0",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0089-27bb45d0.npy",
       "sha256": "d89165cc1841db64e803520a045480fdf24ddf76c5e4217613234c56a2570737",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0090-ffd94d85",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0090-ffd94d85.npy",
       "sha256": "6b61f58d711b90ffe60a660939d3c709ae4e2cd222741357f92da0024badf5f1",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0091-a8010943",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0091-a8010943.npy",
       "sha256": "192e6344ff8a6c1e2f0264b9d16a427c4f8034d48cd26556017d800cf197d887",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0092-14cee6bb",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0092-14cee6bb.npy",
       "sha256": "d42270536d6410208ee02db2c08685e6e9e586c14436d35750706764a6133725",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0093-abdeeb33",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0093-abdeeb33.npy",
       "sha256": "1c5ee878b7bc139af5b2725b8e0e1a524078f2f41fb765b3950900030b68c26a",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0094-55cd402e",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0094-55cd402e.npy",
       "sha256": "864ea3bd4593e5ad401d53061ab738c0e3f3ce667db2c9004bf91a3adf9d5d77",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0095-a36bbfec",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0095-a36bbfec.npy",
       "sha256": "b1dfcfb26457ca621b024bb81b679c83019076451d966a2f93bf62b6c17d0a2a",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0096-c02b1d7c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0096-c02b1d7c.npy",
       "sha256": "f3cb6d671c79e77bec7a110e6b446f76856221aa8c766b4d7bdc785b4a2a1907",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0097-5b9df757",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0097-5b9df757.npy",
       "sha256": "015a95e89c4a6eeb919bb122d10b4fb16e05b46fdf08887aee1213932fa33000",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0098-c79a7d43",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0098-c79a7d43.npy",
       "sha256": "8d2e4cd1574064e24922fa9c3a2e54acce9992e57c420ed820e0662527c73feb",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0099-36af2cb6",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0099-36af2cb6.npy",
       "sha256": "ee692433a7f33245c1390cfee5aaa67c232cce002fc30a77fa87f3b9a702b00f",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0100-26331912",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0100-26331912.npy",
       "sha256": "9329624f7a5c997c88f272b453e6dbd548ca6e8cc8c4aee8d7ca501192bce58b",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0101-2301c92d",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0101-2301c92d.npy",
       "sha256": "2d5251d20a0946587e43e69765664bbf8b2dfef35dd5640f3833e666d4be8199",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0102-61bee15e",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0102-61bee15e.npy",
       "sha256": "8d551af6fcdfee554a58dd7e95b29f9a1d74a9a58ef305c087a6a64bddb04ccb",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0103-f1fbeb60",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0103-f1fbeb60.npy",
       "sha256": "3aaf763f18cdc30ca63816e23e950ee46cd652124645d8b7afa3b2dc31d488f6",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0104-dd42fc60",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0104-dd42fc60.npy",
       "sha256": "ae2293c7ae71de90ba4eaf379fd836ea87b80d1edbcf2222d6ef1dd4abbd9e87",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0105-26d043a5",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0105-26d043a5.npy",
       "sha256": "e5aebf58108a9759b8801e7c0f4565c18ef2e6a344636ab0e9de6044348bf32d",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0106-9bcdf4d2",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0106-9bcdf4d2.npy",
       "sha256": "bb1746dd3b62be73bc2698983ca911af22b26e0cb619d42e98534d8a2d558e28",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0107-183e35cc",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0107-183e35cc.npy",
       "sha256": "410829c2df008e6dd38c58bb9b37eb992bf9139c1a452c70b0e689aee1c71003",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0108-0012738c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0108-0012738c.npy",
       "sha256": "f5ae517c9357c4a4ae3599fd685b25733a6e53fc049a78284acfbdd33ccefc67",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0109-09fa1a76",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0109-09fa1a76.npy",
       "sha256": "9a6cbd762d8cc9cd0c6f066d91f24e90ac946c99582021adbd6012f768708726",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0110-21294830",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0110-21294830.npy",
       "sha256": "f19acef3efd5d00efb1a41bca0c9e7d354606ba3f7df39b4dee7dc20dd971d2b",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0111-78f00500",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0111-78f00500.npy",
       "sha256": "ebc795a1392f9c246352152cca9408924cdbd76eb9be87ff51fa4b75b87594ef",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0112-1a592a82",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0112-1a592a82.npy",
       "sha256": "8c4a0c2414efc9c5c6bca989c4d46eda4d3623bee2ca029622ff42aace0c42cf",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0113-794fe2bf",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0113-794fe2bf.npy",
       "sha256": "453d190cae77f07d782cc988d6ec92928afb11784bcf1d5c124602b9054ef1be",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0114-a4be6723",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0114-a4be6723.npy",
       "sha256": "f1a1938b1b3eb4f237228ab999aaf6890d857f92a359d908a2d837b5fd95d357",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0115-a8d98ff5",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0115-a8d98ff5.npy",
       "sha256": "a1c16ecc0d209b19fd6395a3236c0d1e2ab4aaa60bc3342ccf41b6f5889d20cc",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0116-f12c0519",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0116-f12c0519.npy",
       "sha256": "377d2e5931bb83fe4cf5c5ddfd4aca868c96f99318a7a59af057ed2c52692240",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0117-79c20a7c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0117-79c20a7c.npy",
       "sha256": "ccb8436fa87ad5bd202c9187c140f3a6ff78a9e920ec06e79ce8eca8be600f5c",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0118-3d067909",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0118-3d067909.npy",
       "sha256": "31432da8221eefc18dde152f343052ea81624aed7945237a51a331e6b17c926b",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0119-7faf9eee",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0119-7faf9eee.npy",
       "sha256": "512eafe4b039aedf55cfc5582f9965a1e9a3d9883803e622c257de69f92be4c8",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0120-e57bd051",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0120-e57bd051.npy",
       "sha256": "40d54824440132ee3527589292a65eb21a09ef910cf27ac5d232b3d3c9f70cb7",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0121-05f6e778",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0121-05f6e778.npy",
       "sha256": "44a6bb55fd4dc0313d1fea74e9edbaab348d9a3771cc354498f53e90d839fe5e",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0122-d0a7bc9b",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0122-d0a7bc9b.npy",
       "sha256": "f16f0901f923d7fec22cd14180fb83c9d58c3c1873c8a10b8d3155f6716d2455",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0123-80c305ce",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0123-80c305ce.npy",
       "sha256": "d8b0b46e129a5cb6e7b26b14d8ee2d0525d147a7d843a20a85d0de925d74c3cd",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0124-3592fc7c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0124-3592fc7c.npy",
       "sha256": "2106c243e506c483636c6af12c7eb0c3d31b07a57f94416114f310a68b543ba9",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0125-7b6cb55a",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0125-7b6cb55a.npy",
       "sha256": "35243f82152d16b11d2c497df91a257d3e8e675c7e97281738bdea3b6b428d56",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0126-2c798d80",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0126-2c798d80.npy",
       "sha256": "cee232f78039a2907d29c0ea0d5a493eddfe3738c24555339c98a2d8ed69922b",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0127-7f343ac1",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0127-7f343ac1.npy",
       "sha256": "f2f0fd25821b0e80b181f5f0df77cd0534be97da0b3b228f38dd2f706fbb533f",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0128-174b7511",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0128-174b7511.npy",
       "sha256": "7d763cff8947521a3d976f0549efe4611c0cee6cdbaba827893540940bbb7696",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0129-1d425215",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0129-1d425215.npy",
       "sha256": "6a2e51418bc8cf37cfc7658f493b6b1cd859e3fdf6e9b25b405ef80d4e85fb26",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0130-297ffee2",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0130-297ffee2.npy",
       "sha256": "3e0933b843bdb3c23a956afca31d371085592206374a22a0bf4a76416dc94f36",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0131-4f7de506",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0131-4f7de506.npy",
       "sha256": "a3dde8a401a43c42fa0559e5fdf5b3ea7477f4df8c45d725361d64878b45656a",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0132-80112fbd",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0132-80112fbd.npy",
       "sha256": "17bdf958bec46bd304d48e4fbd88652fc1e2e0e27a0075e916de44071d752bc5",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0133-390263b5",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0133-390263b5.npy",
       "sha256": "05333ba5ba678f0f85d050c534d3427370c1474349cbaccc92b8cfad61b92e76",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0134-56f908c0",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0134-56f908c0.npy",
       "sha256": "1569730286211441e6226251cd323b1140c7c5c861e5a6e572fe1503fb9258c5",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0135-9645ef77",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0135-9645ef77.npy",
       "sha256": "3f13b31bc93460c9d9a534fb8c18423b1ac6e24a4189160fa997359e6ac4a961",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0136-c4863ed9",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0136-c4863ed9.npy",
       "sha256": "1376894809f05161451277173e5e91c24d64f79246c87ea8d0af0e265c7509f9",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0137-1df889eb",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0137-1df889eb.npy",
       "sha256": "7bc527704e1e8f1f2fee1ee4bfeee3c8b8ac54d5b98edd91993a3d3490d78261",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0138-87b36384",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0138-87b36384.npy",
       "sha256": "c41db0e08e7d37a978a72dc66c0bbb371637d39eb784c762774e3d71ed22af74",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0139-78d856ee",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0139-78d856ee.npy",
       "sha256": "aac8c5364168fea774505ed987c2783f9a128858ce8e071e59c7f06d78dc3dc3",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0140-6656421a",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0140-6656421a.npy",
       "sha256": "8b7e791119a7f592d8f791ccc43b86c7e917266c47e38753468d03560507318f",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0141-357081a0",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0141-357081a0.npy",
       "sha256": "4817490d945fcdd3221c0051398640d3d11e723192521f55f9e4c1b435a21587",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0142-894db7dc",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0142-894db7dc.npy",
       "sha256": "637b34d6a7e3f0b6c0e2e87d3e87d8a301468750889b929d6234f7be87a0b2a9",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0143-4e72cc0e",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0143-4e72cc0e.npy",
       "sha256": "1ca366cce441475c3f55e92bfe3e0736d60784c92c6b1c6a7b8e119302c2facb",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0144-654e8573",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0144-654e8573.npy",
       "sha256": "d052a2e36155e69ad985864e7f911bdab5dc6b0b3bfe32bd654df981407bd80e",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0145-5c7d2513",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0145-5c7d2513.npy",
       "sha256": "5eeb20b435a1fc508e9b127c5c631d8beda814421b1fd66684ba40fc25f882f7",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0146-56d7927c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0146-56d7927c.npy",
       "sha256": "5f4d52043d3954ac05fccbdaf04afbcffb4e9b96214efcaa43bf7105dbab2675",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0147-f221ce27",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0147-f221ce27.npy",
       "sha256": "dd183c03cb162edbcb9aa3ea28786883300bb246593efd06b02f0de303fb28e1",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0148-aabdaf96",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0148-aabdaf96.npy",
       "sha256": "d7ae49ec5acd0489e0b0c5f2a51a657ab0cbfbde98839da3121f6184da253ccd",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0149-4cbff96a",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0149-4cbff96a.npy",
       "sha256": "97b4d0adaee0d60b6e70a85f08e2b9781dc4263ca28b4073d56be65ba3fcc2ae",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0150-af4f6b18",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0150-af4f6b18.npy",
       "sha256": "e1cb06145a8979b428e2149f99ec59271d3f5370204c23193e8a80d31c874e12",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0151-f62fe281",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0151-f62fe281.npy",
       "sha256": "eea535a94c33e46f00e8a9fe3aa564aafe9ca33179117f117cfba161b5854158",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0152-04233565",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0152-04233565.npy",
       "sha256": "3372202732b9b3618e58628c39bd51e7b67ad51040ade46a7200a4dd4e1a41bd",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0153-fe6c94ce",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0153-fe6c94ce.npy",
       "sha256": "0037ec31666b27e1f3dd537f8ca07954607c26e966d59216100c45a1915de45a",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0154-94f82113",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0154-94f82113.npy",
       "sha256": "c1cff85475776799c021e4746600c4a268694d47fd7032715697b813f253377c",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0155-d8f18328",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0155-d8f18328.npy",
       "sha256": "199c79a6b43da5185495a2916c0a01bdef66daa3603e11643e51bd583e0e9332",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0156-22cd7d29",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0156-22cd7d29.npy",
       "sha256": "13ef66ca0d67c2066403d9274b1af0ecbb5d6f2f0e4311bc54077643aaaeaebc",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0157-fd1696d7",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0157-fd1696d7.npy",
       "sha256": "e15a98e29fa630d7e0f41c39d3f664fac139862c94847e93767675a9f6e657b3",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0158-f8ffc211",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0158-f8ffc211.npy",
       "sha256": "1285abeaef4fc7277dd2711d572cbb87dbc5f82e53f4528993a1e4d73b9d90a0",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0159-583b3099",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0159-583b3099.npy",
       "sha256": "ca6896edb24551583f13b3fdd96e8eeb3673fa82a59b0f6a8d9cbf166365bcd6",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0160-c3a5357b",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0160-c3a5357b.npy",
       "sha256": "89a51bf6e5e9931eee8e58b058f06a909c27b9aee9a8790064e5c579a99ff9f8",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0161-956f95f1",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0161-956f95f1.npy",
       "sha256": "33c740c537f3c76b8ed31e2ca4da8c1eb1e1b4f321836fb02fb18cd8fd2449ce",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0162-e89c3a2c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0162-e89c3a2c.npy",
       "sha256": "c8e243805b8bf5811791e03f9278603a5d8bbdf5cae604a420c9eb80ae0f865b",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0163-9ccd3b1c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0163-9ccd3b1c.npy",
       "sha256": "b2c6a10ca16958fe3041d0856e550cb92645223cd3a2739bbdc42222b8ad91fa",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0164-07ed2c75",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0164-07ed2c75.npy",
       "sha256": "c9fde861af174737715a7bc9f03754028f2413906fc56990837e3f6f384a3332",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0165-e3c63c9a",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0165-e3c63c9a.npy",
       "sha256": "56d9abcdfdcfdb8a11bfaba1294a0ca2111e0e5d9b8d149c690c1923f4fbb94b",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0166-82331f2f",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0166-82331f2f.npy",
       "sha256": "3d1a20941f5b70f8b01371caf5bda8519c4eec917ab17dd54dac83423865b3cc",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0167-0b748c95",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0167-0b748c95.npy",
       "sha256": "f3f6a955a5af1b24c3a2aa46f352ab0d8a9a35d8b0da7885fa4706b858a33ed8",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0168-b492bd5c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0168-b492bd5c.npy",
       "sha256": "cb4a023e0a6f20220f3d092b7095de7a2a37ad87abe2c55d45379c7afb791f68",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0169-48572c76",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0169-48572c76.npy",
       "sha256": "663ae245e0eaa6b147cfb959d8ac1d5bd20320707f3d9d2e8eab1eb6a5b5247c",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0170-8280eab2",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0170-8280eab2.npy",
       "sha256": "e5405bde5a7f411927b79c82bbee669f02401f31f2369cc1e780ed29847995f5",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0171-a8d7a5d4",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0171-a8d7a5d4.npy",
       "sha256": "a1d0ad2a8d206ca248e5a15cb9688f2d46bf49988ed7387bcf34c6900f9d57d0",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0172-624b204b",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0172-624b204b.npy",
       "sha256": "15f96ec5a09833916a553b2cd3e38f6d6b53f56083e290c5ccb2ccfda36faacc",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0173-53028932",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0173-53028932.npy",
       "sha256": "8d30f976c1008aa244751046f3e55c12ef8fdcb50161ac231fa7c2af3f210dfd",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0174-4a6ac539",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0174-4a6ac539.npy",
       "sha256": "b9dfc349e9ed4283bdbb4738f67a2571df588815b406e3104d1eedaa379420a2",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0175-c5f04daa",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0175-c5f04daa.npy",
       "sha256": "6243c731865ac03031efc3001f04f213def77ba6462210d01012c7d8c990074d",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0176-213eccd4",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0176-213eccd4.npy",
       "sha256": "19c54cf2b3bec61a40c1511e4d435d9c8deacb14e5e5015bad54d340af8cab3d",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0177-559397ea",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0177-559397ea.npy",
       "sha256": "c41b25c31a5131108fd46f8c814323c020791b10ecba94fa361d9b9ad24a9f81",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0178-95eaa3d3",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0178-95eaa3d3.npy",
       "sha256": "863e8e486dd000bf673933189ece316d11ab103368f2b85cfee832423006b365",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0179-c6e4f7a9",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0179-c6e4f7a9.npy",
       "sha256": "c795fa6e4cb59f4ac4cb388fe0071e3fd507373cb589997d98ae66ee7e262968",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0180-d1d4a036",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0180-d1d4a036.npy",
       "sha256": "3cc9f0949391b53aafc15617f540b5a6744143bbae7817bb6da4812544b47e66",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0181-033b2163",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0181-033b2163.npy",
       "sha256": "07337ade8df236d82239875eb4684e7fd05bc1297bccd2744fe10ca2254bac75",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0182-6c3a78f5",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0182-6c3a78f5.npy",
       "sha256": "c657373466b4b56c7e755e20b3c1e17f835c85a37e0ba2a09528374f924a7864",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0183-a3c5d6c1",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0183-a3c5d6c1.npy",
       "sha256": "27def610d5d5a1ad50a92b5e840dc222dd974a7b1292dc38ecd2e73eac198087",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0184-c850cd91",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0184-c850cd91.npy",
       "sha256": "c687053fd104f284833e4d84bdba5a4d8155d35974f81b737a2dd41037b25451",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0185-13c39af3",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0185-13c39af3.npy",
       "sha256": "6c2a2e41da409cdd72fc75305c4850f49b806ca5e303874c0661dcdc8108fc92",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0186-3aa9d9de",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0186-3aa9d9de.npy",
       "sha256": "8e7b8c68a3f97d6c4470c0897ca91f028724d05c2dc2dbc7fa43b47ad718697c",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0187-3693e2f5",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0187-3693e2f5.npy",
       "sha256": "576fb24fb523976f9e71fdb79819c750954406d7938252c3fbdbbbca4b977eeb",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0188-31266e75",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0188-31266e75.npy",
       "sha256": "7b6384178847057dabe0388af562f042150dd9de5537acc26ff5605523fc7022",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0189-f0177379",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0189-f0177379.npy",
       "sha256": "d79bbbafe5f1237c8f4035c3c7521fa49d0a28baf321b106ddd8766e0708deaf",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0190-fa375619",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0190-fa375619.npy",
       "sha256": "08890b5858b51c7727e5c55acf5fbf5cb498c2de2538a6ad79b0f2fe86d999b2",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0191-b8078816",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0191-b8078816.npy",
       "sha256": "fbabae3770ea4498e8619f7af580928aae1d5f0cd5ea44de2d454c4346158b4f",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0192-56d35b34",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0192-56d35b34.npy",
       "sha256": "6718979c614b29bf9388ee44ae09ae3a3c55d6569decb2b81ddfc293bf72d468",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0193-1fdac475",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0193-1fdac475.npy",
       "sha256": "36000f8de94c4e663cd6ce3dfe22b7cd0ddbdc53dfb3e2b4fe59dfc51f906d66",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0194-8007a288",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0194-8007a288.npy",
       "sha256": "f20812d00bb369cd350dd21ec67b5167ffc41cfe73f5ba4bc3806caf223efce6",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0195-dc8e78c1",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0195-dc8e78c1.npy",
       "sha256": "8acf1a72f692dcfdfbbe12268fc76026d41e9cf9ce26a618ef1c75c4a2f8689f",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0196-1e71bdae",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0196-1e71bdae.npy",
       "sha256": "edd8b3bd7d870d2a14d0a16cde54b57c8f4666cd194449baa93a76043dbf562b",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0197-77ead724",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0197-77ead724.npy",
       "sha256": "4f98664f80dbc515f2713945be7167cff17701f1fa129893b0c7fde92b9404f4",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0198-fb6b0164",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0198-fb6b0164.npy",
       "sha256": "03212864c59a5004b08d061f0e7bfb1d8ea3d2a21d09135f885af34a52c65bb0",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0199-cb3e60c1",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0199-cb3e60c1.npy",
       "sha256": "561d5713e60143f92112e08154943a128245514380c3c0626893a4b724df8af8",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0200-724875d9",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0200-724875d9.npy",
       "sha256": "f2c7cfae30349033b31e9e3a389726deb3a91d7521f1ed0c06e8936e7d6fc8b5",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0201-4ac82bd0",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0201-4ac82bd0.npy",
       "sha256": "3ed2ca8c970f87ff66a88161813c59abec3a9657ef6645027702b68b4c28f60e",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0202-ba31119e",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0202-ba31119e.npy",
       "sha256": "92f875dc5f5f28cec36ba9bec5b3c8e2c4e20040c5bae77e1bf5cf81135c73ce",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0203-64b74043",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0203-64b74043.npy",
       "sha256": "a20dae61886d5de771848413f1fc0e56c89eaafcffd881273770c30d05ddd21c",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0204-682d605c",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0204-682d605c.npy",
       "sha256": "0c24ab8544dd9f7a304eceb584e255b5c50816337d04d6c32dd0267c0c32e136",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0205-ee679a11",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0205-ee679a11.npy",
       "sha256": "53e71270c3b475cf46685e8584db64c18b4a478508dce9bfff53387e185ed487",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0206-4c9faad0",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0206-4c9faad0.npy",
       "sha256": "86c81ef0da25c633ed5c1a85db9d983ea3a2313cf2da61bbab621009fa3b7f94",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0207-8aace917",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0207-8aace917.npy",
       "sha256": "24e30f12571f0ad0651d2d56c7d63199ada58f5403dfdad0b9396ef3559bb9bf",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0208-2203abf8",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0208-2203abf8.npy",
       "sha256": "0b87e767389b5870acbb33b1e8b82a09891aa0415ca851feb84443a6693126e7",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0209-b86c7085",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0209-b86c7085.npy",
       "sha256": "60c1a462e9f67fd84d7963ae78cda7134204e2679c1d971e89f1808fc86560ce",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     },
     {
       "source_id": "asset-3d-0210-c26cfe60",
       "source_uri": "owner-authored:aethrion-llm/data/authored/3d",
       "source_path": "3d/point_clouds/3d-0210-c26cfe60.npy",
       "sha256": "88ee7e9816f9f32985e653078e131837695f2d6a82bb59102077e77c5413c32f",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
+      "license": "Claude-generated/project-authored claim; rights review pending",
+      "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": true,
-      "privacy_reviewed": true
+      "allow_training": false,
+      "privacy_reviewed": false
     }
   ],
   "preparation": {
@@ -2352,20 +2352,20 @@
   "governance": {
     "schema": "aethrion-human-review-v1",
     "model_id": "3d",
-    "approval_status": "approved",
+    "approval_status": "pending",
     "author_role": "project owner (content drafted by Claude at the owner's request)",
-    "authorship_attested": true,
-    "first_party_origin_attested": true,
-    "rights_holder_role": "project owner",
-    "rights_attested": true,
-    "source_rights_reviewed": true,
-    "privacy_reviewed": true,
-    "quality_reviewed": true,
-    "reviewer_role": "project owner (attestation given in the Claude Code session)",
-    "reviewed_at": "2026-11-22T13:16+03:00",
-    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/3d/records.jsonl@sha256:e3b083a4b997a11a006a38de55d8240246f034db811bfec591860a6585a96da4",
+    "authorship_attested": false,
+    "first_party_origin_attested": false,
+    "rights_holder_role": "claimed by project owner; verification pending",
+    "rights_attested": false,
+    "source_rights_reviewed": false,
+    "privacy_reviewed": false,
+    "quality_reviewed": false,
+    "reviewer_role": "pending human review",
+    "reviewed_at": "",
+    "evidence_uri": "",
     "speaker_consent_reviewed": false,
     "safety_reviewed": false
   },
-  "dataset_status": "owner_attested_pilot_not_released"
+  "dataset_status": "awaiting_owner_human_review"
 }
