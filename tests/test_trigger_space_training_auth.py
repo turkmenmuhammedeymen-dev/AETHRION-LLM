@@ -158,4 +158,6 @@ def test_tail_returns_the_end_of_long_diagnostics():
     from ci.trigger_space_training import _tail
 
     value = "start " + ("x" * 100) + " FINAL_TRACEBACK"
-    assert _tail(value, 20) == " FINAL_TRACEBACK"
+    tail = _tail(value, 20)
+    assert len(tail) == 20
+    assert tail.endswith(" FINAL_TRACEBACK")
