@@ -181,11 +181,7 @@ def status():
     rows.append("- **External model/API providers**: DISABLED — native-only policy")
     return "### Native model release status\n" + "\n".join(rows)
 
-def chat(message, history):
-    if not SPACE_AUTH_ENABLED:
-        return _auth_required_message()
-    if Capability.CHAT.value not in router.available():
-        return "AETHRION's own trained checkpoint/tokenizer is not loaded. No third-party model is silently substituted."
+def _chat_core(message, history):
     context = []
     for item in (history or [])[-8:]:
         if isinstance(item, dict) and isinstance(item.get("content"), str):
@@ -195,6 +191,17 @@ def chat(message, history):
         return _gpu_local_chat(prompt)
     except CapabilityUnavailable:
         return "AETHRION's own trained checkpoint/tokenizer is not available. No third-party model is silently substituted."
+
+
+def chat(message, history):
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    from aethrion.chat_orchestrator import orchestrate
+    return orchestrate(
+        message, router.available(),
+        lambda capability, prompt: dispatch(capability, prompt),
+        lambda prompt: _chat_core(prompt, history),
+    )
 @spaces.GPU(duration=60)
 def code(prompt):
     if space_auth_required(SPACE_AUTH_ENABLED):

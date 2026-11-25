@@ -19,3 +19,19 @@ def test_web_fetch_blocks_unsafe(url):
 def test_extract_text_drops_scripts():
     title, text = extract_text("<html><title>T</title><script>x()</script><p>Merhaba</p></html>")
     assert title == "T" and text == "Merhaba"
+
+
+def test_orchestrator_delegates_and_never_substitutes():
+    from aethrion.chat_orchestrator import orchestrate
+    calls = []
+    out = orchestrate("python ile fonksiyon yaz", {"chat", "code"}, lambda c, p: calls.append(c) or "kod", lambda p: "özet: " + p[:10])
+    assert calls == ["code"] and out.startswith("özet")
+    msg = orchestrate("python ile fonksiyon yaz", {"chat"}, lambda c, p: "x", lambda p: "y")
+    assert "yayınlanmadı" in msg
+
+
+def test_orchestrator_cites_sources():
+    from aethrion.chat_orchestrator import orchestrate
+    page = lambda u: {"url": u, "title": "T", "text": "icerik"}
+    out = orchestrate("Şunu oku https://example.com/a", {"chat"}, lambda c, p: "", lambda p: "yanıt", page)
+    assert out.endswith("https://example.com/a")
