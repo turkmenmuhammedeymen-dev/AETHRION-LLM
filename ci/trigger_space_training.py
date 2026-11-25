@@ -196,6 +196,22 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _safe_manifest_path(base: Path, relative: str) -> Path:
+    """Resolve a manifest path and reject absolute paths, traversal, and symlink escapes."""
+    if not isinstance(relative, str) or not relative.strip():
+        raise ValueError("manifest path is missing")
+    candidate = Path(relative)
+    if candidate.is_absolute():
+        raise ValueError("absolute manifest paths are not allowed")
+    base_resolved = base.resolve()
+    resolved = (base_resolved / candidate).resolve()
+    try:
+        resolved.relative_to(base_resolved)
+    except ValueError:
+        raise ValueError("manifest path escapes its permitted data directory") from None
+    return resolved
+
+
 def validate_training_approvals(models, root: Path | None = None) -> None:
     """Fail closed unless every selected family has a complete, hash-bound human review."""
     root = Path(root) if root is not None else Path(__file__).resolve().parents[1]
@@ -240,18 +256,18 @@ def validate_training_approvals(models, root: Path | None = None) -> None:
                 expected = source.get("sha256")
                 if not isinstance(relative, str) or not isinstance(expected, str):
                     raise ValueError("source path/hash is missing")
-                source_file = root / "data" / "specialists" / relative
+                source_file = _safe_manifest_path(root / "data" / "specialists", relative)
                 if not source_file.is_file() or _sha256(source_file) != expected:
                     raise ValueError(f"source snapshot missing or hash mismatch: {relative}")
 
             for key in ("dataset_path", "dataset_sha256"):
                 if not manifest.get(key):
                     raise ValueError(f"manifest {key} is missing")
-            dataset_file = root / "data" / "specialists" / manifest["dataset_path"]
+            dataset_file = _safe_manifest_path(root / "data" / "specialists", manifest["dataset_path"])
             if not dataset_file.is_file() or _sha256(dataset_file) != manifest["dataset_sha256"]:
                 raise ValueError("prepared dataset missing or hash mismatch")
             if manifest.get("tokenizer_path"):
-                tokenizer_file = root / "data" / "specialists" / manifest["tokenizer_path"]
+                tokenizer_file = _safe_manifest_path(root / "data" / "specialists", manifest["tokenizer_path"])
                 if not tokenizer_file.is_file() or _sha256(tokenizer_file) != manifest.get("tokenizer_sha256"):
                     raise ValueError("tokenizer missing or hash mismatch")
         except (OSError, ValueError, TypeError, KeyError, GovernanceError) as exc:
