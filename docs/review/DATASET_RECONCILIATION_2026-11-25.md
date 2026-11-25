@@ -97,3 +97,23 @@ This is a mixed automated and static review, not an exhaustive manual review of 
 8. For CHAT/BASE, rebuild the missing prepared corpus from approved sources and rerun provenance/preflight checks.
 9. Keep all training permissions false until each family independently passes its evidence-backed review and its own task-level evaluation. No automated check should grant legal or human approval.
 
+
+## Additional full-text record inventory
+
+The following authored JSONL files were also fetched and parsed in the repository snapshot:
+
+| Family | Rows | Unique IDs | Unique group IDs | Primary-text exact duplicate values |
+|---|---:|---:|---:|---:|
+| VISION | 360 | 360 | 48 | 0 captions |
+| IMAGE | 360 | 360 | 48 | 0 captions |
+| 3D | 210 | 210 | 210 | 35 repeated descriptions |
+| DOCUMENT | 240 | 240 | 81 | 0 text fields |
+| CHAT | 1,989 | 1,989 | 441 | 7 repeated prompts |
+
+CHAT has 1,982 unique normalized prompts and 610 unique normalized responses; 210 response values repeat, affecting 1,379 rows. Exact prompt/response pairs are unique. Repeated short responses are not automatically defects, but they may encourage formulaic outputs and should be evaluated for response diversity and factual consistency. The 350 figure in the review sheet is not the current full authored JSONL row count.
+
+For 3D, the 210 rows have 210 distinct group IDs even though the data generator uses a small number of primitive families and preset variations. This means the current grouping may not hold related primitive-family variants together during train/validation/test splitting. Revisit group IDs so that geometrically related examples cannot be split across partitions; the present 210-group count alone does not prove leakage, but it does not adequately demonstrate family-level isolation.
+
+The 35 repeated 3D descriptions are compatible with multiple different point clouds sharing the same short class/preset caption. Caption repetition is not itself a defect; geometry-to-caption alignment and primitive-family split isolation are the key tests.
+
+These counts are source-record metadata checks, not asset-level semantic verification. All image/audio/3D binary objects still require complete decoding and modality-specific integrity checks.
