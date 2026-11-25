@@ -129,7 +129,19 @@ def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = No
             "note": "Trainer output was not mirrored to the private artifact repository; no release was made.",
             "trainer_tail": detail,
         }
-    return {"model": model, "steps": steps, "pulled": pulled, "pushed": pushed, "trainer_ok": ok,
-            "released": False, "progress": read_progress(directory) if directory.is_dir() else {"status": "unknown", "step": None},
-            "note": "A session is not a release; evaluation and human approval are still required.",
-            "trainer_tail": (getattr(result, "stdout", "") or "")[-400:] if ok else (getattr(result, "stderr", "") or "")[-400:]}
+    progress = read_progress(directory) if directory.is_dir() else {"status": "unknown", "step": None, "complete": False}
+    stdout = str(getattr(result, "stdout", "") or "")
+    stderr = str(getattr(result, "stderr", "") or "")
+    diagnostics = "\n".join(part for part in (stdout, stderr) if part.strip())
+    return {
+        "model": model,
+        "steps": steps,
+        "pulled": pulled,
+        "pushed": pushed,
+        "trainer_ok": ok,
+        "trainer_exit_code": int(getattr(result, "returncode", 1)),
+        "released": False,
+        "progress": progress,
+        "note": "A session is not a release; evaluation and human approval are still required.",
+        "trainer_tail": diagnostics[-1500:] if diagnostics else "Trainer produced no stdout or stderr.",
+    }

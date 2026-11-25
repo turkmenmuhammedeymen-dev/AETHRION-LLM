@@ -51,9 +51,13 @@ fail-closed until source rights, privacy, provenance and quality checks are
 completed.
 
 ## Current status (2026-11-25)
-All eleven AETHRION models are **experimental and NOT released**. They are small first-party models
-trained on synthetic, owner-authored data on CPU. Measured on held-out test sets: SAFETY accuracy 0.85,
-CODE next-token accuracy 0.94 (majority baseline 0.92), RESEARCH retrieval top-1 45%. These numbers do not
-meet release thresholds, and the vision, image, audio, 3D and document models have not been validated on
-real-world inputs. Specialist delegation and cited page reading are wired into Chat, but a model answers
-only after it is trained and released; no third-party model is ever substituted.
+
+All eleven model registry entries remain **NOT_TRAINED and NOT_RELEASED**. The latest repository audit found 10/11 specialist data preflights ready and CHAT/BASE blocked because its prepared corpus, tokenizer and provenance inputs are missing. The ten specialist datasets are owner-attested pilot datasets; their record counts are not production-scale training evidence. No model is approved for release.
+
+The metrics recorded in `docs/RELEASE_THRESHOLDS.md` are pilot measurements, not proof of production capability. SAFETY and RESEARCH are below their proposed thresholds; CODE's next-token accuracy is not executable code-task success. Real-world evaluations are missing for several modalities. A synthetic preflight, passing CI, a checkpoint filename or a successful training session does not establish model quality or release readiness.
+
+## Private artifact and training setup
+
+The owner-only panel can run one bounded, resumable, data-gate-checked training session. It does not bypass dataset approvals or release gates. For private checkpoint synchronization, configure the Space secret `HF_TOKEN` with write access to the private `vizyon2027/aethrion-artifacts` model repository and the Space variable `AETHRION_ARTIFACT_REPO=vizyon2027/aethrion-artifacts`. Add secrets only in Hugging Face Space Settings → Variables and secrets. The GitHub Actions workflow separately requires its own repository secrets. A healthy Gradio endpoint does not prove that private artifact synchronization is configured.
+
+The chat model remains unavailable until its own trained checkpoint and matching tokenizer are installed and integrity-verified. Code, vision, image-generation, ASR, TTS, 3D, research, document-intelligence and safety specialists are separate first-party model programs and remain unavailable until each one is independently trained and passes its release gates.
