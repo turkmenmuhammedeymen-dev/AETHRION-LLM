@@ -11,31 +11,47 @@ SPACE_ID = "vizyon2027/AETHRION-LLM"
 DEFAULT_MODELS = ["chat", "code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document"]
 
 
+_TRAINER_OK = re.compile(r"(?im)^\s*-\s*Trainer ok:\s*(True|False)\b")
+_PROGRESS = re.compile(r"Progress: (\S+) step (\d+|None) \| complete: (True|False)")
+
+
+def parse_progress(out):
+    """Extract the Space's machine-readable progress line without guessing."""
+    m = _PROGRESS.search(str(out))
+    if not m:
+        return None
+    return {
+        "status": m.group(1),
+        "step": None if m.group(2) == "None" else int(m.group(2)),
+        "complete": m.group(3) == "True",
+    }
+
+
+def parse_session_result(out):
+    """Interpret the actual Space response; a paused checkpointed session is successful."""
+    match = _TRAINER_OK.search(str(out))
+    progress = parse_progress(out)
+    return {
+        "trainer_ok": bool(match and match.group(1) == "True"),
+        "progress": progress,
+        "complete": bool(progress and progress.get("complete") is True),
+    }
+
+
 def run(client, models, steps, rounds):
     summary = []
     for _ in range(rounds):
         for model in models:
             out = client.predict(model, steps, api_name="/training_session")
-            ok = "Training session finished" in str(out) and "Trainer ok: True" in str(out)
-            print(f"[{model}] {'OK' if ok else 'NOT OK'}\n{str(out)[:600]}\n", flush=True)
+            ok = parse_session_result(out)["trainer_ok"]
+            print(f"[{model}] {'OK' if ok else 'NOT OK'}\n{str(out)[:900]}\n", flush=True)
             summary.append((model, ok))
     return summary
 
 
-_PROGRESS = re.compile(r"Progress: (\S+) step (\d+|None) \| complete: (True|False)")
-
-
-def parse_progress(out):
-    m = _PROGRESS.search(str(out))
-    if not m:
-        return None
-    return {"status": m.group(1), "step": None if m.group(2) == "None" else int(m.group(2)),
-            "complete": m.group(3) == "True"}
-
-
 def _tail(out, n=500):
     text = " ".join(str(out).split())
-    return text[:n]
+    return text[-n:]
 
 
 def run_until_complete(client, models, steps, max_rounds, min_steps=25, max_consecutive_failures=3):
@@ -58,24 +74,23 @@ def run_until_complete(client, models, steps, max_rounds, min_steps=25, max_cons
                     print(f"[{model}] stopping after {failures} consecutive failed sessions", flush=True)
                     break
                 continue
-            ok = "Training session finished" in str(out) and "Trainer ok: True" in str(out)
-            prog = parse_progress(out) or {}
+            parsed = parse_session_result(out)
+            ok, prog = parsed["trainer_ok"], parsed["progress"] or {}
             print(f"[{model}] round {state['rounds']} ok={ok} progress={prog}", flush=True)
             if not ok:
                 failures += 1
-                print(f"[{model}] session output (no credentials): {_tail(out)}", flush=True)
+                print(f"[{model}] session output (no credentials): {_tail(out, 900)}", flush=True)
                 cur = max(min_steps, cur // 2)
                 if failures >= max_consecutive_failures:
                     print(f"[{model}] stopping after {failures} consecutive failed sessions", flush=True)
                     break
                 continue
             failures = 0
-            state.update(ok=True, step=prog.get("step"), complete=bool(prog.get("complete")))
+            state.update(ok=True, step=prog.get("step"), complete=parsed["complete"])
             if state["complete"]:
                 break
         results[model] = state
     return results
-
 
 class SpaceAuthenticationError(RuntimeError):
     """A Gradio login failure, reported without response bodies or credentials."""
