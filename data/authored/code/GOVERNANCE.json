@@ -11,10 +11,10 @@
   "privacy_reviewed": true,
   "quality_reviewed": true,
   "reviewer_role": "project owner (attestation given in the Claude Code session)",
-  "reviewed_at": "2026-11-22T12:37+03:00",
-  "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/code/records.jsonl@sha256:0d17092d0a54b2c53d695ea9e470923370cbb9c7f4eeff97df9b0f942c73db5f",
+  "reviewed_at": "2026-11-25T15:14+03:00",
+  "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/code/records.jsonl@sha256:09a3429d2934b4c1177b1fb91317893d7599c2847584fe75a9068c53838d02e1",
   "speaker_consent_reviewed": false,
   "safety_reviewed": false,
-  "owner_statement": "CODE ve RESEARCH kayıtlarını inceledim; içerikler projeye aittir; eğitimde kullanılmasına izin veriyorum; gizlilik ve kalite sorumluluğunu kabul ediyorum.",
-  "reviewed_records_sha256": "0d17092d0a54b2c53d695ea9e470923370cbb9c7f4eeff97df9b0f942c73db5f"
+  "owner_statement": "CODE veri kümesinin genişletilmiş hâlini (çalıştırılıp doğrulanmış üretilmiş Python örnekleri) inceledim; içerik projeye aittir (özgün şablonlardan üretilmiş); eğitimde kullanılmasına izin veriyorum; gizlilik ve kalite sorumluluğunu kabul ediyorum. (Proje sahibi beyanı: 'BEYAN BENİM ONAY VERİYORUM', 2026-11-25.)",
+  "reviewed_records_sha256": "09a3429d2934b4c1177b1fb91317893d7599c2847584fe75a9068c53838d02e1"
 }

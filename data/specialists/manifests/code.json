@@ -1,6 +1,6 @@
 {
   "format": "aethrion-specialist-dataset-v1",
-  "dataset_id": "code-prepared-56ebe879fd0a",
+  "dataset_id": "code-prepared-803c02a810f0",
   "model_id": "code",
   "modality": "code",
   "training_allowed": true,
@@ -8,15 +8,15 @@
   "privacy_reviewed": true,
   "speaker_consent_reviewed": false,
   "dataset_path": "code/dataset.npz",
-  "dataset_sha256": "56ebe879fd0ad3a690a512a4e1c74a3037a55a152085cf62e3109d75463bf9b2",
+  "dataset_sha256": "803c02a810f041e2eb5ad778254319eae419b9b4e9ac25e4ee1f9341fac86f4e",
   "tokenizer_path": "code/tokenizer.json",
-  "tokenizer_sha256": "c28a7d7c41cf27045972fe5d920de37f3aeeb8e4049068868bc74997467272d2",
+  "tokenizer_sha256": "2435928ece78f5a78b8eb1e5b71fff83aabc4c6a21a726d95100ce15098355a8",
   "sources": [
     {
       "source_id": "code-input-jsonl",
       "source_uri": "owner-authored:aethrion-llm/data/authored/code",
       "source_path": "code/source.jsonl",
-      "sha256": "0d17092d0a54b2c53d695ea9e470923370cbb9c7f4eeff97df9b0f942c73db5f",
+      "sha256": "09a3429d2934b4c1177b1fb91317893d7599c2847584fe75a9068c53838d02e1",
       "license": "First-party owner-authored",
       "permitted_use": "model training permitted",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/code/GOVERNANCE.json",
@@ -28,14 +28,14 @@
     "tool": "aethrion.specialist_prepare",
     "seed": 1,
     "max_length": 512,
-    "vocab_size": 1321,
+    "vocab_size": 1802,
     "layout_vocab_size": 32,
     "tag_classes": 32,
-    "record_count": 74,
+    "record_count": 163,
     "split_counts": {
-      "train": 62,
-      "validation": 7,
-      "test": 5
+      "train": 135,
+      "validation": 13,
+      "test": 15
     },
     "automatic_approval": false
   },
@@ -52,8 +52,8 @@
     "privacy_reviewed": true,
     "quality_reviewed": true,
     "reviewer_role": "project owner (attestation given in the Claude Code session)",
-    "reviewed_at": "2026-11-22T12:37+03:00",
-    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/code/records.jsonl@sha256:0d17092d0a54b2c53d695ea9e470923370cbb9c7f4eeff97df9b0f942c73db5f",
+    "reviewed_at": "2026-11-25T15:14+03:00",
+    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/code/records.jsonl@sha256:09a3429d2934b4c1177b1fb91317893d7599c2847584fe75a9068c53838d02e1",
     "speaker_consent_reviewed": false,
     "safety_reviewed": false
   },
