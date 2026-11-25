@@ -64,7 +64,7 @@ class SingleCommitTests(unittest.TestCase):
             commits = []
             def create_commit(self, **k): self.commits.append(k)
         with tempfile.TemporaryDirectory() as d:
-            for name in ("checkpoint_last.pt", "checkpoint_last.pt.sha256"):
+            for name in ("checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json"):
                 (Path(d) / name).write_bytes(b"x")
             c = C()
             sent = s.push_model_artifacts("code", d, api=c, environ=ENV)
@@ -74,11 +74,13 @@ class SingleCommitTests(unittest.TestCase):
 
 
 class TokenizerPackageSyncTests(unittest.TestCase):
-    def test_chat_push_and_pull_include_tokenizer_provenance(self):
+    def test_chat_push_includes_tokenizer_provenance(self):
         import tempfile
+        s = __import__("aethrion.artifact_sync", fromlist=["x"])
         with tempfile.TemporaryDirectory() as d:
-            for name in ("checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json"):
+            names = ("checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json")
+            for name in names:
                 (Path(d) / name).write_bytes(b"x")
             f = Fake()
             sent = s.push_model_artifacts("chat", d, api=f, environ=ENV)
-        self.assertEqual(sorted(sent), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
+        self.assertEqual(sorted(sent), sorted(names))
