@@ -33,3 +33,17 @@ The current text preparation implementation hashes each row's `group_id` to choo
 ## Limitations
 
 This review is static and targeted; it is not a full semantic review of all 163 CODE records or a comprehensive security audit of every snippet. A passing syntax or unit-test suite cannot establish dataset rights, factual quality, broad code-generation ability, or production readiness.
+
+## 2026-11-25 implementation status
+
+A source-level remediation has now been prepared on branch `fix/code-corpus-records-and-tests`:
+
+- `code-0009`: the ascending-order precondition is explicit in the record and canonical seed generator.
+- `code-0013`: negative opening balances and non-positive withdrawals are rejected in the record and canonical seed generator.
+- `code-0037`: the Caesar example now rotates the 29-letter Turkish alphabet, preserving case and leaving punctuation/digits unchanged; the Round 2 generator is updated.
+- The Round 2 and Round 3 generator headers now describe generated content accurately rather than implying direct owner authorship or individual review.
+- `tests/test_code_corpus_records.py` adds behavior tests and asserts the 163-row / 84-group inventory and the three original group IDs remain unchanged.
+
+**Important artifact state:** the prepared snapshot at `data/specialists/manifests/code/source.jsonl`, its NPZ tensor, tokenizer, and manifest have not been rebuilt in this change. They still represent the previous source snapshot. Training remains disabled. Do not use or release the old prepared CODE artifact as if it contained these fixes. The official preparation pipeline must be run from the corrected authored JSONL into a clean output location, then source/dataset/tokenizer hashes and split counts must be reconciled before any training consideration.
+
+The source edits are not yet merged; CI must pass first. No training was started.
