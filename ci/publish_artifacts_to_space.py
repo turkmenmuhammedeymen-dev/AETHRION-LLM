@@ -1,67 +1,43 @@
-"""Publish verified private AETHRION training checkpoints into the Space workspace.
+"""Keep unapproved training checkpoints out of the Hugging Face Space.
 
-This sync makes checkpoint files visible to the Space but deliberately does not
-change models/manifest.json, mark models trained/released, or bypass evaluation.
+Training checkpoints remain in the private aethrion-artifacts model repository.
+The Space receives model files only through a separate, fully verified release
+deployment. This cleanup prevents unapproved/partial checkpoints from consuming
+the Space's 1 GB storage quota or appearing to be released models.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import os
-import re
-import shutil
-import tempfile
-from datetime import datetime, timezone
-from pathlib import Path, PurePosixPath
 
-from huggingface_hub import HfApi, hf_hub_download
+from huggingface_hub import CommitOperationDelete, HfApi, hf_hub_download
 
 SPACE_ID = "vizyon2027/AETHRION-LLM"
-ARTIFACT_REPO = "vizyon2027/aethrion-artifacts"
 MODELS = (
     "chat", "code", "vision", "image", "asr", "tts", "3d",
     "research", "document", "safety", "vocoder",
 )
-SPECIALISTS_WITH_TOKENIZER = (
-    "code", "vision", "image", "asr", "tts", "3d", "research", "document", "safety",
-)
-SHA_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def verified_download(api: HfApi, repo_id: str, filename: str, repo_type: str,
-                      destination: Path, expected_sha: str | None = None,
-                      revision: str | None = None) -> str:
-    downloaded = Path(hf_hub_download(
-        repo_id=repo_id, repo_type=repo_type, filename=filename,
-        token=api.token, revision=revision,
-    ))
-    actual = sha256(downloaded)
-    if expected_sha is not None and actual != expected_sha:
-        raise RuntimeError(
-            f"SHA-256 mismatch for {repo_id}/{filename}: expected {expected_sha}, got {actual}"
-        )
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(downloaded, destination)
-    return actual
-
-
-def read_sha_sidecar(api: HfApi, model: str, filename: str) -> str:
-    remote = f"{model}/{filename}.sha256"
-    local = Path(hf_hub_download(
-        repo_id=ARTIFACT_REPO, repo_type="model", filename=remote, token=api.token,
-    ))
-    value = local.read_text(encoding="ascii").strip().split()[0].lower()
-    if not SHA_RE.fullmatch(value):
-        raise RuntimeError(f"Invalid SHA-256 sidecar: {remote}")
-    return value
+def release_approved_models(token: str) -> set[str]:
+    manifest_path = hf_hub_download(
+        repo_id=SPACE_ID, repo_type="space",
+        filename="models/manifest.json", token=token,
+    )
+    with open(manifest_path, "r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+    if not isinstance(payload, dict) or not isinstance(payload.get("models"), dict):
+        raise RuntimeError("Space model manifest is missing or invalid; refusing cleanup.")
+    approved = set()
+    for model in MODELS:
+        entry = payload["models"].get(model)
+        if not isinstance(entry, dict) or entry.get("status") != "trained":
+            continue
+        if all(entry.get(flag) is True for flag in (
+            "release_approval", "quality_gate_passed", "safety_gate_passed"
+        )):
+            approved.add(model)
+    return approved
 
 
 def main() -> None:
@@ -69,160 +45,47 @@ def main() -> None:
     if not token:
         raise SystemExit("HF_TOKEN repository secret is missing.")
     api = HfApi(token=token)
+    approved = release_approved_models(token)
+    space_files = set(api.list_repo_files(repo_id=SPACE_ID, repo_type="space"))
 
-    artifact_info = api.repo_info(repo_id=ARTIFACT_REPO, repo_type="model")
-    if not getattr(artifact_info, "private", False):
-        raise SystemExit("Refusing to read training checkpoints from a non-private artifact repository.")
-    space_info = api.repo_info(repo_id=SPACE_ID, repo_type="space")
-    artifact_files = set(api.list_repo_files(repo_id=ARTIFACT_REPO, repo_type="model"))
-    space_revision = getattr(space_info, "sha", None)
+    stale = []
+    for path in space_files:
+        if path == "models/training_artifact_sync.json":
+            stale.append(path)
+            continue
+        parts = path.split("/")
+        if len(parts) >= 4 and parts[0] == "artifacts" and parts[1] == "models":
+            if parts[2] in MODELS and parts[2] not in approved:
+                stale.append(path)
 
-    with tempfile.TemporaryDirectory(prefix="aethrion-space-artifacts-") as temp:
-        staging = Path(temp)
-        report: dict[str, object] = {
-            "format": "aethrion-training-artifact-sync-v1",
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "source_artifact_repo": ARTIFACT_REPO,
-            "source_artifact_revision": getattr(artifact_info, "sha", None),
-            "target_space": SPACE_ID,
-            "source_space_revision": space_revision,
-            "policy": "checkpoint_available_not_released",
-            "release_status_changed": False,
-            "models": {},
-        }
-        model_rows: dict[str, object] = {}
+    if not stale:
+        print("SPACE_ARTIFACT_CLEANUP=NOOP")
+        print(f"RELEASE_APPROVED_MODELS={len(approved)}")
+        print("UNAPPROVED_CHECKPOINTS_REMAINING=0")
+        return
 
-        for model in MODELS:
-            folder = staging / "artifacts" / "models" / model
-            checkpoint = f"{model}/checkpoint_last.pt"
-            if checkpoint not in artifact_files:
-                raise RuntimeError(f"Missing required checkpoint: {checkpoint}")
-            expected = read_sha_sidecar(api, model, "checkpoint_last.pt")
-            actual = verified_download(
-                api, ARTIFACT_REPO, checkpoint, "model",
-                folder / "checkpoint_last.pt", expected,
-            )
-            (folder / "checkpoint_last.pt.sha256").write_text(actual + "\n", encoding="ascii")
-
-            previous_name = "checkpoint_last.pt.previous"
-            previous = f"{model}/{previous_name}"
-            previous_status = "absent"
-            if previous in artifact_files:
-                previous_expected = read_sha_sidecar(api, model, previous_name)
-                previous_actual = verified_download(
-                    api, ARTIFACT_REPO, previous, "model",
-                    folder / previous_name, previous_expected,
-                )
-                (folder / f"{previous_name}.sha256").write_text(
-                    previous_actual + "\n", encoding="ascii"
-                )
-                previous_status = "verified"
-
-            tokenizer_status = "not_applicable"
-            tokenizer_sha = None
-            if model == "chat":
-                from aethrion.checkpoint import load_checkpoint
-                from aethrion.tokenizer import validate_tokenizer_provenance
-
-                chat_tokenizer_path = Path("artifacts/tokenizer.json")
-                chat_provenance_path = Path("artifacts/tokenizer.json.provenance.json")
-                if not chat_tokenizer_path.is_file() or not chat_provenance_path.is_file():
-                    raise RuntimeError("Chat tokenizer/provenance was not regenerated by the approved BASE preparation step.")
-                _, provenance_hash = validate_tokenizer_provenance(
-                    chat_tokenizer_path,
-                    "data/processed/corpus.txt",
-                    "data/processed/corpus_manifest.json",
-                    "data/raw/cosmos/sources.json",
-                    "data/raw/cosmos",
-                    "data/processed/corpus-report.json",
-                    Path("data/processed/privacy_review/source_review.csv")
-                    if Path("data/processed/privacy_review/source_review.csv").is_file() else None,
-                )
-                checkpoint_state = load_checkpoint(folder / "checkpoint_last.pt")
-                tokenizer_sha = sha256(chat_tokenizer_path)
-                if checkpoint_state.get("tokenizer_sha256") != tokenizer_sha:
-                    raise RuntimeError("Regenerated chat tokenizer does not byte-match the training checkpoint.")
-                if checkpoint_state.get("tokenizer_provenance_sha256") != provenance_hash:
-                    raise RuntimeError("Chat tokenizer provenance does not match the training checkpoint.")
-                shutil.copyfile(chat_tokenizer_path, folder / "tokenizer.json")
-                shutil.copyfile(chat_provenance_path, folder / "tokenizer.json.provenance.json")
-                (folder / "tokenizer.json.sha256").write_text(tokenizer_sha + "\n", encoding="ascii")
-                tokenizer_status = "verified_against_chat_checkpoint_and_provenance"
-            elif model in SPECIALISTS_WITH_TOKENIZER:
-                manifest_name = f"data/specialists/manifests/{model}.json"
-                manifest_file = Path(hf_hub_download(
-                    repo_id=SPACE_ID, repo_type="space", filename=manifest_name,
-                    token=token, revision=space_revision,
-                ))
-                manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
-                raw_path = manifest.get("tokenizer_path")
-                expected_tokenizer = str(manifest.get("tokenizer_sha256", "")).lower()
-                if not isinstance(raw_path, str) or not raw_path:
-                    raise RuntimeError(f"{model}: tokenizer_path missing from source manifest.")
-                relative = PurePosixPath(raw_path)
-                if relative.is_absolute() or ".." in relative.parts:
-                    raise RuntimeError(f"{model}: unsafe tokenizer_path in source manifest.")
-                source_tokenizer = str(PurePosixPath("data/specialists/manifests") / relative)
-                if not SHA_RE.fullmatch(expected_tokenizer):
-                    raise RuntimeError(f"{model}: invalid tokenizer_sha256 in source manifest.")
-                tokenizer_sha = verified_download(
-                    api, SPACE_ID, source_tokenizer, "space",
-                    folder / "tokenizer.json", expected_tokenizer, revision=space_revision,
-                )
-                (folder / "tokenizer.json.sha256").write_text(
-                    tokenizer_sha + "\n", encoding="ascii"
-                )
-                tokenizer_status = "verified_from_space_manifest"
-
-            model_rows[model] = {
-                "status": "checkpoint_available_not_released",
-                "checkpoint_sha256": actual,
-                "previous_checkpoint": previous_status,
-                "tokenizer": tokenizer_status,
-                "tokenizer_sha256": tokenizer_sha,
-                "evaluation": "not_verified_by_this_sync",
-                "release_approval": False,
-            }
-
-        report["models"] = model_rows;
-        manifest_path = staging / "models" / "training_artifact_sync.json"
-        manifest_path.parent.mkdir(parents=True, exist_ok=True)
-        manifest_path.write_text(
-            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
-
-        commit = api.upload_folder(
-            repo_id=SPACE_ID,
-            repo_type="space",
-            folder_path=str(staging),
-            commit_message="Sync verified AETHRION training checkpoints from private artifact repository",
-            allow_patterns=["artifacts/models/**", "models/training_artifact_sync.json"],
-        )
-        revision = getattr(commit, "oid", None)
-        if not revision:
-            raise RuntimeError("Space upload returned no verifiable commit SHA.")
-
-        # Read back every checkpoint from the exact commit and verify byte integrity.
-        for model in MODELS:
-            filename = f"artifacts/models/{model}/checkpoint_last.pt"
-            remote = Path(hf_hub_download(
-                repo_id=SPACE_ID, repo_type="space", filename=filename,
-                token=token, revision=revision,
-            ))
-            actual = sha256(remote)
-            expected = model_rows[model]["checkpoint_sha256"]
-            if actual != expected:
-                raise RuntimeError(f"Space read-back SHA-256 mismatch: {filename}")
-
-        current = api.repo_info(repo_id=SPACE_ID, repo_type="space")
-        if getattr(current, "sha", None) != revision:
-            raise RuntimeError("Space HEAD does not match the artifact-sync commit.")
-
-        print(f"SPACE_ARTIFACT_SYNC_COMMIT={revision}")
-        print(f"CHECKPOINTS_SYNCED={len(MODELS)}")
-        print("CHAT_TOKENIZER=" + str(model_rows["chat"]["tokenizer"]))
-        print("CHECKPOINT_READBACK_SHA256=PASS")
-        print("MODEL_RELEASE_STATUS=UNCHANGED_NOT_RELEASED")
+    operations = [CommitOperationDelete(path_in_repo=path) for path in sorted(stale)]
+    commit = api.create_commit(
+        repo_id=SPACE_ID, repo_type="space", operations=operations,
+        commit_message=(
+            "Remove unapproved AETHRION checkpoints from Space; "
+            "retain canonical copies in private artifact repository"
+        ),
+    )
+    revision = getattr(commit, "oid", None)
+    if not revision:
+        raise RuntimeError("Space cleanup returned no verifiable commit SHA.")
+    current_files = set(api.list_repo_files(repo_id=SPACE_ID, repo_type="space"))
+    remaining = [path for path in stale if path in current_files]
+    if remaining:
+        raise RuntimeError("Space cleanup verification failed: " + ", ".join(remaining[:10]))
+    current = api.repo_info(repo_id=SPACE_ID, repo_type="space")
+    if getattr(current, "sha", None) != revision:
+        raise RuntimeError("Space HEAD does not match the cleanup commit.")
+    print(f"SPACE_ARTIFACT_CLEANUP_COMMIT={revision}")
+    print(f"SPACE_FILES_REMOVED={len(stale)}")
+    print(f"RELEASE_APPROVED_MODELS_RETAINED={len(approved)}")
+    print("PRIVATE_ARTIFACT_REPOSITORY=UNCHANGED")
 
 
 if __name__ == "__main__":
