@@ -90,6 +90,29 @@ class SpecialistTrainingApprovalGateTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "hash mismatch"):
                 validate_training_approvals(["code"], root)
 
+    def test_source_path_traversal_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.build_fixture(root, approved=True)
+            manifest_path = root / "data/specialists/manifests/code.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["sources"][0]["source_path"] = "../../authored/code/GOVERNANCE.json"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "escapes"):
+                validate_training_approvals(["code"], root)
+
+    def test_dataset_path_traversal_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.build_fixture(root, approved=True)
+            manifest_path = root / "data/specialists/manifests/code.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["dataset_path"] = "../../authored/code/GOVERNANCE.json"
+            manifest["dataset_sha256"] = hashlib.sha256((root / "data/authored/code/GOVERNANCE.json").read_bytes()).hexdigest()
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "escapes"):
+                validate_training_approvals(["code"], root)
+
     def test_unsupported_family_is_rejected(self):
         with self.assertRaisesRegex(RuntimeError, "Unsupported"):
             validate_training_approvals(["chat"], Path("."))
