@@ -160,13 +160,22 @@ def training_session(model, steps):
         result = _gpu_training_session(model, steps)
     except Exception as exc:
         return "### Training session failed\n- " + type(exc).__name__ + ": " + str(exc)[:300]
+    progress = result.get("progress", {})
+    trainer_ok = bool(result.get("trainer_ok"))
+    complete = bool(progress.get("complete"))
+    if not trainer_ok:
+        heading = "### Training session failed"
+    elif complete:
+        heading = "### Training session completed (not released)"
+    else:
+        heading = "### Training session paused / incomplete (not released)"
     return (
-        "### Training session finished\n"
-        f"- Model: {result['model']} | steps requested: {result['steps']}\n"
-        f"- Trainer ok: {result['trainer_ok']} | pulled: {len(result['pulled'])} files | pushed: {len(result['pushed'])} files\n"
-        f"- Progress: {result.get('progress', {}).get('status', 'unknown')} step {result.get('progress', {}).get('step')} | complete: {result.get('progress', {}).get('complete', False)}\n"
-        "- Released: NO — a session is not a release; evaluation and human approval are still required.\n"
-        f"```\n{result['trainer_tail']}\n```"
+        heading + "\n"
+        + f"- Model: {result.get('model', model)} | steps requested: {result.get('steps', steps)}\n"
+        + f"- Trainer ok: {trainer_ok} | pulled: {len(result.get('pulled', []))} files | pushed: {len(result.get('pushed', []))} files\n"
+        + f"- Progress: {progress.get('status', 'unknown')} step {progress.get('step')} | complete: {complete}\n"
+        + "- Released: NO — evaluation and human approval are still required.\n"
+        + f"```\n{result.get('trainer_tail', result.get('note', 'No diagnostic available.'))}\n```"
     )
 
 
