@@ -49,3 +49,11 @@ See the [native-only model-family specification](https://github.com/turkmenmuham
 for model-family status and completion criteria. Dataset approval remains
 fail-closed until source rights, privacy, provenance and quality checks are
 completed.
+
+## Current status (2026-11-25)
+All eleven AETHRION models are **experimental and NOT released**. They are small first-party models
+trained on synthetic, owner-authored data on CPU. Measured on held-out test sets: SAFETY accuracy 0.85,
+CODE next-token accuracy 0.94 (majority baseline 0.92), RESEARCH retrieval top-1 45%. These numbers do not
+meet release thresholds, and the vision, image, audio, 3D and document models have not been validated on
+real-world inputs. Specialist delegation and cited page reading are wired into Chat, but a model answers
+only after it is trained and released; no third-party model is ever substituted.
