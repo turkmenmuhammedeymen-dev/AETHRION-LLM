@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Round 2: more original, owner-authored research passages (own wording; general well-established facts)."""
+"""Round 2 RESEARCH passages generated at the project owner's request; not individually human-reviewed. Factual accuracy and source provenance remain pending review."""
 import json
 P = "data/authored/research/records.jsonl"
 M = [
