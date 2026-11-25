@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Round 2: more original owner-authored code samples. Appends to records.jsonl (idempotent by id)."""
+"""Round 2 CODE examples generated at the project owner's request; not individually human-reviewed. Appends idempotently by ID."""
 import json
 P = "data/authored/code/records.jsonl"
 M = [
@@ -12,7 +12,7 @@ M = [
 ("python-metin","def anagram_mi(a, b):\n    temiz = lambda s: sorted(c.lower() for c in s if c.isalpha())\n    return temiz(a) == temiz(b)\n"),
 ("python-metin","def en_uzun_kelime(metin):\n    kelimeler = metin.split()\n    return max(kelimeler, key=len) if kelimeler else ''\n"),
 ("python-metin","import re\n\n\ndef sayilari_bul(metin):\n    return [int(s) for s in re.findall(r'-?\\d+', metin)]\n"),
-("python-metin","def sezar_sifrele(metin, kaydirma):\n    sonuc = []\n    for c in metin:\n        if 'a' <= c <= 'z':\n            sonuc.append(chr((ord(c) - 97 + kaydirma) % 26 + 97))\n        elif 'A' <= c <= 'Z':\n            sonuc.append(chr((ord(c) - 65 + kaydirma) % 26 + 65))\n        else:\n            sonuc.append(c)\n    return ''.join(sonuc)\n"),
+("python-metin","def sezar_sifrele(metin, kaydirma):\n    \"\"\"Türk alfabesindeki 29 harfi büyük/küçük harfi koruyarak kaydırır.\"\"\"\n    kucuk = 'abcçdefgğhıijklmnoöprsştuüvyz'\n    buyuk = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'\n    sonuc = []\n    for c in metin:\n        if c in kucuk:\n            sonuc.append(kucuk[(kucuk.index(c) + kaydirma) % len(kucuk)])\n        elif c in buyuk:\n            sonuc.append(buyuk[(buyuk.index(c) + kaydirma) % len(buyuk)])\n        else:\n            sonuc.append(c)\n    return ''.join(sonuc)\n"),
 ("python-algoritma","def hizli_sirala(dizi):\n    if len(dizi) <= 1:\n        return list(dizi)\n    pivot = dizi[len(dizi) // 2]\n    kucuk = [x for x in dizi if x < pivot]\n    esit = [x for x in dizi if x == pivot]\n    buyuk = [x for x in dizi if x > pivot]\n    return hizli_sirala(kucuk) + esit + hizli_sirala(buyuk)\n"),
 ("python-algoritma","def eratosthenes(n):\n    if n < 2:\n        return []\n    asal = [True] * (n + 1)\n    asal[0] = asal[1] = False\n    for i in range(2, int(n ** 0.5) + 1):\n        if asal[i]:\n            for j in range(i * i, n + 1, i):\n                asal[j] = False\n    return [i for i, a in enumerate(asal) if a]\n"),
 ("python-algoritma","from collections import deque\n\n\ndef genislik_oncelikli(graf, baslangic):\n    gorulen, sira, sonuc = {baslangic}, deque([baslangic]), []\n    while sira:\n        dugum = sira.popleft()\n        sonuc.append(dugum)\n        for komsu in graf.get(dugum, []):\n            if komsu not in gorulen:\n                gorulen.add(komsu)\n                sira.append(komsu)\n    return sonuc\n"),

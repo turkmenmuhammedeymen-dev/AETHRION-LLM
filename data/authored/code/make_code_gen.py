@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Round 3: programmatically generated, executable-verified Python samples (owner-authored templates).
+"""Round 3: programmatically generated, executable-verified Python templates created at the project owner's request; not individually human-reviewed.
 Every snippet is compiled and executed before it is written. Idempotent by id."""
 import ast, json, itertools
 P = "data/authored/code/records.jsonl"
