@@ -1,6 +1,6 @@
 {
   "format": "aethrion-specialist-dataset-v1",
-  "dataset_id": "safety-prepared-7290fea04f72",
+  "dataset_id": "safety-prepared-8be9bb44e48e",
   "model_id": "safety",
   "modality": "text",
   "training_allowed": true,
@@ -8,15 +8,15 @@
   "privacy_reviewed": true,
   "speaker_consent_reviewed": false,
   "dataset_path": "safety/dataset.npz",
-  "dataset_sha256": "7290fea04f727fab667f1073e509348c0385456a8d81f4439b8cce89f4920cd1",
+  "dataset_sha256": "8be9bb44e48ede912519728833cf7053b5335f169bd27742720a610f3ca58e18",
   "tokenizer_path": "safety/tokenizer.json",
-  "tokenizer_sha256": "a16ef076d027a57fc512f5365237134f586c7bb14db6081c5dd7a27bccc28595",
+  "tokenizer_sha256": "6427c12dd0bec27a2d0db131bd05e1c8902bb893358be8fc00311354281c2989",
   "sources": [
     {
       "source_id": "safety-input-jsonl",
       "source_uri": "owner-authored:aethrion-llm/data/authored/safety",
       "source_path": "safety/source.jsonl",
-      "sha256": "0f80a54191c65dc156975ce53f69c35b5a6c3cbd093c2116c813f52d943e20f3",
+      "sha256": "018bc2cc92ae4167c939997ee26f6b1c0f3b0c3eb5daa1f4eaac93f125ee3850",
       "license": "First-party owner-authored",
       "permitted_use": "model training permitted",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/safety/GOVERNANCE.json",
@@ -31,11 +31,11 @@
     "vocab_size": 2048,
     "layout_vocab_size": 32,
     "tag_classes": 32,
-    "record_count": 2570,
+    "record_count": 3030,
     "split_counts": {
-      "train": 2052,
-      "validation": 218,
-      "test": 300
+      "train": 2434,
+      "validation": 260,
+      "test": 336
     },
     "automatic_approval": false
   },
@@ -53,8 +53,8 @@
     "privacy_reviewed": true,
     "quality_reviewed": true,
     "reviewer_role": "project owner (attestation given in the Claude Code session)",
-    "reviewed_at": "2026-11-24T16:35+03:00",
-    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/safety/records.jsonl@sha256:0f80a54191c65dc156975ce53f69c35b5a6c3cbd093c2116c813f52d943e20f3",
+    "reviewed_at": "2026-11-25T06:11+03:00",
+    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/safety/records.jsonl@sha256:018bc2cc92ae4167c939997ee26f6b1c0f3b0c3eb5daa1f4eaac93f125ee3850",
     "speaker_consent_reviewed": false,
     "safety_reviewed": true
   },

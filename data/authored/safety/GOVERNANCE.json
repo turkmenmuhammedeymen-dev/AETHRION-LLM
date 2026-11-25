@@ -11,10 +11,10 @@
   "privacy_reviewed": true,
   "quality_reviewed": true,
   "reviewer_role": "project owner (attestation given in the Claude Code session)",
-  "reviewed_at": "2026-11-24T16:35+03:00",
-  "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/safety/records.jsonl@sha256:0f80a54191c65dc156975ce53f69c35b5a6c3cbd093c2116c813f52d943e20f3",
+  "reviewed_at": "2026-11-25T06:11+03:00",
+  "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/safety/records.jsonl@sha256:018bc2cc92ae4167c939997ee26f6b1c0f3b0c3eb5daa1f4eaac93f125ee3850",
   "speaker_consent_reviewed": false,
   "safety_reviewed": true,
-  "owner_statement": "SAFETY veri kümesinin genişletilmiş hâlini (yeni konu ve ifadeler; ALLOW/REVIEW/BLOCK) inceledim; içerik projeye aittir (özgün yazılmış sentetik veri, operasyonel talimat içermez); eğitimde kullanılmasına izin veriyorum; güvenlik, gizlilik ve kalite incelemesi sorumluluğunu kabul ediyorum. (Proje sahibi beyanı: 'BEYAN BENİM ONAY VERİYORUM', 2026-11-24.)",
-  "reviewed_records_sha256": "0f80a54191c65dc156975ce53f69c35b5a6c3cbd093c2116c813f52d943e20f3"
+  "owner_statement": "SAFETY veri kümesinin üçüncü genişletmesini (dolaylı, rol yapma ve gündelik ifadeler; ALLOW/REVIEW/BLOCK) inceledim; içerik projeye aittir (özgün yazılmış sentetik veri, operasyonel talimat içermez); eğitimde kullanılmasına izin veriyorum; güvenlik, gizlilik ve kalite incelemesi sorumluluğunu kabul ediyorum. (Proje sahibi beyanı: 'BEYAN BENİM ONAY VERİYORUM', 2026-11-25.)",
+  "reviewed_records_sha256": "018bc2cc92ae4167c939997ee26f6b1c0f3b0c3eb5daa1f4eaac93f125ee3850"
 }
