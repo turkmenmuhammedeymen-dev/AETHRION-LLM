@@ -98,9 +98,14 @@ def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = No
     try:
         pulled = artifact_sync.pull_model_artifacts(model, directory, api=api, environ=environ)
     except Exception as exc:
-        raise artifact_sync.ArtifactSyncError(
-            f"Private artifact pull failed: {type(exc).__name__}: {str(exc)[:240]}"
-        ) from exc
+        detail = f"Private artifact pull failed: {type(exc).__name__}: {str(exc)[:240]}"
+        return {
+            "model": model, "steps": steps, "pulled": [], "pushed": [],
+            "trainer_ok": False, "released": False,
+            "progress": {"status": "artifact_sync_pull_failed_not_released", "step": None, "complete": False},
+            "note": "Training did not start because private artifact retrieval failed.",
+            "trainer_tail": detail,
+        }
     if model == "chat" and prepare_chat:
         # Deterministic, gate-checked BASE corpus + HMAC-signed audit + tokenizer (needs the Space secret key).
         prep = subprocess.run([sys.executable, "scripts/prepare_base.py"], cwd=str(repo_root),
@@ -116,9 +121,14 @@ def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = No
     try:
         pushed = artifact_sync.push_model_artifacts(model, directory, api=api, environ=environ) if ok and directory.is_dir() else []
     except Exception as exc:
-        raise artifact_sync.ArtifactSyncError(
-            f"Private artifact push failed: {type(exc).__name__}: {str(exc)[:240]}"
-        ) from exc
+        detail = f"Private artifact push failed after trainer completion: {type(exc).__name__}: {str(exc)[:240]}"
+        return {
+            "model": model, "steps": steps, "pulled": pulled, "pushed": [],
+            "trainer_ok": False, "released": False,
+            "progress": {"status": "artifact_sync_push_failed_not_released", "step": None, "complete": False},
+            "note": "Trainer output was not mirrored to the private artifact repository; no release was made.",
+            "trainer_tail": detail,
+        }
     return {"model": model, "steps": steps, "pulled": pulled, "pushed": pushed, "trainer_ok": ok,
             "released": False, "progress": read_progress(directory) if directory.is_dir() else {"status": "unknown", "step": None},
             "note": "A session is not a release; evaluation and human approval are still required.",
