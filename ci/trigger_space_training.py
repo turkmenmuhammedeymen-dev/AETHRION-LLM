@@ -270,12 +270,19 @@ def main() -> int:
     ap.add_argument("--steps", type=int, default=25)
     ap.add_argument("--rounds", type=int, default=1)
     ap.add_argument("--until-complete", action="store_true")
+    ap.add_argument("--preflight-only", action="store_true", help="check approval and artifact gates without connecting to the Space")
     a = ap.parse_args()
     try:
         validate_training_approvals(a.models)
     except RuntimeError as exc:
+        if a.preflight_only:
+            print("PRE-FLIGHT BLOCKED\\n" + str(exc), file=sys.stderr)
+            return 0
         print(str(exc), file=sys.stderr)
         return 3
+    if a.preflight_only:
+        print("PRE-FLIGHT PASSED: selected specialist approvals and artifact hashes are valid; no training was started.")
+        return 0
     token, user, pw = os.environ.get("HF_TOKEN"), os.environ.get("AETHRION_SPACE_USERNAME"), os.environ.get("AETHRION_SPACE_PASSWORD")
     if not (token and user and pw):
         print("Missing HF_TOKEN / AETHRION_SPACE_USERNAME / AETHRION_SPACE_PASSWORD in GitHub Actions secrets.", file=sys.stderr)
