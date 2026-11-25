@@ -56,3 +56,8 @@ No approval flags were opened by this audit. The BASE corpus manifest and all sp
 ## Scope and limitations
 
 This was a static code-path audit of the four named scripts and their described effects. It did not execute the former approval scripts against production files. The current repository manifests were inspected separately and remain pending/disabled. The mitigations are proposed in this branch and are not active on main until merged.
+
+
+## Additional provenance wording corrections
+
+The same branch also corrects two generator headers that previously described generated material as first-party/owner-authored: `data/authored/make_expand.py` and `data/authored/research/make_research_more.py`. They now state that the content was generated at the project owner's request and has not been individually human-reviewed. No data records or approval flags were changed.
