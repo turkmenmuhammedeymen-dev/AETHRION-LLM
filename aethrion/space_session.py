@@ -95,7 +95,12 @@ def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = No
         directory = _resolve_output_dir(repo_root, config.get("output_dir"))
     except ValueError as exc:
         raise artifact_sync.ArtifactSyncError(f"Unsafe training output directory: {exc}") from exc
-    pulled = artifact_sync.pull_model_artifacts(model, directory, api=api, environ=environ)
+    try:
+        pulled = artifact_sync.pull_model_artifacts(model, directory, api=api, environ=environ)
+    except Exception as exc:
+        raise artifact_sync.ArtifactSyncError(
+            f"Private artifact pull failed: {type(exc).__name__}: {str(exc)[:240]}"
+        ) from exc
     if model == "chat" and prepare_chat:
         # Deterministic, gate-checked BASE corpus + HMAC-signed audit + tokenizer (needs the Space secret key).
         prep = subprocess.run([sys.executable, "scripts/prepare_base.py"], cwd=str(repo_root),
@@ -108,7 +113,12 @@ def run_session(model: str, steps: int, *, root: str | Path = ".", api: Any = No
     cmd = [sys.executable, "-m", "aethrion.train_family", "--execute", "--models", model, "--session-steps", str(steps)]
     result = (runner or subprocess.run)(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=timeout)
     ok = getattr(result, "returncode", 1) == 0
-    pushed = artifact_sync.push_model_artifacts(model, directory, api=api, environ=environ) if ok and directory.is_dir() else []
+    try:
+        pushed = artifact_sync.push_model_artifacts(model, directory, api=api, environ=environ) if ok and directory.is_dir() else []
+    except Exception as exc:
+        raise artifact_sync.ArtifactSyncError(
+            f"Private artifact push failed: {type(exc).__name__}: {str(exc)[:240]}"
+        ) from exc
     return {"model": model, "steps": steps, "pulled": pulled, "pushed": pushed, "trainer_ok": ok,
             "released": False, "progress": read_progress(directory) if directory.is_dir() else {"status": "unknown", "step": None},
             "note": "A session is not a release; evaluation and human approval are still required.",
