@@ -179,7 +179,9 @@ def main() -> int:
     if a.until_complete:
         res = run_until_complete(client, a.models, a.steps, a.rounds)
         print("SUMMARY", res)
-        return 0 if all(v["ok"] for v in res.values()) else 1
+        # A successful bounded session is not equivalent to completed training.
+        # Fail the workflow if any model exhausted its rounds before completion.
+        return 0 if all(v["ok"] and v["complete"] for v in res.values()) else 1
     results = run(client, a.models, a.steps, a.rounds)
     failed = [m for m, ok in results if not ok]
     print("SUMMARY", {"ok": [m for m, ok in results if ok], "failed": failed})
