@@ -41,7 +41,7 @@ def _synthetic_batch(model_id: str, device: torch.device) -> dict[str, torch.Ten
         return {"images": torch.randn(1, 3, 64, 64, device=device), "token_ids": ids((1, 8))}
     if model_id == "asr":
         return {"features": torch.randn(1, 64, 80, device=device), "input_lengths": torch.tensor([64], device=device),
-                "targets": torch.tensor([5, 9, 13, 21], device=device, dtype=torch.long), "target_lengths": torch.tensor([4], device=device)}
+                "targets": torch.tensor([[5, 9, 13, 21]], device=device, dtype=torch.long), "target_lengths": torch.tensor([4], device=device)}
     if model_id == "tts":
         return {"token_ids": ids((1, 4)), "frame_to_token": torch.tensor([[0, 0, 1, 1, 2, 2, 3, 3]], device=device),
                 "target_mels": torch.randn(1, 8, 80, device=device), "durations": torch.tensor([[2, 2, 2, 2]], device=device),
