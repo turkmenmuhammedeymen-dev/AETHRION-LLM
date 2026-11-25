@@ -16,10 +16,12 @@ concurrency:
 jobs:
   train-approved-specialists:
     if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_branch == 'main' &&
-      contains(github.event.workflow_run.head_commit.message, '[train-specialists]')
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'train-approved') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       contains(github.event.workflow_run.head_commit.message, '[train-specialists]'))
     runs-on: ubuntu-latest
     timeout-minutes: 350
     env:
