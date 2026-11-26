@@ -200,5 +200,26 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
                 preflight_model(root, "code")
 
 
+    def test_cli_fails_when_trainer_exits_without_verified_report(self):
+        from aethrion import train_family
+        failed = {
+            "blocked_count": 0,
+            "execute_requested": True,
+            "models": [{"model_id": "code", "status": "trainer_exited_without_verified_report"}],
+        }
+        with patch("aethrion.train_family.run_family", return_value=failed), patch(
+            "sys.argv", ["train_family", "--execute", "--models", "code"]
+        ):
+            self.assertEqual(train_family.main(), 1)
+
+    def test_cli_keeps_preflight_block_as_distinct_exit_code(self):
+        from aethrion import train_family
+        blocked = {"blocked_count": 1, "execute_requested": True, "models": []}
+        with patch("aethrion.train_family.run_family", return_value=blocked), patch(
+            "sys.argv", ["train_family", "--execute", "--models", "code"]
+        ):
+            self.assertEqual(train_family.main(), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
