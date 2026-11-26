@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: aethrion-specialist-cpu-training
+  group: aethrion-specialist-training-artifacts
   cancel-in-progress: false
 
 jobs:
