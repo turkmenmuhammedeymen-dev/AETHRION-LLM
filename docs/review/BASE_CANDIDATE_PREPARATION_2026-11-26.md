@@ -9,8 +9,8 @@ Add a reproducible, fail-closed preparation path for the existing BASE JSONL fil
 - `scripts/prepare_base_candidate.py` reads every `*.jsonl` file in `data/authored/base/`.
 - Each row must be a JSON object with non-empty UTF-8 `text`.
 - Exact normalized duplicates are detected using Unicode NFKC, case-folding, and collapsed whitespace. Stored text is preserved apart from trimming its outer whitespace.
-- Because current BASE rows do not carry stable group IDs, the source filename is used as the provisional group. If exact normalized duplicate text or identical CHAT assistant responses occur in multiple files, those source groups are unioned so they cannot leak across splits.
-- The deterministic group split is 80/10/10 where feasible, with at least one group in each split.
+- Because current BASE rows do not carry stable group IDs, non-dialogue rows use the source filename as a provisional group. CHAT-derived dialogue rows use the exact normalized assistant-response hash as their group, preventing the same answer from crossing splits without merging all rows from entire dialogue files. Exact normalized duplicate rows union their groups.
+- The deterministic group split targets 80/10/10 by group count, with at least one eligible group in each split. Group sizes can make record-level percentages differ.
 - The output is written to `data/processed/base_candidate/`: `train.txt`, `validation.txt`, `test.txt`, `records.jsonl` (exact reviewable records with source line and split), and `manifest.json`. Source-file hashes, split hashes, record-level source locations, group assignments, and duplicate counts are recorded.
 - The writer replaces only its four exact output filenames and never deletes unrelated files.
 - `.github/workflows/base-candidate-preflight.yml` runs the tests, builds the candidate, and uploads it as `aethrion-base-candidate-preflight`.
@@ -21,7 +21,7 @@ The generated manifest explicitly keeps `training_allowed=false`, `owner_approva
 
 ## Limitations requiring review
 
-- Filename-based grouping is a provisional fallback. A stronger future format should store stable source/group IDs in each BASE row.
+- Filename-based grouping for non-dialogue rows is a provisional fallback. A stronger future format should store stable source/group IDs in each BASE row.
 - Deduplication only catches exact normalized duplicates, not paraphrases or factual contradictions.
 - Structural validation does not establish factual correctness, copyright/license status, privacy clearance, or quality. The script excludes malformed ordinal-month phrases and generic animal-property templates from train/validation/test, caps identical CHAT assistant responses at three examples, and retains every source row with inclusion/exclusion reasons in the review JSONL. These conservative heuristics do not establish semantic quality or approve the remaining records.
 - The generated artifact must be inspected and its hashes pinned before any human review decision. This PR does not approve the corpus.
