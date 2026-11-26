@@ -1,6 +1,15 @@
 name: AETHRION Approved Specialist Training
 
 on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Run an offline approval preflight or attempt approved training"
+        required: true
+        type: choice
+        options:
+          - preflight
+          - train-approved
   workflow_run:
     workflows: ["aethrion"]
     types: [completed]
@@ -14,12 +23,35 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  preflight:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'preflight'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out selected source revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install project data dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[data]"
+      - name: Run offline approval and artifact preflight (no secrets, no Space connection)
+        run: |
+          python ci/trigger_space_training.py --preflight-only \
+            --models code research safety vision image asr tts vocoder 3d document
+
   train-approved-specialists:
     if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_branch == 'main' &&
-      contains(github.event.workflow_run.head_commit.message, '[train-specialists]')
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'train-approved') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       contains(github.event.workflow_run.head_commit.message, '[train-specialists]'))
     runs-on: ubuntu-latest
     timeout-minutes: 350
     env:
@@ -30,7 +62,7 @@ jobs:
       - name: Check out the exact verified source revision
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
