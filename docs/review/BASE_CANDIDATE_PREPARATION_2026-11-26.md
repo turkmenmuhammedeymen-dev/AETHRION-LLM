@@ -7,7 +7,7 @@ Add a reproducible, fail-closed preparation path for the existing BASE JSONL fil
 ## Implementation
 
 - `scripts/prepare_base_candidate.py` reads every `*.jsonl` file in `data/authored/base/`.
-- Each row must be a JSON object with non-empty UTF-8 `text`.
+- Each row must be a JSON object with non-empty UTF-8 `text`. Candidate generation fails closed if it detects email-like strings, Turkish mobile-number patterns, IPv4-like strings, or credential literals.
 - Exact normalized duplicates are detected using Unicode NFKC, case-folding, and collapsed whitespace. Stored text is preserved apart from trimming its outer whitespace.
 - Because current BASE rows do not carry stable group IDs, non-dialogue rows use the source filename as a provisional group. CHAT-derived dialogue rows use the exact normalized assistant-response hash as their group, preventing the same answer from crossing splits without merging all rows from entire dialogue files. Exact normalized duplicate rows union their groups.
 - The deterministic group split targets 80/10/10 by group count, with at least one eligible group in each split. Group sizes can make record-level percentages differ.
@@ -51,4 +51,4 @@ Split SHA-256:
 - validation: `88391a79372d72451bc98a86f60959628cc645998e65d007934bfde13328156a`
 - test: `baeb6b56916306510e7043c53bc2a31d3a2d6ef006301c02ae524f2fc0e2e92d`
 
-This is a reproducible structural candidate, not an approved training corpus. The 1,242 quality-flag count includes records with overrepresented responses even where the first three examples were retained. Factual review, semantic quality, provenance/rights and privacy clearance remain open.
+This is a reproducible structural candidate, not an approved training corpus. The 1,242 quality-flag count includes records with overrepresented responses even where the first three examples were retained. Factual review, semantic quality, provenance/rights and full privacy clearance remain open. The pattern scan is a limited pre-screen, not a guarantee that all personal or confidential information has been detected.
