@@ -39,9 +39,9 @@ class SpecialistTrainingApprovalGateTests(unittest.TestCase):
         source = b'{"id":"fixture-1"}\\n'
         dataset = b"fixture dataset"
         tokenizer = b'{"vocab":{}}'
-        source_hash = write(root / "data/specialists/code/source.jsonl", source)
-        dataset_hash = write(root / "data/specialists/code/dataset.npz", dataset)
-        tokenizer_hash = write(root / "data/specialists/code/tokenizer.json", tokenizer)
+        source_hash = write(root / "data/specialists/manifests/code/source.jsonl", source)
+        dataset_hash = write(root / "data/specialists/manifests/code/dataset.npz", dataset)
+        tokenizer_hash = write(root / "data/specialists/manifests/code/tokenizer.json", tokenizer)
         record = governance()
         if not approved:
             record["approval_status"] = "pending"
@@ -86,7 +86,7 @@ class SpecialistTrainingApprovalGateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self.build_fixture(root, approved=True)
-            (root / "data/specialists/code/source.jsonl").write_text("changed", encoding="utf-8")
+            (root / "data/specialists/manifests/code/source.jsonl").write_text("changed", encoding="utf-8")
             with self.assertRaisesRegex(RuntimeError, "hash mismatch"):
                 validate_training_approvals(["code"], root)
 
