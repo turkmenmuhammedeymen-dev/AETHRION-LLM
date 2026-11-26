@@ -38,8 +38,8 @@ def parse_session_result(out):
     match = _TRAINER_OK.search(rendered)
     progress = parse_progress(rendered)
     quota_exceeded = bool(re.search(
-        r"ZeroGPUQuotaExceeded|(?:GPU|ZeroGPU)\\s+quota.{0,80}(?:exceed|exhaust|limit)|"
-        r"(?:exceed|exhaust).{0,80}(?:GPU|ZeroGPU)\\s+quota",
+        r"ZeroGPUQuotaExceeded|(?:GPU|ZeroGPU)\s+quota.{0,80}(?:exceed|exhaust|limit)|"
+        r"(?:exceed|exhaust).{0,80}(?:GPU|ZeroGPU)\s+quota",
         rendered, re.IGNORECASE,
     ))
     valid_progress = bool(
