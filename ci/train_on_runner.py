@@ -66,11 +66,21 @@ def main() -> int:
             prog = res.get("progress") or {}
             print(f"[{model}] round {state['rounds']} trainer_ok={res.get('trainer_ok')} progress={prog} "
                   f"pulled={len(res.get('pulled', []))} pushed={len(res.get('pushed', []))}", flush=True)
-            if not res.get("trainer_ok"):
-                print(f"[{model}] trainer tail: {str(res.get('trainer_tail'))[-400:]}", flush=True)
+            valid_progress = bool(
+                isinstance(prog.get("step"), int)
+                and not isinstance(prog.get("step"), bool)
+                and prog.get("step") >= 0
+                and prog.get("status") in {
+                    "training_interrupted_not_released",
+                    "training_complete_not_released",
+                }
+            )
+            if not res.get("trainer_ok") or not valid_progress:
+                print(f"[{model}] refusing unverified session: trainer_ok={res.get('trainer_ok')} progress={prog}", flush=True)
+                print(f"[{model}] trainer tail: {str(res.get('trainer_tail'))[-900:]}", flush=True)
                 failures += 1
-                if failures >= 2: break
-                continue
+                # Unknown progress is a hard stop: repeating it only re-uploads the same artifact.
+                break
             failures = 0
             state.update(ok=True, step=prog.get("step"), complete=bool(prog.get("complete")))
             if state["complete"]: break
