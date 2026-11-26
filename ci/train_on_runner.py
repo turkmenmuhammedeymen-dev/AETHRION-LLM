@@ -16,6 +16,19 @@ sys.path.insert(0, str(ROOT))
 MODELS = ["code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document", "chat"]
 
 
+def _has_verified_progress(progress: dict) -> bool:
+    return bool(
+        isinstance(progress, dict)
+        and isinstance(progress.get("step"), int)
+        and not isinstance(progress.get("step"), bool)
+        and progress.get("step") >= 0
+        and progress.get("status") in {
+            "training_interrupted_not_released",
+            "training_complete_not_released",
+        }
+    )
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", default=MODELS)
@@ -66,15 +79,7 @@ def main() -> int:
             prog = res.get("progress") or {}
             print(f"[{model}] round {state['rounds']} trainer_ok={res.get('trainer_ok')} progress={prog} "
                   f"pulled={len(res.get('pulled', []))} pushed={len(res.get('pushed', []))}", flush=True)
-            valid_progress = bool(
-                isinstance(prog.get("step"), int)
-                and not isinstance(prog.get("step"), bool)
-                and prog.get("step") >= 0
-                and prog.get("status") in {
-                    "training_interrupted_not_released",
-                    "training_complete_not_released",
-                }
-            )
+            valid_progress = _has_verified_progress(prog)
             if not res.get("trainer_ok") or not valid_progress:
                 print(f"[{model}] refusing unverified session: trainer_ok={res.get('trainer_ok')} progress={prog}", flush=True)
                 print(f"[{model}] trainer tail: {str(res.get('trainer_tail'))[-900:]}", flush=True)
