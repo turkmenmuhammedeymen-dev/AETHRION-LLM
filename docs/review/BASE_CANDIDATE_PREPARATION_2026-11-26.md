@@ -23,10 +23,10 @@ The generated manifest explicitly keeps `training_allowed=false`, `owner_approva
 
 - Filename-based grouping is a provisional fallback. A stronger future format should store stable source/group IDs in each BASE row.
 - Deduplication only catches exact normalized duplicates, not paraphrases or factual contradictions.
-- Structural validation does not establish factual correctness, copyright/license status, privacy clearance, or quality. The script flags a small set of known low-quality templates and overrepresented assistant responses for review; it does not automatically rewrite or approve them.
+- Structural validation does not establish factual correctness, copyright/license status, privacy clearance, or quality. The script excludes malformed ordinal-month phrases and generic animal-property templates from train/validation/test, caps identical CHAT assistant responses at three examples, and retains every source row with inclusion/exclusion reasons in the review JSONL. These conservative heuristics do not establish semantic quality or approve the remaining records.
 - The generated artifact must be inspected and its hashes pinned before any human review decision. This PR does not approve the corpus.
 - CHAT/BASE integration remains blocked until the exact candidate snapshot and its source lineage receive the required review.
 
 ## Verification status
 
-The PR adds focused tests for duplicate-group union, non-empty splits, SHA-256 consistency, fail-closed flags, and malformed JSONL rejection. The GitHub Actions preflight workflow will produce the first candidate artifact when the PR workflow runs. Until that run succeeds and its artifact is inspected, no record count or successful corpus-preparation claim is made.
+The PR adds focused tests for duplicate-group union, repeated-answer split leakage, response caps, non-empty splits, SHA-256 consistency, fail-closed flags, and malformed JSONL rejection. The GitHub Actions preflight workflow will produce the first candidate artifact when the PR workflow runs. Until that run succeeds and its artifact is inspected, no record count or successful corpus-preparation claim is made.
