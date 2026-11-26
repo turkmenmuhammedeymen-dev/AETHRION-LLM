@@ -9,7 +9,7 @@ Add a reproducible, fail-closed preparation path for the existing BASE JSONL fil
 - `scripts/prepare_base_candidate.py` reads every `*.jsonl` file in `data/authored/base/`.
 - Each row must be a JSON object with non-empty UTF-8 `text`.
 - Exact normalized duplicates are detected using Unicode NFKC, case-folding, and collapsed whitespace. Stored text is preserved apart from trimming its outer whitespace.
-- Because current BASE rows do not carry stable group IDs, the source filename is used as the provisional group. If exact normalized duplicate text occurs in multiple files, those source groups are unioned so they cannot leak across splits.
+- Because current BASE rows do not carry stable group IDs, the source filename is used as the provisional group. If exact normalized duplicate text or identical CHAT assistant responses occur in multiple files, those source groups are unioned so they cannot leak across splits.
 - The deterministic group split is 80/10/10 where feasible, with at least one group in each split.
 - The output is written to `data/processed/base_candidate/`: `train.txt`, `validation.txt`, `test.txt`, `records.jsonl` (exact reviewable records with source line and split), and `manifest.json`. Source-file hashes, split hashes, record-level source locations, group assignments, and duplicate counts are recorded.
 - The writer replaces only its four exact output filenames and never deletes unrelated files.
@@ -23,7 +23,7 @@ The generated manifest explicitly keeps `training_allowed=false`, `owner_approva
 
 - Filename-based grouping is a provisional fallback. A stronger future format should store stable source/group IDs in each BASE row.
 - Deduplication only catches exact normalized duplicates, not paraphrases or factual contradictions.
-- Structural validation does not establish factual correctness, copyright/license status, privacy clearance, or quality.
+- Structural validation does not establish factual correctness, copyright/license status, privacy clearance, or quality. The script flags a small set of known low-quality templates and overrepresented assistant responses for review; it does not automatically rewrite or approve them.
 - The generated artifact must be inspected and its hashes pinned before any human review decision. This PR does not approve the corpus.
 - CHAT/BASE integration remains blocked until the exact candidate snapshot and its source lineage receive the required review.
 
