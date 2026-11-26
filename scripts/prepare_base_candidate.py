@@ -138,7 +138,7 @@ def build_candidate(source_dir: Path, output_dir: Path) -> dict[str, Any]:
         flags: list[str] = []
         if re.search(r"için en bilinen özellik", item["text"], re.IGNORECASE):
             flags.append("generic_animal_property_template")
-        if re.search(r"\\b(yılın|ayın)\\s+\\w+\\.\\s+ayıdır", item["text"], re.IGNORECASE):
+        if re.search(r"\b(yılın|ayın)\s+\w+\.\s+ayıdır", item["text"], re.IGNORECASE):
             flags.append("malformed_ordinal_month_phrase")
         if item["source_file"].startswith("diyalog-") and "AETHRION:" in item["text"]:
             response_key = normalized_text(item["text"].split("AETHRION:", 1)[1].strip())
