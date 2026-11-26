@@ -11,9 +11,10 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import tempfile
 import unicodedata
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -117,6 +118,35 @@ def build_candidate(source_dir: Path, output_dir: Path) -> dict[str, Any]:
             seen[key] = item
             rows.append(item)
 
+    # Identical assistant responses across CHAT-derived dialogue files must
+    # remain in one split; otherwise a held-out split can contain a memorized
+    # answer seen in training under a different prompt.
+    response_first_group: dict[str, str] = {}
+    response_counts: Counter[str] = Counter()
+    for item in rows:
+        if item["source_file"].startswith("diyalog-") and "AETHRION:" in item["text"]:
+            response = item["text"].split("AETHRION:", 1)[1].strip()
+            response_key = normalized_text(response)
+            if response_key:
+                response_counts[response_key] += 1
+                if response_key in response_first_group:
+                    union.union(item["source_group"], response_first_group[response_key])
+                else:
+                    response_first_group[response_key] = item["source_group"]
+
+    for item in rows:
+        flags: list[str] = []
+        if re.search(r"için en bilinen özellik", item["text"], re.IGNORECASE):
+            flags.append("generic_animal_property_template")
+        if re.search(r"\\b(yılın|ayın)\\s+\\w+\\.\\s+ayıdır", item["text"], re.IGNORECASE):
+            flags.append("malformed_ordinal_month_phrase")
+        if item["source_file"].startswith("diyalog-") and "AETHRION:" in item["text"]:
+            response_key = normalized_text(item["text"].split("AETHRION:", 1)[1].strip())
+            if response_key and response_counts[response_key] > 3:
+                flags.append("assistant_response_repeated_more_than_three_times")
+            item["assistant_response_sha256"] = sha256_bytes(response_key.encode("utf-8")) if response_key else None
+        item["quality_flags"] = flags
+
     if len(rows) < 3:
         raise ValueError("At least three unique text records are required for candidate splits.")
 
@@ -194,9 +224,11 @@ def build_candidate(source_dir: Path, output_dir: Path) -> dict[str, Any]:
         "unique_record_count": len(rows),
         "duplicate_records_removed": duplicate_count,
         "independent_group_count_after_duplicate_union": count,
-        "split_policy": "deterministic 80/10/10 by source-file group; exact-normalized duplicates union source groups",
+        "split_policy": "deterministic 80/10/10 by source-file group; exact-normalized record duplicates and repeated CHAT assistant responses union source groups",
         "normalization_for_duplicate_detection_only": "Unicode NFKC, casefold, collapse whitespace; stored text is otherwise preserved",
         "group_assignment": assignment,
+        "quality_flag_counts": dict(Counter(flag for item in rows for flag in item["quality_flags"])),
+        "quality_review_required_records": sum(bool(item["quality_flags"]) for item in rows),
         "splits": split_files,
         "review_records_file": {"file": "records.jsonl", "records": len(review_rows), "sha256": sha256_bytes(review_jsonl.encode("utf-8"))},
         "record_audit": [
@@ -206,6 +238,7 @@ def build_candidate(source_dir: Path, output_dir: Path) -> dict[str, Any]:
                 "source_group": item["source_group"],
                 "split": assignment[item["source_group"]],
                 "normalized_text_sha256": item["text_sha256"],
+                "quality_flags": item["quality_flags"],
             }
             for item in rows
         ],
@@ -213,6 +246,8 @@ def build_candidate(source_dir: Path, output_dir: Path) -> dict[str, Any]:
             "This is a structural candidate preparation, not a rights, privacy, factual-quality, or safety approval.",
             "Source groups are approximated by source filename because current BASE rows do not carry stable group IDs.",
             "Exact normalized duplicate texts are removed and their source groups are kept in one split.",
+            "Repeated assistant responses across CHAT-derived dialogue files are grouped into one split to reduce answer leakage.",
+            "Heuristic quality flags are review aids only; they do not automatically certify or repair content.",
             "No tokenizer is trained, no checkpoint is created, and no training gate is opened.",
         ],
     }
