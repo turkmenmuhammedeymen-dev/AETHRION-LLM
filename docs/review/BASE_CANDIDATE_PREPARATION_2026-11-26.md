@@ -6,7 +6,8 @@ Add a reproducible, fail-closed preparation path for the existing BASE JSONL fil
 
 ## Implementation
 
-- `scripts/prepare_base_candidate.py` reads every `*.jsonl` file in `data/authored/base/` and creates the fail-closed train/validation/test candidate.\n- `scripts/prepare_base_chat_candidate.py` learns a candidate byte-BPE tokenizer from the BASE train split only, writes a train-only `corpus.txt` and tokenizer provenance, then prepares CHAT instruction NPZ data using that exact tokenizer.
+- `scripts/prepare_base_candidate.py` reads every `*.jsonl` file in `data/authored/base/` and creates the fail-closed train/validation/test candidate.
+- `scripts/prepare_base_chat_candidate.py` learns a candidate byte-BPE tokenizer from the BASE train split only, writes a train-only `corpus.txt` and tokenizer provenance, then prepares CHAT instruction NPZ data using that exact tokenizer.
 - Each row must be a JSON object with non-empty UTF-8 `text`. Candidate generation fails closed if it detects email-like strings, Turkish mobile-number patterns, IPv4-like strings, or credential literals.
 - Exact normalized duplicates are detected using Unicode NFKC, case-folding, and collapsed whitespace. Stored text is preserved apart from trimming its outer whitespace.
 - Because current BASE rows do not carry stable group IDs, non-dialogue rows use the source filename as a provisional group. CHAT-derived dialogue rows use the exact normalized assistant-response hash as their group, preventing the same answer from crossing splits without merging all rows from entire dialogue files. Exact normalized duplicate rows union their groups.
@@ -29,7 +30,7 @@ The generated manifest explicitly keeps `training_allowed=false`, `owner_approva
 
 ## Verification status
 
-The PR adds focused tests for duplicate-group union, repeated-answer split leakage, response caps, non-empty splits, SHA-256 consistency, fail-closed flags, PII-pattern blocking, and malformed JSONL rejection. On main, the candidate is also retained in the private HF artifact repository under a commit-specific path; it remains explicitly unapproved. The GitHub Actions preflight workflow will produce the first candidate artifact when the PR workflow runs. Until that run succeeds and its artifact is inspected, no record count or successful corpus-preparation claim is made.
+The PR adds focused tests for duplicate-group union, repeated-answer split leakage, response caps, non-empty splits, SHA-256 consistency, fail-closed flags, PII-pattern blocking, and malformed JSONL rejection. After this PR is merged, the push-triggered workflow will store the BASE and CHAT candidates in the private HF artifact repository under commit-specific paths; PR runs only create GitHub Actions artifacts. A BASE-only artifact is already available from run `45852483911`. The extended tokenizer/CHAT preparation stage is awaiting its new focused Actions run and artifact inspection; it has not yet been claimed successful.
 
 
 ## First generated artifact — 2026-11-26
