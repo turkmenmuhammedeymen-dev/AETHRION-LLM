@@ -30,7 +30,7 @@ The generated manifest explicitly keeps `training_allowed=false`, `owner_approva
 
 ## Verification status
 
-The PR adds focused tests for duplicate-group union, repeated-answer split leakage, response caps, non-empty splits, SHA-256 consistency, fail-closed flags, PII-pattern blocking, and malformed JSONL rejection. After this PR is merged, the push-triggered workflow will store the BASE and CHAT candidates in the private HF artifact repository under commit-specific paths; PR runs only create GitHub Actions artifacts. A BASE-only artifact is already available from run `45852483911`. The extended tokenizer/CHAT preparation stage is awaiting its new focused Actions run and artifact inspection; it has not yet been claimed successful.
+The PR adds focused tests for duplicate-group union, repeated-answer split leakage, response caps, non-empty splits, SHA-256 consistency, fail-closed flags, PII-pattern blocking, and malformed JSONL rejection. After this PR is merged, the push-triggered workflow will store the BASE and CHAT candidates in the private HF artifact repository under commit-specific paths; PR runs only create GitHub Actions artifacts. A BASE-only artifact is already available from run `45852483911`. The extended tokenizer/CHAT preparation stage completed successfully in Actions run `45853975805`; artifact `15134482032` was downloaded and inspected. The candidate hashes and split counts are recorded below. The run was a PR preflight, so its private-HF upload step was intentionally skipped; the push-to-main workflow will perform that upload after merge.
 
 
 ## First generated artifact — 2026-11-26
@@ -54,3 +54,22 @@ Split SHA-256:
 - test: `baeb6b56916306510e7043c53bc2a31d3a2d6ef006301c02ae524f2fc0e2e92d`
 
 This is a reproducible structural candidate, not an approved training corpus. The 1,242 quality-flag count includes records with overrepresented responses even where the first three examples were retained. Factual review, semantic quality, provenance/rights and full privacy clearance remain open. The pattern scan is a limited pre-screen, not a guarantee that all personal or confidential information has been detected.
+
+
+## BASE tokenizer and CHAT candidate preflight — 2026-11-26
+
+GitHub Actions run [45853975805](https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/actions/runs/45853975805) succeeded. Artifact ID: `15134482032`; archive SHA-256: `ad0e9c7afb69287ac05399b620c0ca083bf95f59dc0e451d1bbfd895ee26d6f3`.
+
+Verified by inspecting the exact artifact:
+
+- BASE tokenizer was learned only from the 807-row BASE train split; validation and test partitions were not used.
+- BASE candidate split: 807 train / 98 validation / 101 test; 1,006 candidate rows.
+- BASE candidate train-only corpus SHA-256: `f0b110194bf029ff6bbdbe1a0b46487fc2be8a7567dbdb6ccc533d88fdbd8a13`.
+- Candidate tokenizer SHA-256: `6ad7ba13563cd7bf97290c353c2db12be1ac63d5c5dd8154f29c01ff53a7c1d9`; configured vocabulary ceiling 2,048 (actual vocabulary size recorded in tokenizer file).
+- CHAT candidate: 1,989 rows; 1,610 train / 141 validation / 238 test; 441 group IDs; no group ID crosses splits.
+- CHAT dataset SHA-256: `0f6ae1cbdea27dc7d0dd450220f13f54c97bdf7bae61f8eb8af8e492f003cd77`.
+- CHAT source SHA-256: `5b1edbf0a877a17d7501287be349ce065a5dabe0dc31491ec127582688f5ed57`.
+- The CHAT dataset tokenizer SHA-256 exactly matches the BASE candidate tokenizer SHA-256.
+- Both BASE and CHAT candidate manifests keep `training_allowed=false`, `owner_approval=false`, and `privacy_reviewed=false`.
+
+This verifies preprocessing integrity and group-split consistency only. It does not establish factual correctness, rights, privacy clearance, consent, or approval for model-weight training. The private-HF upload did not run during this PR event; it is configured for the subsequent main-branch push.
