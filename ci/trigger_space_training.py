@@ -256,18 +256,18 @@ def validate_training_approvals(models, root: Path | None = None) -> None:
                 expected = source.get("sha256")
                 if not isinstance(relative, str) or not isinstance(expected, str):
                     raise ValueError("source path/hash is missing")
-                source_file = _safe_manifest_path(root / "data" / "specialists", relative)
+                source_file = _safe_manifest_path(root / "data" / "specialists" / "manifests", relative)
                 if not source_file.is_file() or _sha256(source_file) != expected:
                     raise ValueError(f"source snapshot missing or hash mismatch: {relative}")
 
             for key in ("dataset_path", "dataset_sha256"):
                 if not manifest.get(key):
                     raise ValueError(f"manifest {key} is missing")
-            dataset_file = _safe_manifest_path(root / "data" / "specialists", manifest["dataset_path"])
+            dataset_file = _safe_manifest_path(root / "data" / "specialists" / "manifests", manifest["dataset_path"])
             if not dataset_file.is_file() or _sha256(dataset_file) != manifest["dataset_sha256"]:
                 raise ValueError("prepared dataset missing or hash mismatch")
             if manifest.get("tokenizer_path"):
-                tokenizer_file = _safe_manifest_path(root / "data" / "specialists", manifest["tokenizer_path"])
+                tokenizer_file = _safe_manifest_path(root / "data" / "specialists" / "manifests", manifest["tokenizer_path"])
                 if not tokenizer_file.is_file() or _sha256(tokenizer_file) != manifest.get("tokenizer_sha256"):
                     raise ValueError("tokenizer missing or hash mismatch")
         except (OSError, ValueError, TypeError, KeyError, GovernanceError) as exc:
