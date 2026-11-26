@@ -17,7 +17,7 @@ Add a reproducible, fail-closed preparation path for the existing BASE JSONL fil
 
 ## Safety and release state
 
-The generated manifest explicitly keeps `training_allowed=false`, `owner_approval=false`, and `privacy_reviewed=false`. It does not modify `data/processed/corpus_manifest.json`, any specialist manifest, tokenizer, checkpoint, or HF artifact repository. No training or release is triggered.
+The generated manifest explicitly keeps `training_allowed=false`, `owner_approval=false`, and `privacy_reviewed=false`. It does not modify `data/processed/corpus_manifest.json`, any specialist manifest, tokenizer, or checkpoint. On a push to `main`, the workflow stores the unapproved candidate under `candidates/base/{commit_sha}` in `vizyon2027/aethrion-artifacts` only after verifying that the HF repository is private and `HF_TOKEN` is present. No training or model release is triggered.
 
 ## Limitations requiring review
 
@@ -29,7 +29,7 @@ The generated manifest explicitly keeps `training_allowed=false`, `owner_approva
 
 ## Verification status
 
-The PR adds focused tests for duplicate-group union, repeated-answer split leakage, response caps, non-empty splits, SHA-256 consistency, fail-closed flags, and malformed JSONL rejection. The GitHub Actions preflight workflow will produce the first candidate artifact when the PR workflow runs. Until that run succeeds and its artifact is inspected, no record count or successful corpus-preparation claim is made.
+The PR adds focused tests for duplicate-group union, repeated-answer split leakage, response caps, non-empty splits, SHA-256 consistency, fail-closed flags, and malformed JSONL rejection. On main, the candidate is also retained in the private HF artifact repository under a commit-specific path; it remains explicitly unapproved. The GitHub Actions preflight workflow will produce the first candidate artifact when the PR workflow runs. Until that run succeeds and its artifact is inspected, no record count or successful corpus-preparation claim is made.
 
 
 ## First generated artifact — 2026-11-26
