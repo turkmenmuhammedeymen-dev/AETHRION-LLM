@@ -81,7 +81,7 @@ def main() -> int:
         report_path = Path(a.report).resolve()
         report_path.parent.mkdir(parents=True, exist_ok=True)
         temporary = Path(str(report_path) + ".tmp")
-        temporary.write_text(rendered + "\\n", encoding="utf-8")
+        temporary.write_text(rendered + "\n", encoding="utf-8")
         temporary.replace(report_path)
     return 0 if all(v["ok"] for v in summary.values()) else 1
 
