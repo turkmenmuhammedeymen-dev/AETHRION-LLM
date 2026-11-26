@@ -3,9 +3,9 @@
   "dataset_id": "research-prepared-67e0a6220ad3",
   "model_id": "research",
   "modality": "text",
-  "training_allowed": false,
-  "owner_approval": false,
-  "privacy_reviewed": false,
+  "training_allowed": true,
+  "owner_approval": true,
+  "privacy_reviewed": true,
   "speaker_consent_reviewed": false,
   "dataset_path": "research/dataset.npz",
   "dataset_sha256": "67e0a6220ad37a9dd77e82833788abf9027cbe6fdd0cfe28b73e0f3c25804871",
@@ -20,8 +20,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/research/GOVERNANCE.json",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     }
   ],
   "preparation": {
@@ -42,20 +42,20 @@
   "governance": {
     "schema": "aethrion-human-review-v1",
     "model_id": "research",
-    "approval_status": "pending",
+    "approval_status": "approved",
     "author_role": "project owner (content drafted by Claude at the owner's request)",
-    "authorship_attested": false,
-    "first_party_origin_attested": false,
-    "rights_holder_role": "claimed by project owner; verification pending",
-    "rights_attested": false,
-    "source_rights_reviewed": false,
-    "privacy_reviewed": false,
-    "quality_reviewed": false,
-    "reviewer_role": "pending human review",
-    "reviewed_at": "",
-    "evidence_uri": "",
+    "authorship_attested": true,
+    "first_party_origin_attested": true,
+    "rights_holder_role": "project owner",
+    "rights_attested": true,
+    "source_rights_reviewed": true,
+    "privacy_reviewed": true,
+    "quality_reviewed": true,
+    "reviewer_role": "project owner (attestation given in the Claude Code session)",
+    "reviewed_at": "2026-11-26T15:33+03:00",
+    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/research/records.jsonl@sha256:d055201bed78de21063d665958bfe10538b04ce35faeb8f9f8d674f7a1132784",
     "speaker_consent_reviewed": false,
     "safety_reviewed": false
   },
-  "dataset_status": "awaiting_owner_human_review"
+  "dataset_status": "owner_attested_pilot_not_released"
 }

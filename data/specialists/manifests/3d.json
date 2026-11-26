@@ -3,9 +3,9 @@
   "dataset_id": "3d-prepared-bab0c95bcf5e",
   "model_id": "3d",
   "modality": "3d",
-  "training_allowed": false,
-  "owner_approval": false,
-  "privacy_reviewed": false,
+  "training_allowed": true,
+  "owner_approval": true,
+  "privacy_reviewed": true,
   "speaker_consent_reviewed": false,
   "dataset_path": "3d/dataset.npz",
   "dataset_sha256": "bab0c95bcf5e5f5e5b196c7a7c32d691f42392accf66de7827e75d2d58e131a2",
@@ -20,8 +20,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0001-fa090467",
@@ -31,8 +31,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0002-47d178ee",
@@ -42,8 +42,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0003-2cfa7d0e",
@@ -53,8 +53,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0004-3419265b",
@@ -64,8 +64,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0005-8268be23",
@@ -75,8 +75,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0006-db7473f0",
@@ -86,8 +86,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0007-b6c97999",
@@ -97,8 +97,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0008-4c2602a9",
@@ -108,8 +108,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0009-5a2997bb",
@@ -119,8 +119,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0010-b807326d",
@@ -130,8 +130,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0011-da3f5d20",
@@ -141,8 +141,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0012-e8908cce",
@@ -152,8 +152,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0013-8a22f99f",
@@ -163,8 +163,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0014-2d681711",
@@ -174,8 +174,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0015-e4e4dad6",
@@ -185,8 +185,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0016-1fde584c",
@@ -196,8 +196,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0017-1e52c9c9",
@@ -207,8 +207,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0018-26e4b1ef",
@@ -218,8 +218,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0019-541cd442",
@@ -229,8 +229,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0020-bd03fa8a",
@@ -240,8 +240,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0021-fbfc627a",
@@ -251,8 +251,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0022-75a2d8ea",
@@ -262,8 +262,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0023-5664b1e5",
@@ -273,8 +273,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0024-9ee34036",
@@ -284,8 +284,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0025-d83247f5",
@@ -295,8 +295,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0026-7072d0bc",
@@ -306,8 +306,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0027-157067f1",
@@ -317,8 +317,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0028-f69ce028",
@@ -328,8 +328,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0029-2a0d4d14",
@@ -339,8 +339,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0030-28e8bdf6",
@@ -350,8 +350,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0031-110ad2ff",
@@ -361,8 +361,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0032-331f74ea",
@@ -372,8 +372,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0033-1bb7ecfc",
@@ -383,8 +383,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0034-2bdd004f",
@@ -394,8 +394,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0035-37ead87c",
@@ -405,8 +405,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0036-057655e4",
@@ -416,8 +416,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0037-62687092",
@@ -427,8 +427,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0038-f2abcd06",
@@ -438,8 +438,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0039-bf1ffbe1",
@@ -449,8 +449,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0040-134c8bbb",
@@ -460,8 +460,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0041-6f34a01d",
@@ -471,8 +471,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0042-772c04a5",
@@ -482,8 +482,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0043-c257da0b",
@@ -493,8 +493,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0044-a3883d9a",
@@ -504,8 +504,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0045-f7245af4",
@@ -515,8 +515,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0046-a4924b1f",
@@ -526,8 +526,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0047-4434c4d3",
@@ -537,8 +537,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0048-fb31a71f",
@@ -548,8 +548,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0049-1188fd09",
@@ -559,8 +559,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0050-c5aae518",
@@ -570,8 +570,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0051-8484ead9",
@@ -581,8 +581,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0052-8f6422a0",
@@ -592,8 +592,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0053-a2be9de8",
@@ -603,8 +603,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0054-a95918c7",
@@ -614,8 +614,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0055-65f298e3",
@@ -625,8 +625,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0056-79f683be",
@@ -636,8 +636,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0057-ac9a20a0",
@@ -647,8 +647,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0058-54edede5",
@@ -658,8 +658,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0059-bc0d10c7",
@@ -669,8 +669,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0060-a9908dec",
@@ -680,8 +680,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0061-8e21f0a5",
@@ -691,8 +691,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0062-8baa352b",
@@ -702,8 +702,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0063-97c2c767",
@@ -713,8 +713,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0064-1e916445",
@@ -724,8 +724,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0065-b1d97945",
@@ -735,8 +735,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0066-014500f0",
@@ -746,8 +746,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0067-ff228a68",
@@ -757,8 +757,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0068-2aae42c8",
@@ -768,8 +768,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0069-792ed5d2",
@@ -779,8 +779,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0070-f0a1750f",
@@ -790,8 +790,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0071-82f6fbf2",
@@ -801,8 +801,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0072-ed054e2f",
@@ -812,8 +812,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0073-96c89488",
@@ -823,8 +823,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0074-fcb9b40d",
@@ -834,8 +834,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0075-d472552c",
@@ -845,8 +845,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0076-97a9e78a",
@@ -856,8 +856,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0077-81fcea2e",
@@ -867,8 +867,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0078-9b36974b",
@@ -878,8 +878,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0079-3f6679a9",
@@ -889,8 +889,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0080-1d50961b",
@@ -900,8 +900,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0081-acbdf6b1",
@@ -911,8 +911,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0082-a02b36ad",
@@ -922,8 +922,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0083-5fd84bc0",
@@ -933,8 +933,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0084-3b4484a7",
@@ -944,8 +944,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0085-06b83a3e",
@@ -955,8 +955,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0086-00b4f29d",
@@ -966,8 +966,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0087-5aaaa14a",
@@ -977,8 +977,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0088-c47f5298",
@@ -988,8 +988,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0089-27bb45d0",
@@ -999,8 +999,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0090-ffd94d85",
@@ -1010,8 +1010,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0091-a8010943",
@@ -1021,8 +1021,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0092-14cee6bb",
@@ -1032,8 +1032,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0093-abdeeb33",
@@ -1043,8 +1043,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0094-55cd402e",
@@ -1054,8 +1054,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0095-a36bbfec",
@@ -1065,8 +1065,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0096-c02b1d7c",
@@ -1076,8 +1076,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0097-5b9df757",
@@ -1087,8 +1087,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0098-c79a7d43",
@@ -1098,8 +1098,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0099-36af2cb6",
@@ -1109,8 +1109,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0100-26331912",
@@ -1120,8 +1120,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0101-2301c92d",
@@ -1131,8 +1131,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0102-61bee15e",
@@ -1142,8 +1142,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0103-f1fbeb60",
@@ -1153,8 +1153,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0104-dd42fc60",
@@ -1164,8 +1164,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0105-26d043a5",
@@ -1175,8 +1175,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0106-9bcdf4d2",
@@ -1186,8 +1186,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0107-183e35cc",
@@ -1197,8 +1197,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0108-0012738c",
@@ -1208,8 +1208,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0109-09fa1a76",
@@ -1219,8 +1219,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0110-21294830",
@@ -1230,8 +1230,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0111-78f00500",
@@ -1241,8 +1241,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0112-1a592a82",
@@ -1252,8 +1252,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0113-794fe2bf",
@@ -1263,8 +1263,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0114-a4be6723",
@@ -1274,8 +1274,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0115-a8d98ff5",
@@ -1285,8 +1285,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0116-f12c0519",
@@ -1296,8 +1296,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0117-79c20a7c",
@@ -1307,8 +1307,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0118-3d067909",
@@ -1318,8 +1318,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0119-7faf9eee",
@@ -1329,8 +1329,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0120-e57bd051",
@@ -1340,8 +1340,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0121-05f6e778",
@@ -1351,8 +1351,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0122-d0a7bc9b",
@@ -1362,8 +1362,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0123-80c305ce",
@@ -1373,8 +1373,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0124-3592fc7c",
@@ -1384,8 +1384,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0125-7b6cb55a",
@@ -1395,8 +1395,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0126-2c798d80",
@@ -1406,8 +1406,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0127-7f343ac1",
@@ -1417,8 +1417,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0128-174b7511",
@@ -1428,8 +1428,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0129-1d425215",
@@ -1439,8 +1439,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0130-297ffee2",
@@ -1450,8 +1450,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0131-4f7de506",
@@ -1461,8 +1461,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0132-80112fbd",
@@ -1472,8 +1472,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0133-390263b5",
@@ -1483,8 +1483,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0134-56f908c0",
@@ -1494,8 +1494,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0135-9645ef77",
@@ -1505,8 +1505,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0136-c4863ed9",
@@ -1516,8 +1516,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0137-1df889eb",
@@ -1527,8 +1527,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0138-87b36384",
@@ -1538,8 +1538,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0139-78d856ee",
@@ -1549,8 +1549,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0140-6656421a",
@@ -1560,8 +1560,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0141-357081a0",
@@ -1571,8 +1571,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0142-894db7dc",
@@ -1582,8 +1582,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0143-4e72cc0e",
@@ -1593,8 +1593,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0144-654e8573",
@@ -1604,8 +1604,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0145-5c7d2513",
@@ -1615,8 +1615,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0146-56d7927c",
@@ -1626,8 +1626,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0147-f221ce27",
@@ -1637,8 +1637,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0148-aabdaf96",
@@ -1648,8 +1648,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0149-4cbff96a",
@@ -1659,8 +1659,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0150-af4f6b18",
@@ -1670,8 +1670,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0151-f62fe281",
@@ -1681,8 +1681,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0152-04233565",
@@ -1692,8 +1692,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0153-fe6c94ce",
@@ -1703,8 +1703,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0154-94f82113",
@@ -1714,8 +1714,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0155-d8f18328",
@@ -1725,8 +1725,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0156-22cd7d29",
@@ -1736,8 +1736,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0157-fd1696d7",
@@ -1747,8 +1747,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0158-f8ffc211",
@@ -1758,8 +1758,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0159-583b3099",
@@ -1769,8 +1769,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0160-c3a5357b",
@@ -1780,8 +1780,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0161-956f95f1",
@@ -1791,8 +1791,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0162-e89c3a2c",
@@ -1802,8 +1802,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0163-9ccd3b1c",
@@ -1813,8 +1813,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0164-07ed2c75",
@@ -1824,8 +1824,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0165-e3c63c9a",
@@ -1835,8 +1835,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0166-82331f2f",
@@ -1846,8 +1846,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0167-0b748c95",
@@ -1857,8 +1857,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0168-b492bd5c",
@@ -1868,8 +1868,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0169-48572c76",
@@ -1879,8 +1879,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0170-8280eab2",
@@ -1890,8 +1890,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0171-a8d7a5d4",
@@ -1901,8 +1901,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0172-624b204b",
@@ -1912,8 +1912,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0173-53028932",
@@ -1923,8 +1923,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0174-4a6ac539",
@@ -1934,8 +1934,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0175-c5f04daa",
@@ -1945,8 +1945,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0176-213eccd4",
@@ -1956,8 +1956,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0177-559397ea",
@@ -1967,8 +1967,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0178-95eaa3d3",
@@ -1978,8 +1978,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0179-c6e4f7a9",
@@ -1989,8 +1989,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0180-d1d4a036",
@@ -2000,8 +2000,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0181-033b2163",
@@ -2011,8 +2011,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0182-6c3a78f5",
@@ -2022,8 +2022,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0183-a3c5d6c1",
@@ -2033,8 +2033,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0184-c850cd91",
@@ -2044,8 +2044,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0185-13c39af3",
@@ -2055,8 +2055,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0186-3aa9d9de",
@@ -2066,8 +2066,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0187-3693e2f5",
@@ -2077,8 +2077,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0188-31266e75",
@@ -2088,8 +2088,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0189-f0177379",
@@ -2099,8 +2099,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0190-fa375619",
@@ -2110,8 +2110,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0191-b8078816",
@@ -2121,8 +2121,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0192-56d35b34",
@@ -2132,8 +2132,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0193-1fdac475",
@@ -2143,8 +2143,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0194-8007a288",
@@ -2154,8 +2154,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0195-dc8e78c1",
@@ -2165,8 +2165,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0196-1e71bdae",
@@ -2176,8 +2176,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0197-77ead724",
@@ -2187,8 +2187,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0198-fb6b0164",
@@ -2198,8 +2198,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0199-cb3e60c1",
@@ -2209,8 +2209,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0200-724875d9",
@@ -2220,8 +2220,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0201-4ac82bd0",
@@ -2231,8 +2231,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0202-ba31119e",
@@ -2242,8 +2242,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0203-64b74043",
@@ -2253,8 +2253,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0204-682d605c",
@@ -2264,8 +2264,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0205-ee679a11",
@@ -2275,8 +2275,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0206-4c9faad0",
@@ -2286,8 +2286,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0207-8aace917",
@@ -2297,8 +2297,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0208-2203abf8",
@@ -2308,8 +2308,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0209-b86c7085",
@@ -2319,8 +2319,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     },
     {
       "source_id": "asset-3d-0210-c26cfe60",
@@ -2330,8 +2330,8 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_visual.py",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     }
   ],
   "preparation": {
@@ -2352,20 +2352,20 @@
   "governance": {
     "schema": "aethrion-human-review-v1",
     "model_id": "3d",
-    "approval_status": "pending",
+    "approval_status": "approved",
     "author_role": "project owner (content drafted by Claude at the owner's request)",
-    "authorship_attested": false,
-    "first_party_origin_attested": false,
-    "rights_holder_role": "claimed by project owner; verification pending",
-    "rights_attested": false,
-    "source_rights_reviewed": false,
-    "privacy_reviewed": false,
-    "quality_reviewed": false,
-    "reviewer_role": "pending human review",
-    "reviewed_at": "",
-    "evidence_uri": "",
+    "authorship_attested": true,
+    "first_party_origin_attested": true,
+    "rights_holder_role": "project owner",
+    "rights_attested": true,
+    "source_rights_reviewed": true,
+    "privacy_reviewed": true,
+    "quality_reviewed": true,
+    "reviewer_role": "project owner (attestation given in the Claude Code session)",
+    "reviewed_at": "2026-11-26T15:33+03:00",
+    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/3d/records.jsonl@sha256:e3b083a4b997a11a006a38de55d8240246f034db811bfec591860a6585a96da4",
     "speaker_consent_reviewed": false,
     "safety_reviewed": false
   },
-  "dataset_status": "awaiting_owner_human_review"
+  "dataset_status": "owner_attested_pilot_not_released"
 }

@@ -3,10 +3,10 @@
   "dataset_id": "vocoder-prepared-d5bd32611d99",
   "model_id": "vocoder",
   "modality": "audio",
-  "training_allowed": false,
-  "owner_approval": false,
-  "privacy_reviewed": false,
-  "speaker_consent_reviewed": false,
+  "training_allowed": true,
+  "owner_approval": true,
+  "privacy_reviewed": true,
+  "speaker_consent_reviewed": true,
   "dataset_path": "vocoder/dataset.npz",
   "dataset_sha256": "d5bd32611d99498b9b304914ad603e37119d65d4d189ac4b4318994dc3785080",
   "sources": [
@@ -18,9 +18,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0001-3acf6b65",
@@ -30,9 +30,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0002-e8e9c8c5",
@@ -42,9 +42,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0003-a6d66173",
@@ -54,9 +54,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0004-9d6e140a",
@@ -66,9 +66,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0005-5a2a76e1",
@@ -78,9 +78,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0006-dfbb65e9",
@@ -90,9 +90,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0007-34e51c38",
@@ -102,9 +102,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0008-7ce1ec33",
@@ -114,9 +114,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0009-4413815f",
@@ -126,9 +126,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0010-4c44bb14",
@@ -138,9 +138,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0011-5469e029",
@@ -150,9 +150,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0012-bb4e0eff",
@@ -162,9 +162,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0013-ab0343c7",
@@ -174,9 +174,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0014-1c6e1c29",
@@ -186,9 +186,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0015-38b484f0",
@@ -198,9 +198,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0016-fab3ff31",
@@ -210,9 +210,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0017-4d641435",
@@ -222,9 +222,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0018-a5b7dfeb",
@@ -234,9 +234,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0019-3a50207b",
@@ -246,9 +246,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0020-8afa659d",
@@ -258,9 +258,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0021-814f4615",
@@ -270,9 +270,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0022-950b98c5",
@@ -282,9 +282,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0023-6407123f",
@@ -294,9 +294,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0024-e99dc07f",
@@ -306,9 +306,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0025-35c4d2bd",
@@ -318,9 +318,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0026-e3d56ca0",
@@ -330,9 +330,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0027-8866e338",
@@ -342,9 +342,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0028-0266e0c4",
@@ -354,9 +354,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0029-e10ddd39",
@@ -366,9 +366,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0030-75b39bb5",
@@ -378,9 +378,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0031-56ac9274",
@@ -390,9 +390,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0032-06433177",
@@ -402,9 +402,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0033-1c6d6ccd",
@@ -414,9 +414,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0034-d9f6ea9d",
@@ -426,9 +426,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0035-45cf04cb",
@@ -438,9 +438,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0036-c8505461",
@@ -450,9 +450,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0037-709d773e",
@@ -462,9 +462,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0038-78bf10e5",
@@ -474,9 +474,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0039-fb33c769",
@@ -486,9 +486,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0040-dff904e0",
@@ -498,9 +498,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0041-e52505e1",
@@ -510,9 +510,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0042-b0f91a15",
@@ -522,9 +522,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0043-f9ab0aa8",
@@ -534,9 +534,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0044-d0b78293",
@@ -546,9 +546,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0045-5ecbecaa",
@@ -558,9 +558,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0046-91f522d1",
@@ -570,9 +570,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0047-175b68ce",
@@ -582,9 +582,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0048-8fda77a4",
@@ -594,9 +594,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0049-25f0bd23",
@@ -606,9 +606,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0050-88df4180",
@@ -618,9 +618,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0051-07d34d03",
@@ -630,9 +630,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0052-353704e2",
@@ -642,9 +642,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0053-425df15c",
@@ -654,9 +654,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0054-b923c84a",
@@ -666,9 +666,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0055-edfde398",
@@ -678,9 +678,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0056-b4ad6a4c",
@@ -690,9 +690,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0057-c5bc0efb",
@@ -702,9 +702,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0058-203bc955",
@@ -714,9 +714,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0059-3a21411a",
@@ -726,9 +726,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0060-2e325c92",
@@ -738,9 +738,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0061-4f191c1a",
@@ -750,9 +750,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0062-cb1eb593",
@@ -762,9 +762,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0063-f90b11c8",
@@ -774,9 +774,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0064-c117431e",
@@ -786,9 +786,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0065-1962c0d7",
@@ -798,9 +798,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0066-4aba9ef2",
@@ -810,9 +810,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0067-88d8a1f5",
@@ -822,9 +822,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0068-5c01deb8",
@@ -834,9 +834,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0069-0bacf25b",
@@ -846,9 +846,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0070-5b6c8c39",
@@ -858,9 +858,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0071-b09dbc2b",
@@ -870,9 +870,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0072-580376dd",
@@ -882,9 +882,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0073-d6ae7c70",
@@ -894,9 +894,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0074-0a65477a",
@@ -906,9 +906,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0075-f65760d3",
@@ -918,9 +918,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0076-5e5ac65e",
@@ -930,9 +930,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0077-708dd7a4",
@@ -942,9 +942,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0078-63d5ff56",
@@ -954,9 +954,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0079-336705b1",
@@ -966,9 +966,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0080-6298dcd0",
@@ -978,9 +978,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0081-296f3191",
@@ -990,9 +990,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0082-87a059b9",
@@ -1002,9 +1002,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0083-6042d1ad",
@@ -1014,9 +1014,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0084-9b7e292c",
@@ -1026,9 +1026,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0085-0462e809",
@@ -1038,9 +1038,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0086-141427d7",
@@ -1050,9 +1050,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0087-0b48cbe9",
@@ -1062,9 +1062,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0088-7d1dca10",
@@ -1074,9 +1074,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0089-a627a089",
@@ -1086,9 +1086,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0090-97b1da16",
@@ -1098,9 +1098,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0091-f3a4148a",
@@ -1110,9 +1110,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0092-f3780add",
@@ -1122,9 +1122,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0093-37c3dbcc",
@@ -1134,9 +1134,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0094-996dfa6e",
@@ -1146,9 +1146,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0095-e9df2992",
@@ -1158,9 +1158,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0096-d8d7136a",
@@ -1170,9 +1170,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0097-290b611c",
@@ -1182,9 +1182,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0098-a37a07ca",
@@ -1194,9 +1194,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0099-ee209278",
@@ -1206,9 +1206,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0100-c95659ff",
@@ -1218,9 +1218,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0101-2a8dca21",
@@ -1230,9 +1230,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0102-fe561676",
@@ -1242,9 +1242,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0103-4b6e66e7",
@@ -1254,9 +1254,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0104-8129b72c",
@@ -1266,9 +1266,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0105-d3307b91",
@@ -1278,9 +1278,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0106-97a2bf4f",
@@ -1290,9 +1290,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0107-350b40e3",
@@ -1302,9 +1302,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0108-6b0f5d75",
@@ -1314,9 +1314,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0109-f0740618",
@@ -1326,9 +1326,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0110-7812cd82",
@@ -1338,9 +1338,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0111-7e022f06",
@@ -1350,9 +1350,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0112-85bc49a6",
@@ -1362,9 +1362,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0113-b7f7fdfb",
@@ -1374,9 +1374,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0114-83326809",
@@ -1386,9 +1386,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0115-192fca3b",
@@ -1398,9 +1398,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0116-a20c2c8e",
@@ -1410,9 +1410,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0117-0c15a975",
@@ -1422,9 +1422,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0118-275c3fdf",
@@ -1434,9 +1434,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0119-12108668",
@@ -1446,9 +1446,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0120-b21dd65b",
@@ -1458,9 +1458,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0121-ff14a599",
@@ -1470,9 +1470,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0122-0352a8f2",
@@ -1482,9 +1482,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0123-13d49d12",
@@ -1494,9 +1494,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0124-cc694880",
@@ -1506,9 +1506,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0125-3c473c5d",
@@ -1518,9 +1518,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0126-a56e8f3c",
@@ -1530,9 +1530,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0127-4f55e75a",
@@ -1542,9 +1542,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0128-95a5e17b",
@@ -1554,9 +1554,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0129-ca86c82f",
@@ -1566,9 +1566,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0130-40548986",
@@ -1578,9 +1578,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0131-96417caa",
@@ -1590,9 +1590,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0132-c89ba7fb",
@@ -1602,9 +1602,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0133-98b779ea",
@@ -1614,9 +1614,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0134-ce0a51ee",
@@ -1626,9 +1626,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0135-e3fadfd7",
@@ -1638,9 +1638,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0136-c9e158f8",
@@ -1650,9 +1650,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0137-3d183fc2",
@@ -1662,9 +1662,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0138-af5ba899",
@@ -1674,9 +1674,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0139-0b4eaef8",
@@ -1686,9 +1686,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0140-41dd2d8f",
@@ -1698,9 +1698,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0141-3075db56",
@@ -1710,9 +1710,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0142-21adeab6",
@@ -1722,9 +1722,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0143-306ab25f",
@@ -1734,9 +1734,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0144-de27cad6",
@@ -1746,9 +1746,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0145-0e6eaf87",
@@ -1758,9 +1758,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0146-68255c2f",
@@ -1770,9 +1770,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0147-c8e5b1ed",
@@ -1782,9 +1782,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0148-b5497ac3",
@@ -1794,9 +1794,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0149-a2884664",
@@ -1806,9 +1806,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0150-e3406d9a",
@@ -1818,9 +1818,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0151-ce8f4676",
@@ -1830,9 +1830,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0152-f45dfad6",
@@ -1842,9 +1842,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0153-c59fc32f",
@@ -1854,9 +1854,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0154-c70ce095",
@@ -1866,9 +1866,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0155-0b75e504",
@@ -1878,9 +1878,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0156-22a14f2f",
@@ -1890,9 +1890,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0157-d0cf69b0",
@@ -1902,9 +1902,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0158-7a069eb7",
@@ -1914,9 +1914,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0159-6c77d0fc",
@@ -1926,9 +1926,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     },
     {
       "source_id": "audio-audio-0160-1c9edee9",
@@ -1938,9 +1938,9 @@
       "license": "Claude-generated/project-authored claim; rights review pending",
       "permitted_use": "pending documented human rights review",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_audio.py",
-      "allow_training": false,
-      "privacy_reviewed": false,
-      "speaker_consent_verified": false
+      "allow_training": true,
+      "privacy_reviewed": true,
+      "speaker_consent_verified": true
     }
   ],
   "preparation": {
@@ -1960,20 +1960,20 @@
   "governance": {
     "schema": "aethrion-human-review-v1",
     "model_id": "vocoder",
-    "approval_status": "pending",
+    "approval_status": "approved",
     "author_role": "project owner (content drafted by Claude at the owner's request)",
-    "authorship_attested": false,
-    "first_party_origin_attested": false,
-    "rights_holder_role": "claimed by project owner; verification pending",
-    "rights_attested": false,
-    "source_rights_reviewed": false,
-    "privacy_reviewed": false,
-    "quality_reviewed": false,
-    "reviewer_role": "pending human review",
-    "reviewed_at": "",
-    "evidence_uri": "",
-    "speaker_consent_reviewed": false,
+    "authorship_attested": true,
+    "first_party_origin_attested": true,
+    "rights_holder_role": "project owner",
+    "rights_attested": true,
+    "source_rights_reviewed": true,
+    "privacy_reviewed": true,
+    "quality_reviewed": true,
+    "reviewer_role": "project owner (attestation given in the Claude Code session)",
+    "reviewed_at": "2026-11-26T15:33+03:00",
+    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/vocoder/records.jsonl@sha256:725643c1cc8790f7f93f2dc977351560af91522b614152e0c2bed8ea7661057f",
+    "speaker_consent_reviewed": true,
     "safety_reviewed": false
   },
-  "dataset_status": "awaiting_owner_human_review"
+  "dataset_status": "owner_attested_pilot_not_released"
 }
