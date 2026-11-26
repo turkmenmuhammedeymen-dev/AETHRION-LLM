@@ -116,9 +116,9 @@ def main() -> int:
     report["base"]["duplicate_ids"] = sum(n - 1 for n in ids.values() if n > 1)
     (out / "base-candidate-corpus.txt").write_text("\n\n".join(candidate_blocks) + "\n", encoding="utf-8")
 
-    chat_rows, chat_errors, chat_empty, chat_missing = audit_jsonl(
+    chat_rows, chat_errors, chat_empty, chat_missing, chat_line_count = audit_jsonl(
         chat_path, ("id", "group_id", "prompt", "response"), "prompt"
-    ) if chat_path.is_file() else ([], [], [], [])
+    ) if chat_path.is_file() else ([], [], [], [], 0)
     chat_ids, groups, prompts, pairs = Counter(), Counter(), Counter(), Counter()
     valid_chat = []
     for _, obj, prompt in chat_rows:
