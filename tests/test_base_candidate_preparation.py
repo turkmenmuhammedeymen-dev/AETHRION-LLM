@@ -40,6 +40,8 @@ def test_candidate_preparation_deduplicates_and_keeps_groups_together(tmp_path: 
     assert manifest["privacy_reviewed"] is False
     assert manifest["duplicate_records_removed"] == 1
     assert manifest["unique_record_count"] == 5
+    assert manifest["candidate_record_count"] == 5
+    assert manifest["excluded_record_count"] == 0
     review_rows = [
         json.loads(line)
         for line in (output / "records.jsonl").read_text(encoding="utf-8").splitlines()
@@ -92,6 +94,8 @@ def test_repeated_chat_answers_are_kept_in_one_split(tmp_path: Path) -> None:
     ]
     dialogue_rows = [row for row in rows if row["source_file"].startswith("diyalog-")]
     assert len(dialogue_rows) == 4
+    assert manifest["candidate_record_count"] == 6
+    assert manifest["excluded_record_count"] == 1
     assert all("assistant_response_repeated_more_than_three_times" in row["quality_flags"] for row in dialogue_rows)
 
 
