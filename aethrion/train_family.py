@@ -260,12 +260,22 @@ def run_family(
         }
         for row in rows
     )
+    failed_statuses = {
+        "training_failed_not_released",
+        "training_launch_failed_not_released",
+        "training_report_invalid_not_released",
+        "training_progress_invalid_not_released",
+        "trainer_exited_without_verified_report",
+        "trainer_report_unrecognized_not_released",
+    }
+    execution_failed_count = sum(row.get("status") in failed_statuses for row in rows)
     return {
         "format": "aethrion-family-training-run-v1",
         "execution_policy": "local_only",
         "model_count": len(rows),
         "ready_count": sum(row.get("ready") is True for row in rows),
         "blocked_count": sum(row.get("status") == "blocked" for row in rows),
+        "execution_failed_count": execution_failed_count,
         "training_started": bool(started),
         "released_count": 0,
         "execute_requested": bool(execute),
@@ -305,7 +315,11 @@ def main() -> int:
         temporary = Path(str(target) + ".tmp")
         temporary.write_text(rendered + "\n", encoding="utf-8")
         temporary.replace(target)
-    return 0 if report["blocked_count"] == 0 else 2
+    if report["blocked_count"] > 0:
+        return 2
+    if args.execute and report.get("execution_failed_count", 0) > 0:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
