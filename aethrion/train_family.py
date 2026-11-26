@@ -305,7 +305,31 @@ def main() -> int:
         temporary = Path(str(target) + ".tmp")
         temporary.write_text(rendered + "\n", encoding="utf-8")
         temporary.replace(target)
-    return 0 if report["blocked_count"] == 0 else 2
+    if report["blocked_count"]:
+        return 2
+    failed_statuses = {
+        "training_failed_not_released",
+        "training_launch_failed_not_released",
+        "training_report_invalid_not_released",
+        "training_progress_invalid_not_released",
+        "trainer_exited_without_verified_report",
+        "trainer_report_unrecognized_not_released",
+    }
+    execution_failed_count = sum(row.get("status") in failed_statuses for row in report["models"])
+    report["execution_failed_count"] = execution_failed_count
+    if args.execute and execution_failed_count:
+        print("TRAINING EXECUTION FAILED: one or more trainers did not produce a verified report.", file=sys.stderr)
+        # Rewrite the report with the failure count so automation can audit the result.
+        rendered = json.dumps(report, ensure_ascii=False, indent=2)
+        print(rendered, file=sys.stderr)
+        if args.report:
+            target = Path(args.report)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            temporary = Path(str(target) + ".tmp")
+            temporary.write_text(rendered + "\\n", encoding="utf-8")
+            temporary.replace(target)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
