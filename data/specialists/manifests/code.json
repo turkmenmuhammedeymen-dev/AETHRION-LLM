@@ -55,7 +55,9 @@
     "reviewed_at": "2026-11-26T15:33+03:00",
     "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/code/records.jsonl@sha256:bd32929a0e42ad87f1949b60ffc225b888989d08c0f6cfd0ba28473ca0a1d6c1",
     "speaker_consent_reviewed": false,
-    "safety_reviewed": false
+    "safety_reviewed": false,
+    "owner_statement": "Proje sahibinin sohbetteki beyanı (2026-11-26 15:32, sahibin kendi sözleriyle): 'Verileri onayladım inceledim bunların hepsini'. Bu kayıt, sahibin bu beyanını aktarır; tek tek kayıt incelemesi bağımsız olarak doğrulanmamıştır; veriler sentetik/Claude tarafından sahibin isteğiyle hazırlanmıştır. Yayın onayı değildir.",
+    "reviewed_records_sha256": "bd32929a0e42ad87f1949b60ffc225b888989d08c0f6cfd0ba28473ca0a1d6c1"
   },
   "dataset_status": "owner_attested_pilot_not_released"
 }
