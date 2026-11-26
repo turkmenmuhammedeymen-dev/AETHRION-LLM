@@ -45,6 +45,7 @@ jobs:
             --max-rounds 60 \
             --session-timeout 1500 \
             --deadline-minutes 330 \
+            --fresh-on-stale \
             --report aethrion-specialist-training-summary.json \
             --models code research safety vision image asr tts vocoder 3d document
       - name: Upload training summary (not a release)

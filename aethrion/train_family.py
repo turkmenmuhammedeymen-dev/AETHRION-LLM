@@ -138,6 +138,29 @@ def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
 
 
 
+def _run_forwarding_stop_signals(command: list[str], cwd: Path) -> subprocess.CompletedProcess:
+    """Run a trainer and forward SIGTERM/SIGINT so it can checkpoint before pausing."""
+    import signal
+    child = subprocess.Popen(command, cwd=cwd)
+    previous = {}
+
+    def _forward(signum, _frame):
+        if child.poll() is None:
+            child.send_signal(signum)
+
+    for stop_signal in (signal.SIGINT, signal.SIGTERM):
+        try:
+            previous[stop_signal] = signal.signal(stop_signal, _forward)
+        except ValueError:  # not in the main thread
+            pass
+    try:
+        returncode = child.wait()
+    finally:
+        for stop_signal, handler in previous.items():
+            signal.signal(stop_signal, handler)
+    return subprocess.CompletedProcess(command, returncode)
+
+
 def _training_outcome(output_dir: Path, model_id: str, returncode: int) -> str:
     """Derive status from the trainer's durable report, never from exit code alone."""
     if returncode != 0:
@@ -241,7 +264,7 @@ def run_family(
         for row, plan in zip(rows, plans):
             assert plan is not None
             try:
-                completed = subprocess.run(plan["command"], cwd=repo, check=False)
+                completed = _run_forwarding_stop_signals(plan["command"], repo)
                 row["status"] = _training_outcome(
                     repo / plan["output_dir"], row["model_id"], int(completed.returncode)
                 )
