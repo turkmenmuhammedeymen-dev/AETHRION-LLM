@@ -1,0 +1,97 @@
+name: AETHRION BASE, CHAT and CODE data audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "data/authored/base/**"
+      - "data/authored/chat/**"
+      - "data/authored/code/**"
+      - "scripts/audit_base_corpus.py"
+      - "aethrion/specialist_prepare.py"
+      - ".github/workflows/base-data-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "data/authored/base/**"
+      - "data/authored/chat/**"
+      - "data/authored/code/**"
+      - "scripts/audit_base_corpus.py"
+      - "aethrion/specialist_prepare.py"
+      - ".github/workflows/base-data-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install data-preparation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[data]" "huggingface-hub>=0.30,<1.0"
+      - name: Audit every BASE and CHAT JSONL record
+        run: python scripts/audit_base_corpus.py --out aethrion-base-data-audit
+      - name: Rebuild CODE prepared-data candidate without approval or training
+        run: |
+          python -m aethrion.specialist_prepare \
+            --input data/authored/code/records.jsonl \
+            --model code \
+            --output-root aethrion-code-prepared-candidate \
+            --license "Owner-claimed; third-party rights not independently verified" \
+            --permitted-use "pending human review; training not approved" \
+            --evidence-uri "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/code/GOVERNANCE.json" \
+            --source-uri "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/code/records.jsonl" \
+            --seed 1 --vocab-size 2048 --max-length 512
+      - name: Run offline fail-closed preflight for all ten specialist families
+        run: |
+          python ci/trigger_space_training.py --preflight-only \
+            --models code research safety vision image asr tts vocoder 3d document \
+            > aethrion-specialist-preflight.txt 2>&1
+      - name: Upload BASE, CHAT and CODE candidate audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: aethrion-base-chat-code-audit
+          path: |
+            aethrion-base-data-audit/
+            aethrion-code-prepared-candidate/
+            aethrion-specialist-preflight.txt
+          if-no-files-found: error
+      - name: Store BASE/CHAT audit and CODE candidate in the private HF artifact repository
+        if: github.event_name == 'push'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import os
+          from huggingface_hub import HfApi
+
+          token = os.environ.get("HF_TOKEN", "")
+          if not token:
+              raise SystemExit("HF_TOKEN is required for main-branch private candidate uploads.")
+          repo_id = "vizyon2027/aethrion-artifacts"
+          api = HfApi(token=token)
+          info = api.repo_info(repo_id=repo_id, repo_type="model")
+          if not getattr(info, "private", False):
+              raise SystemExit("Refusing candidate upload: artifact repository must remain private.")
+          sha = os.environ["SOURCE_SHA"]
+          for folder, destination, label in (
+              ("aethrion-code-prepared-candidate/manifests", f"candidates/code/{sha}", "CODE"),
+              ("aethrion-base-data-audit", f"candidates/base-chat-audit/{sha}", "BASE_CHAT_AUDIT"),
+          ):
+              commit = api.upload_folder(
+                  repo_id=repo_id,
+                  repo_type="model",
+                  folder_path=folder,
+                  path_in_repo=destination,
+                  commit_message=f"Store unapproved {label} candidate {sha[:12]}",
+              )
+              print(f"PRIVATE_{label}_UPLOAD=PASS revision={commit.oid}")
+          PY
