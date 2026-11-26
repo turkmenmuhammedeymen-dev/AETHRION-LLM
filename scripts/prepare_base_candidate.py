@@ -37,6 +37,14 @@ class UnionFind:
             self.parent[max(a, b)] = min(a, b)
 
 
+PRIVACY_PATTERNS = {
+    "email_like": re.compile(r"\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b", re.IGNORECASE),
+    "turkish_mobile_like": re.compile(r"(?<!\\d)(?:\\+90|0)?[\\s-]?5\\d{2}[\\s-]?\\d{3}[\\s-]?\\d{2}[\\s-]?\\d{2}(?!\\d)"),
+    "ipv4_like": re.compile(r"\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b"),
+    "credential_literal": re.compile(r"\\b(password|parola|api[_ -]?key|secret|token)\\s*[:=]\\s*\\S+", re.IGNORECASE),
+}
+
+
 def normalized_text(text: str) -> str:
     return " ".join(unicodedata.normalize("NFKC", text).casefold().split())
 
@@ -104,6 +112,12 @@ def build_candidate(source_dir: Path, output_dir: Path) -> dict[str, Any]:
             key = normalized_text(text)
             if not key:
                 raise ValueError(f"{path.name}:{line_number}: text is empty after normalization")
+            for privacy_name, privacy_pattern in PRIVACY_PATTERNS.items():
+                if privacy_pattern.search(text):
+                    raise ValueError(
+                        f"{path.name}:{line_number}: potential {privacy_name} detected; "
+                        "refusing to create or upload a candidate containing possible private data"
+                    )
             group = path.name
             if path.name.startswith("diyalog-") and "AETHRION:" in text:
                 response_key = normalized_text(text.split("AETHRION:", 1)[1].strip())
