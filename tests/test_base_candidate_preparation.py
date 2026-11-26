@@ -102,6 +102,28 @@ def test_repeated_chat_answers_are_kept_in_one_split(tmp_path: Path) -> None:
     assert all("assistant_response_repeated_more_than_three_times" in row["quality_flags"] for row in dialogue_rows)
 
 
+
+def test_candidate_preparation_blocks_private_data_patterns(tmp_path: Path) -> None:
+    source = tmp_path / "base"
+    output = tmp_path / "candidate"
+    source.mkdir()
+    _write_jsonl(source / "a.jsonl", [{"text": "A safe factual sentence."}])
+    _write_jsonl(source / "b.jsonl", [{"text": "Another safe factual sentence."}])
+    _write_jsonl(source / "c.jsonl", [{"text": "A third safe factual sentence."}])
+    _write_jsonl(source / "d.jsonl", [{"text": "Contact test.user@example.invalid for details."}])
+
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--source-dir", str(source), "--output-dir", str(output)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "potential email_like detected" in result.stderr
+    assert not (output / "manifest.json").exists()
+
+
 def test_candidate_preparation_rejects_invalid_jsonl(tmp_path: Path) -> None:
     source = tmp_path / "base"
     output = tmp_path / "candidate"
