@@ -33,13 +33,29 @@ def parse_progress(out):
 
 
 def parse_session_result(out):
-    """Interpret the actual Space response; a paused checkpointed session is successful."""
-    match = _TRAINER_OK.search(str(out))
-    progress = parse_progress(out)
+    """Require a durable, parseable progress report; detect exhausted GPU quota."""
+    rendered = str(out)
+    match = _TRAINER_OK.search(rendered)
+    progress = parse_progress(rendered)
+    quota_exceeded = bool(re.search(
+        r"ZeroGPUQuotaExceeded|(?:GPU|ZeroGPU)\\s+quota.{0,80}(?:exceed|exhaust|limit)|"
+        r"(?:exceed|exhaust).{0,80}(?:GPU|ZeroGPU)\\s+quota",
+        rendered, re.IGNORECASE,
+    ))
+    valid_progress = bool(
+        progress
+        and isinstance(progress.get("step"), int)
+        and progress.get("step") >= 0
+        and progress.get("status") in {
+            "training_interrupted_not_released",
+            "training_complete_not_released",
+        }
+    )
     return {
-        "trainer_ok": bool(match and match.group(1) == "True"),
+        "trainer_ok": bool(match and match.group(1) == "True" and valid_progress and not quota_exceeded),
         "progress": progress,
         "complete": bool(progress and progress.get("complete") is True),
+        "quota_exceeded": quota_exceeded,
     }
 
 
@@ -64,15 +80,26 @@ def run_until_complete(client, models, steps, max_rounds, min_steps=25, max_cons
     Steps are halved after a failed session (shorter sessions fit the GPU window).
     Completion never means release."""
     results = {}
+    quota_blocked = False
     for model in models:
         cur, state = steps, {"ok": False, "complete": False, "step": None, "rounds": 0}
+        if quota_blocked:
+            state["quota_exceeded"] = True
+            state["skipped_reason"] = "Earlier model exhausted the shared ZeroGPU quota."
+            results[model] = state
+            continue
         failures = 0
         for _ in range(max_rounds):
             state["rounds"] += 1
             try:
                 out = client.predict(model, cur, api_name="/training_session")
-            except Exception as exc:  # network/quota hiccup: retry smaller
-                print(f"[{model}] call failed: {type(exc).__name__}: {str(exc)[:200]}", flush=True)
+            except Exception as exc:
+                detail = str(exc)
+                print(f"[{model}] call failed: {type(exc).__name__}: {detail[:200]}", flush=True)
+                if parse_session_result(detail)["quota_exceeded"]:
+                    state["quota_exceeded"] = True
+                    quota_blocked = True
+                    break
                 failures += 1
                 cur = max(min_steps, cur // 2)
                 if failures >= max_consecutive_failures:
@@ -82,6 +109,11 @@ def run_until_complete(client, models, steps, max_rounds, min_steps=25, max_cons
             parsed = parse_session_result(out)
             ok, prog = parsed["trainer_ok"], parsed["progress"] or {}
             print(f"[{model}] round {state['rounds']} ok={ok} progress={prog}", flush=True)
+            if parsed["quota_exceeded"]:
+                state["quota_exceeded"] = True
+                quota_blocked = True
+                print(f"[{model}] stopping immediately: shared ZeroGPU quota is exhausted.", flush=True)
+                break
             if not ok:
                 failures += 1
                 print(f"[{model}] session output (no credentials): {_tail(out, 900)}", flush=True)
