@@ -40,6 +40,14 @@ def test_candidate_preparation_deduplicates_and_keeps_groups_together(tmp_path: 
     assert manifest["privacy_reviewed"] is False
     assert manifest["duplicate_records_removed"] == 1
     assert manifest["unique_record_count"] == 5
+    review_rows = [
+        json.loads(line)
+        for line in (output / "records.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert len(review_rows) == 5
+    assert manifest["review_records_file"]["records"] == 5
+    assert all(row["split"] == manifest["group_assignment"][row["source_group"]] for row in review_rows)
     assert manifest["group_assignment"]["a.jsonl"] == manifest["group_assignment"]["b.jsonl"]
     assert {manifest["group_assignment"][name] for name in ("a.jsonl", "c.jsonl", "d.jsonl")} == {
         "train", "validation", "test"
