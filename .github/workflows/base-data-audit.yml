@@ -57,3 +57,35 @@ jobs:
             aethrion-base-data-audit/
             aethrion-code-prepared-candidate/
           if-no-files-found: error
+      - name: Store BASE/CHAT audit and CODE candidate in the private HF artifact repository
+        if: github.event_name == 'push'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import os
+          from huggingface_hub import HfApi
+
+          token = os.environ.get("HF_TOKEN", "")
+          if not token:
+              raise SystemExit("HF_TOKEN is required for main-branch private candidate uploads.")
+          repo_id = "vizyon2027/aethrion-artifacts"
+          api = HfApi(token=token)
+          info = api.repo_info(repo_id=repo_id, repo_type="model")
+          if not getattr(info, "private", False):
+              raise SystemExit("Refusing candidate upload: artifact repository must remain private.")
+          sha = os.environ["SOURCE_SHA"]
+          for folder, destination, label in (
+              ("aethrion-code-prepared-candidate/manifests", f"candidates/code/{sha}", "CODE"),
+              ("aethrion-base-data-audit", f"candidates/base-chat-audit/{sha}", "BASE_CHAT_AUDIT"),
+          ):
+              commit = api.upload_folder(
+                  repo_id=repo_id,
+                  repo_type="model",
+                  folder_path=folder,
+                  path_in_repo=destination,
+                  commit_message=f"Store unapproved {label} candidate {sha[:12]}",
+              )
+              print(f"PRIVATE_{label}_UPLOAD=PASS revision={commit.oid}")
+          PY
