@@ -13,7 +13,7 @@ from pathlib import Path
 from aethrion.data_governance import GovernanceError, validate_governance_record
 
 SPACE_ID = "vizyon2027/AETHRION-LLM"
-DEFAULT_MODELS = ["chat", "code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document"]
+DEFAULT_MODELS = ["code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document"]
 
 
 _TRAINER_OK = re.compile(r"(?im)^\s*-\s*Trainer ok:\s*(True|False)\b")

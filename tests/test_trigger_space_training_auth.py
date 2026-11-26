@@ -161,3 +161,10 @@ def test_tail_returns_the_end_of_long_diagnostics():
     tail = _tail(value, 20)
     assert len(tail) == 20
     assert tail.endswith(" FINAL_TRACEBACK")
+
+
+def test_default_training_models_match_supported_specialists_and_exclude_chat():
+    from ci.trigger_space_training import DEFAULT_MODELS, TRAINABLE_MODELS
+
+    assert tuple(DEFAULT_MODELS) == TRAINABLE_MODELS
+    assert "chat" not in DEFAULT_MODELS
