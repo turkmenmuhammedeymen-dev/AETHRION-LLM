@@ -30,3 +30,25 @@ The generated manifest explicitly keeps `training_allowed=false`, `owner_approva
 ## Verification status
 
 The PR adds focused tests for duplicate-group union, repeated-answer split leakage, response caps, non-empty splits, SHA-256 consistency, fail-closed flags, and malformed JSONL rejection. The GitHub Actions preflight workflow will produce the first candidate artifact when the PR workflow runs. Until that run succeeds and its artifact is inspected, no record count or successful corpus-preparation claim is made.
+
+
+## First generated artifact — 2026-11-26
+
+GitHub Actions run [45851315277](https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/actions/runs/45851315277) completed successfully. Its artifact is `aethrion-base-candidate-preflight` (artifact ID `15134262131`, archive SHA-256 `b4af5f51a10f549bd72d9660cb9790e2a449b372383ba934f3153f8dd5288b61`).
+
+Verified by downloading and inspecting that exact artifact:
+
+- 93 source JSONL files; 1,792 input rows; 1,792 unique full-text rows; zero exact normalized full-record duplicates.
+- 1,006 rows included in candidate splits; 786 retained in the review JSONL but excluded from train/validation/test.
+- Exclusions: 722 excess repeated-response rows (response cap = 3), 56 malformed ordinal-month rows, and 36 generic animal-property template rows.
+- Candidate split: train 807 rows / 369 groups; validation 98 / 46; test 101 / 46.
+- 432 unique included dialogue-response groups; zero identical assistant-response groups crossing splits.
+- Review JSONL count and SHA-256 match the manifest; all three split-file SHA-256 values match; every included row's split agrees with its group assignment.
+- `training_allowed=false`, `owner_approval=false`, and `privacy_reviewed=false` remain unchanged.
+
+Split SHA-256:
+- train: `b01505a8d9561ec1a665bcb438762068c720cc20744baf255b712ada0073c7cc`
+- validation: `88391a79372d72451bc98a86f60959628cc645998e65d007934bfde13328156a`
+- test: `baeb6b56916306510e7043c53bc2a31d3a2d6ef006301c02ae524f2fc0e2e92d`
+
+This is a reproducible structural candidate, not an approved training corpus. The 1,242 quality-flag count includes records with overrepresented responses even where the first three examples were retained. Factual review, semantic quality, provenance/rights and privacy clearance remain open.
