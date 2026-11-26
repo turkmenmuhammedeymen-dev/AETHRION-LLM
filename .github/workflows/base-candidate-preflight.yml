@@ -1,0 +1,36 @@
+name: AETHRION BASE Candidate Preflight
+
+on:
+  pull_request:
+    paths:
+      - "data/authored/base/**"
+      - "scripts/prepare_base_candidate.py"
+      - "tests/test_base_candidate_preparation.py"
+      - ".github/workflows/base-candidate-preflight.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test runner
+        run: python -m pip install --upgrade pip pytest
+      - name: Validate candidate preparation
+        run: python -m pytest -q tests/test_base_candidate_preparation.py
+      - name: Build non-training BASE candidate
+        run: python scripts/prepare_base_candidate.py
+      - name: Upload candidate and audit manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: aethrion-base-candidate-preflight
+          path: data/processed/base_candidate/
+          if-no-files-found: error
+          retention-days: 14
