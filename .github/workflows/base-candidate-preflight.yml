@@ -5,15 +5,21 @@ on:
     branches: [main]
     paths:
       - "data/authored/base/**"
+      - "data/authored/chat/**"
       - "scripts/prepare_base_candidate.py"
+      - "scripts/prepare_base_chat_candidate.py"
       - "tests/test_base_candidate_preparation.py"
+      - "tests/test_base_chat_candidate.py"
       - ".github/workflows/base-candidate-preflight.yml"
   push:
     branches: [main]
     paths:
       - "data/authored/base/**"
+      - "data/authored/chat/**"
       - "scripts/prepare_base_candidate.py"
+      - "scripts/prepare_base_chat_candidate.py"
       - "tests/test_base_candidate_preparation.py"
+      - "tests/test_base_chat_candidate.py"
       - ".github/workflows/base-candidate-preflight.yml"
   workflow_dispatch:
 
@@ -32,11 +38,13 @@ jobs:
       - name: Install test and private Hub upload dependencies
         run: |
           python -m pip install --upgrade pip pytest
-          python -m pip install "huggingface-hub>=0.30,<1.0"
+          python -m pip install "huggingface-hub>=0.30,<1.0" "numpy>=1.24"
       - name: Validate candidate preparation
-        run: python -m pytest -q tests/test_base_candidate_preparation.py
+        run: python -m pytest -q tests/test_base_candidate_preparation.py tests/test_base_chat_candidate.py
       - name: Build non-training BASE candidate
         run: python scripts/prepare_base_candidate.py
+      - name: Build BASE tokenizer and CHAT instruction candidate with approvals disabled
+        run: python scripts/prepare_base_chat_candidate.py
       - name: Store non-training candidate in the private HF artifact repository
         if: github.event_name == 'push'
         env:
@@ -56,19 +64,28 @@ jobs:
           if not getattr(info, "private", False):
               raise SystemExit("Refusing to upload candidate data: artifact repository must remain private.")
           sha = os.environ["SOURCE_SHA"]
-          commit = api.upload_folder(
+          base_commit = api.upload_folder(
               repo_id=repo_id,
               repo_type="model",
               folder_path="data/processed/base_candidate",
               path_in_repo=f"candidates/base/{sha}",
+              ignore_patterns=["chat_candidate/**"],
               commit_message=f"Store unapproved BASE candidate {sha[:12]}",
           )
-          print(f"PRIVATE_BASE_CANDIDATE_UPLOAD=PASS revision={commit.oid}")
+          print(f"PRIVATE_BASE_CANDIDATE_UPLOAD=PASS revision={base_commit.oid}")
+          chat_commit = api.upload_folder(
+              repo_id=repo_id,
+              repo_type="model",
+              folder_path="data/processed/base_candidate/chat_candidate",
+              path_in_repo=f"candidates/chat/{sha}",
+              commit_message=f"Store unapproved CHAT candidate {sha[:12]}",
+          )
+          print(f"PRIVATE_CHAT_CANDIDATE_UPLOAD=PASS revision={chat_commit.oid}")
           PY
       - name: Upload candidate and audit manifest to GitHub Actions
         uses: actions/upload-artifact@v4
         with:
-          name: aethrion-base-candidate-preflight
+          name: aethrion-base-chat-candidate-preflight
           path: data/processed/base_candidate/
           if-no-files-found: error
           retention-days: 14
