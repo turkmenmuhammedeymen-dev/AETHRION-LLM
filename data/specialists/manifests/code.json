@@ -17,8 +17,8 @@
       "source_uri": "owner-authored:aethrion-llm/data/authored/code",
       "source_path": "code/source.jsonl",
       "sha256": "bd32929a0e42ad87f1949b60ffc225b888989d08c0f6cfd0ba28473ca0a1d6c1",
-      "license": "First-party owner-authored",
-      "permitted_use": "pending human review; training NOT approved",
+      "license": "Project-owner declared first-party content (owner declaration 2026-11-26)",
+      "permitted_use": "model training and evaluation permitted by the project owner's declaration; not a release approval",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/code/GOVERNANCE.json",
       "allow_training": true,
       "privacy_reviewed": true

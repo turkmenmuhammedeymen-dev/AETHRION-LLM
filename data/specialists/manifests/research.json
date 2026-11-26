@@ -17,8 +17,8 @@
       "source_uri": "owner-authored:aethrion-llm/data/authored/research",
       "source_path": "research/source.jsonl",
       "sha256": "d055201bed78de21063d665958bfe10538b04ce35faeb8f9f8d674f7a1132784",
-      "license": "Claude-generated/project-authored claim; rights review pending",
-      "permitted_use": "pending documented human rights review",
+      "license": "Project-owner declared first-party content (owner declaration 2026-11-26)",
+      "permitted_use": "model training and evaluation permitted by the project owner's declaration; not a release approval",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/research/GOVERNANCE.json",
       "allow_training": true,
       "privacy_reviewed": true

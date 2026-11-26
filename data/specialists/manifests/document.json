@@ -17,8 +17,8 @@
       "source_uri": "owner-authored:aethrion-llm/data/authored/document",
       "source_path": "document/source.jsonl",
       "sha256": "ebf0e9d727a6744eced266f75b4fca4dcf53b479cb49ac5cc097d4ffc79f9b79",
-      "license": "Claude-generated/project-authored claim; rights review pending",
-      "permitted_use": "pending documented human rights review",
+      "license": "Project-owner declared first-party content (owner declaration 2026-11-26)",
+      "permitted_use": "model training and evaluation permitted by the project owner's declaration; not a release approval",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_document.py",
       "allow_training": true,
       "privacy_reviewed": true

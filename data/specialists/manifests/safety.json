@@ -17,8 +17,8 @@
       "source_uri": "owner-authored:aethrion-llm/data/authored/safety",
       "source_path": "safety/source.jsonl",
       "sha256": "74c1ddd4f2d937e666cbe96cf9dbbac45d2ff7743b34335d6fc2377b0ed2106b",
-      "license": "Claude-generated/project-authored claim; rights review pending",
-      "permitted_use": "pending documented human rights review",
+      "license": "Project-owner declared first-party content (owner declaration 2026-11-26)",
+      "permitted_use": "model training and evaluation permitted by the project owner's declaration; not a release approval",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/safety/GOVERNANCE.json",
       "allow_training": true,
       "privacy_reviewed": true
