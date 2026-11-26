@@ -1,6 +1,6 @@
 {
   "format": "aethrion-specialist-dataset-v1",
-  "dataset_id": "code-prepared-803c02a810f0",
+  "dataset_id": "code-prepared-1cbfc59eef32",
   "model_id": "code",
   "modality": "code",
   "training_allowed": false,
@@ -8,17 +8,17 @@
   "privacy_reviewed": false,
   "speaker_consent_reviewed": false,
   "dataset_path": "code/dataset.npz",
-  "dataset_sha256": "803c02a810f041e2eb5ad778254319eae419b9b4e9ac25e4ee1f9341fac86f4e",
+  "dataset_sha256": "1cbfc59eef323a3fe3d9e0ee84de5a12b415bf09d2e9c8ed091c068d179c6f50",
   "tokenizer_path": "code/tokenizer.json",
-  "tokenizer_sha256": "2435928ece78f5a78b8eb1e5b71fff83aabc4c6a21a726d95100ce15098355a8",
+  "tokenizer_sha256": "2f33ad7eef843da2c54d35546af61aaadac2ebf2a3c7d19459658e5331eeb174",
   "sources": [
     {
       "source_id": "code-input-jsonl",
       "source_uri": "owner-authored:aethrion-llm/data/authored/code",
       "source_path": "code/source.jsonl",
-      "sha256": "09a3429d2934b4c1177b1fb91317893d7599c2847584fe75a9068c53838d02e1",
-      "license": "Claude-generated/project-authored claim; rights review pending",
-      "permitted_use": "pending documented human rights review",
+      "sha256": "bd32929a0e42ad87f1949b60ffc225b888989d08c0f6cfd0ba28473ca0a1d6c1",
+      "license": "First-party owner-authored",
+      "permitted_use": "pending human review; training NOT approved",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/code/GOVERNANCE.json",
       "allow_training": false,
       "privacy_reviewed": false
@@ -28,7 +28,7 @@
     "tool": "aethrion.specialist_prepare",
     "seed": 1,
     "max_length": 512,
-    "vocab_size": 1802,
+    "vocab_size": 1804,
     "layout_vocab_size": 32,
     "tag_classes": 32,
     "record_count": 163,
@@ -38,24 +38,5 @@
       "test": 15
     },
     "automatic_approval": false
-  },
-  "governance": {
-    "schema": "aethrion-human-review-v1",
-    "model_id": "code",
-    "approval_status": "pending",
-    "author_role": "project owner (content drafted by Claude at the owner's request)",
-    "authorship_attested": false,
-    "first_party_origin_attested": false,
-    "rights_holder_role": "claimed by project owner; verification pending",
-    "rights_attested": false,
-    "source_rights_reviewed": false,
-    "privacy_reviewed": false,
-    "quality_reviewed": false,
-    "reviewer_role": "pending human review",
-    "reviewed_at": "",
-    "evidence_uri": "",
-    "speaker_consent_reviewed": false,
-    "safety_reviewed": false
-  },
-  "dataset_status": "awaiting_owner_human_review"
+  }
 }
