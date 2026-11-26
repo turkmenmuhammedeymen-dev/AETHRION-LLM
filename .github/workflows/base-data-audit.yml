@@ -1,4 +1,4 @@
-name: AETHRION BASE and CHAT data audit
+name: AETHRION BASE, CHAT and CODE data audit
 
 on:
   pull_request:
@@ -6,14 +6,18 @@ on:
     paths:
       - "data/authored/base/**"
       - "data/authored/chat/**"
+      - "data/authored/code/**"
       - "scripts/audit_base_corpus.py"
+      - "aethrion/specialist_prepare.py"
       - ".github/workflows/base-data-audit.yml"
   push:
     branches: [main]
     paths:
       - "data/authored/base/**"
       - "data/authored/chat/**"
+      - "data/authored/code/**"
       - "scripts/audit_base_corpus.py"
+      - "aethrion/specialist_prepare.py"
       - ".github/workflows/base-data-audit.yml"
   workflow_dispatch:
 
@@ -28,11 +32,28 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install data-preparation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[data]"
       - name: Audit every BASE and CHAT JSONL record
         run: python scripts/audit_base_corpus.py --out aethrion-base-data-audit
-      - name: Upload structural audit and candidate corpora
+      - name: Rebuild CODE prepared-data candidate without approval or training
+        run: |
+          python -m aethrion.specialist_prepare \
+            --input data/authored/code/records.jsonl \
+            --model code \
+            --output-root aethrion-code-prepared-candidate \
+            --license "Owner-claimed; third-party rights not independently verified" \
+            --permitted-use "pending human review; training not approved" \
+            --evidence-uri "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/code/GOVERNANCE.json" \
+            --source-uri "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/code/records.jsonl" \
+            --seed 1 --vocab-size 2048 --max-length 512
+      - name: Upload BASE, CHAT and CODE candidate audit artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: aethrion-base-data-audit
-          path: aethrion-base-data-audit/
+          name: aethrion-base-chat-code-audit
+          path: |
+            aethrion-base-data-audit/
+            aethrion-code-prepared-candidate/
           if-no-files-found: error
