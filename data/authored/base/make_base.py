@@ -232,8 +232,9 @@ def write(name, recs):
 
 def main():
     import importlib.util
-    for old in HERE.glob("*.jsonl"):
-        old.unlink()
+    # Preserve existing JSONL files. The generator owns only the exact output
+    # names it writes below; broad deletion could erase reviewed or hand-curated
+    # records that happen to share this directory.
     spec = importlib.util.spec_from_file_location("make_expand", HERE.parent / "make_expand.py")
     me = importlib.util.module_from_spec(spec); spec.loader.exec_module(me)
     groups = {k: [l.strip() for l in v.strip().splitlines() if l.strip()] for k, v in GROUPS.items()}
