@@ -141,7 +141,7 @@ def build_candidate(source_dir: Path, output_dir: Path) -> dict[str, Any]:
         if re.search(r"için en bilinen özellik", item["text"], re.IGNORECASE):
             flags.append("generic_animal_property_template")
             exclusion_reasons.append("generic_animal_property_template")
-        if re.search(r"\\b(yılın|ayın)\\s+\\w+\\.\\s+ayıdır", item["text"], re.IGNORECASE):
+        if re.search(r"\b(yılın|ayın)\s+\w+\.\s+ayıdır", item["text"], re.IGNORECASE):
             flags.append("malformed_ordinal_month_phrase")
             exclusion_reasons.append("malformed_ordinal_month_phrase")
         if item["source_file"].startswith("diyalog-") and "AETHRION:" in item["text"]:
@@ -171,7 +171,7 @@ def build_candidate(source_dir: Path, output_dir: Path) -> dict[str, Any]:
     components = {root: all_components[root] for root in eligible_roots}
     ordered_components = sorted(
         components,
-        key=lambda root: hashlib.sha256("\\n".join(sorted(components[root])).encode("utf-8")).hexdigest(),
+        key=lambda root: hashlib.sha256("\n".join(sorted(components[root])).encode("utf-8")).hexdigest(),
     )
     count = len(ordered_components)
     if count < 3:
