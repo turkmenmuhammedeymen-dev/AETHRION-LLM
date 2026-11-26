@@ -1,0 +1,38 @@
+name: AETHRION BASE and CHAT data audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "data/authored/base/**"
+      - "data/authored/chat/**"
+      - "scripts/audit_base_corpus.py"
+      - ".github/workflows/base-data-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "data/authored/base/**"
+      - "data/authored/chat/**"
+      - "scripts/audit_base_corpus.py"
+      - ".github/workflows/base-data-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Audit every BASE and CHAT JSONL record
+        run: python scripts/audit_base_corpus.py --out aethrion-base-data-audit
+      - name: Upload structural audit and candidate corpora
+        uses: actions/upload-artifact@v4
+        with:
+          name: aethrion-base-data-audit
+          path: aethrion-base-data-audit/
+          if-no-files-found: error
