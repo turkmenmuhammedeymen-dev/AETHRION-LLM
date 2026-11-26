@@ -29,7 +29,8 @@ def sha256(path: Path) -> str:
 
 def audit_jsonl(path: Path, required_fields: tuple[str, ...], text_field: str):
     rows, errors, empty_text, missing = [], [], [], []
-    for line_no, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for line_no, raw in enumerate(lines, 1):
         if not raw.strip():
             errors.append({"line": line_no, "error": "blank_line"})
             continue
@@ -44,12 +45,13 @@ def audit_jsonl(path: Path, required_fields: tuple[str, ...], text_field: str):
         absent = [key for key in required_fields if not isinstance(obj.get(key), str) or not obj[key].strip()]
         if absent:
             missing.append({"line": line_no, "fields": absent})
+            continue
         value = obj.get(text_field)
         if isinstance(value, str) and value.strip():
             rows.append((line_no, obj, value))
         else:
             empty_text.append(line_no)
-    return rows, errors, empty_text, missing
+    return rows, errors, empty_text, missing, len(lines)
 
 
 def main() -> int:
@@ -87,9 +89,9 @@ def main() -> int:
     candidate_blocks = []
     for path in base_files:
         raw_bytes = path.stat().st_size
-        rows, errors, empty, missing = audit_jsonl(path, ("text",), "text")
+        rows, errors, empty, missing, line_count = audit_jsonl(path, ("text",), "text")
         report["base"]["total_bytes"] += raw_bytes
-        report["base"]["record_count"] += len(rows) + len(errors) + len(empty) + len(missing)
+        report["base"]["record_count"] += line_count
         report["base"]["invalid_json_or_blank_lines"] += len(errors)
         report["base"]["empty_text_records"] += len(empty)
         report["base"]["missing_text_records"] += len(missing)
@@ -126,7 +128,7 @@ def main() -> int:
         pairs[(norm(prompt), norm(obj["response"]))] += 1
         valid_chat.append(obj)
     report["chat"].update({
-        "record_count": len(chat_rows) + len(chat_errors) + len(chat_empty) + len(chat_missing),
+        "record_count": chat_line_count,
         "invalid_json_or_blank_lines": len(chat_errors),
         "missing_required_fields": len(chat_missing) + len(chat_empty),
         "duplicate_ids": sum(n - 1 for n in chat_ids.values() if n > 1),
