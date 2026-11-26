@@ -3,9 +3,9 @@
   "dataset_id": "code-prepared-1cbfc59eef32",
   "model_id": "code",
   "modality": "code",
-  "training_allowed": false,
-  "owner_approval": false,
-  "privacy_reviewed": false,
+  "training_allowed": true,
+  "owner_approval": true,
+  "privacy_reviewed": true,
   "speaker_consent_reviewed": false,
   "dataset_path": "code/dataset.npz",
   "dataset_sha256": "1cbfc59eef323a3fe3d9e0ee84de5a12b415bf09d2e9c8ed091c068d179c6f50",
@@ -17,11 +17,11 @@
       "source_uri": "owner-authored:aethrion-llm/data/authored/code",
       "source_path": "code/source.jsonl",
       "sha256": "bd32929a0e42ad87f1949b60ffc225b888989d08c0f6cfd0ba28473ca0a1d6c1",
-      "license": "First-party owner-authored",
-      "permitted_use": "pending human review; training NOT approved",
+      "license": "Project-owner declared first-party content (owner declaration 2026-11-26)",
+      "permitted_use": "model training and evaluation permitted by the project owner's declaration; not a release approval",
       "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/code/GOVERNANCE.json",
-      "allow_training": false,
-      "privacy_reviewed": false
+      "allow_training": true,
+      "privacy_reviewed": true
     }
   ],
   "preparation": {
@@ -38,5 +38,24 @@
       "test": 15
     },
     "automatic_approval": false
-  }
+  },
+  "governance": {
+    "schema": "aethrion-human-review-v1",
+    "model_id": "code",
+    "approval_status": "approved",
+    "author_role": "project owner (content drafted by Claude at the owner's request)",
+    "authorship_attested": true,
+    "first_party_origin_attested": true,
+    "rights_holder_role": "project owner",
+    "rights_attested": true,
+    "source_rights_reviewed": true,
+    "privacy_reviewed": true,
+    "quality_reviewed": true,
+    "reviewer_role": "project owner (attestation given in the Claude Code session)",
+    "reviewed_at": "2026-11-26T15:33+03:00",
+    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/code/records.jsonl@sha256:bd32929a0e42ad87f1949b60ffc225b888989d08c0f6cfd0ba28473ca0a1d6c1",
+    "speaker_consent_reviewed": false,
+    "safety_reviewed": false
+  },
+  "dataset_status": "owner_attested_pilot_not_released"
 }
