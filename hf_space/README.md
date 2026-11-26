@@ -20,7 +20,9 @@ Set AETHRION_SPACE_USERNAME and AETHRION_SPACE_PASSWORD under Space Secrets
 to enable authenticated access to local model inference. No model API keys
 are accepted or required.
 
-The Space provides a public, read-only 11-model training-readiness panel. It reports non-sensitive data-gate blockers without requiring inference authentication; it never starts training or writes checkpoints. A READY result is not a trained or released model.\n\nThe chat model remains unavailable until its own trained checkpoint and
+The Space provides a public, read-only 11-model training-readiness panel. It reports non-sensitive data-gate blockers without requiring inference authentication; it never starts training or writes checkpoints. A READY result is not a trained or released model.
+
+The chat model remains unavailable until its own trained checkpoint and
 matching tokenizer are installed and integrity-verified. Code, vision,
 image-generation, ASR, TTS, 3D, research, document-intelligence and safety
 specialists are separate first-party model programs and remain unavailable
@@ -52,7 +54,7 @@ completed.
 
 ## Current status (2026-11-26)
 
-All eleven model registry entries remain **NOT_TRAINED and NOT_RELEASED**. The ten specialist-family manifests are fail-closed: `training_allowed=false`, `owner_approval=false` and `privacy_reviewed=false`, pending documented human review. CHAT/BASE remains blocked: a non-training candidate can be prepared, but its approved training corpus, tokenizer and provenance inputs are not yet installed. The prepared specialist datasets are small synthetic pilot candidates drafted/generated for this project; they are not approved training corpora and their record counts are not production-scale evidence.
+All eleven model registry entries remain **NOT_TRAINED and NOT_RELEASED**. The ten specialist-family manifests are fail-closed: `training_allowed=false`, `owner_approval=false` and `privacy_reviewed=false`, pending documented human review. Non-training BASE, CHAT and CODE candidate snapshots are stored privately under the artifact repository's `candidates/` paths. They are not loaded into this Space and are not approved for model-weight training. CHAT/BASE remains blocked because its official approved corpus, tokenizer and provenance inputs are not installed. The prepared specialist datasets are small synthetic pilot candidates drafted/generated for this project; they are not approved training corpora and their record counts are not production-scale evidence.
 
 The latest private-artifact evaluation on 2026-11-26 found that the CODE checkpoint does not match the current dataset manifest, so the integrity/evaluation audit exited with failure. Other checkpoint evaluation outputs are synthetic held-out measurements only, not a release decision. Private artifact files do not establish training approval or release readiness. The Space deployment includes the current code and dataset manifests, but unapproved model checkpoints are intentionally removed from the Space. No model is approved for release.
 
