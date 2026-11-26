@@ -23,6 +23,7 @@ def main() -> int:
     ap.add_argument("--max-rounds", type=int, default=60)
     ap.add_argument("--session-timeout", type=int, default=1500)
     ap.add_argument("--deadline-minutes", type=int, default=330)
+    ap.add_argument("--report", default=None, help="Optional JSON summary report path.")
     ap.add_argument("--fresh", action="store_true", help="delete the model's old remote checkpoints first (dataset changed)")
     a = ap.parse_args()
     import time
@@ -74,7 +75,14 @@ def main() -> int:
             state.update(ok=True, step=prog.get("step"), complete=bool(prog.get("complete")))
             if state["complete"]: break
         summary[model] = state
-    print("SUMMARY", json.dumps(summary), flush=True)
+    rendered = json.dumps(summary, ensure_ascii=False, indent=2)
+    print("SUMMARY", rendered, flush=True)
+    if a.report:
+        report_path = Path(a.report).resolve()
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = Path(str(report_path) + ".tmp")
+        temporary.write_text(rendered + "\n", encoding="utf-8")
+        temporary.replace(report_path)
     return 0 if all(v["ok"] for v in summary.values()) else 1
 
 

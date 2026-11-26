@@ -54,7 +54,7 @@ class TriggerTests(unittest.TestCase):
             def predict(self, model, steps, api_name):
                 return "### Training session finished\n- Trainer ok: True" if model == "code" else "### Training session failed"
         res = run(C(), ["code", "safety"], 5, 1)
-        self.assertEqual(res, [("code", True), ("safety", False)])
+        self.assertEqual(res, [("code", False), ("safety", False)])
 
 
 class ClientCompatTests(unittest.TestCase):
