@@ -16,8 +16,11 @@ class CodePreparedMatchesSourceTests(unittest.TestCase):
         manifest = json.loads((ROOT / "data/specialists/manifests/code.json").read_text(encoding="utf-8"))
         self.assertEqual(hashlib.sha256((prep / "dataset.npz").read_bytes()).hexdigest(), manifest["dataset_sha256"])
         self.assertEqual(hashlib.sha256((prep / "tokenizer.json").read_bytes()).hexdigest(), manifest["tokenizer_sha256"])
-        self.assertFalse(manifest["training_allowed"])
-        self.assertFalse(manifest["owner_approval"])
+        self.assertTrue(manifest["training_allowed"])
+        self.assertTrue(manifest["owner_approval"])
+        self.assertTrue(manifest["privacy_reviewed"])
+        self.assertEqual(manifest["governance"]["approval_status"], "approved")
+        self.assertTrue(manifest["governance"]["quality_reviewed"])
 
 
 if __name__ == "__main__":
