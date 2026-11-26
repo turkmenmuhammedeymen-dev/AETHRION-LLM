@@ -38,10 +38,10 @@ class UnionFind:
 
 
 PRIVACY_PATTERNS = {
-    "email_like": re.compile(r"\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b", re.IGNORECASE),
-    "turkish_mobile_like": re.compile(r"(?<!\\d)(?:\\+90|0)?[\\s-]?5\\d{2}[\\s-]?\\d{3}[\\s-]?\\d{2}[\\s-]?\\d{2}(?!\\d)"),
-    "ipv4_like": re.compile(r"\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b"),
-    "credential_literal": re.compile(r"\\b(password|parola|api[_ -]?key|secret|token)\\s*[:=]\\s*\\S+", re.IGNORECASE),
+    "email_like": re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE),
+    "turkish_mobile_like": re.compile(r"(?<!\d)(?:\+90|0)?[\s-]?5\d{2}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}(?!\d)"),
+    "ipv4_like": re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b"),
+    "credential_literal": re.compile(r"\b(password|parola|api[_ -]?key|secret|token)\s*[:=]\s*\S+", re.IGNORECASE),
 }
 
 
