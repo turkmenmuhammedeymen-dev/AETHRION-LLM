@@ -82,11 +82,14 @@ def test_repeated_chat_answers_are_kept_in_one_split(tmp_path: Path) -> None:
 
     assert result.returncode == 0, result.stdout + result.stderr
     manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
-    dialogue_splits = {
-        manifest["group_assignment"][f"diyalog-{index:02d}.jsonl"]
-        for index in range(1, 5)
-    }
+    dialogue_rows = [
+        json.loads(line)
+        for line in (output / "records.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip() and json.loads(line)["source_file"].startswith("diyalog-")
+    ]
+    dialogue_splits = {row["split"] for row in dialogue_rows}
     assert len(dialogue_splits) == 1
+    assert len({row["source_group"] for row in dialogue_rows}) == 1
     rows = [
         json.loads(line)
         for line in (output / "records.jsonl").read_text(encoding="utf-8").splitlines()
