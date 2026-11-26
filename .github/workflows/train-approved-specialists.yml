@@ -1,6 +1,14 @@
 name: AETHRION Approved Specialist Training
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "data/specialists/manifests/**"
+      - "data/authored/**/GOVERNANCE.json"
+      - "data/authored/audio/GOVERNANCE_*.json"
+      - "ci/trigger_space_training.py"
+      - ".github/workflows/train-approved-specialists.yml"
   workflow_dispatch:
     inputs:
       action:
@@ -24,7 +32,7 @@ concurrency:
 
 jobs:
   preflight:
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'preflight'
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'preflight')
     runs-on: ubuntu-latest
     steps:
       - name: Check out selected source revision
