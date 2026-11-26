@@ -125,6 +125,13 @@ def build_candidate(source_dir: Path, output_dir: Path) -> dict[str, Any]:
 
     group_names = sorted({item["source_group"] for item in rows})
 
+    response_counts: Counter[str] = Counter()
+    for item in rows:
+        if item["source_file"].startswith("diyalog-") and "AETHRION:" in item["text"]:
+            response_key = normalized_text(item["text"].split("AETHRION:", 1)[1].strip())
+            if response_key:
+                response_counts[response_key] += 1
+
     response_seen: Counter[str] = Counter()
     for item in rows:
         flags: list[str] = []
