@@ -29,12 +29,12 @@ The generated manifest explicitly keeps `training_allowed=false`, `owner_approva
 
 ## Verification status
 
-The PR adds focused tests for duplicate-group union, repeated-answer split leakage, response caps, non-empty splits, SHA-256 consistency, fail-closed flags, and malformed JSONL rejection. On main, the candidate is also retained in the private HF artifact repository under a commit-specific path; it remains explicitly unapproved. The GitHub Actions preflight workflow will produce the first candidate artifact when the PR workflow runs. Until that run succeeds and its artifact is inspected, no record count or successful corpus-preparation claim is made.
+The PR adds focused tests for duplicate-group union, repeated-answer split leakage, response caps, non-empty splits, SHA-256 consistency, fail-closed flags, PII-pattern blocking, and malformed JSONL rejection. On main, the candidate is also retained in the private HF artifact repository under a commit-specific path; it remains explicitly unapproved. The GitHub Actions preflight workflow will produce the first candidate artifact when the PR workflow runs. Until that run succeeds and its artifact is inspected, no record count or successful corpus-preparation claim is made.
 
 
 ## First generated artifact — 2026-11-26
 
-GitHub Actions run [45851315277](https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/actions/runs/45851315277) completed successfully. Its artifact is `aethrion-base-candidate-preflight` (artifact ID `15134262131`, archive SHA-256 `b4af5f51a10f549bd72d9660cb9790e2a449b372383ba934f3153f8dd5288b61`).
+GitHub Actions run [45852483911](https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/actions/runs/45852483911) completed successfully. Its artifact is `aethrion-base-candidate-preflight` (artifact ID `15133758612`, archive SHA-256 `156aea382e822db057a150d2b321b391e35c03fda7e89793ac37212b78638d08`).
 
 Verified by downloading and inspecting that exact artifact:
 
@@ -44,6 +44,7 @@ Verified by downloading and inspecting that exact artifact:
 - Candidate split: train 807 rows / 369 groups; validation 98 / 46; test 101 / 46.
 - 432 unique included dialogue-response groups; zero identical assistant-response groups crossing splits.
 - Review JSONL count and SHA-256 match the manifest; all three split-file SHA-256 values match; every included row's split agrees with its group assignment.
+- The fail-closed privacy pre-screen completed with zero email-like, Turkish-mobile-like, IPv4-like, or credential-literal matches across all 1,792 rows; a match would abort candidate creation.
 - `training_allowed=false`, `owner_approval=false`, and `privacy_reviewed=false` remain unchanged.
 
 Split SHA-256:
