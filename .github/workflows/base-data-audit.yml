@@ -51,8 +51,8 @@ jobs:
             --seed 1 --vocab-size 2048 --max-length 512
       - name: Run offline fail-closed preflight for all ten specialist families
         run: |
-          python ci/trigger_space_training.py --preflight-only \\
-            --models code research safety vision image asr tts vocoder 3d document \\
+          python ci/trigger_space_training.py --preflight-only \
+            --models code research safety vision image asr tts vocoder 3d document \
             > aethrion-specialist-preflight.txt 2>&1
       - name: Upload BASE, CHAT and CODE candidate audit artifacts
         uses: actions/upload-artifact@v4
@@ -61,6 +61,7 @@ jobs:
           path: |
             aethrion-base-data-audit/
             aethrion-code-prepared-candidate/
+            aethrion-specialist-preflight.txt
           if-no-files-found: error
       - name: Store BASE/CHAT audit and CODE candidate in the private HF artifact repository
         if: github.event_name == 'push'
