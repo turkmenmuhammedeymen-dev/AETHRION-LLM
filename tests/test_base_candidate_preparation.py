@@ -58,6 +58,43 @@ def test_candidate_preparation_deduplicates_and_keeps_groups_together(tmp_path: 
         assert manifest["splits"][split]["sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+
+def test_repeated_chat_answers_are_kept_in_one_split(tmp_path: Path) -> None:
+    source = tmp_path / "base"
+    output = tmp_path / "candidate"
+    source.mkdir()
+    for index in range(1, 5):
+        _write_jsonl(
+            source / f"diyalog-{index:02d}.jsonl",
+            [{"text": f"Kullanıcı: farklı soru {index}?\\nAETHRION: Aynı yanıt."}],
+        )
+    for name in ("other-a.jsonl", "other-b.jsonl", "other-c.jsonl"):
+        _write_jsonl(source / name, [{"text": f"Bağımsız içerik {name}."}])
+
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--source-dir", str(source), "--output-dir", str(output)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+    dialogue_splits = {
+        manifest["group_assignment"][f"diyalog-{index:02d}.jsonl"]
+        for index in range(1, 5)
+    }
+    assert len(dialogue_splits) == 1
+    rows = [
+        json.loads(line)
+        for line in (output / "records.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    dialogue_rows = [row for row in rows if row["source_file"].startswith("diyalog-")]
+    assert len(dialogue_rows) == 4
+    assert all("assistant_response_repeated_more_than_three_times" in row["quality_flags"] for row in dialogue_rows)
+
+
 def test_candidate_preparation_rejects_invalid_jsonl(tmp_path: Path) -> None:
     source = tmp_path / "base"
     output = tmp_path / "candidate"
