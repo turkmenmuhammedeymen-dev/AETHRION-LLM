@@ -169,6 +169,15 @@ def build_candidate(source_dir: Path, output_dir: Path) -> dict[str, Any]:
             "sha256": sha256_bytes(content.encode("utf-8")),
         }
 
+    review_rows = []
+    for split, items in split_rows.items():
+        for item in items:
+            review_rows.append({**item, "split": split})
+    review_jsonl = "".join(
+        json.dumps(item, ensure_ascii=False) + "\n" for item in review_rows
+    )
+    atomic_write(output_dir / "records.jsonl", review_jsonl)
+
     manifest = {
         "schema_version": 1,
         "project": "AETHRION-LLM",
@@ -189,6 +198,7 @@ def build_candidate(source_dir: Path, output_dir: Path) -> dict[str, Any]:
         "normalization_for_duplicate_detection_only": "Unicode NFKC, casefold, collapse whitespace; stored text is otherwise preserved",
         "group_assignment": assignment,
         "splits": split_files,
+        "review_records_file": {"file": "records.jsonl", "records": len(review_rows), "sha256": sha256_bytes(review_jsonl.encode("utf-8"))},
         "record_audit": [
             {
                 "source_file": item["source_file"],
