@@ -1,9 +1,7 @@
-"""CHAT stage 2 on the CI runner: instruction-tune from the verified BASE checkpoint (CPU), never a release.
+"""CHAT instruction tuning is blocked until BASE and CHAT human-review gates are approved.
 
-Steps: deterministic BASE tokenizer (scripts/prepare_base.py, needs AETHRION_BASE_AUDIT_HMAC_KEY) ->
-pull BASE checkpoint from the private artifact repo (prefix `chat`) -> prepare the owner-attested CHAT
-instruction dataset with that exact tokenizer -> attestation bound to the records hash -> instruction tuning
-(response-only loss) -> push result under prefix `chat_instruct`. Sessions are not resumed (runs to completion)."""
+This runner validates the existing CHAT governance record and stops before downloading or training
+when review is pending. It never synthesizes an owner attestation or opens a training gate."""
 from __future__ import annotations
 
 import json
@@ -30,6 +28,13 @@ def main() -> int:
     from aethrion import artifact_sync
     api = HfApi(token=token)
     os.environ.setdefault("AETHRION_ARTIFACT_REPO", f"{api.whoami()['name']}/aethrion-artifacts")
+    from aethrion.data_governance import GovernanceError, validate_governance_record
+    chat_governance = json.loads((ROOT / "data/authored/chat/GOVERNANCE.json").read_text(encoding="utf-8"))
+    try:
+        validate_governance_record(chat_governance, model_id="chat")
+    except GovernanceError as exc:
+        print(f"CHAT human review is pending or incomplete: {exc}", file=sys.stderr)
+        return 5
     sh(sys.executable, "scripts/prepare_base.py")
     pulled = artifact_sync.pull_model_artifacts("chat", ROOT / "artifacts", api=api)
     if "checkpoint_last.pt" not in pulled:
@@ -46,8 +51,6 @@ def main() -> int:
        "--model", "chat", "--license", "First-party owner-authored", "--permitted-use", "model training permitted",
        "--evidence-uri", "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/chat/GOVERNANCE.json",
        "--source-uri", "owner-authored:aethrion-llm/data/authored/chat", "--tokenizer", "artifacts/tokenizer.json", "--max-length", "256")
-    sh(sys.executable, "scripts/apply_owner_attestation.py", "chat", "--session", "01CgbDesHhneLFEzEj5NSZrK",
-       "--statement", gov["owner_statement"])
     sh(sys.executable, "-m", "aethrion.instruction_tune", "--config", "configs/instruction_tuning.json",
        "--manifest", "data/specialists/manifests/chat.json", "--base-checkpoint", "artifacts/checkpoint_last.pt")
     out = ROOT / "artifacts" / "models" / "chat"

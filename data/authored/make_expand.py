@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Deterministic expansion of first-party (owner-attested) data: research pairs, chat Q&A, extra BASE topics.
-Run from repo root: python3 data/authored/make_expand.py   (idempotent; appends only missing ids)"""
+"""Deterministic expansion of Claude-generated candidate content at the project owner's request.
+Outputs are not individually human-reviewed and are not owner-attested or approved for training.
+Run from repo root: python3 data/authored/make_expand.py (idempotent; appends only missing IDs)."""
 import importlib.util, json, re
 from pathlib import Path
 
