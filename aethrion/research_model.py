@@ -62,7 +62,7 @@ class AETHRIONResearch(nn.Module):
         self.passage_encoder = ResearchTextEncoder(config)
         self.logit_scale = nn.Parameter(torch.tensor(2.0))
         # Hybrid retrieval: learned dense similarity + exact token overlap (generalises to unseen words).
-        self.lexical_weight = nn.Parameter(torch.tensor(6.0))
+        self.lexical_weight = nn.Parameter(torch.tensor(6.0), requires_grad=False)  # fixed anchor: training must refine, not replace, exact-match scoring
 
     @staticmethod
     def lexical_overlap(query_ids, passage_ids):
@@ -74,7 +74,7 @@ class AETHRIONResearch(nn.Module):
     def score_matrix(self, query_ids, passage_ids, query_mask=None, passage_mask=None):
         q = self.query_encoder(query_ids, query_mask)
         p = self.passage_encoder(passage_ids, passage_mask)
-        dense = self.logit_scale.exp().clamp(max=20) * q @ p.T
+        dense = self.logit_scale.exp().clamp(max=4) * q @ p.T
         return q, p, dense + self.lexical_weight * self.lexical_overlap(query_ids, passage_ids)
 
     def forward(self, query_ids, passage_ids, query_mask=None, passage_mask=None):
