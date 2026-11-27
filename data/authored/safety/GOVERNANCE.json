@@ -13,6 +13,7 @@
   "reviewer_role": "Project owner (self-attestation)",
   "reviewed_at": "2026-11-26T18:06:46.491Z",
   "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/docs/review/OWNER_DATA_REVIEW_ATTESTATION_2026-11-26.md",
+  "reviewed_records_sha256": "74c1ddd4f2d937e666cbe96cf9dbbac45d2ff7743b34335d6fc2377b0ed2106b",
   "speaker_consent_reviewed": false,
   "safety_reviewed": true,
   "owner_statement": "Project owner explicitly states all dataset materials were reviewed and verified and authorizes AETHRION development/training; see linked attestation."
