@@ -204,15 +204,16 @@ def make_client(space_id, token, auth, client_cls=None):
                 "runtime health and authentication configuration."
             )
         raise RuntimeError(
-            "Space login failed (safe diagnostic): " + detail +
+            f"Space login failed (HTTP {exc.status_code}; safe diagnostic): " + detail +
             " No credentials or response bodies were logged."
         ) from None
     except ValueError:
-        # Other gradio_client ValueErrors may contain server details.
+        # Some gradio_client versions raise ValueError internally. Do not expose
+        # its message because it may contain server response details.
         raise RuntimeError(
-            "Space login rejected: Gradio client initialization failed before "
-            "authentication could be confirmed. No response details or "
-            "credentials were logged."
+            "Space login rejected by gradio_client before an HTTP status was "
+            "available. Verify the matching GitHub Actions and Hugging Face "
+            "Space secrets. No credentials or response details were logged."
         ) from None
 
 
