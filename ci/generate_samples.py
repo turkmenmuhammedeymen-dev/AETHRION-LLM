@@ -34,8 +34,12 @@ def _load(model, scratch, api):
     return net.eval()
 
 
+STATS = []
+
+
 def _wav(path, x):
     x = np.clip(np.asarray(x, dtype=np.float32), -1, 1)
+    STATS.append(f"{Path(path).name} seconds={len(x)/SR:.2f} rms={float(np.sqrt((x**2).mean())):.5f} peak={float(abs(x).max()):.5f}")
     with wave.open(str(path), "wb") as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes((x * 32767).astype("<i2").tobytes())
@@ -68,6 +72,7 @@ def main() -> int:
                 dur = tts.predict_durations(ids)
                 align, _ = tts.durations_to_alignment(dur)
                 mel = tts(ids, align).transpose(1, 2)
+                STATS.append(f"tts mel mean={float(mel.mean()):.3f} std={float(mel.std()):.3f} real_mean={float(d['target_mels'][i].mean()):.3f} real_std={float(d['target_mels'][i].std()):.3f}")
                 _wav(out / "audio" / f"sample_{len(key) + 1:03d}.wav", voc(mel)[0].numpy())
                 key.append((f"sample_{len(key) + 1:03d}.wav", "tts+vocoder", rows[int(i)]["transcript"]))
         with torch.no_grad():
@@ -120,6 +125,7 @@ def main() -> int:
     (out / "README.txt").write_text(
         "Rate each file in ratings.csv: MOS 1 (bad) to 5 (excellent), intelligible (audio), unsafe (images).\n"
         "Listen/look before opening key.csv. Synthetic-data models only.\n" + "\n".join(notes) + "\n", encoding="utf-8")
+    print("\n".join(STATS))
     print(f"samples={len(key)} notes={notes}")
     return 0
 

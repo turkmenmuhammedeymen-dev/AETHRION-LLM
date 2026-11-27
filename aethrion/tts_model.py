@@ -151,12 +151,29 @@ class AETHRIONVocoder(nn.Module):
 
     @staticmethod
     def waveform_loss(predicted, target, sample_mask=None):
+        """L1 waveform loss + multi-resolution STFT loss.
+
+        Raw-waveform L1 alone lets the model collapse to near-silence (predicting ~0 is a cheap optimum
+        for oscillating audio), so spectral magnitude terms are added."""
         if predicted.shape != target.shape:
             raise ValueError("predicted and target waveform shapes must match")
+        if sample_mask is not None and sample_mask.shape != target.shape:
+            raise ValueError("sample_mask must match waveform shape")
         error = (predicted - target).abs()
         if sample_mask is not None:
-            if sample_mask.shape != target.shape:
-                raise ValueError("sample_mask must match waveform shape")
-            error = error * sample_mask.to(error.dtype)
-            return error.sum() / sample_mask.sum().clamp_min(1)
-        return error.mean()
+            weight = sample_mask.to(error.dtype)
+            l1 = (error * weight).sum() / weight.sum().clamp_min(1)
+            predicted, target = predicted * weight, target * weight
+        else:
+            l1 = error.mean()
+        spectral = predicted.new_zeros(())
+        for n_fft in (512, 1024, 2048):
+            if predicted.size(-1) < n_fft:
+                continue
+            window = torch.hann_window(n_fft, device=predicted.device, dtype=predicted.dtype)
+            sp = torch.stft(predicted, n_fft, n_fft // 4, window=window, return_complex=True).abs()
+            st = torch.stft(target, n_fft, n_fft // 4, window=window, return_complex=True).abs()
+            log_term = (torch.log(sp + 1e-5) - torch.log(st + 1e-5)).abs().mean()
+            conv_term = torch.linalg.vector_norm(st - sp) / torch.linalg.vector_norm(st).clamp_min(1e-6)
+            spectral = spectral + log_term + conv_term
+        return l1 + spectral
