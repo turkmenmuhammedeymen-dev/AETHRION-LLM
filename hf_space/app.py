@@ -206,10 +206,17 @@ _EXPERIMENTAL_CHAT_TOKENIZER = None
 _EXPERIMENTAL_CHAT_INFO = None
 
 
+_LOCAL_SEARCH = None
+
+
 def chat(message, history):
     if not SPACE_AUTH_ENABLED:
         return _auth_required_message()
     from aethrion.chat_orchestrator import orchestrate
+    from aethrion.local_search import LocalSearch
+    global _LOCAL_SEARCH
+    if _LOCAL_SEARCH is None:
+        _LOCAL_SEARCH = LocalSearch()
     think = False
     for prefix in ("/düşün ", "/think "):
         if message.startswith(prefix):
@@ -221,6 +228,7 @@ def chat(message, history):
         lambda capability, prompt: dispatch(capability, prompt),
         lambda prompt: _chat_core(prompt, history),
         trace=trace if think else None,
+        search=_LOCAL_SEARCH,
     )
     if think and trace:  # thinking mode: show the real steps taken, not invented reasoning
         answer = "Düşünme adımları:\n" + "\n".join(f"{i}. {t}" for i, t in enumerate(trace, 1)) + "\n\n" + answer
