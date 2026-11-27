@@ -200,6 +200,10 @@ def _chat_core(message, history):
         return _gpu_local_chat(prompt)
     except CapabilityUnavailable:
         return "AETHRION's own trained checkpoint/tokenizer is not available. No third-party model is silently substituted."
+# Private preview is separate from the production router and release registry.
+_EXPERIMENTAL_CHAT_MODEL = None
+_EXPERIMENTAL_CHAT_TOKENIZER = None
+_EXPERIMENTAL_CHAT_INFO = None
 
 
 def chat(message, history):
@@ -221,7 +225,48 @@ def chat(message, history):
     if think and trace:  # thinking mode: show the real steps taken, not invented reasoning
         answer = "Düşünme adımları:\n" + "\n".join(f"{i}. {t}" for i, t in enumerate(trace, 1)) + "\n\n" + answer
     return answer
+
+
 @spaces.GPU(duration=60)
+def _gpu_experimental_chat(prompt):
+    global _EXPERIMENTAL_CHAT_MODEL, _EXPERIMENTAL_CHAT_TOKENIZER, _EXPERIMENTAL_CHAT_INFO
+    from aethrion.experimental_chat import load_experimental_chat, generate_experimental_chat
+    if _EXPERIMENTAL_CHAT_MODEL is None:
+        root = Path(__file__).resolve().parent
+        _EXPERIMENTAL_CHAT_MODEL, _EXPERIMENTAL_CHAT_TOKENIZER, _EXPERIMENTAL_CHAT_INFO = load_experimental_chat(root)
+    answer = generate_experimental_chat(
+        _EXPERIMENTAL_CHAT_MODEL, _EXPERIMENTAL_CHAT_TOKENIZER, prompt,
+        max_new_tokens=64,
+    )
+    return answer, _EXPERIMENTAL_CHAT_INFO
+
+
+def experimental_chat(message, history):
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    if not isinstance(message, str) or not message.strip():
+        return "Enter a prompt for the experimental Chat candidate."
+    if len(message) > 2000:
+        return "Experimental preview prompts are limited to 2,000 characters."
+    context = []
+    for item in (history or [])[-4:]:
+        if isinstance(item, dict) and isinstance(item.get("content"), str):
+            context.append(str(item.get("role", "user")) + ": " + item["content"][:500])
+    prompt = "\\n".join(context + ["user: " + message, "assistant:"])
+    try:
+        answer, info = _gpu_experimental_chat(prompt)
+        return (
+            "**EXPERIMENTAL CANDIDATE — NOT RELEASED**\\n\\n"
+            + answer
+            + "\\n\\n---\\n"
+            + f"Checkpoint step: {info.get('step')} · Device: {info.get('device')}\\n"
+            + "This private preview bypasses release registration only; it does not change "
+              "models/manifest.json, approval flags, or production routing."
+        )
+    except Exception as exc:
+        return "Experimental Chat load/inference failed: " + type(exc).__name__ + ": " + str(exc)[:240]
+
+
 def code(prompt):
     if space_auth_required(SPACE_AUTH_ENABLED):
         return _auth_required_message()
@@ -518,6 +563,16 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
     with gr.Tabs():
         with gr.Tab("AI Chat"):
             gr.ChatInterface(chat,type="messages",chatbot=gr.Chatbot(type="messages",height=420))
+        if SPACE_AUTH_ENABLED:
+            with gr.Tab("Experimental Chat · owner only"):
+                gr.Markdown(
+                    "**Private experimental candidate. Not released, not safety-reviewed, and not the production model route.** "
+                    "The checkpoint and tokenizer hashes are checked before loading. Output is limited to 64 new tokens."
+                )
+                gr.ChatInterface(
+                    experimental_chat, type="messages",
+                    chatbot=gr.Chatbot(type="messages", height=420),
+                )
         with gr.Tab("Code & Project"):
             p=gr.Textbox(lines=4,label="Code task");o=gr.Code(label="Generated code")
             gr.Button("Generate").click(code,inputs=p,outputs=o)
