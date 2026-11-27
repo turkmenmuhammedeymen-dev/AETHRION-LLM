@@ -74,7 +74,7 @@ class AETHRIONResearch(nn.Module):
     def score_matrix(self, query_ids, passage_ids, query_mask=None, passage_mask=None):
         q = self.query_encoder(query_ids, query_mask)
         p = self.passage_encoder(passage_ids, passage_mask)
-        dense = self.logit_scale.exp().clamp(max=100) * q @ p.T
+        dense = self.logit_scale.exp().clamp(max=20) * q @ p.T
         return q, p, dense + self.lexical_weight * self.lexical_overlap(query_ids, passage_ids)
 
     def forward(self, query_ids, passage_ids, query_mask=None, passage_mask=None):
