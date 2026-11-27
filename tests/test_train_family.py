@@ -1,9 +1,11 @@
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
-from aethrion.train_family import MODEL_IDS, FamilyTrainingError, _resolve_output_dir, preflight_model, run_family
+from aethrion.train_family import MODEL_IDS, FamilyTrainingError, _resolve_output_dir, main, preflight_model, run_family
 
 
 class FamilyTrainingOrchestratorTests(unittest.TestCase):
@@ -198,6 +200,56 @@ class FamilyTrainingOrchestratorTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(FamilyTrainingError, "model_id"):
                 preflight_model(root, "code")
+
+    def test_execute_reports_trainer_failure_instead_of_success(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ready_plan = {
+                "model_id": "code",
+                "ready": True,
+                "command": ["python", "-m", "aethrion.specialist_train"],
+                "checkpoint": "artifacts/models/code/checkpoint_last.pt",
+                "output_dir": "artifacts/models/code",
+            }
+            failed_process = type("Completed", (), {"returncode": 1})()
+            with (
+                patch("aethrion.train_family.preflight_model", return_value=ready_plan),
+                patch("aethrion.train_family.subprocess.run", return_value=failed_process),
+            ):
+                report = run_family(tmp, selected=["code"], execute=True)
+            self.assertEqual(report["models"][0]["status"], "training_failed_not_released")
+            self.assertEqual(report["execution_failed_count"], 1)
+            self.assertTrue(report["training_started"])
+            self.assertEqual(report["released_count"], 0)
+
+    def test_cli_returns_nonzero_when_trainer_execution_failed(self):
+        report = {"blocked_count": 0, "execution_failed_count": 1}
+        with (
+            patch("sys.argv", ["train_family", "--execute", "--models", "code"]),
+            patch("aethrion.train_family.run_family", return_value=report),
+            redirect_stdout(StringIO()),
+        ):
+            self.assertEqual(main(), 1)
+
+
+    def test_cli_fails_when_trainer_exits_without_verified_report(self):
+        from aethrion import train_family
+        failed = {
+            "blocked_count": 0,
+            "execute_requested": True,
+            "models": [{"model_id": "code", "status": "trainer_exited_without_verified_report"}],
+        }
+        with patch("aethrion.train_family.run_family", return_value=failed), patch(
+            "sys.argv", ["train_family", "--execute", "--models", "code"]
+        ):
+            self.assertEqual(train_family.main(), 1)
+
+    def test_cli_keeps_preflight_block_as_distinct_exit_code(self):
+        from aethrion import train_family
+        blocked = {"blocked_count": 1, "execute_requested": True, "models": []}
+        with patch("aethrion.train_family.run_family", return_value=blocked), patch(
+            "sys.argv", ["train_family", "--execute", "--models", "code"]
+        ):
+            self.assertEqual(train_family.main(), 2)
 
 
 if __name__ == "__main__":

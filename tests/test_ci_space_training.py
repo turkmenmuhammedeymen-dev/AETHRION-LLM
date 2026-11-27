@@ -54,7 +54,7 @@ class TriggerTests(unittest.TestCase):
             def predict(self, model, steps, api_name):
                 return "### Training session finished\n- Trainer ok: True" if model == "code" else "### Training session failed"
         res = run(C(), ["code", "safety"], 5, 1)
-        self.assertEqual(res, [("code", True), ("safety", False)])
+        self.assertEqual(res, [("code", False), ("safety", False)])
 
 
 class ClientCompatTests(unittest.TestCase):
@@ -84,7 +84,7 @@ class LoginRetryTests(unittest.TestCase):
 
 
 class LoginCookieTests(unittest.TestCase):
-    def test_login_does_not_forward_bearer_token_and_returns_cookies(self):
+    def test_login_sends_bearer_header_for_private_space_and_returns_cookies(self):
         seen = {}
         def fake_post(url, **kwargs):
             seen.update(url=url, **kwargs)
@@ -93,12 +93,38 @@ class LoginCookieTests(unittest.TestCase):
         self.assertEqual(out, {"access-token": "abc"})
         self.assertEqual(seen["url"], "https://x.hf.space/login")
         self.assertEqual(seen["data"], {"username": "u", "password": "p"})
-        self.assertNotIn("headers", seen)
+        self.assertEqual(seen["headers"], {"Authorization": "Bearer hf_tok"})  # private Space: proxy 404s without it
+        self.assertNotIn("hf_tok", str(seen["data"]))
+
+    def test_retries_trailing_slash_only_after_404(self):
+        seen = []
+        responses = iter([
+            SimpleNamespace(status_code=404, cookies={}),
+            SimpleNamespace(status_code=200, cookies={"access-token": "ok"}),
+        ])
+
+        def fake_post(url, **kwargs):
+            seen.append(url)
+            return next(responses)
+
+        out = login_cookies("https://x.hf.space/", "u", "p", post=fake_post)
+        self.assertEqual(out, {"access-token": "ok"})
+        self.assertEqual(
+            seen,
+            ["https://x.hf.space/login", "https://x.hf.space/login/"],
+        )
 
     def test_login_failure_raises_sanitized_authentication_error(self):
         from ci.trigger_space_training import SpaceAuthenticationError
-        with self.assertRaises(SpaceAuthenticationError):
-            login_cookies("https://x.hf.space", "u", "p", "t", post=lambda *a, **k: SimpleNamespace(status_code=401, cookies={}))
+        statuses = iter([404, 404])
+        with self.assertRaises(SpaceAuthenticationError) as ctx:
+            login_cookies(
+                "https://x.hf.space", "u", "p",
+                post=lambda *a, **k: SimpleNamespace(
+                    status_code=next(statuses), cookies={}
+                ),
+            )
+        self.assertEqual(ctx.exception.status_code, 404)
 
 
 if __name__ == "__main__":

@@ -138,6 +138,29 @@ def preflight_model(root: str | Path, model_id: str) -> dict[str, Any]:
 
 
 
+def _run_forwarding_stop_signals(command: list[str], cwd: Path) -> subprocess.CompletedProcess:
+    """Run a trainer and forward SIGTERM/SIGINT so it can checkpoint before pausing."""
+    import signal
+    child = subprocess.Popen(command, cwd=cwd)
+    previous = {}
+
+    def _forward(signum, _frame):
+        if child.poll() is None:
+            child.send_signal(signum)
+
+    for stop_signal in (signal.SIGINT, signal.SIGTERM):
+        try:
+            previous[stop_signal] = signal.signal(stop_signal, _forward)
+        except ValueError:  # not in the main thread
+            pass
+    try:
+        returncode = child.wait()
+    finally:
+        for stop_signal, handler in previous.items():
+            signal.signal(stop_signal, handler)
+    return subprocess.CompletedProcess(command, returncode)
+
+
 def _training_outcome(output_dir: Path, model_id: str, returncode: int) -> str:
     """Derive status from the trainer's durable report, never from exit code alone."""
     if returncode != 0:
@@ -241,7 +264,7 @@ def run_family(
         for row, plan in zip(rows, plans):
             assert plan is not None
             try:
-                completed = subprocess.run(plan["command"], cwd=repo, check=False)
+                completed = _run_forwarding_stop_signals(plan["command"], repo)
                 row["status"] = _training_outcome(
                     repo / plan["output_dir"], row["model_id"], int(completed.returncode)
                 )
@@ -260,12 +283,22 @@ def run_family(
         }
         for row in rows
     )
+    failed_statuses = {
+        "training_failed_not_released",
+        "training_launch_failed_not_released",
+        "training_report_invalid_not_released",
+        "training_progress_invalid_not_released",
+        "trainer_exited_without_verified_report",
+        "trainer_report_unrecognized_not_released",
+    }
+    execution_failed_count = sum(row.get("status") in failed_statuses for row in rows)
     return {
         "format": "aethrion-family-training-run-v1",
         "execution_policy": "local_only",
         "model_count": len(rows),
         "ready_count": sum(row.get("ready") is True for row in rows),
         "blocked_count": sum(row.get("status") == "blocked" for row in rows),
+        "execution_failed_count": execution_failed_count,
         "training_started": bool(started),
         "released_count": 0,
         "execute_requested": bool(execute),
@@ -305,7 +338,35 @@ def main() -> int:
         temporary = Path(str(target) + ".tmp")
         temporary.write_text(rendered + "\n", encoding="utf-8")
         temporary.replace(target)
-    return 0 if report["blocked_count"] == 0 else 2
+    if report["blocked_count"]:
+        return 2
+    failed_statuses = {
+        "training_failed_not_released",
+        "training_launch_failed_not_released",
+        "training_report_invalid_not_released",
+        "training_progress_invalid_not_released",
+        "trainer_exited_without_verified_report",
+        "trainer_report_unrecognized_not_released",
+    }
+    execution_failed_count = report.get("execution_failed_count")
+    if execution_failed_count is None:
+        execution_failed_count = sum(
+            row.get("status") in failed_statuses for row in report.get("models", [])
+        )
+    report["execution_failed_count"] = execution_failed_count
+    if args.execute and execution_failed_count:
+        print("TRAINING EXECUTION FAILED: one or more trainers did not produce a verified report.", file=sys.stderr)
+        # Rewrite the report with the failure count so automation can audit the result.
+        rendered = json.dumps(report, ensure_ascii=False, indent=2)
+        print(rendered, file=sys.stderr)
+        if args.report:
+            target = Path(args.report)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            temporary = Path(str(target) + ".tmp")
+            temporary.write_text(rendered + "\n", encoding="utf-8")
+            temporary.replace(target)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

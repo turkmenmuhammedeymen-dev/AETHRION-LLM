@@ -21,13 +21,14 @@ class ArtifactSyncTests(unittest.TestCase):
             (src / "notes.txt").write_text("must be rejected")
             (src / "metrics.jsonl").write_text('{"step":1,"train_loss":0.5}\\n')
             (src / "training_report.json").write_text('{"status":"training_in_progress_not_released"}')
+            (src / "progress.json").write_text('{"step":1500}')
             f = Fake()
             with self.assertRaises(s.ArtifactSyncError): s.push_model_artifacts("chat", src, api=f, environ=ENV)
             (src / "notes.txt").unlink()
-            self.assertEqual(s.push_model_artifacts("chat", src, api=f, environ=ENV), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
+            self.assertEqual(sorted(s.push_model_artifacts("chat", src, api=f, environ=ENV)), ["checkpoint_last.pt", "checkpoint_last.pt.sha256", "metrics.jsonl", "progress.json", "training_report.json"])
             self.assertTrue(f.created["private"])
             dst = Path(d, "dst", "chat")
-            self.assertEqual(sorted(s.pull_model_artifacts("chat", dst, api=f, environ=ENV)), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
+            self.assertEqual(sorted(s.pull_model_artifacts("chat", dst, api=f, environ=ENV)), ["checkpoint_last.pt", "checkpoint_last.pt.sha256", "metrics.jsonl", "progress.json", "training_report.json"])
             self.assertEqual((dst / "checkpoint_last.pt").read_bytes(), b"w")
     def test_refuses_public_repo_unknown_model_and_missing_config(self):
         with tempfile.TemporaryDirectory() as d:
@@ -49,3 +50,37 @@ class ArtifactSyncTests(unittest.TestCase):
             with self.assertRaises(s.ArtifactSyncError): s._safe("chat", n)
 
 if __name__ == "__main__": unittest.main()
+
+
+class SingleCommitTests(unittest.TestCase):
+    def test_push_uses_one_commit_for_all_files(self):
+        try:
+            import huggingface_hub  # noqa: F401
+        except ImportError:
+            self.skipTest('huggingface_hub is validated in CI')
+        import tempfile
+        s = __import__("aethrion.artifact_sync", fromlist=["x"])
+        class C(Fake):
+            commits = []
+            def create_commit(self, **k): self.commits.append(k)
+        with tempfile.TemporaryDirectory() as d:
+            for name in ("checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json"):
+                (Path(d) / name).write_bytes(b"x")
+            c = C()
+            sent = s.push_model_artifacts("code", d, api=c, environ=ENV)
+        self.assertEqual(len(C.commits), 1)
+        self.assertEqual(sorted(sent), ["checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json"])
+        self.assertEqual(c.up, [])
+
+
+class TokenizerPackageSyncTests(unittest.TestCase):
+    def test_chat_push_includes_tokenizer_provenance(self):
+        import tempfile
+        s = __import__("aethrion.artifact_sync", fromlist=["x"])
+        with tempfile.TemporaryDirectory() as d:
+            names = ("checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json")
+            for name in names:
+                (Path(d) / name).write_bytes(b"x")
+            f = Fake()
+            sent = s.push_model_artifacts("chat", d, api=f, environ=ENV)
+        self.assertEqual(sorted(sent), sorted(names))

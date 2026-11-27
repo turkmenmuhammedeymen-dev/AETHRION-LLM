@@ -29,7 +29,61 @@ def _macro_f1(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(sum(scores) / len(scores)) if scores else 0.0
 
 
+def _research_metrics(model, arrays, idx, device) -> dict[str, Any]:
+    """Retrieval over the held-out test passages: top-1 / MRR versus random ranking."""
+    idx = np.asarray(idx)
+    if len(idx) < 2:
+        return {}
+    model.eval()
+    def _ids(key):
+        ids = torch.from_numpy(np.asarray(arrays[key][idx]).copy()).long().to(device)
+        mask = ids != 0
+        mask[:, 0] = True
+        length = max(1, int(mask.sum(1).max()))
+        return ids[:, :length], mask[:, :length]
+    (qi, qm), (pi, pm) = _ids("query_ids"), _ids("passage_ids")
+    with torch.no_grad():
+        scores = model.score_matrix(qi, pi, qm, pm)[2].cpu().numpy()
+    groups = np.asarray(arrays["group_id"][idx]).astype(str)
+    ranks = []
+    for i in range(len(idx)):
+        order = np.argsort(-scores[i])
+        ranks.append(next(r for r, j in enumerate(order, 1) if i == j or groups[j] == groups[i]))
+    ranks = np.asarray(ranks, dtype=np.float64)
+    n = len(idx)
+    return {"task_metrics": {"accuracy": float((ranks == 1).mean()), "majority_baseline_accuracy": float(1.0 / n),
+                             "mrr": float((1.0 / ranks).mean()), "support": int(n)}}
+
+
+def _vision_metrics(model, arrays, idx, device) -> dict[str, Any]:
+    """Image->caption retrieval on held-out items; same-group captions count as correct."""
+    idx = np.asarray(idx)
+    if len(idx) < 2:
+        return {}
+    model.eval()
+    ids = torch.from_numpy(np.asarray(arrays["token_ids"][idx]).copy()).long().to(device)
+    mask = ids != 0
+    mask[:, 0] = True
+    keep = max(1, int(mask.sum(1).max()))
+    imgs = torch.from_numpy(np.asarray(arrays["images"][idx]).copy()).to(device).float().div(127.5).sub(1.0)
+    with torch.no_grad():
+        scores = (model.encode_image(imgs) @ model.encode_text(ids[:, :keep], mask[:, :keep]).T).cpu().numpy()
+    groups = np.asarray(arrays["group_id"][idx]).astype(str)
+    ranks = []
+    for i in range(len(idx)):
+        order = np.argsort(-scores[i])
+        ranks.append(next(r for r, j in enumerate(order, 1) if i == j or groups[j] == groups[i]))
+    ranks = np.asarray(ranks, dtype=np.float64)
+    n = len(idx)
+    return {"task_metrics": {"accuracy": float((ranks == 1).mean()), "majority_baseline_accuracy": float(1.0 / n),
+                             "mrr": float((1.0 / ranks).mean()), "support": int(n)}}
+
+
 def _task_metrics(model, model_id, arrays, keys, idx, device, batch_size) -> dict[str, Any]:
+    if model_id == "research":
+        return _research_metrics(model, arrays, idx, device)
+    if model_id == "vision":
+        return _vision_metrics(model, arrays, idx, device)
     if model_id not in {"safety", "document", "code"}:
         return {}
     model.eval()
@@ -103,4 +157,8 @@ def evaluate_specialist(config: dict[str, Any], manifest_path: str | Path, check
                  "independent quality, safety review and human approval remain required."),
     }
     report.update(_task_metrics(trained, model_id, arrays, keys, test_idx, dev, batch_size))
+    # Untrained model on the same metric: shows whether training adds anything beyond the architecture itself.
+    base_task = _task_metrics(baseline, model_id, arrays, keys, test_idx, dev, batch_size)
+    if base_task:
+        report["untrained_baseline_task_metrics"] = base_task["task_metrics"]
     return report

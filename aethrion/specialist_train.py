@@ -125,7 +125,13 @@ def _loss(model: nn.Module, model_id: str, batch: dict[str, torch.Tensor]) -> to
             raise ValueError("code token_ids must have shape [batch, sequence>=2]")
         return model(ids[:, :-1], ids[:, 1:])[1]
     if model_id == "vision":
-        return model(batch["images"], batch["token_ids"], batch.get("attention_mask"))["loss"]
+        ids = batch["token_ids"]
+        mask = batch.get("attention_mask")
+        if mask is None:  # right-padded id 0 must not be pooled as content
+            mask = ids != 0
+            mask[:, 0] = True
+        keep = int(mask.sum(dim=1).max().item())
+        return model(batch["images"], ids[:, :keep], mask[:, :keep])["loss"]
     if model_id == "image":
         return model.diffusion_loss(batch["images"], batch["token_ids"])
     if model_id == "asr":
@@ -147,10 +153,17 @@ def _loss(model: nn.Module, model_id: str, batch: dict[str, torch.Tensor]) -> to
     if model_id == "3d":
         return model.diffusion_loss(batch["points"], batch["token_ids"])
     if model_id == "research":
-        return model(
-            batch["query_ids"], batch["passage_ids"],
-            batch.get("query_mask"), batch.get("passage_mask")
-        )["loss"]
+        # Datasets are right-padded with id 0 up to max_length; without a mask the encoders
+        # mean-pool over hundreds of padding positions and cannot learn (loss stays at chance).
+        def _crop(ids, mask):
+            if mask is None:
+                mask = ids != 0
+                mask[:, 0] = True
+            length = max(1, int(mask.sum(1).max()))
+            return ids[:, :length], mask[:, :length]
+        q_ids, q_mask = _crop(batch["query_ids"], batch.get("query_mask"))
+        p_ids, p_mask = _crop(batch["passage_ids"], batch.get("passage_mask"))
+        return model(q_ids, p_ids, q_mask, p_mask)["loss"]
     if model_id == "document":
         output = model(batch["token_ids"], batch["boxes"], batch["layout_ids"], batch.get("attention_mask"))
         return model.multitask_loss(

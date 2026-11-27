@@ -107,6 +107,9 @@ def gpu_model_preflight():
         lines.append(
             f"| {row['model']} | {row['status']} | {row.get('parameters', 0):,} | {row.get('synthetic_loss', '—')} |"
         )
+    for row in report["results"]:
+        if row.get("error"):
+            lines.append(f"\n**{row['model']} error:** `{row['error']}`")
     lines.extend([
         "",
         "**Safety:** synthetic tensors only; no dataset read, no optimizer step, no checkpoint written, no production training started.",
@@ -157,13 +160,22 @@ def training_session(model, steps):
         result = _gpu_training_session(model, steps)
     except Exception as exc:
         return "### Training session failed\n- " + type(exc).__name__ + ": " + str(exc)[:300]
+    progress = result.get("progress", {})
+    trainer_ok = bool(result.get("trainer_ok"))
+    complete = bool(progress.get("complete"))
+    if not trainer_ok:
+        heading = "### Training session failed"
+    elif complete:
+        heading = "### Training session completed (not released)"
+    else:
+        heading = "### Training session paused / incomplete (not released)"
     return (
-        "### Training session finished\n"
-        f"- Model: {result['model']} | steps requested: {result['steps']}\n"
-        f"- Trainer ok: {result['trainer_ok']} | pulled: {len(result['pulled'])} files | pushed: {len(result['pushed'])} files\n"
-        f"- Progress: {result.get('progress', {}).get('status', 'unknown')} step {result.get('progress', {}).get('step')} | complete: {result.get('progress', {}).get('complete', False)}\n"
-        "- Released: NO — a session is not a release; evaluation and human approval are still required.\n"
-        f"```\n{result['trainer_tail']}\n```"
+        heading + "\n"
+        + f"- Model: {result.get('model', model)} | steps requested: {result.get('steps', steps)}\n"
+        + f"- Trainer ok: {trainer_ok} | exit code: {result.get('trainer_exit_code', 'unknown')} | pulled: {len(result.get('pulled', []))} files | pushed: {len(result.get('pushed', []))} files\n"
+        + f"- Progress: {progress.get('status', 'unknown')} step {progress.get('step')} | complete: {complete}\n"
+        + "- Released: NO — evaluation and human approval are still required.\n"
+        + f"```\n{result.get('trainer_tail', result.get('note', 'No diagnostic available.'))}\n```"
     )
 
 
@@ -178,11 +190,7 @@ def status():
     rows.append("- **External model/API providers**: DISABLED — native-only policy")
     return "### Native model release status\n" + "\n".join(rows)
 
-def chat(message, history):
-    if not SPACE_AUTH_ENABLED:
-        return _auth_required_message()
-    if Capability.CHAT.value not in router.available():
-        return "AETHRION's own trained checkpoint/tokenizer is not loaded. No third-party model is silently substituted."
+def _chat_core(message, history):
     context = []
     for item in (history or [])[-8:]:
         if isinstance(item, dict) and isinstance(item.get("content"), str):
@@ -192,7 +200,73 @@ def chat(message, history):
         return _gpu_local_chat(prompt)
     except CapabilityUnavailable:
         return "AETHRION's own trained checkpoint/tokenizer is not available. No third-party model is silently substituted."
+# Private preview is separate from the production router and release registry.
+_EXPERIMENTAL_CHAT_MODEL = None
+_EXPERIMENTAL_CHAT_TOKENIZER = None
+_EXPERIMENTAL_CHAT_INFO = None
+
+
+def chat(message, history):
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    from aethrion.chat_orchestrator import orchestrate
+    think = False
+    for prefix in ("/düşün ", "/think "):
+        if message.startswith(prefix):
+            think, message = True, message[len(prefix):]
+            break
+    trace: list[str] = []
+    answer = orchestrate(
+        message, router.available(),
+        lambda capability, prompt: dispatch(capability, prompt),
+        lambda prompt: _chat_core(prompt, history),
+        trace=trace if think else None,
+    )
+    if think and trace:  # thinking mode: show the real steps taken, not invented reasoning
+        answer = "Düşünme adımları:\n" + "\n".join(f"{i}. {t}" for i, t in enumerate(trace, 1)) + "\n\n" + answer
+    return answer
+
+
 @spaces.GPU(duration=60)
+def _gpu_experimental_chat(prompt):
+    global _EXPERIMENTAL_CHAT_MODEL, _EXPERIMENTAL_CHAT_TOKENIZER, _EXPERIMENTAL_CHAT_INFO
+    from aethrion.experimental_chat import load_experimental_chat, generate_experimental_chat
+    if _EXPERIMENTAL_CHAT_MODEL is None:
+        root = Path(__file__).resolve().parent
+        _EXPERIMENTAL_CHAT_MODEL, _EXPERIMENTAL_CHAT_TOKENIZER, _EXPERIMENTAL_CHAT_INFO = load_experimental_chat(root)
+    answer = generate_experimental_chat(
+        _EXPERIMENTAL_CHAT_MODEL, _EXPERIMENTAL_CHAT_TOKENIZER, prompt,
+        max_new_tokens=64,
+    )
+    return answer, _EXPERIMENTAL_CHAT_INFO
+
+
+def experimental_chat(message, history):
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    if not isinstance(message, str) or not message.strip():
+        return "Enter a prompt for the experimental Chat candidate."
+    if len(message) > 2000:
+        return "Experimental preview prompts are limited to 2,000 characters."
+    context = []
+    for item in (history or [])[-4:]:
+        if isinstance(item, dict) and isinstance(item.get("content"), str):
+            context.append(str(item.get("role", "user")) + ": " + item["content"][:500])
+    prompt = "\\n".join(context + ["user: " + message, "assistant:"])
+    try:
+        answer, info = _gpu_experimental_chat(prompt)
+        return (
+            "**EXPERIMENTAL CANDIDATE — NOT RELEASED**\\n\\n"
+            + answer
+            + "\\n\\n---\\n"
+            + f"Checkpoint step: {info.get('step')} · Device: {info.get('device')}\\n"
+            + "This private preview bypasses release registration only; it does not change "
+              "models/manifest.json, approval flags, or production routing."
+        )
+    except Exception as exc:
+        return "Experimental Chat load/inference failed: " + type(exc).__name__ + ": " + str(exc)[:240]
+
+
 def code(prompt):
     if space_auth_required(SPACE_AUTH_ENABLED):
         return _auth_required_message()
@@ -489,6 +563,16 @@ with gr.Blocks(title="AETHRION-LLM · Intelligence Without Limits",theme=gr.them
     with gr.Tabs():
         with gr.Tab("AI Chat"):
             gr.ChatInterface(chat,type="messages",chatbot=gr.Chatbot(type="messages",height=420))
+        if SPACE_AUTH_ENABLED:
+            with gr.Tab("Experimental Chat · owner only"):
+                gr.Markdown(
+                    "**Private experimental candidate. Not released, not safety-reviewed, and not the production model route.** "
+                    "The checkpoint and tokenizer hashes are checked before loading. Output is limited to 64 new tokens."
+                )
+                gr.ChatInterface(
+                    experimental_chat, type="messages",
+                    chatbot=gr.Chatbot(type="messages", height=420),
+                )
         with gr.Tab("Code & Project"):
             p=gr.Textbox(lines=4,label="Code task");o=gr.Code(label="Generated code")
             gr.Button("Generate").click(code,inputs=p,outputs=o)

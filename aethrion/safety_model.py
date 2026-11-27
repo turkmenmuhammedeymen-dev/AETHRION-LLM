@@ -38,6 +38,8 @@ class AETHRIONSafe(nn.Module):
         self.position = nn.Embedding(config.max_length, config.width)
         layer = nn.TransformerEncoderLayer(config.width, config.heads, 4*config.width, batch_first=True)
         self.encoder = nn.TransformerEncoder(layer, config.layers)
+        # Hashed token-bigram bag: phrase-level signal that carries over to unseen topics.
+        self.ngram = nn.Embedding(8192, config.width)
         self.norm = nn.LayerNorm(config.width)
         self.decision_head = nn.Linear(config.width, config.decisions)
         self.reason_head = nn.Linear(config.width, config.reason_classes)
@@ -51,14 +53,21 @@ class AETHRIONSafe(nn.Module):
         if token_ids.min().item() < 0 or token_ids.max().item() >= self.config.vocab_size:
             raise ValueError("safety token outside vocabulary")
         pos = torch.arange(length, device=token_ids.device).unsqueeze(0)
-        mask = None if attention_mask is None else ~attention_mask.bool()
+        if attention_mask is None:
+            # Right-padded with id 0: never pool or attend over padding positions.
+            attention_mask = token_ids != 0
+            attention_mask[:, 0] = True
+        mask = ~attention_mask.bool()
         hidden = self.encoder(self.token(token_ids) + self.position(pos), src_key_padding_mask=mask)
         if attention_mask is None:
             pooled = hidden.mean(1)
         else:
             weights = attention_mask.to(hidden.dtype).unsqueeze(-1)
             pooled = (hidden * weights).sum(1) / weights.sum(1).clamp_min(1)
-        pooled = self.norm(pooled)
+        bigram = (token_ids[:, :-1] * 1315423911 + token_ids[:, 1:]) % 8192
+        bmask = (attention_mask[:, :-1] & attention_mask[:, 1:]).to(hidden.dtype).unsqueeze(-1)
+        bag = (self.ngram(bigram) * bmask).sum(1) / bmask.sum(1).clamp_min(1)
+        pooled = self.norm(pooled + bag)
         return {"decision_logits": self.decision_head(pooled),
                 "reason_logits": self.reason_head(pooled)}
 
