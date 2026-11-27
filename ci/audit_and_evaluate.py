@@ -64,7 +64,7 @@ def main() -> int:
         ev = r.get("evaluation", {})
         print(f"[{m}] integrity_ok={r['integrity_ok']} step={ev.get('checkpoint_step')}/{ev.get('max_steps')} "
               f"test_loss={ev.get('test_loss')} baseline={ev.get('untrained_baseline_test_loss')} "
-              f"learning={ev.get('evidence_of_learning')} task={ev.get('task_metrics')} err={r.get('error')}", flush=True)
+              f"learning={ev.get('evidence_of_learning')} task={ev.get('task_metrics')} gen={ev.get('code_generation')} base_task={ev.get('untrained_baseline_task_metrics')} err={r.get('error')}", flush=True)
         results.append(r)
     report = {"format": "aethrion-specialist-evaluation-v1", "released_models": [], "models": results,
               "note": "Evaluation on held-out synthetic first-party data; not a release decision."}
