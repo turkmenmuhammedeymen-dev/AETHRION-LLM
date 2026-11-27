@@ -210,11 +210,21 @@ def chat(message, history):
     if not SPACE_AUTH_ENABLED:
         return _auth_required_message()
     from aethrion.chat_orchestrator import orchestrate
-    return orchestrate(
+    think = False
+    for prefix in ("/düşün ", "/think "):
+        if message.startswith(prefix):
+            think, message = True, message[len(prefix):]
+            break
+    trace: list[str] = []
+    answer = orchestrate(
         message, router.available(),
         lambda capability, prompt: dispatch(capability, prompt),
         lambda prompt: _chat_core(prompt, history),
+        trace=trace if think else None,
     )
+    if think and trace:  # thinking mode: show the real steps taken, not invented reasoning
+        answer = "Düşünme adımları:\n" + "\n".join(f"{i}. {t}" for i, t in enumerate(trace, 1)) + "\n\n" + answer
+    return answer
 
 
 @spaces.GPU(duration=60)

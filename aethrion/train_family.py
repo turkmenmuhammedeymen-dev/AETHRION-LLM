@@ -283,12 +283,22 @@ def run_family(
         }
         for row in rows
     )
+    failed_statuses = {
+        "training_failed_not_released",
+        "training_launch_failed_not_released",
+        "training_report_invalid_not_released",
+        "training_progress_invalid_not_released",
+        "trainer_exited_without_verified_report",
+        "trainer_report_unrecognized_not_released",
+    }
+    execution_failed_count = sum(row.get("status") in failed_statuses for row in rows)
     return {
         "format": "aethrion-family-training-run-v1",
         "execution_policy": "local_only",
         "model_count": len(rows),
         "ready_count": sum(row.get("ready") is True for row in rows),
         "blocked_count": sum(row.get("status") == "blocked" for row in rows),
+        "execution_failed_count": execution_failed_count,
         "training_started": bool(started),
         "released_count": 0,
         "execute_requested": bool(execute),
@@ -338,7 +348,11 @@ def main() -> int:
         "trainer_exited_without_verified_report",
         "trainer_report_unrecognized_not_released",
     }
-    execution_failed_count = sum(row.get("status") in failed_statuses for row in report["models"])
+    execution_failed_count = report.get("execution_failed_count")
+    if execution_failed_count is None:
+        execution_failed_count = sum(
+            row.get("status") in failed_statuses for row in report.get("models", [])
+        )
     report["execution_failed_count"] = execution_failed_count
     if args.execute and execution_failed_count:
         print("TRAINING EXECUTION FAILED: one or more trainers did not produce a verified report.", file=sys.stderr)
@@ -349,7 +363,7 @@ def main() -> int:
             target = Path(args.report)
             target.parent.mkdir(parents=True, exist_ok=True)
             temporary = Path(str(target) + ".tmp")
-            temporary.write_text(rendered + "\\n", encoding="utf-8")
+            temporary.write_text(rendered + "\n", encoding="utf-8")
             temporary.replace(target)
         return 1
     return 0
