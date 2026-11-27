@@ -9,6 +9,7 @@ import re
 from typing import Callable, Iterable
 
 from aethrion.delegation import decide
+from aethrion.local_search import LocalSearch
 from aethrion.web_fetch import WebFetchError, fetch
 
 _URL = re.compile(r"https?://[^\s)>\]]+")
@@ -21,6 +22,7 @@ def orchestrate(
     chat: Callable[[str], str],
     fetch_page: Callable[[str], dict] = fetch,
     trace: list[str] | None = None,
+    search: LocalSearch | None = None,
 ) -> str:
     """Route one message. If ``trace`` is a list, it receives the real steps taken
     (thinking mode): routing decision, pages read, model availability. It records
@@ -40,6 +42,13 @@ def orchestrate(
         except WebFetchError as exc:
             note(f"Sayfa okunamadı: {url} ({exc})")
             sources.append({"url": url, "title": "", "text": "", "error": str(exc)})
+    for s in sources:
+        if search is not None and s.get("text"):
+            search.add(s["url"], s.get("title", ""), s["text"])
+    if search is not None and not sources and plan.needs_web:
+        hits = search.search(message)
+        note(f"Yerel indekste {len(hits)} sonuç bulundu")
+        sources.extend(hits)
     prompt = message
     ok = [s for s in sources if s.get("text")]
     if ok:
