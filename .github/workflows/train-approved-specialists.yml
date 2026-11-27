@@ -18,16 +18,12 @@ on:
         options:
           - preflight
           - train-approved
-  workflow_run:
-    workflows: ["aethrion"]
-    types: [completed]
-    branches: [main]
 
 permissions:
   contents: read
 
 concurrency:
-  group: aethrion-approved-specialist-training
+  group: aethrion-specialist-training-artifacts
   cancel-in-progress: false
 
 jobs:
@@ -53,13 +49,7 @@ jobs:
             --models code research safety vision image asr tts vocoder 3d document
 
   train-approved-specialists:
-    if: >-
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'train-approved') ||
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event == 'push' &&
-       github.event.workflow_run.head_branch == 'main' &&
-       contains(github.event.workflow_run.head_commit.message, '[train-specialists]'))
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'train-approved'
     runs-on: ubuntu-latest
     timeout-minutes: 350
     env:

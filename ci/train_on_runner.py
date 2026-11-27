@@ -16,6 +16,19 @@ sys.path.insert(0, str(ROOT))
 MODELS = ["code", "research", "safety", "vision", "image", "asr", "tts", "vocoder", "3d", "document", "chat"]
 
 
+def _has_verified_progress(progress: dict) -> bool:
+    return bool(
+        isinstance(progress, dict)
+        and isinstance(progress.get("step"), int)
+        and not isinstance(progress.get("step"), bool)
+        and progress.get("step") >= 0
+        and progress.get("status") in {
+            "training_interrupted_not_released",
+            "training_complete_not_released",
+        }
+    )
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", default=MODELS)
@@ -23,12 +36,15 @@ def main() -> int:
     ap.add_argument("--max-rounds", type=int, default=60)
     ap.add_argument("--session-timeout", type=int, default=1500)
     ap.add_argument("--deadline-minutes", type=int, default=330)
+    ap.add_argument("--report", default=None, help="Optional JSON summary report path.")
     ap.add_argument("--fresh", action="store_true", help="delete the model's old remote checkpoints first (dataset changed)")
+    ap.add_argument("--fresh-on-stale", action="store_true",
+                    help="restart from scratch only when the stored checkpoint is incompatible with the approved data/config")
     a = ap.parse_args()
     import time
     t0 = time.time()
     from huggingface_hub import HfApi
-    from aethrion.space_session import run_session
+    from aethrion.space_session import graceful_runner, run_session
     token = os.environ.get("HF_TOKEN")
     if not token:
         print("HF_TOKEN missing", file=sys.stderr); return 2
@@ -52,7 +68,8 @@ def main() -> int:
             if state["rounds"] >= a.max_rounds: break
             state["rounds"] += 1
             try:
-                res = run_session(model, a.steps, root=ROOT, api=api, prepare_chat=True, timeout=a.session_timeout)
+                res = run_session(model, a.steps, root=ROOT, api=api, prepare_chat=True, timeout=a.session_timeout,
+                                  runner=graceful_runner, fresh_on_stale=a.fresh_on_stale)
             except Exception as exc:
                 if "429" in str(exc) and waits < 8:  # Hub commit rate limit: wait, then retry the same round
                     waits += 1; state["rounds"] -= 1
@@ -63,18 +80,29 @@ def main() -> int:
                 if failures >= 2: break
                 continue
             prog = res.get("progress") or {}
+            if res.get("stale_checkpoint_replaced"):
+                print(f"[{model}] stale checkpoint quarantined; fresh training started: {res['stale_checkpoint_replaced']}", flush=True)
             print(f"[{model}] round {state['rounds']} trainer_ok={res.get('trainer_ok')} progress={prog} "
                   f"pulled={len(res.get('pulled', []))} pushed={len(res.get('pushed', []))}", flush=True)
-            if not res.get("trainer_ok"):
-                print(f"[{model}] trainer tail: {str(res.get('trainer_tail'))[-400:]}", flush=True)
+            valid_progress = _has_verified_progress(prog)
+            if not res.get("trainer_ok") or not valid_progress:
+                print(f"[{model}] refusing unverified session: trainer_ok={res.get('trainer_ok')} progress={prog}", flush=True)
+                print(f"[{model}] trainer tail: {str(res.get('trainer_tail'))[-900:]}", flush=True)
                 failures += 1
-                if failures >= 2: break
-                continue
+                # Unknown progress is a hard stop: repeating it only re-uploads the same artifact.
+                break
             failures = 0
             state.update(ok=True, step=prog.get("step"), complete=bool(prog.get("complete")))
             if state["complete"]: break
         summary[model] = state
-    print("SUMMARY", json.dumps(summary), flush=True)
+    rendered = json.dumps(summary, ensure_ascii=False, indent=2)
+    print("SUMMARY", rendered, flush=True)
+    if a.report:
+        report_path = Path(a.report).resolve()
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = Path(str(report_path) + ".tmp")
+        temporary.write_text(rendered + "\n", encoding="utf-8")
+        temporary.replace(report_path)
     return 0 if all(v["ok"] for v in summary.values()) else 1
 
 
