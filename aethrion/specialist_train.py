@@ -125,7 +125,13 @@ def _loss(model: nn.Module, model_id: str, batch: dict[str, torch.Tensor]) -> to
             raise ValueError("code token_ids must have shape [batch, sequence>=2]")
         return model(ids[:, :-1], ids[:, 1:])[1]
     if model_id == "vision":
-        return model(batch["images"], batch["token_ids"], batch.get("attention_mask"))["loss"]
+        ids = batch["token_ids"]
+        mask = batch.get("attention_mask")
+        if mask is None:  # right-padded id 0 must not be pooled as content
+            mask = ids != 0
+            mask[:, 0] = True
+        keep = int(mask.sum(dim=1).max().item())
+        return model(batch["images"], ids[:, :keep], mask[:, :keep])["loss"]
     if model_id == "image":
         return model.diffusion_loss(batch["images"], batch["token_ids"])
     if model_id == "asr":

@@ -103,7 +103,7 @@ class AETHRIONVision(nn.Module):
                 attention_mask: torch.Tensor | None = None):
         image_features = self.encode_image(images)
         text_features = self.encode_text(token_ids, attention_mask)
-        scale = self.logit_scale.exp().clamp(max=100)
+        scale = self.logit_scale.exp().clamp(max=20)  # cap overconfidence on tiny datasets
         logits = scale * image_features @ text_features.transpose(0, 1)
         labels = torch.arange(images.size(0), device=images.device)
         if token_ids.size(0) != images.size(0):
