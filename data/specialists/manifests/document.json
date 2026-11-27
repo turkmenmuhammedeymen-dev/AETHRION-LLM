@@ -17,9 +17,9 @@
       "source_uri": "owner-authored:aethrion-llm/data/authored/document",
       "source_path": "document/source.jsonl",
       "sha256": "ebf0e9d727a6744eced266f75b4fca4dcf53b479cb49ac5cc097d4ffc79f9b79",
-      "license": "First-party procedurally generated",
-      "permitted_use": "model training permitted",
-      "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/data/authored/make_synth_document.py",
+      "license": "Owner-attested original project / Claude-generated material; rights review recorded 2026-11-26",
+      "permitted_use": "AETHRION model training and evaluation; owner-attested, subject to technical and safety gates",
+      "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/docs/review/OWNER_DATA_REVIEW_ATTESTATION_2026-11-26.md",
       "allow_training": true,
       "privacy_reviewed": true
     }
@@ -43,19 +43,20 @@
     "schema": "aethrion-human-review-v1",
     "model_id": "document",
     "approval_status": "approved",
-    "author_role": "project owner (content drafted by Claude at the owner's request)",
+    "author_role": "Project owner states material was generated for the project; Claude assistance disclosed",
     "authorship_attested": true,
     "first_party_origin_attested": true,
-    "rights_holder_role": "project owner",
+    "rights_holder_role": "Project owner (self-attested)",
     "rights_attested": true,
     "source_rights_reviewed": true,
     "privacy_reviewed": true,
     "quality_reviewed": true,
-    "reviewer_role": "project owner (attestation given in the Claude Code session)",
-    "reviewed_at": "2026-11-22T13:16+03:00",
-    "evidence_uri": "owner-attestation:claude-session-01CgbDesHhneLFEzEj5NSZrK#data/authored/document/records.jsonl@sha256:ebf0e9d727a6744eced266f75b4fca4dcf53b479cb49ac5cc097d4ffc79f9b79",
+    "reviewer_role": "Project owner (self-attestation)",
+    "reviewed_at": "2026-11-26T18:06:46.491Z",
+    "evidence_uri": "https://github.com/turkmenmuhammedeymen-dev/AETHRION-LLM/blob/main/docs/review/OWNER_DATA_REVIEW_ATTESTATION_2026-11-26.md",
     "speaker_consent_reviewed": false,
-    "safety_reviewed": false
+    "safety_reviewed": false,
+    "owner_statement": "Project owner explicitly states all dataset materials were reviewed and verified and authorizes AETHRION development/training; see linked attestation."
   },
-  "dataset_status": "owner_attested_pilot_not_released"
+  "dataset_status": "owner_reviewed_awaiting_technical_preflight"
 }

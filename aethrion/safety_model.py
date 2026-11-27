@@ -38,6 +38,8 @@ class AETHRIONSafe(nn.Module):
         self.position = nn.Embedding(config.max_length, config.width)
         layer = nn.TransformerEncoderLayer(config.width, config.heads, 4*config.width, batch_first=True)
         self.encoder = nn.TransformerEncoder(layer, config.layers)
+        # Hashed token-bigram bag: phrase-level signal that carries over to unseen topics.
+        self.ngram = nn.Embedding(8192, config.width)
         self.norm = nn.LayerNorm(config.width)
         self.decision_head = nn.Linear(config.width, config.decisions)
         self.reason_head = nn.Linear(config.width, config.reason_classes)
@@ -62,7 +64,10 @@ class AETHRIONSafe(nn.Module):
         else:
             weights = attention_mask.to(hidden.dtype).unsqueeze(-1)
             pooled = (hidden * weights).sum(1) / weights.sum(1).clamp_min(1)
-        pooled = self.norm(pooled)
+        bigram = (token_ids[:, :-1] * 1315423911 + token_ids[:, 1:]) % 8192
+        bmask = (attention_mask[:, :-1] & attention_mask[:, 1:]).to(hidden.dtype).unsqueeze(-1)
+        bag = (self.ngram(bigram) * bmask).sum(1) / bmask.sum(1).clamp_min(1)
+        pooled = self.norm(pooled + bag)
         return {"decision_logits": self.decision_head(pooled),
                 "reason_logits": self.reason_head(pooled)}
 

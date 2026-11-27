@@ -25,10 +25,10 @@ class ArtifactSyncTests(unittest.TestCase):
             f = Fake()
             with self.assertRaises(s.ArtifactSyncError): s.push_model_artifacts("chat", src, api=f, environ=ENV)
             (src / "notes.txt").unlink()
-            self.assertEqual(s.push_model_artifacts("chat", src, api=f, environ=ENV), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
+            self.assertEqual(sorted(s.push_model_artifacts("chat", src, api=f, environ=ENV)), ["checkpoint_last.pt", "checkpoint_last.pt.sha256", "metrics.jsonl", "progress.json", "training_report.json"])
             self.assertTrue(f.created["private"])
             dst = Path(d, "dst", "chat")
-            self.assertEqual(sorted(s.pull_model_artifacts("chat", dst, api=f, environ=ENV)), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
+            self.assertEqual(sorted(s.pull_model_artifacts("chat", dst, api=f, environ=ENV)), ["checkpoint_last.pt", "checkpoint_last.pt.sha256", "metrics.jsonl", "progress.json", "training_report.json"])
             self.assertEqual((dst / "checkpoint_last.pt").read_bytes(), b"w")
     def test_refuses_public_repo_unknown_model_and_missing_config(self):
         with tempfile.TemporaryDirectory() as d:
@@ -64,21 +64,23 @@ class SingleCommitTests(unittest.TestCase):
             commits = []
             def create_commit(self, **k): self.commits.append(k)
         with tempfile.TemporaryDirectory() as d:
-            for name in ("checkpoint_last.pt", "checkpoint_last.pt.sha256"):
+            for name in ("checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json"):
                 (Path(d) / name).write_bytes(b"x")
             c = C()
             sent = s.push_model_artifacts("code", d, api=c, environ=ENV)
         self.assertEqual(len(C.commits), 1)
-        self.assertEqual(sorted(sent), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
+        self.assertEqual(sorted(sent), ["checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json"])
         self.assertEqual(c.up, [])
 
 
-class TokenizerStaysLocalTests(unittest.TestCase):
-    def test_chat_push_ignores_regenerated_tokenizer_files(self):
+class TokenizerPackageSyncTests(unittest.TestCase):
+    def test_chat_push_includes_tokenizer_provenance(self):
         import tempfile
+        s = __import__("aethrion.artifact_sync", fromlist=["x"])
         with tempfile.TemporaryDirectory() as d:
-            for name in ("checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json"):
+            names = ("checkpoint_last.pt", "checkpoint_last.pt.sha256", "tokenizer.json", "tokenizer.json.provenance.json")
+            for name in names:
                 (Path(d) / name).write_bytes(b"x")
             f = Fake()
             sent = s.push_model_artifacts("chat", d, api=f, environ=ENV)
-        self.assertEqual(sorted(sent), ["checkpoint_last.pt", "checkpoint_last.pt.sha256"])
+        self.assertEqual(sorted(sent), sorted(names))

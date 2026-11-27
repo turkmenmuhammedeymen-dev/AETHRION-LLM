@@ -15,17 +15,22 @@ from typing import Any
 
 ALLOWED_MODELS = frozenset({"chat", "code", "vision", "image", "asr", "tts", "vocoder", "3d", "research", "document", "safety", "base", "chat_instruct"})
 _NAME = re.compile(r"^[A-Za-z0-9._-]{1,120}$")
-# Only resumable model state is mirrored. Runtime telemetry stays in the Space
-# workspace and is not uploaded as a model artifact.
+# Keep the complete private, resumable inference package together. Checkpoints
+# without their tokenizer/processor and provenance cannot be loaded in a fresh
+# Space session. Reports and telemetry are retained privately for audit/resume;
+# none of these files is a public release or changes a model's approval status.
 ALLOWED_ARTIFACT_NAMES = frozenset({
     "checkpoint_last.pt",
     "checkpoint_last.pt.sha256",
     "checkpoint_last.pt.previous",
     "checkpoint_last.pt.previous.sha256",
+    "tokenizer.json",
+    "tokenizer.json.provenance.json",
+    "processor.json",
+    "training_report.json",
+    "progress.json",
+    "metrics.jsonl",
 })
-# tokenizer files are regenerated deterministically from the attested corpus each session, so they stay local.
-RUNTIME_FILES = frozenset({"metrics.jsonl", "training_report.json", "progress.json",
-                           "tokenizer.json", "tokenizer.json.provenance.json"})
 
 
 class ArtifactSyncError(RuntimeError):
@@ -76,14 +81,12 @@ def push_model_artifacts(model: str, directory: str | Path, *, api: Any = None, 
     directory = Path(directory)
     if not directory.is_dir():
         raise ArtifactSyncError("Artifact directory does not exist.")
-    # Validate the complete upload set before the first network write. The
-    # trainer also emits progress.json, metrics.jsonl, and training_report.json;
-    # these are runtime telemetry, not resumable model state, so keep them local.
+    # Validate the complete upload set before the first network write. Keep
+    # tokenizer/processor provenance and training telemetry with the checkpoint
+    # in the private repo so a fresh Space session can resume and be audited.
     candidates = []
     for path in sorted(directory.iterdir()):
         if not path.is_file() or path.is_symlink():
-            continue
-        if path.name in RUNTIME_FILES:
             continue
         _safe(model, path.name)
         candidates.append(path)

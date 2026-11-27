@@ -2,7 +2,7 @@
 
 **Intelligence Without Limits.** AETHRION-LLM is a from-scratch model research and engineering project. Its native inference policy is local-only: AETHRION models must be initialized and trained by this project. It does not load third-party pretrained weights or silently fall back to hosted model APIs.
 
-> **Verified status:** the repository contains model architectures, data governance, training and evaluation scaffolding, checkpoint-integrity code, and a Hugging Face Space application. It does not currently contain production training corpora or trained model checkpoints. All 11 native model-family entries remain `not_trained`; the base corpus manifest keeps `training_allowed: false`. Passing software tests is not evidence of model capability.
+> **Verified status (2026-11-25 audit):** 0 of 11 model-family data preflights are approved for training: the ten specialist families are intentionally blocked pending owner-level record review, rights/provenance/privacy/quality checks and modality-specific review; CHAT/BASE is separately blocked because its prepared corpus/tokenizer and provenance inputs are missing. The specialist datasets are small pilot sets, not production-scale corpora. All 11 registry entries remain `not_trained`; 0 models are release-ready. Passing software tests or a synthetic architecture preflight is not evidence of trained-model capability.
 
 ## Model family
 
@@ -14,25 +14,21 @@ See [the native-only model-family specification](docs/NATIVE_ONLY_MODEL_FAMILY.m
 
 GitHub is the source of truth for code, branches, reviews, tests and CI configuration. The Hugging Face Space is the deployed application.
 
-The CircleCI workflow in `.circleci/config.yml` runs:
-1. `build-and-test`: installs the project from `pyproject.toml` and runs `python -m pytest -q`.
-2. `deploy-to-hugging-face`: after tests pass, stages the current AETHRION package and approved support files into `hf_space/`, then uploads that folder to `vizyon2027/AETHRION-LLM`.
+The active GitHub Actions workflow `.github/workflows/aethrion.yml` runs tests for pushes and pull requests to `main`; after a successful push test it stages the canonical runtime and deploys to `vizyon2027/AETHRION-LLM`. The same workflow supports explicit manual audit and training actions. Training is a separate operation and must never be confused with deployment or CI success. The repository also retains `.circleci/config.yml`; do not assume CircleCI jobs are active merely because that configuration file exists.
 
-The deployment is enabled for `main` and `circleci-project-setup`. It preserves the Hugging Face Space's root `README.md` because that file contains Space metadata. The repository README is also staged as `docs/REPOSITORY_README.md` in the Space. GitHub-only workflow and development-container files remain in GitHub; they are not runtime dependencies of the Space.
-
-The CircleCI context `aethrion-deploy` supplies `HF_TOKEN`. Keep credentials in CircleCI contexts and Hugging Face Space Secrets; never commit tokens, API keys or private credentials.
+The GitHub Actions repository secrets used by deployment/training are `HF_TOKEN`, `AETHRION_SPACE_USERNAME` and `AETHRION_SPACE_PASSWORD`; BASE corpus preparation additionally requires `AETHRION_BASE_AUDIT_HMAC_KEY`. The Space separately needs its own `HF_TOKEN` secret for private artifact synchronization. Add secrets only in the appropriate provider settings UI; never commit or paste them into source files or chat.
 
 ## Data governance and training
 
 Only use material you own, public-domain material, or sources whose terms and rights explicitly permit the intended machine-learning training use. Preserve source URLs, licenses, attribution, provenance and SHA-256 hashes. Review privacy and consent; speech datasets require speaker-consent evidence. Dataset-level license labels do not automatically clear embedded third-party web pages, recordings, images, code repositories or 3D assets.
 
-Keep raw data, prepared corpora, NPZ datasets, tokenizers, checkpoints and private evaluation material outside Git unless a separately reviewed release policy explicitly permits publication. The training gate must remain closed until the required first-party origin, rights, privacy, quality and safety reviews have been completed. Automated checks validate recorded evidence; they do not make legal decisions.
+Keep raw data, prepared corpora, NPZ datasets, tokenizers, checkpoints and private evaluation material outside Git unless a separately reviewed release policy explicitly permits publication. Each specialist manifest is independently checked for first-party origin, rights, privacy, quality and safety evidence. The current pilot datasets are not approved for training: see [the 2026-11-25 dataset governance reconciliation](docs/review/DATASET_RECONCILIATION_2026-11-25.md). The BASE corpus gate remains closed until its prepared corpus, tokenizer and provenance report are present. Automated checks validate recorded evidence; they do not make legal decisions.
 
 BASE pretraining, instruction tuning and each specialist training stage have separate data and evaluation requirements. Training reports are not releases. Do not represent a smoke test or synthetic fixture as production training data.
 
 ## Checkpoints and model artifacts
 
-No trained checkpoint or production model weights are currently present in the tracked repository or deployed Space. The paths in `models/manifest.json` describe expected outputs; they are not evidence that those files exist. The manifest correctly marks each model `not_trained`. Do not fabricate placeholder weights or change model status until genuine artifacts pass integrity and evaluation gates.
+No model is currently marked trained or released in `models/manifest.json`. Private artifact-repository files and checkpoint filenames alone do not establish that a checkpoint is valid, complete, evaluated or releasable. The deployed Space intentionally excludes unapproved checkpoints. Do not fabricate placeholder weights or change model status until genuine artifacts pass integrity and evaluation gates.
 
 ## Development and tests
 
@@ -53,7 +49,7 @@ Codespaces is optional and CPU-only in this project. Hugging Face ZeroGPU is not
 
 ## Hugging Face Space
 
-Space runtime files are maintained in `hf_space/`. CircleCI stages the current root `aethrion/` package and the project support directories (`configs/`, `docs/`, `data/`, `tests/`, `ci/`, `scripts/`), plus `pyproject.toml` and the example model manifest, before deployment. The Space's own README metadata is preserved.
+Space runtime files are maintained in `hf_space/`. The GitHub Actions deployment assembles the current root `aethrion/` package, support directories and model manifest before deployment. The Space's own README metadata is preserved.
 
 The Space reports a capability as unavailable until the corresponding first-party model is trained, evaluated, released and installed with verified artifacts. Deterministic document utilities are not a trained DOC model.
 

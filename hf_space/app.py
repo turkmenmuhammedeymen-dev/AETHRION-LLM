@@ -160,13 +160,22 @@ def training_session(model, steps):
         result = _gpu_training_session(model, steps)
     except Exception as exc:
         return "### Training session failed\n- " + type(exc).__name__ + ": " + str(exc)[:300]
+    progress = result.get("progress", {})
+    trainer_ok = bool(result.get("trainer_ok"))
+    complete = bool(progress.get("complete"))
+    if not trainer_ok:
+        heading = "### Training session failed"
+    elif complete:
+        heading = "### Training session completed (not released)"
+    else:
+        heading = "### Training session paused / incomplete (not released)"
     return (
-        "### Training session finished\n"
-        f"- Model: {result['model']} | steps requested: {result['steps']}\n"
-        f"- Trainer ok: {result['trainer_ok']} | pulled: {len(result['pulled'])} files | pushed: {len(result['pushed'])} files\n"
-        f"- Progress: {result.get('progress', {}).get('status', 'unknown')} step {result.get('progress', {}).get('step')} | complete: {result.get('progress', {}).get('complete', False)}\n"
-        "- Released: NO — a session is not a release; evaluation and human approval are still required.\n"
-        f"```\n{result['trainer_tail']}\n```"
+        heading + "\n"
+        + f"- Model: {result.get('model', model)} | steps requested: {result.get('steps', steps)}\n"
+        + f"- Trainer ok: {trainer_ok} | exit code: {result.get('trainer_exit_code', 'unknown')} | pulled: {len(result.get('pulled', []))} files | pushed: {len(result.get('pushed', []))} files\n"
+        + f"- Progress: {progress.get('status', 'unknown')} step {progress.get('step')} | complete: {complete}\n"
+        + "- Released: NO — evaluation and human approval are still required.\n"
+        + f"```\n{result.get('trainer_tail', result.get('note', 'No diagnostic available.'))}\n```"
     )
 
 
@@ -181,11 +190,7 @@ def status():
     rows.append("- **External model/API providers**: DISABLED — native-only policy")
     return "### Native model release status\n" + "\n".join(rows)
 
-def chat(message, history):
-    if not SPACE_AUTH_ENABLED:
-        return _auth_required_message()
-    if Capability.CHAT.value not in router.available():
-        return "AETHRION's own trained checkpoint/tokenizer is not loaded. No third-party model is silently substituted."
+def _chat_core(message, history):
     context = []
     for item in (history or [])[-8:]:
         if isinstance(item, dict) and isinstance(item.get("content"), str):
@@ -199,6 +204,17 @@ def chat(message, history):
 _EXPERIMENTAL_CHAT_MODEL = None
 _EXPERIMENTAL_CHAT_TOKENIZER = None
 _EXPERIMENTAL_CHAT_INFO = None
+
+
+def chat(message, history):
+    if not SPACE_AUTH_ENABLED:
+        return _auth_required_message()
+    from aethrion.chat_orchestrator import orchestrate
+    return orchestrate(
+        message, router.available(),
+        lambda capability, prompt: dispatch(capability, prompt),
+        lambda prompt: _chat_core(prompt, history),
+    )
 
 
 @spaces.GPU(duration=60)

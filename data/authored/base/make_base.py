@@ -1,7 +1,8 @@
-"""Writes the first-party BASE corpus sources (owner-approved, Claude-drafted original Turkish text).
+"""Generates candidate BASE text at the project owner's request; not individually human-reviewed.
 
-Four topic groups of original factual sentences (rolling 3-sentence paragraphs) plus a dialogue
-group built from the already attested CHAT records. No external text is copied.
+Synthetic factual text and a dialogue group derived from CHAT records. This generator does not
+establish rights, factual accuracy, privacy review, or training approval. Its output must remain
+blocked until the exact generated snapshot receives human review.
 Run: python data/authored/base/make_base.py"""
 import json
 from pathlib import Path
@@ -231,8 +232,9 @@ def write(name, recs):
 
 def main():
     import importlib.util
-    for old in HERE.glob("*.jsonl"):
-        old.unlink()
+    # Preserve existing JSONL files. The generator owns only the exact output
+    # names it writes below; broad deletion could erase reviewed or hand-curated
+    # records that happen to share this directory.
     spec = importlib.util.spec_from_file_location("make_expand", HERE.parent / "make_expand.py")
     me = importlib.util.module_from_spec(spec); spec.loader.exec_module(me)
     groups = {k: [l.strip() for l in v.strip().splitlines() if l.strip()] for k, v in GROUPS.items()}

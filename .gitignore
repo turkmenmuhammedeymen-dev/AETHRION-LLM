@@ -18,3 +18,4 @@ artifacts/tokenizer.json
 !data/processed/corpus_manifest.json
 *.egg-info/
 data/intake/
+artifacts/models/

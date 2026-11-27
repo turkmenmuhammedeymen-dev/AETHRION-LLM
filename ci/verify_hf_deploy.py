@@ -41,7 +41,6 @@ def main() -> None:
                 "data governance and tests"
             ),
             ignore_patterns=[
-                "README.md",
                 "**/__pycache__/**",
                 "**/*.pyc",
                 ".DS_Store",
@@ -62,6 +61,7 @@ def main() -> None:
 
     # Verify runtime health-check code as well as the app and model configs.
     required_files = [
+        "README.md",
         "app.py",
         "pyproject.toml",
         "aethrion/space_training.py",
