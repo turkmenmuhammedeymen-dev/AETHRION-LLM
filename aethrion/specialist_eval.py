@@ -52,7 +52,8 @@ def _research_metrics(model, arrays, idx, device) -> dict[str, Any]:
     ranks = np.asarray(ranks, dtype=np.float64)
     n = len(idx)
     return {"task_metrics": {"accuracy": float((ranks == 1).mean()), "majority_baseline_accuracy": float(1.0 / n),
-                             "mrr": float((1.0 / ranks).mean()), "support": int(n)}}
+                             "mrr": float((1.0 / ranks).mean()), "recall_at_5": float((ranks <= 5).mean()),
+                             "support": int(n)}}
 
 
 def _vision_metrics(model, arrays, idx, device) -> dict[str, Any]:
@@ -76,7 +77,8 @@ def _vision_metrics(model, arrays, idx, device) -> dict[str, Any]:
     ranks = np.asarray(ranks, dtype=np.float64)
     n = len(idx)
     return {"task_metrics": {"accuracy": float((ranks == 1).mean()), "majority_baseline_accuracy": float(1.0 / n),
-                             "mrr": float((1.0 / ranks).mean()), "support": int(n)}}
+                             "mrr": float((1.0 / ranks).mean()), "recall_at_5": float((ranks <= 5).mean()),
+                             "support": int(n)}}
 
 
 def _split_prompt(text: str) -> str | None:
@@ -147,13 +149,14 @@ def _task_metrics(model, model_id, arrays, keys, idx, device, batch_size) -> dic
     if model_id not in {"safety", "document", "code"}:
         return {}
     model.eval()
-    ys, ps = [], []
+    ys, ps, confs = [], [], []
     with torch.no_grad():
         for start in range(0, len(idx), batch_size):
             batch = _to_batch(arrays, keys, idx[start:start + batch_size], device)
             if model_id == "safety":
                 out = model(batch["token_ids"], batch.get("attention_mask"))
                 ys.append(batch["decision_labels"].cpu().numpy()); ps.append(out["decision_logits"].argmax(-1).cpu().numpy())
+                confs.append(out["decision_logits"].softmax(-1).max(-1).values.cpu().numpy())
             elif model_id == "document":
                 out = model(batch["token_ids"], batch["boxes"], batch["layout_ids"], batch.get("attention_mask"))
                 labels = batch["tag_labels"]; mask = labels != -100
@@ -171,6 +174,21 @@ def _task_metrics(model, model_id, arrays, keys, idx, device, batch_size) -> dic
                "support": int(len(y))}
     if model_id in {"safety", "document"}:
         metrics["macro_f1"] = _macro_f1(y, p)
+    if model_id == "safety" and confs:
+        conf = np.concatenate(confs)
+        correct = (y == p).astype(np.float64)
+        ece = 0.0
+        edges = np.linspace(0.0, 1.0, 11)
+        for lo, hi in zip(edges[:-1], edges[1:]):
+            sel = (conf > lo) & (conf <= hi)
+            if sel.any():
+                ece += float(sel.mean()) * abs(float(correct[sel].mean()) - float(conf[sel].mean()))
+        block = y == 2  # DECISIONS = (ALLOW, REVIEW, BLOCK)
+        metrics["calibration_ece"] = float(ece)
+        if block.any():
+            metrics["false_negative_rate"] = float((p[block] != 2).mean())  # harmful item not blocked
+            metrics["block_to_allow_rate"] = float((p[block] == 0).mean())  # harmful item allowed outright
+            metrics["block_support"] = int(block.sum())
     return {"task_metrics": metrics}
 
 
