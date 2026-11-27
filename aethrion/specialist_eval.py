@@ -79,6 +79,66 @@ def _vision_metrics(model, arrays, idx, device) -> dict[str, Any]:
                              "mrr": float((1.0 / ranks).mean()), "support": int(n)}}
 
 
+def _split_prompt(text: str) -> str | None:
+    """Text up to the end of the first function's signature/docstring; None if there is no function."""
+    import ast
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return None
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef):
+            body = node.body
+            cut = body[0].end_lineno if (isinstance(body[0], ast.Expr) and isinstance(getattr(body[0], "value", None), ast.Constant)
+                                         and isinstance(body[0].value.value, str)) else node.lineno
+            lines = text.splitlines()[:cut]
+            return "\n".join(lines) + "\n"
+    return None
+
+
+def _code_generation_metrics(model, tokenizer_path, arrays, idx, device, max_new: int = 160) -> dict[str, Any]:
+    """Greedy-complete each held-out function from its signature+docstring and check that
+    prompt+completion is valid Python that defines the function (compile + exec of the definition)."""
+    import ast
+    from aethrion.tokenizer import ByteBPETokenizer
+    tok = ByteBPETokenizer.load(tokenizer_path)
+    model.eval()
+    total = parsed = defined = 0
+    for i in np.asarray(idx):
+        ids = [int(t) for t in np.asarray(arrays["token_ids"][i]) if int(t) != 0]
+        prompt = _split_prompt(tok.decode(ids))
+        if not prompt:
+            continue
+        pids = tok.encode(prompt)[: model.config.block_size - max_new]
+        out = model.generate(torch.tensor([pids], dtype=torch.long, device=device), max_new, temperature=1e-4, top_k=1,
+                             top_p=1.0, repetition_penalty=1.0)
+        new = tok.decode([int(t) for t in out[0].tolist()[len(pids):]])
+        total += 1
+        code = prompt + new
+        tree = None
+        # trim to the longest valid prefix at a line boundary (the model may run on into unrelated text)
+        lines = code.splitlines()
+        for end in range(len(lines), 0, -1):
+            try:
+                tree = ast.parse("\n".join(lines[:end]) + "\n")
+                break
+            except SyntaxError:
+                continue
+        if tree is None or not any(isinstance(n, ast.FunctionDef) for n in tree.body):
+            continue
+        parsed += 1
+        try:
+            ns: dict[str, Any] = {}
+            exec(compile(ast.Module([n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.Import, ast.ImportFrom))], []), "<gen>", "exec"), {"__builtins__": __builtins__}, ns)
+            defined += 1
+        except Exception:
+            pass
+    if not total:
+        return {}
+    return {"code_generation": {"functions": total, "valid_python_rate": parsed / total, "defines_function_rate": defined / total,
+                                "note": "Syntax/definition validity only; behavioural pass@k needs per-task unit tests."}}
+
+
 def _task_metrics(model, model_id, arrays, keys, idx, device, batch_size) -> dict[str, Any]:
     if model_id == "research":
         return _research_metrics(model, arrays, idx, device)
@@ -157,6 +217,8 @@ def evaluate_specialist(config: dict[str, Any], manifest_path: str | Path, check
                  "independent quality, safety review and human approval remain required."),
     }
     report.update(_task_metrics(trained, model_id, arrays, keys, test_idx, dev, batch_size))
+    if model_id == "code" and approval.get("tokenizer_path"):
+        report.update(_code_generation_metrics(trained, approval["tokenizer_path"], arrays, test_idx, dev))
     # Untrained model on the same metric: shows whether training adds anything beyond the architecture itself.
     base_task = _task_metrics(baseline, model_id, arrays, keys, test_idx, dev, batch_size)
     if base_task:
