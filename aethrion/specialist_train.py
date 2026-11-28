@@ -172,7 +172,12 @@ def _loss(model: nn.Module, model_id: str, batch: dict[str, torch.Tensor]) -> to
         )
     if model_id == "safety":
         output = model(batch["token_ids"], batch.get("attention_mask"))
-        return model.loss(output, batch["decision_labels"], batch.get("reason_labels"))
+        loss = model.loss(output, batch["decision_labels"], batch.get("reason_labels"))
+        # A harmful item that is not blocked costs more than a false alarm: extra CE on true-BLOCK items.
+        block = batch["decision_labels"] == 2
+        if block.any():
+            loss = loss + 2.0 * torch.nn.functional.cross_entropy(output["decision_logits"][block], batch["decision_labels"][block])
+        return loss
     raise ValueError(f"No training objective registered for {model_id}")
 
 
