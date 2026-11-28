@@ -84,3 +84,25 @@ class TokenizerPackageSyncTests(unittest.TestCase):
             f = Fake()
             sent = s.push_model_artifacts("chat", d, api=f, environ=ENV)
         self.assertEqual(sorted(sent), sorted(names))
+
+
+def test_pull_never_creates_repo_and_explains_rejected_token(tmp_path):
+    import pytest
+    from aethrion import artifact_sync
+
+    class Resp:
+        status_code = 401
+
+    class Rejected(Exception):
+        response = Resp()
+
+    class Api:
+        created = False
+        def create_repo(self, **kw):
+            Api.created = True
+        def repo_info(self, **kw):
+            raise Rejected("401")
+
+    with pytest.raises(artifact_sync.ArtifactSyncError, match="rejected the token"):
+        artifact_sync.pull_model_artifacts("safety", tmp_path / "m", api=Api(), environ={"AETHRION_ARTIFACT_REPO": "o/r", "HF_TOKEN": "x"})
+    assert Api.created is False
