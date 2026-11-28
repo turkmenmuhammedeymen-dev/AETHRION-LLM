@@ -35,6 +35,26 @@ def _load(model, scratch, api):
 
 
 STATS = []
+IMG_CHECKS = []
+_PALETTE = {'turkuaz': (30, 170, 180), 'mavi': (40, 80, 200), 'kırmızı': (200, 40, 40), 'pembe': (230, 120, 170),
+            'yeşil': (40, 160, 70), 'turuncu': (235, 130, 30), 'sarı': (230, 200, 40), 'mor': (130, 60, 170)}  # mean colours of the real training images
+
+
+def _check_image(arr, caption):
+    """Automatic prompt-alignment check: background word and object colour vs measured pixels."""
+    a = arr.astype(float)
+    edge = np.concatenate([a[:6].reshape(-1, 3), a[-6:].reshape(-1, 3), a[:, :6].reshape(-1, 3), a[:, -6:].reshape(-1, 3)]).mean(0)
+    lum, sat = edge.mean(), edge.max() - edge.min()
+    bg = 'renkli' if sat > 60 else ('siyah' if lum < 60 else ('beyaz' if lum > 190 else 'gri'))
+    words = caption.lower().split()
+    want_bg = words[0] if words else ''
+    obj = np.abs(a - edge).sum(-1) > 90
+    color = 'yok'
+    if obj.sum() >= 12:
+        mean = a[obj].mean(0)
+        color = min(_PALETTE, key=lambda k: float(np.linalg.norm(mean - np.array(_PALETTE[k]))))
+    want_color = next((w for w in words if w in _PALETTE), '')
+    return bg == want_bg, color == want_color
 
 
 def _wav(path, x):
@@ -90,6 +110,16 @@ def main() -> int:
         img = _load("image", scratch, api)
         d = np.load(MAN / "image" / "dataset.npz", allow_pickle=False)
         rows = [json.loads(l) for l in (MAN / "image" / "source.jsonl").read_text(encoding="utf-8").splitlines()]
+        train_ref = np.flatnonzero(d["split"].astype(str) == "train")[: a.n]
+        train_checks = []
+        for i in train_ref:
+            ids = torch.from_numpy(d["token_ids"][i:i + 1]).long()
+            with torch.no_grad():
+                xt = img.generate(ids, inference_steps=50)[0].clamp(-1, 1)
+            train_checks.append(_check_image(((xt.permute(1, 2, 0).numpy() + 1) * 127.5).round().astype("uint8"), rows[int(i)].get("caption", "")))
+        if train_checks:
+            n = len(train_checks)
+            STATS.append(f"TRAIN_prompts image_background_ok={sum(c[0] for c in train_checks)}/{n} image_object_color_ok={sum(c[1] for c in train_checks)}/{n}")
         for i in np.flatnonzero(d["split"].astype(str) == "test")[: a.n]:
             ids = torch.from_numpy(d["token_ids"][i:i + 1]).long()
             with torch.no_grad():
@@ -97,6 +127,7 @@ def main() -> int:
             arr = ((x.permute(1, 2, 0).numpy() + 1) * 127.5).round().astype("uint8")
             name = f"image_{len(key) + 1:03d}.png"
             Image.fromarray(arr).save(out / "images" / name)
+            IMG_CHECKS.append(_check_image(arr, rows[int(i)].get("caption", "")))
             key.append((name, "image", rows[int(i)].get("caption", "")))
     except Exception as exc:
         notes.append(f"image failed: {type(exc).__name__}: {exc}")
@@ -125,6 +156,9 @@ def main() -> int:
     (out / "README.txt").write_text(
         "Rate each file in ratings.csv: MOS 1 (bad) to 5 (excellent), intelligible (audio), unsafe (images).\n"
         "Listen/look before opening key.csv. Synthetic-data models only.\n" + "\n".join(notes) + "\n", encoding="utf-8")
+    if IMG_CHECKS:
+        n = len(IMG_CHECKS)
+        STATS.append(f"image_background_ok={sum(c[0] for c in IMG_CHECKS)}/{n} image_object_color_ok={sum(c[1] for c in IMG_CHECKS)}/{n}")
     print("\n".join(STATS))
     print(f"samples={len(key)} notes={notes}")
     return 0

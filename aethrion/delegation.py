@@ -20,6 +20,13 @@ _RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("research", ("araştır", "kaynak bul", "literatür", "güncel haber", "internette ara", "web'de ara", "son durum")),
 )
 _URL = re.compile(r"https?://\S+")
+# "bugün" alone is small talk; it needs the web only when asking for a time-sensitive fact.
+_TODAY_FACT = re.compile(r"bugün\w*\s.*\b(haber|hava|fiyat|kur|skor|maç|borsa)\w*|\b(haber|hava|fiyat|kur|skor|maç|borsa)\w*\s.*bugün")
+
+
+def _has(text: str, key: str) -> bool:
+    """Match a keyword at a word start so 'script' does not fire inside 'transcript'."""
+    return re.search(r"(?<![\wçğıöşü])" + re.escape(key), text) is not None
 
 
 @dataclass(frozen=True)
@@ -31,9 +38,10 @@ class Delegation:
 
 def decide(prompt: str) -> Delegation:
     text = " ".join(prompt.lower().split())
-    needs_web = bool(_URL.search(text)) or any(k in text for k in ("internette ara", "web'de ara", "güncel", "son dakika", "bugün"))
+    needs_web = bool(_URL.search(text)) or any(k in text for k in ("internette ara", "web'de ara", "güncel", "son dakika"))
+    needs_web = needs_web or bool(_TODAY_FACT.search(text))
     for capability, keys in _RULES:
-        hit = next((k for k in keys if k in text), None)
+        hit = next((k for k in keys if _has(text, k)), None)
         if hit:
             return Delegation(capability, f"keyword:{hit}", needs_web)
     return Delegation("chat", "default", needs_web)
