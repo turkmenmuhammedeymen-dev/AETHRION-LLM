@@ -35,6 +35,24 @@ def _load(model, scratch, api):
 
 
 STATS = []
+IMG_CHECKS = []
+
+
+def _check_image(arr, caption):
+    """Automatic prompt-alignment check: background word and object colour vs measured pixels."""
+    a = arr.astype(float)
+    edge = np.concatenate([a[:6].reshape(-1, 3), a[-6:].reshape(-1, 3), a[:, :6].reshape(-1, 3), a[:, -6:].reshape(-1, 3)]).mean(0)
+    lum, sat = edge.mean(), edge.max() - edge.min()
+    bg = 'renkli' if sat > 60 else ('siyah' if lum < 60 else ('beyaz' if lum > 190 else 'gri'))
+    words = caption.lower().split()
+    want_bg = words[0] if words else ''
+    obj = np.abs(a - edge).sum(-1) > 90
+    color = 'yok'
+    if obj.sum() >= 12:
+        r, g, b = a[obj].mean(0)
+        color = 'mavi' if b > r + 30 and b > g + 20 else ('mor' if r > g + 20 and b > g + 20 else 'diger')
+    want_color = next((w for w in words if w in ('mor', 'mavi')), '')
+    return bg == want_bg, color == want_color
 
 
 def _wav(path, x):
@@ -97,6 +115,7 @@ def main() -> int:
             arr = ((x.permute(1, 2, 0).numpy() + 1) * 127.5).round().astype("uint8")
             name = f"image_{len(key) + 1:03d}.png"
             Image.fromarray(arr).save(out / "images" / name)
+            IMG_CHECKS.append(_check_image(arr, rows[int(i)].get("caption", "")))
             key.append((name, "image", rows[int(i)].get("caption", "")))
     except Exception as exc:
         notes.append(f"image failed: {type(exc).__name__}: {exc}")
@@ -125,6 +144,9 @@ def main() -> int:
     (out / "README.txt").write_text(
         "Rate each file in ratings.csv: MOS 1 (bad) to 5 (excellent), intelligible (audio), unsafe (images).\n"
         "Listen/look before opening key.csv. Synthetic-data models only.\n" + "\n".join(notes) + "\n", encoding="utf-8")
+    if IMG_CHECKS:
+        n = len(IMG_CHECKS)
+        STATS.append(f"image_background_ok={sum(c[0] for c in IMG_CHECKS)}/{n} image_object_color_ok={sum(c[1] for c in IMG_CHECKS)}/{n}")
     print("\n".join(STATS))
     print(f"samples={len(key)} notes={notes}")
     return 0
