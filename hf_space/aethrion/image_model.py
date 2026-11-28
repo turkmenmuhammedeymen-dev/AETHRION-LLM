@@ -74,7 +74,13 @@ class AETHRIONImageGenerator(nn.Module):
             raise ValueError("text length outside configured bounds")
         if token_ids.min().item() < 0 or token_ids.max().item() >= self.config.vocab_size:
             raise ValueError("text token outside vocabulary")
-        _, hidden = self.text_encoder(self.text_embedding(token_ids))
+        # Right-padded id 0 must not wash out the content: pool only over real tokens.
+        keep = token_ids != 0
+        keep[:, 0] = True
+        outputs, _ = self.text_encoder(self.text_embedding(token_ids))
+        weights = keep.unsqueeze(-1).to(outputs.dtype)
+        pooled = (outputs * weights).sum(1) / weights.sum(1).clamp_min(1.0)
+        hidden = pooled.unsqueeze(0)
         steps = timesteps.float().unsqueeze(-1) / max(1, self.config.diffusion_steps - 1)
         frequencies = torch.exp(torch.linspace(0, -8, self.config.time_dim // 2, device=steps.device))
         angles = steps * frequencies.unsqueeze(0) * 1000
@@ -100,10 +106,13 @@ class AETHRIONImageGenerator(nn.Module):
         x = self.up(torch.cat((x0, x1), dim=1))
         return self.output(self.up_block(x, cond))
 
-    def diffusion_loss(self, clean_images, token_ids, timesteps=None, noise=None):
+    def diffusion_loss(self, clean_images, token_ids, timesteps=None, noise=None, condition_dropout: float = 0.1):
         if clean_images.ndim != 4 or clean_images.size(1) != 3:
             raise ValueError("clean_images must have shape [batch, 3, H, W]")
         batch = clean_images.size(0)
+        if self.training and condition_dropout > 0:  # classifier-free guidance: learn an unconditional model too
+            drop = torch.rand(batch, device=token_ids.device) < condition_dropout
+            token_ids = torch.where(drop.unsqueeze(-1), torch.zeros_like(token_ids), token_ids)
         if timesteps is None:
             timesteps = torch.randint(self.config.diffusion_steps, (batch,), device=clean_images.device)
         if noise is None:
@@ -114,7 +123,7 @@ class AETHRIONImageGenerator(nn.Module):
         return F.mse_loss(prediction, noise)
 
     @torch.no_grad()
-    def generate(self, token_ids: torch.Tensor, inference_steps: int = 50) -> torch.Tensor:
+    def generate(self, token_ids: torch.Tensor, inference_steps: int = 50, guidance: float = 3.0) -> torch.Tensor:
         """DDIM-style deterministic sampling from noise; returns images in [-1,1]."""
         if token_ids.ndim != 2 or token_ids.dtype != torch.long or token_ids.size(0) < 1:
             raise ValueError("token_ids must be a non-empty [batch, sequence] long tensor")
@@ -136,6 +145,9 @@ class AETHRIONImageGenerator(nn.Module):
             for index, timestep in enumerate(schedule):
                 times = torch.full((batch,), int(timestep.item()), device=device, dtype=torch.long)
                 predicted_noise = self(image, token_ids, times)
+                if guidance != 1.0:
+                    unconditional = self(image, torch.zeros_like(token_ids), times)
+                    predicted_noise = unconditional + guidance * (predicted_noise - unconditional)
                 alpha = self.alpha_bars[timestep]
                 if index + 1 < len(schedule):
                     previous = self.alpha_bars[schedule[index + 1]]
