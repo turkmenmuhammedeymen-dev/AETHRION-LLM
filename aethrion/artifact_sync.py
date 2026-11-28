@@ -56,9 +56,21 @@ def _client(api: Any = None, environ=None):
     return HfApi(token=token)
 
 
-def _require_private(api: Any, repo: str) -> None:
-    api.create_repo(repo_id=repo, repo_type="model", private=True, exist_ok=True)
-    info = api.repo_info(repo_id=repo, repo_type="model")
+def _require_private(api: Any, repo: str, *, create: bool = False) -> None:
+    """Refuse to touch a public artifact repo. Only a push may create it; a pull needs read access only."""
+    try:
+        if create:
+            api.create_repo(repo_id=repo, repo_type="model", private=True, exist_ok=True)
+        info = api.repo_info(repo_id=repo, repo_type="model")
+    except ArtifactSyncError:
+        raise
+    except Exception as exc:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        if status in (401, 403):
+            raise ArtifactSyncError(
+                f"Hugging Face rejected the token (HTTP {status}). Set a valid HF_TOKEN secret "
+                f"({'with write access' if create else 'with read access'}) that can reach {repo}.") from exc
+        raise
     if not getattr(info, "private", False):
         raise ArtifactSyncError("Artifact repo is not private; refusing to sync training artifacts.")
 
@@ -77,7 +89,7 @@ def _check_model(model: str) -> None:
 
 def push_model_artifacts(model: str, directory: str | Path, *, api: Any = None, environ=None) -> list[str]:
     _check_model(model)
-    repo = _repo_id(environ); client = _client(api, environ); _require_private(client, repo)
+    repo = _repo_id(environ); client = _client(api, environ); _require_private(client, repo, create=True)
     directory = Path(directory)
     if not directory.is_dir():
         raise ArtifactSyncError("Artifact directory does not exist.")
