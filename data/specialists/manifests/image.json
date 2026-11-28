@@ -1,6 +1,6 @@
 {
   "format": "aethrion-specialist-dataset-v1",
-  "dataset_id": "image-prepared-e9647265fd74",
+  "dataset_id": "image-prepared-cbabd4902251",
   "model_id": "image",
   "modality": "image",
   "training_allowed": true,
@@ -8,9 +8,9 @@
   "privacy_reviewed": true,
   "speaker_consent_reviewed": false,
   "dataset_path": "image/dataset.npz",
-  "dataset_sha256": "e9647265fd74c68da134c01e11836b322a6e8291e2a807538ee70797534fb2df",
+  "dataset_sha256": "cbabd4902251e18a7f4c1a9ea65dd45ad80261507b43d9fca6f221eab8ea0957",
   "tokenizer_path": "image/tokenizer.json",
-  "tokenizer_sha256": "e0c83dcf5b93857b0ad361c174beb4a89258976e30009ce00ce4d762d41c3b6a",
+  "tokenizer_sha256": "69a838f55b2f824f467b1260a59f1231fb00c08da747a5bc0e7dbd0890d8ffa8",
   "sources": [
     {
       "source_id": "image-metadata-jsonl",
@@ -3987,7 +3987,7 @@
   "preparation": {
     "tool": "aethrion.specialist_prepare_visual",
     "seed": 1,
-    "vocab_size": 435,
+    "vocab_size": 270,
     "max_text_length": 128,
     "image_size": 64,
     "point_count": null,
@@ -3999,6 +3999,7 @@
     },
     "automatic_approval": false
   },
+  "dataset_status": "owner_reviewed_awaiting_technical_preflight",
   "governance": {
     "schema": "aethrion-human-review-v1",
     "model_id": "image",
@@ -4018,6 +4019,5 @@
     "speaker_consent_reviewed": false,
     "safety_reviewed": false,
     "owner_statement": "Project owner explicitly states all dataset materials were reviewed and verified and authorizes AETHRION development/training; see linked attestation."
-  },
-  "dataset_status": "owner_reviewed_awaiting_technical_preflight"
+  }
 }
