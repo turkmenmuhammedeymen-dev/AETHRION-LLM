@@ -36,6 +36,8 @@ def _load(model, scratch, api):
 
 STATS = []
 IMG_CHECKS = []
+_PALETTE = {'turkuaz': (30, 170, 180), 'mavi': (40, 80, 200), 'kırmızı': (200, 40, 40), 'pembe': (230, 120, 170),
+            'yeşil': (40, 160, 70), 'turuncu': (235, 130, 30), 'sarı': (230, 200, 40), 'mor': (130, 60, 170)}  # mean colours of the real training images
 
 
 def _check_image(arr, caption):
@@ -49,9 +51,9 @@ def _check_image(arr, caption):
     obj = np.abs(a - edge).sum(-1) > 90
     color = 'yok'
     if obj.sum() >= 12:
-        r, g, b = a[obj].mean(0)
-        color = 'mavi' if b > r + 30 and b > g + 20 else ('mor' if r > g + 20 and b > g + 20 else 'diger')
-    want_color = next((w for w in words if w in ('mor', 'mavi')), '')
+        mean = a[obj].mean(0)
+        color = min(_PALETTE, key=lambda k: float(np.linalg.norm(mean - np.array(_PALETTE[k]))))
+    want_color = next((w for w in words if w in _PALETTE), '')
     return bg == want_bg, color == want_color
 
 
