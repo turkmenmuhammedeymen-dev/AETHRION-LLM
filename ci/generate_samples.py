@@ -108,6 +108,16 @@ def main() -> int:
         img = _load("image", scratch, api)
         d = np.load(MAN / "image" / "dataset.npz", allow_pickle=False)
         rows = [json.loads(l) for l in (MAN / "image" / "source.jsonl").read_text(encoding="utf-8").splitlines()]
+        train_ref = np.flatnonzero(d["split"].astype(str) == "train")[: a.n]
+        train_checks = []
+        for i in train_ref:
+            ids = torch.from_numpy(d["token_ids"][i:i + 1]).long()
+            with torch.no_grad():
+                xt = img.generate(ids, inference_steps=50)[0].clamp(-1, 1)
+            train_checks.append(_check_image(((xt.permute(1, 2, 0).numpy() + 1) * 127.5).round().astype("uint8"), rows[int(i)].get("caption", "")))
+        if train_checks:
+            n = len(train_checks)
+            STATS.append(f"TRAIN_prompts image_background_ok={sum(c[0] for c in train_checks)}/{n} image_object_color_ok={sum(c[1] for c in train_checks)}/{n}")
         for i in np.flatnonzero(d["split"].astype(str) == "test")[: a.n]:
             ids = torch.from_numpy(d["token_ids"][i:i + 1]).long()
             with torch.no_grad():
